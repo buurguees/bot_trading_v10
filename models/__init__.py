@@ -30,6 +30,12 @@ from .predictor import (
     ConfidenceCalculator
 )
 
+# Componentes core implementados
+from .prediction_engine import prediction_engine, predict, get_prediction_summary, health_check as prediction_health_check
+from .adaptive_trainer import adaptive_trainer, train_initial_model, online_learning_update, get_training_status, health_check as trainer_health_check
+from .model_evaluator import model_evaluator, evaluate_model_performance, get_evaluation_summary, health_check as evaluator_health_check
+from .confidence_estimator import confidence_estimator, estimate_confidence, update_calibration_data, get_confidence_statistics, get_calibration_quality, health_check as confidence_health_check
+
 # Archivos que se implementarán en el futuro
 # from .evaluator import ModelEvaluator, PerformanceTracker, MetricsCalculator
 # from .model_manager import ModelManager, model_manager
@@ -54,6 +60,27 @@ __all__ = [
     'TradingPredictor',
     'RealTimePredictor',
     'ConfidenceCalculator',
+    
+    # Componentes core implementados
+    'prediction_engine',
+    'predict',
+    'get_prediction_summary',
+    'prediction_health_check',
+    'adaptive_trainer',
+    'train_initial_model',
+    'online_learning_update',
+    'get_training_status',
+    'trainer_health_check',
+    'model_evaluator',
+    'evaluate_model_performance',
+    'get_evaluation_summary',
+    'evaluator_health_check',
+    'confidence_estimator',
+    'estimate_confidence',
+    'update_calibration_data',
+    'get_confidence_statistics',
+    'get_calibration_quality',
+    'confidence_health_check',
     
     # Evaluación (futuro)
     # 'ModelEvaluator',
