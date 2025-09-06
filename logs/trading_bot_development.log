@@ -55,3 +55,16 @@
 2025-09-06 21:41:07,308 - urllib3.connectionpool - DEBUG - https://api.bitget.com:443 "GET /api/v2/spot/market/tickers?symbol=BTCUSDT HTTP/1.1" 200 None
 2025-09-06 21:41:07,309 - ccxt.base.exchange - DEBUG - GET https://api.bitget.com/api/v2/spot/market/tickers?symbol=BTCUSDT, Response: 200 {'Date': 'Sat, 06 Sep 2025 19:41:07 GMT', 'Content-Type': 'application/json', 'Transfer-Encoding': 'chunked', 'Connection': 'keep-alive', 'Content-Encoding': 'gzip', 'x-mbx-used-remain-limit': '19', 'x-xss-protection': '1; mode=block', 'x-content-type-options': 'nosniff', 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS', 'cf-cache-status': 'DYNAMIC', 'Set-Cookie': '__cf_bm=96_SnA6yxoopzk79crB3zp0mLoZMl7oIThZA5VSItqc-1757187667-1.0.1.1-g3Gab2nCIhWczZ1gSwKNRgGwlx1sekMqqM3MIYQtlaxtsIUgb0QfB_ZHS0zjCs_LJmkkP2.X6uhfdMUzqHU0wjUM1iAgYKKhK_OMRRh1Gag; path=/; expires=Sat, 06-Sep-25 20:11:07 GMT; domain=.api.bitget.com; HttpOnly; Secure; SameSite=None', 'X-Frame-Options': 'SAMEORIGIN', 'Server': 'cloudflare', 'CF-RAY': '97b071262b55026a-MAD'} {"code":"00000","msg":"success","requestTime":1757187667043,"data":[{"open":"111399.99","symbol":"BTCUSDT","high24h":"111713.96","low24h":"109971.4","lastPr":"110074.21","quoteVolume":"417470759.802036","baseVolume":"3768.604196","usdtVolume":"417470759.802035954166","ts":"1757187666051","bidPr":"110074.21","askPr":"110074.22","bidSz":"0.23393","askSz":"7.657386","openUtc":"110676.98","changeUtc24h":"-0.00545","change24h":"-0.0119"}]}
 2025-09-06 21:41:07,310 - data.collector - DEBUG - API REST funcionando correctamente
+2025-09-06 22:35:07,012 - config.settings - INFO - Configuración inicializada para entorno: development
+2025-09-06 22:35:07,029 - config.config_loader - INFO - Configuración de usuario cargada desde C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\config\user_settings.yaml
+2025-09-06 22:35:07,030 - config.config_loader - INFO - Configuración del usuario aplicada exitosamente
+2025-09-06 22:35:07,030 - config.config_loader - INFO - Configuración del usuario validada exitosamente
+2025-09-06 22:35:07,048 - data.database - INFO - Esquema de base de datos inicializado exitosamente
+2025-09-06 22:35:07,048 - data.database - INFO - Base de datos inicializada: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-06 22:35:43,786 - config.settings - INFO - Configuración inicializada para entorno: development
+2025-09-06 22:35:43,802 - config.config_loader - INFO - Configuración de usuario cargada desde C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\config\user_settings.yaml
+2025-09-06 22:35:43,803 - config.config_loader - INFO - Configuración del usuario aplicada exitosamente
+2025-09-06 22:35:43,803 - config.config_loader - INFO - Configuración del usuario validada exitosamente
+2025-09-06 22:35:43,821 - data.database - INFO - Esquema de base de datos inicializado exitosamente
+2025-09-06 22:35:43,821 - data.database - INFO - Base de datos inicializada: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-06 22:35:44,119 - data.preprocessor - INFO - DataPreprocessor inicializado
