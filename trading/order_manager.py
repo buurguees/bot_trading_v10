@@ -16,6 +16,8 @@ from dataclasses import dataclass
 from datetime import datetime
 import uuid
 import asyncio
+import ccxt
+import os
 
 from config.config_loader import user_config
 from data.database import db_manager
@@ -62,7 +64,44 @@ class OrderManager:
         self.paper_balance = self.trading_config.get('initial_balance', 10000.0)
         self.current_balance = self.paper_balance
         
+        # Cliente Bitget para modo live
+        self.bitget_client = None
+        self._initialize_bitget_client()
+        
         logger.info(f"OrderManager inicializado - Modo: {self.trading_mode}, Balance inicial: {self.paper_balance}")
+    
+    def _initialize_bitget_client(self):
+        """Inicializa el cliente de Bitget para trading live"""
+        try:
+            if self.trading_mode == 'live_trading':
+                # Obtener credenciales del .env
+                api_key = os.getenv('BITGET_API_KEY')
+                secret_key = os.getenv('BITGET_SECRET_KEY')
+                passphrase = os.getenv('BITGET_PASSPHRASE', '')
+                
+                if not api_key or not secret_key:
+                    logger.error("Credenciales de Bitget no configuradas para modo live")
+                    return
+                
+                # Crear cliente Bitget
+                self.bitget_client = ccxt.bitget({
+                    'apiKey': api_key,
+                    'secret': secret_key,
+                    'password': passphrase,
+                    'sandbox': False,  # True para testnet
+                    'enableRateLimit': True,
+                    'options': {
+                        'defaultType': 'swap',  # Para futuros
+                    }
+                })
+                
+                logger.info("Cliente Bitget inicializado para trading live")
+            else:
+                logger.info("Modo paper trading - Cliente Bitget no inicializado")
+                
+        except Exception as e:
+            logger.error(f"Error inicializando cliente Bitget: {e}")
+            self.bitget_client = None
     
     async def execute_order(
         self,
@@ -162,11 +201,59 @@ class OrderManager:
     async def _execute_live_order(self, trade_record: TradeRecord) -> bool:
         """Ejecuta una orden en modo live (Bitget API)"""
         try:
-            # TODO: Implementar integración con Bitget API
-            # Por ahora simular como paper mode
-            logger.warning("Modo live no implementado aún, simulando como paper mode")
-            return await self._execute_paper_order(trade_record)
+            if not self.bitget_client:
+                logger.error("Cliente Bitget no inicializado")
+                return False
             
+            # Preparar parámetros de la orden
+            symbol = trade_record.symbol
+            side = 'buy' if trade_record.side == 'BUY' else 'sell'
+            amount = trade_record.size_qty
+            price = trade_record.entry_price
+            
+            # Generar clientOrderId único para idempotencia
+            client_order_id = f"bot_{trade_record.trade_id}"
+            
+            # Crear orden en Bitget
+            order_params = {
+                'symbol': symbol,
+                'type': 'limit',  # Orden limitada
+                'side': side,
+                'amount': amount,
+                'price': price,
+                'clientOrderId': client_order_id,
+                'timeInForce': 'GTC',  # Good Till Cancelled
+            }
+            
+            # Ejecutar orden
+            logger.info(f"Enviando orden a Bitget: {order_params}")
+            order = self.bitget_client.create_order(**order_params)
+            
+            if order and order.get('id'):
+                # Orden creada exitosamente
+                trade_record.status = "FILLED"
+                trade_record.trade_id = order['id']  # Usar ID real de Bitget
+                
+                # Calcular comisiones reales
+                trade_value = trade_record.size_qty * trade_record.entry_price
+                commission = trade_value * self.commission_rate
+                trade_record.fees = commission
+                
+                logger.info(f"Orden live ejecutada: {order['id']} - {side} {amount} {symbol} @ {price}")
+                return True
+            else:
+                logger.error(f"Error creando orden en Bitget: {order}")
+                return False
+                
+        except ccxt.InsufficientFunds as e:
+            logger.error(f"Fondos insuficientes para la orden: {e}")
+            return False
+        except ccxt.InvalidOrder as e:
+            logger.error(f"Orden inválida: {e}")
+            return False
+        except ccxt.NetworkError as e:
+            logger.error(f"Error de red con Bitget: {e}")
+            return False
         except Exception as e:
             logger.error(f"Error ejecutando live order: {e}")
             return False
@@ -271,10 +358,40 @@ class OrderManager:
     async def _save_trade_to_db(self, trade_record: TradeRecord) -> bool:
         """Guarda un trade en la base de datos"""
         try:
-            # TODO: Implementar guardado en BD
-            # Por ahora solo loggear
+            # Crear query SQL para insertar trade
+            query = """
+            INSERT INTO trades (
+                trade_id, symbol, side, size_qty, entry_price, exit_price,
+                stop_loss, take_profit, leverage, pnl, pnl_pct, fees,
+                entry_time, exit_time, exit_reason, status, confidence
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            
+            values = (
+                trade_record.trade_id,
+                trade_record.symbol,
+                trade_record.side,
+                trade_record.size_qty,
+                trade_record.entry_price,
+                trade_record.exit_price,
+                trade_record.stop_loss,
+                trade_record.take_profit,
+                trade_record.leverage,
+                trade_record.pnl,
+                trade_record.pnl_pct,
+                trade_record.fees,
+                trade_record.entry_time,
+                trade_record.exit_time,
+                trade_record.exit_reason,
+                trade_record.status,
+                trade_record.confidence
+            )
+            
+            # Ejecutar query
+            await db_manager.execute_query(query, values)
             logger.info(f"Trade guardado en BD: {trade_record.trade_id}")
             return True
+            
         except Exception as e:
             logger.error(f"Error guardando trade en BD: {e}")
             return False
@@ -282,9 +399,30 @@ class OrderManager:
     async def _update_trade_in_db(self, trade_record: TradeRecord) -> bool:
         """Actualiza un trade en la base de datos"""
         try:
-            # TODO: Implementar actualización en BD
+            # Crear query SQL para actualizar trade
+            query = """
+            UPDATE trades SET
+                exit_price = ?, exit_time = ?, exit_reason = ?, status = ?,
+                pnl = ?, pnl_pct = ?, fees = ?
+            WHERE trade_id = ?
+            """
+            
+            values = (
+                trade_record.exit_price,
+                trade_record.exit_time,
+                trade_record.exit_reason,
+                trade_record.status,
+                trade_record.pnl,
+                trade_record.pnl_pct,
+                trade_record.fees,
+                trade_record.trade_id
+            )
+            
+            # Ejecutar query
+            await db_manager.execute_query(query, values)
             logger.info(f"Trade actualizado en BD: {trade_record.trade_id}")
             return True
+            
         except Exception as e:
             logger.error(f"Error actualizando trade en BD: {e}")
             return False
@@ -295,7 +433,30 @@ class OrderManager:
     
     def get_balance(self) -> float:
         """Obtiene el balance actual"""
-        return self.current_balance
+        if self.trading_mode == 'paper_trading':
+            return self.current_balance
+        else:
+            # En modo live, obtener balance real de Bitget
+            return self._get_live_balance()
+    
+    def _get_live_balance(self) -> float:
+        """Obtiene el balance real de Bitget"""
+        try:
+            if not self.bitget_client:
+                return self.current_balance
+            
+            # Obtener balance de USDT
+            balance = self.bitget_client.fetch_balance()
+            usdt_balance = balance.get('USDT', {}).get('free', 0.0)
+            
+            # Actualizar balance local
+            self.current_balance = usdt_balance
+            
+            return usdt_balance
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo balance live: {e}")
+            return self.current_balance
     
     def get_trade_summary(self) -> Dict:
         """Obtiene un resumen de trades"""
@@ -308,6 +469,35 @@ class OrderManager:
             'total_pnl': total_pnl,
             'trading_mode': self.trading_mode
         }
+    
+    async def get_last_trade_result(self) -> Optional[Dict]:
+        """Obtiene el resultado del último trade cerrado"""
+        try:
+            # Query para obtener el último trade cerrado
+            query = """
+            SELECT * FROM trades 
+            WHERE status = 'CLOSED' 
+            ORDER BY exit_time DESC 
+            LIMIT 1
+            """
+            
+            result = await db_manager.fetch_one(query)
+            if result:
+                return {
+                    'trade_id': result[0],
+                    'symbol': result[1],
+                    'side': result[2],
+                    'pnl': result[9],
+                    'pnl_pct': result[10],
+                    'fees': result[11],
+                    'exit_reason': result[14],
+                    'duration_hours': (result[13] - result[12]).total_seconds() / 3600 if result[13] and result[12] else 0
+                }
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo último trade: {e}")
+            return None
 
 # Instancia global
 order_manager = OrderManager()

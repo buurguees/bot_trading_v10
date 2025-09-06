@@ -40,14 +40,24 @@ C:\TradingBot_v10\
 2. **Copiar todos los archivos generados** en sus ubicaciones correspondientes según la estructura de arriba.
 
 ### Paso 2: Configurar Entorno
-1. **Ejecutar setup automático:**
+**⚠️ IMPORTANTE: Este proyecto requiere Python 3.11 específicamente**
+
+1. **Verificar versión de Python:**
+   ```powershell
+   python --version
+   # Debe mostrar: Python 3.11.x
+   ```
+   
+   Si no tienes Python 3.11, descárgalo desde: https://www.python.org/downloads/release/python-3118/
+
+2. **Ejecutar setup automático:**
    ```powershell
    python setup.py install
    ```
    
    O manualmente:
    ```powershell
-   # Crear entorno virtual
+   # Crear entorno virtual con Python 3.11
    python -m venv venv
    
    # Activar entorno

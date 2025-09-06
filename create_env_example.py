@@ -1,5 +1,10 @@
-# .env.example
-# Ubicación: C:\TradingBot_v10\.env.example
+#!/usr/bin/env python3
+"""
+Script para crear .env.example con credenciales enmascaradas
+"""
+
+env_content = """# .env.example
+# Ubicación: C:\\TradingBot_v10\\.env.example
 #
 # IMPORTANTE: Este archivo es un template. Copia a .env y configura tus credenciales reales.
 # NUNCA subas el archivo .env real a GitHub.
@@ -91,3 +96,10 @@ MAX_RISK_PER_TRADE=0.02
 MAX_DAILY_LOSS_PCT=0.05
 MAX_DRAWDOWN_PCT=0.10
 MAX_LEVERAGE=3.0
+"""
+
+# Escribir el archivo
+with open('.env.example', 'w', encoding='utf-8') as f:
+    f.write(env_content)
+
+print("✅ .env.example creado exitosamente con credenciales enmascaradas")

@@ -34,14 +34,18 @@ class ExecutionEngine:
         self.max_trades_per_bar = self.trading_config.get('max_trades_per_bar', 1)
         self.circuit_breaker_loss = self.trading_config.get('circuit_breaker_loss', 0.05)  # 5%
         
-        # Control de duplicados
-        self.last_signals = {}  # {symbol: (signal, timestamp)}
+        # Control de duplicados por (bar_time, side)
         self.trades_per_bar = defaultdict(int)  # {symbol: count}
+        self.trades_per_side = defaultdict(set)  # {symbol: {side1, side2}}
         self.current_bar = None
         
-        # Circuit breakers
+        # Circuit breakers avanzados
         self.daily_loss = 0.0
+        self.max_drawdown = 0.0
+        self.peak_balance = balance if 'balance' in locals() else 10000.0
         self.last_reset_date = datetime.now().date()
+        self.consecutive_losses = 0
+        self.max_consecutive_losses = 3
         
         logger.info(f"ExecutionEngine inicializado - Confianza mínima: {self.min_confidence}")
     
@@ -116,9 +120,8 @@ class ExecutionEngine:
             
             if trade_record:
                 # Actualizar controles
-                self.last_signals[symbol] = (signal, bar_timestamp)
                 self.trades_per_bar[symbol] += 1
-                self.current_bar = bar_timestamp
+                self.trades_per_side[symbol].add(signal)
                 
                 logger.info(f"Señal ejecutada: {symbol} {signal} - Trade ID: {trade_record.trade_id}")
                 return trade_record
@@ -136,24 +139,23 @@ class ExecutionEngine:
         signal: str,
         bar_timestamp: datetime
     ) -> bool:
-        """Verifica si la señal es duplicada"""
+        """Verifica si la señal es duplicada por (bar_time, side)"""
         try:
-            # Verificar si es la misma barra
-            if self.current_bar and bar_timestamp == self.current_bar:
-                # Verificar límite de trades por barra
-                if self.trades_per_bar[symbol] >= self.max_trades_per_bar:
-                    return False
-                
-                # Verificar si es la misma señal
-                if symbol in self.last_signals:
-                    last_signal, last_timestamp = self.last_signals[symbol]
-                    if last_signal == signal and last_timestamp == bar_timestamp:
-                        return False
-            
-            # Resetear contador si es nueva barra
+            # Resetear contadores si es nueva barra
             if not self.current_bar or bar_timestamp != self.current_bar:
                 self.trades_per_bar.clear()
+                self.trades_per_side.clear()
                 self.current_bar = bar_timestamp
+            
+            # Verificar límite de trades por barra
+            if self.trades_per_bar[symbol] >= self.max_trades_per_bar:
+                logger.warning(f"Límite de trades por barra alcanzado: {symbol}")
+                return False
+            
+            # Verificar si ya hay un trade del mismo lado en esta barra
+            if signal in self.trades_per_side[symbol]:
+                logger.warning(f"Ya existe trade {signal} en esta barra: {symbol}")
+                return False
             
             return True
             
@@ -162,18 +164,41 @@ class ExecutionEngine:
             return False
     
     async def _check_circuit_breakers(self, balance: float) -> bool:
-        """Verifica circuit breakers"""
+        """Verifica circuit breakers avanzados"""
         try:
-            # Resetear pérdidas diarias si es nuevo día
+            # Resetear contadores si es nuevo día
             today = datetime.now().date()
             if today != self.last_reset_date:
                 self.daily_loss = 0.0
+                self.consecutive_losses = 0
                 self.last_reset_date = today
+                logger.info("Contadores diarios reseteados")
             
-            # Verificar pérdida diaria máxima
+            # Actualizar peak balance
+            if balance > self.peak_balance:
+                self.peak_balance = balance
+                self.max_drawdown = 0.0  # Reset drawdown en nuevo peak
+            
+            # Calcular drawdown actual
+            current_drawdown = (self.peak_balance - balance) / self.peak_balance
+            if current_drawdown > self.max_drawdown:
+                self.max_drawdown = current_drawdown
+            
+            # Circuit breaker 1: Pérdida diaria máxima
             max_daily_loss = balance * self.circuit_breaker_loss
             if self.daily_loss >= max_daily_loss:
-                logger.warning(f"Circuit breaker activado por pérdida diaria: {self.daily_loss:.2f} >= {max_daily_loss:.2f}")
+                logger.warning(f"Circuit breaker: Pérdida diaria {self.daily_loss:.2f} >= {max_daily_loss:.2f}")
+                return False
+            
+            # Circuit breaker 2: Drawdown máximo
+            max_drawdown_pct = self.trading_config.get('max_drawdown_pct', 0.10)  # 10%
+            if self.max_drawdown >= max_drawdown_pct:
+                logger.warning(f"Circuit breaker: Drawdown {self.max_drawdown:.2%} >= {max_drawdown_pct:.2%}")
+                return False
+            
+            # Circuit breaker 3: Pérdidas consecutivas
+            if self.consecutive_losses >= self.max_consecutive_losses:
+                logger.warning(f"Circuit breaker: {self.consecutive_losses} pérdidas consecutivas")
                 return False
             
             return True
@@ -183,10 +208,14 @@ class ExecutionEngine:
             return False
     
     async def update_daily_loss(self, pnl: float):
-        """Actualiza la pérdida diaria para circuit breakers"""
+        """Actualiza la pérdida diaria y contadores para circuit breakers"""
         if pnl < 0:
             self.daily_loss += abs(pnl)
-            logger.info(f"Pérdida diaria actualizada: {self.daily_loss:.2f}")
+            self.consecutive_losses += 1
+            logger.info(f"Pérdida diaria: {self.daily_loss:.2f}, Consecutivas: {self.consecutive_losses}")
+        else:
+            # Reset contador de pérdidas consecutivas en ganancia
+            self.consecutive_losses = 0
     
     async def check_open_trades(self, current_price: float) -> List[TradeRecord]:
         """Verifica trades abiertos para SL/TP"""
@@ -211,15 +240,23 @@ class ExecutionEngine:
             'max_trades_per_bar': self.max_trades_per_bar,
             'circuit_breaker_loss': self.circuit_breaker_loss,
             'daily_loss': self.daily_loss,
+            'max_drawdown': self.max_drawdown,
+            'consecutive_losses': self.consecutive_losses,
+            'peak_balance': self.peak_balance,
             'open_trades': len(order_manager.get_open_trades()),
-            'current_balance': order_manager.get_balance()
+            'current_balance': order_manager.get_balance(),
+            'trades_per_bar': dict(self.trades_per_bar),
+            'trades_per_side': {k: list(v) for k, v in self.trades_per_side.items()}
         }
     
     def reset_daily_counters(self):
         """Resetea contadores diarios"""
         self.daily_loss = 0.0
+        self.consecutive_losses = 0
+        self.max_drawdown = 0.0
         self.last_reset_date = datetime.now().date()
         self.trades_per_bar.clear()
+        self.trades_per_side.clear()
         logger.info("Contadores diarios reseteados")
 
 # Instancia global
