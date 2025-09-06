@@ -1,0 +1,250 @@
+# config/user_settings.yaml
+# Ubicación: C:\TradingBot_v10\config\user_settings.yaml
+# 
+# CONFIGURACIÓN PERSONALIZABLE DEL TRADING BOT
+# ============================================
+# 
+# Este archivo te permite configurar el bot sin tocar código.
+# Modifica los valores según tus preferencias y el bot se adaptará automáticamente.
+
+# =============================================================================
+# CONFIGURACIÓN GENERAL DEL BOT
+# =============================================================================
+bot_settings:
+  # Nombre del bot (aparecerá en logs y dashboard)
+  name: "TradingBot_v10_Alex"
+  
+  # Modo de operación
+  # Opciones: "conservative", "moderate", "aggressive", "custom"
+  trading_mode: "moderate"
+  
+  # Activar/desactivar funciones principales
+  features:
+    auto_trading: true          # El bot puede ejecutar trades automáticamente
+    auto_retraining: true       # El bot se reentrena automáticamente
+    risk_management: true       # Aplicar gestión de riesgo
+    stop_on_drawdown: true      # Parar si hay mucho drawdown
+    adaptive_sizing: true       # Ajustar tamaño de posición dinámicamente
+
+# =============================================================================
+# CONFIGURACIÓN DE CAPITAL Y RIESGO
+# =============================================================================
+capital_management:
+  # Capital inicial para operar (en USDT)
+  initial_balance: 1000.0
+  
+  # Porcentaje máximo del balance a arriesgar por trade
+  max_risk_per_trade: 2.0      # 2% del balance
+  
+  # Límites de pérdida
+  max_daily_loss_pct: 5.0      # 5% pérdida máxima por día
+  max_weekly_loss_pct: 15.0    # 15% pérdida máxima por semana
+  max_drawdown_pct: 20.0       # 20% drawdown máximo antes de parar
+  
+  # Límites de ganancias (para asegurar beneficios)
+  daily_profit_target: 3.0     # 3% ganancia diaria objetivo
+  take_profit_at_target: false # Parar al alcanzar objetivo diario
+
+# =============================================================================
+# CONFIGURACIÓN DE TRADING
+# =============================================================================
+trading_settings:
+  # Símbolo principal a operar
+  primary_symbol: "BTCUSDT"
+  
+  # Timeframes a utilizar (el bot usará múltiples timeframes)
+  timeframes:
+    primary: "1h"              # Timeframe principal para decisiones
+    secondary: "4h"            # Timeframe secundario para contexto
+    entry: "15m"               # Timeframe para entrada precisa
+  
+  # Configuración de órdenes
+  order_settings:
+    # Tipo de orden preferido: "market", "limit"
+    preferred_order_type: "limit"
+    
+    # Tiempo máximo para que se ejecute una orden limit (en minutos)
+    limit_order_timeout: 5
+    
+    # Usar trailing stops
+    use_trailing_stops: true
+    trailing_stop_distance: 1.5  # 1.5% de distancia
+  
+  # Stop Loss y Take Profit
+  stop_loss:
+    method: "adaptive"           # "fixed", "adaptive", "atr_based"
+    default_pct: 2.0            # 2% por defecto
+    min_pct: 0.5                # Mínimo 0.5%
+    max_pct: 5.0                # Máximo 5%
+  
+  take_profit:
+    method: "scaled"            # "fixed", "scaled", "trailing"
+    default_pct: 4.0            # 4% por defecto
+    # Para take profit escalonado
+    levels:
+      - target: 2.0             # 2% ganancia
+        close_pct: 33           # Cerrar 33% de la posición
+      - target: 4.0             # 4% ganancia
+        close_pct: 50           # Cerrar 50% de la posición restante
+      - target: 8.0             # 8% ganancia
+        close_pct: 100          # Cerrar el resto
+
+# =============================================================================
+# CONFIGURACIÓN DEL MODELO DE IA
+# =============================================================================
+ai_model_settings:
+  # Configuración de confianza
+  confidence:
+    min_confidence_to_trade: 65.0    # Mínimo 65% confianza para operar
+    high_confidence_threshold: 80.0  # 80%+ se considera alta confianza
+    
+    # Ajustes por nivel de confianza
+    confidence_adjustments:
+      low_confidence: 0.5       # Reducir posición al 50% si confianza baja
+      high_confidence: 1.5      # Aumentar posición al 150% si confianza alta
+  
+  # Configuración de reentrenamiento
+  retraining:
+    frequency: "adaptive"       # "fixed", "adaptive", "performance_based"
+    min_trades_before_retrain: 50
+    retrain_on_poor_performance: true
+    performance_threshold: 60.0 # Reentrenar si precisión < 60%
+  
+  # Features que el modelo debe priorizar
+  feature_importance:
+    price_action: 0.3           # 30% importancia a acción del precio
+    technical_indicators: 0.4   # 40% a indicadores técnicos
+    volume_analysis: 0.2        # 20% a análisis de volumen
+    market_sentiment: 0.1       # 10% a sentimiento de mercado
+
+# =============================================================================
+# SISTEMA DE RECOMPENSAS Y PENALIZACIONES
+# =============================================================================
+reward_system:
+  # El bot aprenderá de sus decisiones usando este sistema
+  
+  # Recompensas por trades exitosos
+  rewards:
+    profitable_trade: 1.0       # Recompensa base por trade ganador
+    high_profit_bonus: 2.0      # Bonus si ganancia > 5%
+    quick_profit_bonus: 0.5     # Bonus si ganancia en < 1 hora
+    low_risk_bonus: 0.3         # Bonus si trade con bajo riesgo
+  
+  # Penalizaciones por trades fallidos
+  penalties:
+    losing_trade: -0.5          # Penalización por trade perdedor
+    big_loss_penalty: -2.0      # Penalización extra si pérdida > 3%
+    missed_opportunity: -0.1    # Penalización leve por no operar en buen momento
+    early_stop_penalty: -0.2    # Penalización por salir muy temprano
+  
+  # Factores adicionales
+  learning_factors:
+    market_condition_bonus: 0.2  # Bonus por adaptarse a condiciones de mercado
+    consistency_bonus: 0.5       # Bonus por mantener performance consistente
+    volatility_adaptation: 0.3   # Bonus por manejar bien la volatilidad
+
+# =============================================================================
+# CONFIGURACIÓN DE MONITOREO Y ALERTAS
+# =============================================================================
+monitoring:
+  # Dashboard web
+  dashboard:
+    enabled: true
+    auto_refresh_seconds: 30
+    show_detailed_metrics: true
+    show_model_predictions: true
+  
+  # Alertas que quieres recibir
+  alerts:
+    # Por email (si está configurado en .env)
+    email_alerts:
+      enabled: false
+      events:
+        - "large_loss"          # Pérdida grande
+        - "daily_limit_reached" # Límite diario alcanzado
+        - "system_error"        # Error del sistema
+        - "high_profit"         # Ganancia alta
+    
+    # Por consola/logs
+    console_alerts:
+      enabled: true
+      events:
+        - "trade_executed"      # Trade ejecutado
+        - "model_retrained"     # Modelo reentrenado
+        - "risk_limit_hit"      # Límite de riesgo alcanzado
+        - "api_error"           # Error de API
+  
+  # Frecuencia de reportes automáticos
+  reporting:
+    daily_summary: true         # Resumen diario de performance
+    weekly_analysis: true       # Análisis semanal detallado
+    model_performance_report: true # Reporte de performance del modelo
+
+# =============================================================================
+# CONFIGURACIÓN AVANZADA (Para usuarios experimentados)
+# =============================================================================
+advanced_settings:
+  # Configuración de backtesting
+  backtesting:
+    lookback_days: 365          # Días de historia para backtesting
+    walk_forward_months: 3      # Meses para walk-forward analysis
+    min_trades_for_validation: 100 # Mínimo trades para validar estrategia
+  
+  # Configuración de API
+  api_settings:
+    request_timeout: 30         # Timeout en segundos
+    max_retries: 3              # Reintentos máximos
+    rate_limit_buffer: 0.8      # Usar 80% del rate limit máximo
+  
+  # Configuración de datos
+  data_management:
+    cleanup_old_data_days: 90   # Limpiar datos > 90 días
+    backup_frequency_hours: 24  # Backup cada 24 horas
+    compress_old_logs: true     # Comprimir logs antiguos
+
+# =============================================================================
+# CONFIGURACIÓN DE SÍMBOLOS ADICIONALES (Para futuro)
+# =============================================================================
+multi_symbol_settings:
+  # Por ahora solo BTCUSDT, pero preparado para múltiples símbolos
+  enabled: false
+  
+  symbols:
+    BTCUSDT:
+      enabled: true
+      allocation_pct: 100.0     # 100% del capital
+      risk_multiplier: 1.0      # Multiplicador de riesgo base
+    
+    # Futuros símbolos (deshabilitados por ahora)
+    ETHUSDT:
+      enabled: false
+      allocation_pct: 0.0
+      risk_multiplier: 1.2      # ETH es más volátil
+    
+    ADAUSDT:
+      enabled: false
+      allocation_pct: 0.0
+      risk_multiplier: 1.5      # Altcoins más volátiles
+
+# =============================================================================
+# NOTAS DE CONFIGURACIÓN
+# =============================================================================
+# 
+# TRADING MODES EXPLICADOS:
+# - conservative: Menos trades, mayor confianza requerida, stop loss más estrictos
+# - moderate: Balance entre frecuencia y seguridad
+# - aggressive: Más trades, menor confianza requerida, mayor riesgo
+# - custom: Usa exactamente los valores que configures arriba
+# 
+# IMPORTANTE:
+# - Siempre empezar con trading_mode: "conservative" o "moderate"
+# - Probar primero en paper trading antes de dinero real
+# - El bot aprende y mejora con el tiempo, sé paciente
+# - Revisar y ajustar configuración basado en performance
+# 
+# TIPS:
+# - Si el bot pierde mucho: Reducir max_risk_per_trade y aumentar min_confidence_to_trade
+# - Si el bot no opera suficiente: Reducir min_confidence_to_trade
+# - Si hay muchos falsos positivos: Aumentar min_confidence_to_trade
+# - Para más agresividad: Aumentar max_risk_per_trade (con cuidado)
+#
