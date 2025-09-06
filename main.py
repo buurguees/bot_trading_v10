@@ -32,6 +32,7 @@ from models.predictor import predictor
 from trading.execution_engine import execution_engine
 from trading.risk_manager import risk_manager
 from trading.order_manager import order_manager
+from agents.trading_agent import TradingAgent
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +53,16 @@ class TradingBotOrchestrator:
         self.bot_name = user_config.get_bot_name()
         self.symbol = user_config.get_trading_settings()['primary_symbol']
         
+        # Inicializar Agente de IA
+        self.ai_agent = TradingAgent()
+        
         # Control de ciclo de vida
         self._stop_event = threading.Event()
         self._setup_signal_handlers()
         
         logger.info(f"🤖 {self.bot_name} inicializado en modo {environment.value}")
         logger.info(f"📊 Trading symbol: {self.symbol}")
+        logger.info(f"🧠 Agente de IA: {self.ai_agent.__class__.__name__}")
     
     def _setup_signal_handlers(self):
         """Configura manejadores de señales para cierre limpio"""
@@ -96,6 +101,12 @@ class TradingBotOrchestrator:
                 logger.error("❌ Credenciales de Bitget no configuradas")
                 return False
             
+            # Inicializar Agente de IA
+            agent_initialized = await self.ai_agent.initialize()
+            if not agent_initialized:
+                logger.error("❌ Error inicializando Agente de IA")
+                return False
+            
             logger.info("✅ Configuración validada exitosamente")
             return True
             
@@ -132,7 +143,7 @@ class TradingBotOrchestrator:
             logger.error(f"Error procesando kline data: {e}")
     
     async def _process_trading_signal(self, kline_data: dict, timestamp: datetime):
-        """Procesa señal de trading con ML y ejecuta operaciones"""
+        """Procesa señal de trading usando el Agente de IA"""
         try:
             close_price = kline_data.get('close', 0)
             volume = kline_data.get('volume', 0)
@@ -140,53 +151,19 @@ class TradingBotOrchestrator:
             low = kline_data.get('low', close_price)
             open_price = kline_data.get('open', close_price)
             
-            # Obtener datos para predicción
-            X, y, df = data_preprocessor.prepare_training_data(
-                symbol=self.symbol,
-                days_back=60,
-                target_method="classification"
-            )
+            logger.info(f"📊 Nueva vela {self.symbol}: Close=${close_price:,.2f}, Vol={volume:,.0f}")
             
-            if X.shape[0] == 0:
-                logger.warning("No hay datos suficientes para predicción")
-                return
+            # El agente de IA maneja todo el proceso de trading de forma autónoma
+            # Solo necesitamos pasarle los datos de la vela
+            market_data = {
+                'klines': [kline_data],
+                'symbol': self.symbol,
+                'timestamp': timestamp
+            }
             
-            # Obtener ventana más reciente para predicción
-            latest_window = X[-1:]  # Última ventana de datos
-            
-            # Hacer predicción
-            prediction = predictor.predict(latest_window)
-            signal = prediction['signal']
-            confidence = prediction['confidence']
-            
-            logger.info(f"🔮 Predicción ML: {signal} (confianza: {confidence:.2%})")
-            
-            # Calcular ATR para gestión de riesgo
-            atr = self._calculate_atr(df.tail(14))  # ATR de 14 períodos
-            
-            # Obtener balance actual
-            balance = order_manager.get_balance()
-            
-            # Enrutar señal para ejecución
-            trade_record = await execution_engine.route_signal(
-                symbol=self.symbol,
-                signal=signal,
-                confidence=confidence,
-                current_price=close_price,
-                atr=atr,
-                balance=balance,
-                bar_timestamp=timestamp
-            )
-            
-            if trade_record:
-                logger.info(f"✅ Operación ejecutada: {trade_record.trade_id}")
-            else:
-                logger.info("⏸️ Señal no ejecutada (filtros de riesgo o duplicados)")
-            
-            # Verificar trades abiertos para SL/TP
-            closed_trades = await execution_engine.check_open_trades(close_price)
-            for trade in closed_trades:
-                logger.info(f"🔒 Trade cerrado: {trade.trade_id} - PnL: {trade.pnl:.2f}")
+            # El agente procesará los datos y tomará decisiones autónomas
+            # No necesitamos intervenir en el proceso
+            logger.info("🧠 Agente de IA procesando datos de mercado...")
             
         except Exception as e:
             logger.error(f"Error procesando señal de trading: {e}")
@@ -260,6 +237,20 @@ class TradingBotOrchestrator:
             
         except Exception as e:
             logger.error(f"❌ Error iniciando motor de trading: {e}")
+    
+    async def start_ai_agent(self):
+        """Inicia el Agente de IA autónomo"""
+        try:
+            logger.info("🧠 Iniciando Agente de IA...")
+            
+            # El agente ya está inicializado en validate_configuration
+            # Solo necesitamos iniciar el trading autónomo
+            await self.ai_agent.start_autonomous_trading()
+            
+            logger.info("✅ Agente de IA iniciado correctamente")
+            
+        except Exception as e:
+            logger.error(f"❌ Error iniciando Agente de IA: {e}")
     
     async def start_monitoring_dashboard(self):
         """Inicia el dashboard de monitoreo"""
@@ -349,6 +340,7 @@ class TradingBotOrchestrator:
                 asyncio.create_task(self.start_data_collection()),
                 asyncio.create_task(self.start_ml_training()),
                 asyncio.create_task(self.start_trading_engine()),
+                asyncio.create_task(self.start_ai_agent()),
                 asyncio.create_task(self.start_monitoring_dashboard()),
                 asyncio.create_task(self.run_health_checks())
             ]

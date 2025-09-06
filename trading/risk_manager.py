@@ -1,26 +1,27 @@
 """
 trading/risk_manager.py
-Sistema de gestión de riesgo para trading
-Ubicación: C:\\TradingBot_v10\\trading\\risk_manager.py
+Sistema de gestión de riesgo para trading (LONG/SHORT, spot/futures)
 
-Funcionalidades:
-- Cálculo de tamaño de posición basado en riesgo
-- Gestión de stop loss y take profit
-- Control de leverage y exposición máxima
-- Validación de límites de riesgo diarios
+Mejoras:
+- Awareness de side (BUY/LONG y SELL/SHORT)
+- Rounding por símbolo (lotStep/tickSize) y chequeo de minNotional
+- Leverage derivado de config y límites de exposición/margen
+- Buffer por comisiones ida+vuelta
+- Límite diario y drawdown con peak_equity in-memory (y BD si está disponible)
 """
 
 import logging
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-import numpy as np
-from decimal import Decimal, ROUND_DOWN
+from datetime import datetime, date
+from decimal import Decimal, ROUND_DOWN, ROUND_HALF_UP, getcontext
 
 from config.config_loader import user_config
 from data.database import db_manager
 
 logger = logging.getLogger(__name__)
+getcontext().prec = 28  # evitar problemas de precisión en Decimal
+
 
 @dataclass
 class RiskDecision:
@@ -34,167 +35,307 @@ class RiskDecision:
     risk_percentage: float
     trailing_config: Optional[Dict] = None
 
+
 class RiskManager:
     """Gestor de riesgo para operaciones de trading"""
-    
+
     def __init__(self):
         self.config = user_config
-        self.risk_config = self.config.get_value(['risk_management'], {})
-        self.trading_config = self.config.get_value(['trading'], {})
-        
+
+        self.risk_config = self.config.get_value(["risk_management"], {})
+        self.trading_config = self.config.get_value(["trading"], {})
+        self.symbol = self.trading_config.get("symbol", "BTCUSDT")
+
+        # Símbolo / filtros
+        sym_cfg = self.config.get_value(["symbols", self.symbol], {})
+        filters = (sym_cfg or {}).get("filters", {})
+        self.min_notional = float(filters.get("minNotional", 5.0))
+        self.lot_step = float(filters.get("lotStep", 0.0001))
+        self.tick_size = float(filters.get("tickSize", 0.01))
+
         # Límites de riesgo
-        self.max_risk_per_trade = self.risk_config.get('max_risk_per_trade', 0.02)  # 2%
-        self.max_daily_loss_pct = self.risk_config.get('max_daily_loss_pct', 0.05)  # 5%
-        self.max_drawdown_pct = self.risk_config.get('max_drawdown_pct', 0.10)  # 10%
-        self.max_leverage = self.risk_config.get('max_leverage', 3.0)  # 3x máximo
-        
-        # Configuración de trading
-        self.trading_mode = self.trading_config.get('mode', 'paper_trading')
-        self.is_futures = self.trading_config.get('futures', False)
-        
-        logger.info(f"RiskManager inicializado - Modo: {self.trading_mode}, Futuros: {self.is_futures}")
-    
+        self.max_risk_per_trade = float(self.risk_config.get("max_risk_per_trade", 0.02))  # 2%
+        self.max_daily_loss_pct = float(self.risk_config.get("max_daily_loss_pct", 0.05))  # 5%
+        self.max_drawdown_pct = float(self.risk_config.get("max_drawdown_pct", 0.10))      # 10%
+        self.max_leverage = float(self.risk_config.get("max_leverage", 3.0))               # ≤3x
+        self.max_exposure_pct = float(self.risk_config.get("max_exposure_pct", 0.50))      # 50% del balance
+
+        # SL/TP por defecto
+        self.default_sl_pct = float(self.risk_config.get("default_sl_pct", 0.02))          # 2%
+        self.tp_r_multiple = float(self.risk_config.get("tp_r_multiple", 2.0))             # TP = 2R
+
+        # Volatilidad → ajuste por ATR
+        self.min_sl_atr_mult = float(self.risk_config.get("min_sl_atr_mult", 0.0))         # ej. 1.0 → SL >= 1*ATR
+        self.atr_target_fraction = float(self.risk_config.get("atr_target_fraction", 0.5)) # 50% del rango relativo
+
+        # Confianza
+        self.min_signal_conf = float(self.risk_config.get("min_signal_confidence", 0.5))
+        self.confidence_risk_gamma = float(self.risk_config.get("confidence_risk_gamma", 1.0))
+
+        # Fees ida+vuelta
+        fee_maker = float(self.trading_config.get("maker_fee", 0.001))
+        fee_taker = float(self.trading_config.get("taker_fee", 0.001))
+        self.roundtrip_fee = 2.0 * max(fee_maker, fee_taker)  # conservador
+
+        # Trading mode
+        self.trading_mode = self.trading_config.get("mode", "paper_trading")
+        self.is_futures = bool(self.trading_config.get("futures", False))
+        self.default_leverage = float(self.trading_config.get("default_leverage", 3.0 if self.is_futures else 1.0))
+
+        # Estado para DD
+        self.peak_equity: Optional[float] = None
+
+        # Trailing desde config (si existe)
+        trailing_cfg = self.risk_config.get("trailing", {})
+        self.trailing_defaults = {
+            "enabled": bool(trailing_cfg.get("enabled", True)),
+            "activation_pct": float(trailing_cfg.get("activation_pct", 0.01)),
+            "trail_pct": float(trailing_cfg.get("trail_pct", 0.005)),
+            "min_trail_pct": float(trailing_cfg.get("min_trail_pct", 0.01)),
+        }
+
+        logger.info(
+            f"[RiskManager] Modo={self.trading_mode} | Futures={self.is_futures} | "
+            f"Symbol={self.symbol} | lotStep={self.lot_step} tickSize={self.tick_size} minNotional={self.min_notional}"
+        )
+
+    # ----------------------------- Helpers de precisión -----------------------------
+
+    def _round_down_to_step(self, value: float, step: float) -> float:
+        if step <= 0:
+            return float(value)
+        quant = Decimal(str(step))
+        return float((Decimal(str(value)) / quant).to_integral_value(rounding=ROUND_DOWN) * quant)
+
+    def _round_price_to_tick(self, price: float) -> float:
+        return self._round_to_step(price, self.tick_size)
+
+    def _round_to_step(self, value: float, step: float) -> float:
+        # Para precios preferimos half-up a la malla de ticks
+        if step <= 0:
+            return float(value)
+        quant = Decimal(str(step))
+        return float((Decimal(str(value)) / quant).to_integral_value(rounding=ROUND_HALF_UP) * quant)
+
+    # ----------------------------- API pública -----------------------------
+
+    def validate_signal(self, signal: str, confidence: float) -> bool:
+        if confidence < self.min_signal_conf:
+            logger.warning(f"[RISK] Confianza insuficiente: {confidence:.2%} < {self.min_signal_conf:.0%}")
+            return False
+        if signal not in ["BUY", "SELL", "HOLD", "LONG", "SHORT"]:
+            logger.warning(f"[RISK] Señal inválida: {signal}")
+            return False
+        return True
+
     def calculate_position_size(
         self,
         current_price: float,
         atr: float,
         balance: float,
-        stop_loss_pct: float = 0.02,
+        side: str,
+        stop_loss_pct: Optional[float] = None,
         confidence: float = 1.0
     ) -> RiskDecision:
         """
-        Calcula el tamaño de posición basado en el riesgo
-        
-        Args:
-            current_price: Precio actual del activo
-            atr: Average True Range para volatilidad
-            balance: Balance disponible
-            stop_loss_pct: Porcentaje de stop loss (default 2%)
-            confidence: Confianza de la señal (0-1)
-        
-        Returns:
-            RiskDecision con todos los parámetros calculados
+        Calcula tamaño, SL, TP y leverage en base a riesgo.
+        - Soporta LONG (BUY) y SHORT (SELL)
+        - Cumple minNotional/lotStep/tickSize
         """
         try:
-            # Validar inputs
-            if current_price <= 0 or atr <= 0 or balance <= 0:
-                logger.warning("Inputs inválidos para cálculo de posición")
-                return self._create_reject_decision("Inputs inválidos")
-            
-            # Verificar límites diarios
+            # Validación de inputs
+            if current_price <= 0 or balance <= 0:
+                return self._reject("Inputs inválidos (precio/balance)")
+
+            if atr is None or atr <= 0:
+                logger.debug("[RISK] ATR no válido; se ignora ajuste por volatilidad.")
+                atr = 0.0
+
+            # Límite diario y DD
             if not self._check_daily_limits(balance):
-                return self._create_reject_decision("Límites diarios excedidos")
-            
-            # Calcular riesgo base
-            base_risk_amount = balance * self.max_risk_per_trade
-            
-            # Ajustar por confianza
-            adjusted_risk_amount = base_risk_amount * confidence
-            
-            # Calcular tamaño de posición
-            risk_per_share = current_price * stop_loss_pct
-            if risk_per_share <= 0:
-                return self._create_reject_decision("Stop loss inválido")
-            
-            # Tamaño base
-            base_size = adjusted_risk_amount / risk_per_share
-            
-            # Ajustar por volatilidad (ATR)
-            volatility_factor = min(1.0, 0.5 / (atr / current_price))  # Reducir si muy volátil
-            adjusted_size = base_size * volatility_factor
-            
-            # Aplicar límites de exposición
-            max_position_value = balance * 0.5  # Máximo 50% del balance
-            max_size_by_value = max_position_value / current_price
-            final_size = min(adjusted_size, max_size_by_value)
-            
-            # Redondear hacia abajo
-            final_size = float(Decimal(str(final_size)).quantize(Decimal('0.0001'), rounding=ROUND_DOWN))
-            
-            if final_size <= 0:
-                return self._create_reject_decision("Tamaño de posición muy pequeño")
-            
-            # Calcular stop loss y take profit
-            stop_loss = current_price * (1 - stop_loss_pct)
-            take_profit = current_price * (1 + stop_loss_pct * 2)  # Risk:Reward 1:2
-            
-            # Calcular leverage
-            leverage = min(self.max_leverage, 1.0)  # Paper mode: leverage 1x por defecto
-            if self.is_futures and self.trading_mode == 'live_trading':
-                leverage = min(self.max_leverage, 3.0)
-            
-            # Configuración de trailing stop
-            trailing_config = {
-                'enabled': True,
-                'activation_pct': 0.01,  # 1% de ganancia para activar
-                'trail_pct': 0.005,     # 0.5% de trailing
-                'min_trail_pct': 0.01   # Mínimo 1% de trailing
-            }
-            
-            # Calcular métricas finales
-            position_value = final_size * current_price
-            actual_risk_amount = final_size * (current_price - stop_loss)
-            actual_risk_pct = actual_risk_amount / balance
-            
+                return self._reject("Límites diarios o drawdown excedidos")
+
+            # Normalizar side
+            side = side.upper()
+            if side == "BUY":
+                side = "LONG"
+            elif side == "SELL":
+                side = "SHORT"
+            if side not in ["LONG", "SHORT"]:
+                return self._reject(f"Side inválido: {side}")
+
+            # SL por defecto y ajuste por ATR mínimo (opcional)
+            sl_pct = float(stop_loss_pct if stop_loss_pct is not None else self.default_sl_pct)
+            if self.min_sl_atr_mult > 0 and atr > 0:
+                sl_pct = max(sl_pct, (atr / current_price) * self.min_sl_atr_mult)
+
+            # Riesgo base en USD ajustado por confianza
+            risk_usd = balance * self.max_risk_per_trade
+            if self.confidence_risk_gamma != 1.0:
+                risk_usd *= float(confidence ** self.confidence_risk_gamma)
+            else:
+                risk_usd *= float(confidence)
+
+            # Distancia monetaria al SL por unidad (incluye fees ida+vuelta como buffer)
+            # Nota: para LONG y SHORT el módulo de la distancia es el mismo: price * sl_pct
+            risk_per_unit = current_price * sl_pct
+            fees_buffer = current_price * self.roundtrip_fee
+            risk_per_unit += fees_buffer
+
+            if risk_per_unit <= 0:
+                return self._reject("Stop loss inválido / fees mal configurados")
+
+            # Tamaño inicial por riesgo puro
+            qty_raw = risk_usd / risk_per_unit
+
+            # Ajuste por volatilidad relativa (cap si ATR muy alto)
+            if atr > 0 and self.atr_target_fraction > 0:
+                rel_atr = atr / current_price  # fracción del precio
+                vol_factor = min(1.0, self.atr_target_fraction / max(rel_atr, 1e-12))
+                qty_raw *= vol_factor
+
+            # Límite por exposición (notional)
+            # Spot: notional <= balance * max_exposure_pct
+            # Futures: notional <= balance * max_exposure_pct * leverage_elegido
+            leverage = 1.0
+            if self.is_futures:
+                leverage = max(1.0, min(self.max_leverage, self.default_leverage))
+
+            max_notional = balance * self.max_exposure_pct * leverage
+            qty_cap_by_exposure = max_notional / current_price if current_price > 0 else 0.0
+
+            qty_capped = min(qty_raw, qty_cap_by_exposure)
+
+            # Redondeos por símbolo
+            qty_rounded = self._round_down_to_step(qty_capped, self.lot_step)
+
+            # Precios SL/TP según side
+            if side == "LONG":
+                sl_price = current_price * (1.0 - sl_pct)
+                tp_price = current_price * (1.0 + self.tp_r_multiple * sl_pct)
+            else:
+                sl_price = current_price * (1.0 + sl_pct)
+                tp_price = current_price * (1.0 - self.tp_r_multiple * sl_pct)
+
+            sl_price = self._round_to_step(sl_price, self.tick_size)
+            tp_price = self._round_to_step(tp_price, self.tick_size)
+
+            if qty_rounded <= 0:
+                return self._reject("Tamaño de posición resultó 0 tras límites/rounding")
+
+            # minNotional: si queda por debajo, podemos escalar (siempre respetando exposición)
+            notional = qty_rounded * current_price
+            if notional < self.min_notional:
+                # Intentar subir al mínimo
+                needed_qty = self._round_down_to_step((self.min_notional / current_price), self.lot_step)
+                # Aun así, respetar exposición
+                needed_qty = min(needed_qty, qty_cap_by_exposure)
+                if needed_qty <= 0:
+                    return self._reject("No se puede alcanzar minNotional sin violar exposición")
+                qty_rounded = needed_qty
+                notional = qty_rounded * current_price
+
+            # Métricas finales de riesgo
+            # Distancia al SL por unidad (sin signo)
+            sl_distance = abs(current_price - sl_price)
+            risk_amount = qty_rounded * sl_distance
+            risk_pct = risk_amount / balance if balance > 0 else 0.0
+
             decision = RiskDecision(
-                size_qty=final_size,
-                stop_loss=stop_loss,
-                take_profit=take_profit,
-                leverage=leverage,
-                max_position_value=max_position_value,
-                risk_amount=actual_risk_amount,
-                risk_percentage=actual_risk_pct,
-                trailing_config=trailing_config
+                size_qty=float(qty_rounded),
+                stop_loss=float(sl_price),
+                take_profit=float(tp_price),
+                leverage=float(leverage),
+                max_position_value=float(max_notional),
+                risk_amount=float(risk_amount),
+                risk_percentage=float(risk_pct),
+                trailing_config=dict(self.trailing_defaults),
             )
-            
-            logger.info(f"Decisión de riesgo calculada: {final_size:.4f} unidades, "
-                       f"SL: {stop_loss:.2f}, TP: {take_profit:.2f}, "
-                       f"Riesgo: {actual_risk_pct:.2%}")
-            
+
+            logger.info(
+                f"[RISK] {side} qty={decision.size_qty:.6f} SL={decision.stop_loss:.2f} "
+                f"TP={decision.take_profit:.2f} lev={decision.leverage:.2f} "
+                f"risk={decision.risk_percentage:.2%} notional≈{notional:.2f}"
+            )
             return decision
-            
+
         except Exception as e:
-            logger.error(f"Error calculando tamaño de posición: {e}")
-            return self._create_reject_decision(f"Error en cálculo: {e}")
-    
-    def _check_daily_limits(self, balance: float) -> bool:
-        """Verifica si se han excedido los límites diarios"""
+            logger.exception(f"[RISK] Error calculando posición: {e}")
+            return self._reject(f"Error en cálculo: {e}")
+
+    def get_risk_summary(self) -> Dict:
+        return {
+            "symbol": self.symbol,
+            "max_risk_per_trade": self.max_risk_per_trade,
+            "max_daily_loss_pct": self.max_daily_loss_pct,
+            "max_drawdown_pct": self.max_drawdown_pct,
+            "max_leverage": self.max_leverage,
+            "max_exposure_pct": self.max_exposure_pct,
+            "default_sl_pct": self.default_sl_pct,
+            "tp_r_multiple": self.tp_r_multiple,
+            "trading_mode": self.trading_mode,
+            "is_futures": self.is_futures,
+            "lot_step": self.lot_step,
+            "tick_size": self.tick_size,
+            "min_notional": self.min_notional,
+        }
+
+    # ----------------------------- Límites diarios / DD -----------------------------
+
+    def _check_daily_limits(self, current_balance: float) -> bool:
         try:
-            # Obtener pérdidas del día
-            today = datetime.now().date()
+            today = date.today()
             daily_pnl = self._get_daily_pnl(today)
-            
-            # Verificar pérdida diaria máxima
-            max_daily_loss = balance * self.max_daily_loss_pct
+
+            max_daily_loss = current_balance * self.max_daily_loss_pct
             if daily_pnl < -max_daily_loss:
-                logger.warning(f"Límite de pérdida diaria excedido: {daily_pnl:.2f} < -{max_daily_loss:.2f}")
+                logger.warning(f"[RISK] Límite de pérdida diaria excedido: {daily_pnl:.2f} < -{max_daily_loss:.2f}")
                 return False
-            
-            # Verificar drawdown máximo
-            max_drawdown = balance * self.max_drawdown_pct
-            if daily_pnl < -max_drawdown:
-                logger.warning(f"Drawdown máximo excedido: {daily_pnl:.2f} < -{max_drawdown:.2f}")
+
+            # Peak equity in-memory (si la BD tiene pico histórico, podría consultarse)
+            if self.peak_equity is None:
+                self.peak_equity = float(current_balance)
+            else:
+                self.peak_equity = max(self.peak_equity, float(current_balance))
+
+            # Drawdown vs pico de la sesión
+            dd_abs = self.peak_equity - float(current_balance)
+            if dd_abs > (self.max_drawdown_pct * self.peak_equity):
+                logger.warning(
+                    f"[RISK] Drawdown máximo excedido: {dd_abs:.2f} > {self.max_drawdown_pct*100:.2f}% de {self.peak_equity:.2f}"
+                )
                 return False
-            
+
             return True
-            
         except Exception as e:
-            logger.error(f"Error verificando límites diarios: {e}")
+            logger.error(f"[RISK] Error verificando límites diarios: {e}")
+            # En caso de error de BD, se prefiere ser conservador y bloquear
             return False
-    
-    def _get_daily_pnl(self, date) -> float:
-        """Obtiene el PnL del día desde la base de datos"""
+
+    def _get_daily_pnl(self, day: date) -> float:
+        """Consulta PnL del día en la BD. Fallback: 0.0 si no hay estructura."""
         try:
-            # Implementar consulta a BD para obtener PnL del día
-            # Por ahora retornar 0 (no hay trades aún)
-            return 0.0
+            # Si el db_manager expone un helper específico:
+            if hasattr(db_manager, "get_daily_pnl"):
+                return float(db_manager.get_daily_pnl(self.symbol, day))
+
+            # Fallback SQL genérico (ajusta a tu esquema real)
+            # Se asume una tabla 'trades' con columnas: symbol, close_time (ISO), pnl
+            rows = db_manager.query(
+                "SELECT COALESCE(SUM(pnl), 0) FROM trades "
+                "WHERE symbol = ? AND DATE(close_time) = DATE(?)",
+                (self.symbol, day.isoformat()),
+            )
+            total = rows[0][0] if rows and rows[0] and rows[0][0] is not None else 0.0
+            return float(total)
         except Exception as e:
-            logger.error(f"Error obteniendo PnL diario: {e}")
+            logger.debug(f"[RISK] Fallback daily PnL (0.0) por error: {e}")
             return 0.0
-    
-    def _create_reject_decision(self, reason: str) -> RiskDecision:
-        """Crea una decisión de rechazo"""
-        logger.warning(f"Operación rechazada: {reason}")
+
+    # ----------------------------- Utilidades internas -----------------------------
+
+    def _reject(self, reason: str) -> RiskDecision:
+        logger.warning(f"[RISK] Operación rechazada: {reason}")
         return RiskDecision(
             size_qty=0.0,
             stop_loss=0.0,
@@ -203,31 +344,9 @@ class RiskManager:
             max_position_value=0.0,
             risk_amount=0.0,
             risk_percentage=0.0,
-            trailing_config=None
+            trailing_config=None,
         )
-    
-    def validate_signal(self, signal: str, confidence: float) -> bool:
-        """Valida si una señal puede ser ejecutada"""
-        if confidence < 0.5:  # Mínimo 50% de confianza
-            logger.warning(f"Confianza insuficiente: {confidence:.2%}")
-            return False
-        
-        if signal not in ['BUY', 'SELL', 'HOLD']:
-            logger.warning(f"Señal inválida: {signal}")
-            return False
-        
-        return True
-    
-    def get_risk_summary(self) -> Dict:
-        """Obtiene un resumen del estado de riesgo actual"""
-        return {
-            'max_risk_per_trade': self.max_risk_per_trade,
-            'max_daily_loss_pct': self.max_daily_loss_pct,
-            'max_drawdown_pct': self.max_drawdown_pct,
-            'max_leverage': self.max_leverage,
-            'trading_mode': self.trading_mode,
-            'is_futures': self.is_futures
-        }
+
 
 # Instancia global
 risk_manager = RiskManager()

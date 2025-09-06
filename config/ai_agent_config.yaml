@@ -1,0 +1,96 @@
+# 🤖 Configuración del Agente de IA
+# Configuración para el TradingAgent autónomo, autodidacta y autocorrectivo
+
+ai_agent:
+  # Configuración general del agente
+  general:
+    enabled: true
+    mode: "autonomous"  # autonomous, supervised, manual
+    learning_enabled: true
+    self_correction_enabled: true
+    adaptation_frequency: 100  # cada N trades
+    
+  # Motor de decisiones autónomas
+  decision_engine:
+    min_confidence: 0.7
+    risk_tolerance: 0.5
+    opportunity_threshold: 0.6
+    factor_weights:
+      ml_prediction: 0.4
+      technical_analysis: 0.3
+      risk_assessment: 0.2
+      market_context: 0.1
+    
+  # Sistema de aprendizaje autodidacta
+  learning_system:
+    learning_rate: 0.01
+    memory_size: 1000
+    pattern_threshold: 0.7
+    adaptation_threshold: 0.6
+    exploration_rate: 0.1
+    exploitation_rate: 0.9
+    
+  # Mecanismo de autocorrección
+  self_correction:
+    correction_mode: "automatic"  # automatic, manual, disabled
+    error_thresholds:
+      prediction_accuracy: 0.6
+      decision_confidence: 0.5
+      performance_degradation: 0.2
+      system_stability: 0.8
+    auto_recovery: true
+    fallback_mode: true
+    
+  # Configuración de memoria y persistencia
+  memory:
+    episodic_memory_size: 1000
+    semantic_memory_size: 500
+    pattern_memory_size: 200
+    persistence_frequency: 50  # cada N episodios
+    
+  # Configuración de monitoreo
+  monitoring:
+    health_check_interval: 60  # segundos
+    performance_check_interval: 300  # segundos
+    error_detection_interval: 30  # segundos
+    metrics_collection_interval: 10  # segundos
+    
+  # Configuración de adaptación
+  adaptation:
+    parameter_adjustment_rate: 0.1
+    strategy_modification_threshold: 0.7
+    market_regime_adaptation: true
+    volatility_adaptation: true
+    performance_adaptation: true
+    
+  # Configuración de validación
+  validation:
+    decision_validation: true
+    prediction_validation: true
+    execution_validation: true
+    performance_validation: true
+    confidence_calibration: true
+    
+  # Configuración de logging y debugging
+  logging:
+    log_level: "INFO"
+    log_decisions: true
+    log_learning: true
+    log_corrections: true
+    log_adaptations: true
+    log_errors: true
+    
+  # Configuración de testing
+  testing:
+    test_mode: false
+    simulation_mode: true
+    backtest_mode: false
+    paper_trading_mode: true
+    
+  # Configuración de seguridad
+  safety:
+    max_daily_trades: 50
+    max_position_size: 0.1  # 10% del balance
+    emergency_stop_loss: 0.15  # 15% del balance
+    circuit_breaker_enabled: true
+    human_override_enabled: true
