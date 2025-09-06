@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 import threading
 import time
+import numpy as np
 
 # Añadir el directorio actual al path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -27,6 +28,10 @@ from config.config_loader import user_config
 from data.database import db_manager
 from data.collector import data_collector, collect_and_save_historical_data
 from data.preprocessor import data_preprocessor
+from models.predictor import predictor
+from trading.execution_engine import execution_engine
+from trading.risk_manager import risk_manager
+from trading.order_manager import order_manager
 
 logger = logging.getLogger(__name__)
 
@@ -116,19 +121,101 @@ class TradingBotOrchestrator:
             # Log de nueva vela completada
             close_price = kline_data.get('close', 0)
             volume = kline_data.get('volume', 0)
+            timestamp = datetime.now()
             
             logger.info(f"📊 Nueva vela {self.symbol}: Close=${close_price:,.2f}, Vol={volume:,.0f}")
             
-            # Aquí se podría triggear análisis del modelo ML
-            # self._trigger_ml_analysis()
+            # Triggear análisis del modelo ML y ejecución
+            asyncio.create_task(self._process_trading_signal(kline_data, timestamp))
             
         except Exception as e:
             logger.error(f"Error procesando kline data: {e}")
     
-    def _trigger_ml_analysis(self):
-        """Triggerea análisis del modelo ML (placeholder)"""
-        # TODO: Implementar cuando tengamos el modelo ML
-        pass
+    async def _process_trading_signal(self, kline_data: dict, timestamp: datetime):
+        """Procesa señal de trading con ML y ejecuta operaciones"""
+        try:
+            close_price = kline_data.get('close', 0)
+            volume = kline_data.get('volume', 0)
+            high = kline_data.get('high', close_price)
+            low = kline_data.get('low', close_price)
+            open_price = kline_data.get('open', close_price)
+            
+            # Obtener datos para predicción
+            X, y, df = data_preprocessor.prepare_training_data(
+                symbol=self.symbol,
+                days_back=60,
+                target_method="classification"
+            )
+            
+            if X.shape[0] == 0:
+                logger.warning("No hay datos suficientes para predicción")
+                return
+            
+            # Obtener ventana más reciente para predicción
+            latest_window = X[-1:]  # Última ventana de datos
+            
+            # Hacer predicción
+            prediction = predictor.predict(latest_window)
+            signal = prediction['signal']
+            confidence = prediction['confidence']
+            
+            logger.info(f"🔮 Predicción ML: {signal} (confianza: {confidence:.2%})")
+            
+            # Calcular ATR para gestión de riesgo
+            atr = self._calculate_atr(df.tail(14))  # ATR de 14 períodos
+            
+            # Obtener balance actual
+            balance = order_manager.get_balance()
+            
+            # Enrutar señal para ejecución
+            trade_record = await execution_engine.route_signal(
+                symbol=self.symbol,
+                signal=signal,
+                confidence=confidence,
+                current_price=close_price,
+                atr=atr,
+                balance=balance,
+                bar_timestamp=timestamp
+            )
+            
+            if trade_record:
+                logger.info(f"✅ Operación ejecutada: {trade_record.trade_id}")
+            else:
+                logger.info("⏸️ Señal no ejecutada (filtros de riesgo o duplicados)")
+            
+            # Verificar trades abiertos para SL/TP
+            closed_trades = await execution_engine.check_open_trades(close_price)
+            for trade in closed_trades:
+                logger.info(f"🔒 Trade cerrado: {trade.trade_id} - PnL: {trade.pnl:.2f}")
+            
+        except Exception as e:
+            logger.error(f"Error procesando señal de trading: {e}")
+    
+    def _calculate_atr(self, df, period=14):
+        """Calcula Average True Range"""
+        try:
+            if len(df) < period:
+                return 0.01  # ATR por defecto si no hay suficientes datos
+            
+            high = df['high'].values
+            low = df['low'].values
+            close = df['close'].values
+            
+            # Calcular True Range
+            tr1 = high[1:] - low[1:]
+            tr2 = np.abs(high[1:] - close[:-1])
+            tr3 = np.abs(low[1:] - close[:-1])
+            
+            tr = np.maximum(tr1, np.maximum(tr2, tr3))
+            
+            # Calcular ATR como media móvil simple
+            atr = np.mean(tr[-period:])
+            
+            return atr if not np.isnan(atr) else 0.01
+            
+        except Exception as e:
+            logger.error(f"Error calculando ATR: {e}")
+            return 0.01
     
     async def start_ml_training(self):
         """Inicia entrenamiento del modelo ML"""
@@ -155,8 +242,21 @@ class TradingBotOrchestrator:
     async def start_trading_engine(self):
         """Inicia el motor de trading"""
         try:
-            logger.info("⚡ Motor de trading pendiente de implementación")
-            # TODO: Implementar cuando tengamos el motor de trading
+            logger.info("⚡ Iniciando motor de trading...")
+            
+            # Inicializar componentes de trading
+            logger.info("🔧 Inicializando componentes de trading...")
+            
+            # Mostrar resumen de configuración
+            risk_summary = risk_manager.get_risk_summary()
+            execution_summary = execution_engine.get_execution_summary()
+            trade_summary = order_manager.get_trade_summary()
+            
+            logger.info(f"📊 Configuración de riesgo: {risk_summary}")
+            logger.info(f"⚙️ Configuración de ejecución: {execution_summary}")
+            logger.info(f"💰 Estado de trading: {trade_summary}")
+            
+            logger.info("✅ Motor de trading iniciado correctamente")
             
         except Exception as e:
             logger.error(f"❌ Error iniciando motor de trading: {e}")

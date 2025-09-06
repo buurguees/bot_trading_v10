@@ -48,6 +48,39 @@ capital_management:
 # =============================================================================
 # CONFIGURACIÓN DE TRADING
 # =============================================================================
+trading:
+  # Modo de trading
+  mode: "paper_trading"  # Opciones: "development", "backtesting", "paper_trading", "live_trading"
+  
+  # Configuración de futuros
+  futures: false  # true para futuros, false para spot
+  
+  # Configuración de ejecución
+  min_confidence: 0.6        # Confianza mínima para ejecutar (60%)
+  max_trades_per_bar: 1      # Máximo 1 trade por barra
+  commission_rate: 0.001      # 0.1% de comisión
+  
+  # Circuit breakers
+  circuit_breaker_loss: 0.05  # 5% pérdida diaria para activar circuit breaker
+  
+  # Balance inicial para paper trading
+  initial_balance: 10000.0
+
+# =============================================================================
+# GESTIÓN DE RIESGO
+# =============================================================================
+risk_management:
+  # Límites de riesgo por trade
+  max_risk_per_trade: 0.02    # 2% del balance por trade
+  max_daily_loss_pct: 0.05    # 5% pérdida máxima por día
+  max_drawdown_pct: 0.10      # 10% drawdown máximo
+  
+  # Configuración de leverage
+  max_leverage: 3.0           # Máximo 3x leverage para futuros
+  
+  # Configuración de stop loss y take profit
+  default_stop_loss_pct: 0.02  # 2% stop loss por defecto
+  risk_reward_ratio: 2.0       # Ratio riesgo:beneficio 1:2
 trading_settings:
   # Símbolo principal a operar
   primary_symbol: "BTCUSDT"
