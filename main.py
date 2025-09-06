@@ -143,7 +143,7 @@ class TradingBotOrchestrator:
             logger.error(f"Error procesando kline data: {e}")
     
     async def _process_trading_signal(self, kline_data: dict, timestamp: datetime):
-        """Procesa señal de trading usando el Agente de IA"""
+        """Procesa señal de trading con el sistema completo"""
         try:
             close_price = kline_data.get('close', 0)
             volume = kline_data.get('volume', 0)
@@ -153,17 +153,53 @@ class TradingBotOrchestrator:
             
             logger.info(f"📊 Nueva vela {self.symbol}: Close=${close_price:,.2f}, Vol={volume:,.0f}")
             
-            # El agente de IA maneja todo el proceso de trading de forma autónoma
-            # Solo necesitamos pasarle los datos de la vela
-            market_data = {
-                'klines': [kline_data],
-                'symbol': self.symbol,
-                'timestamp': timestamp
-            }
+            # 1. Obtener datos históricos para features
+            X, y, df = data_preprocessor.prepare_training_data(
+                symbol=self.symbol,
+                days_back=60,
+                target_method="classification"
+            )
             
-            # El agente procesará los datos y tomará decisiones autónomas
-            # No necesitamos intervenir en el proceso
-            logger.info("🧠 Agente de IA procesando datos de mercado...")
+            if X.shape[0] == 0:
+                logger.warning("No hay datos suficientes para predicción")
+                return
+            
+            # 2. Obtener ventana más reciente para predicción
+            latest_window = X[-1:]  # Última ventana de datos
+            
+            # 3. Hacer predicción con el modelo ML
+            prediction = predictor.predict(latest_window)
+            signal = prediction['signal']
+            confidence = prediction['confidence']
+            
+            logger.info(f"🔮 Predicción ML: {signal} (confianza: {confidence:.2%})")
+            
+            # 4. Calcular ATR para gestión de riesgo
+            atr = self._calculate_atr(df.tail(14))  # ATR de 14 períodos
+            
+            # 5. Obtener balance actual
+            balance = order_manager.get_balance()
+            
+            # 6. Enrutar señal para ejecución (con circuit breakers y anti-duplicados)
+            trade_record = await execution_engine.route_signal(
+                symbol=self.symbol,
+                signal=signal,
+                confidence=confidence,
+                current_price=close_price,
+                atr=atr,
+                balance=balance,
+                bar_timestamp=timestamp
+            )
+            
+            if trade_record:
+                logger.info(f"✅ Operación ejecutada: {trade_record.trade_id}")
+            else:
+                logger.info("⏸️ Señal no ejecutada (filtros de riesgo o duplicados)")
+            
+            # 7. Verificar trades abiertos para SL/TP
+            closed_trades = await execution_engine.check_open_trades(close_price)
+            for trade in closed_trades:
+                logger.info(f"🔒 Trade cerrado: {trade.trade_id} - PnL: {trade.pnl:.2f}")
             
         except Exception as e:
             logger.error(f"Error procesando señal de trading: {e}")
