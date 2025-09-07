@@ -464,8 +464,14 @@ class DatabaseManager:
                 
                 if result and result[0] is not None and result[1] is not None:
                     try:
-                        start_date = datetime.fromtimestamp(result[0])
-                        end_date = datetime.fromtimestamp(result[1])
+                        # Verificar si el timestamp está en milisegundos o segundos
+                        min_ts, max_ts = result[0], result[1]
+                        if min_ts > 10000000000:  # Timestamp en milisegundos
+                            start_date = datetime.fromtimestamp(min_ts / 1000)
+                            end_date = datetime.fromtimestamp(max_ts / 1000)
+                        else:  # Timestamp en segundos
+                            start_date = datetime.fromtimestamp(min_ts)
+                            end_date = datetime.fromtimestamp(max_ts)
                         return (start_date, end_date)
                     except (ValueError, OSError) as e:
                         logger.error(f"Error convirtiendo timestamp: {e}")
