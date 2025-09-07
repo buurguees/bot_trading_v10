@@ -406,7 +406,10 @@ class TradingBotApp:
             # Mostrar configuraciones clave
             bot_name = user_config.get_bot_name()
             trading_mode = user_config.get_trading_mode()
-            symbols = user_config.get_trading_symbols()
+            
+            # Obtener símbolos desde la configuración
+            bot_settings = user_config.get_value(['bot_settings'], {})
+            symbols = bot_settings.get('main_symbols', ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT'])
             
             print(f"   Nombre del bot: {bot_name}")
             print(f"   Modo de trading: {trading_mode}")
