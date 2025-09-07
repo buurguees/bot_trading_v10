@@ -145,7 +145,9 @@ class TradingDashboard:
                 return {}, {}
         
         # Registrar callbacks específicos de cada página
-        register_callbacks(self.app)
+        from .callbacks import DashboardCallbacks
+        callbacks_handler = DashboardCallbacks(self.app, self.data_provider, self.chart_components)
+        callbacks_handler.register_all_callbacks()
     
     def run(self):
         """Ejecuta el servidor del dashboard"""
