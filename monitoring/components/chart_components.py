@@ -5,7 +5,7 @@ from monitoring.core.data_provider import DashboardDataProvider
 
 def render_price_section(symbol: str = "ETHUSDT"):
     """Renderiza la sección de gráficos de precio"""
-    from monitoring.components.chart_components import ChartComponents
+    from monitoring.components.charts import ChartComponents
     chart_components = ChartComponents()
     
     # Obtener datos del proveedor

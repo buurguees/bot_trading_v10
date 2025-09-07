@@ -14,7 +14,7 @@ from .tables.data_tables import DataTable
 
 # Componentes básicos
 from .alerts import AlertComponent
-from .charts import ChartComponent
+from .chart_components import ChartComponent
 from .metrics_cards import MetricsCard
 
 __all__ = [

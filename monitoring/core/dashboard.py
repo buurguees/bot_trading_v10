@@ -31,7 +31,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from config.config_loader import user_config
 from .data_provider import DashboardDataProvider
 from monitoring.pages.home import HomePage
-from monitoring.components.charts import ChartComponents
+from monitoring.components.chart_components import ChartComponents
 from monitoring.callbacks.home_callbacks import register_callbacks
 
 logger = logging.getLogger(__name__)
