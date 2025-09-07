@@ -42,7 +42,7 @@ class TradingBotMain:
                 return False
             
             print(f"Símbolos disponibles: {summary['total_symbols']}")
-            print(f"📈 Total registros: {summary['total_records']:,}")
+            print(f"Total registros: {summary['total_records']:,}")
             
             # Verificar si necesitamos más datos
             valid_symbols = [s for s in summary['symbols'] if s['status'] == 'OK']
@@ -68,7 +68,7 @@ class TradingBotMain:
     
     def iniciar_dashboard_background(self):
         """Inicia el dashboard en segundo plano"""
-        print("🚀 INICIANDO DASHBOARD...")
+        print("INICIANDO DASHBOARD...")
         print("=" * 30)
         
         try:
@@ -84,8 +84,16 @@ class TradingBotMain:
             
             print("Dashboard iniciado en http://127.0.0.1:8050")
             print("Abre tu navegador para ver las métricas en tiempo real")
-            print("⏳ Esperando 5 segundos para que se cargue completamente...")
+            print("Esperando 5 segundos para que se cargue completamente...")
             time.sleep(5)
+            
+            # Iniciar entrenamiento en hilo separado
+            print("\nIniciando entrenamiento del modelo...")
+            training_thread = threading.Thread(
+                target=self._run_training,
+                daemon=True
+            )
+            training_thread.start()
             
             self.dashboard_running = True
             return True
@@ -102,9 +110,29 @@ class TradingBotMain:
         except Exception as e:
             print(f"Error en dashboard: {e}")
     
+    def _run_training(self):
+        """Ejecuta el entrenamiento en el hilo separado"""
+        try:
+            from core.entrenar_agente import EntrenadorAgente
+            entrenador = EntrenadorAgente()
+            
+            # Ejecutar entrenamiento para cada símbolo
+            symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+            
+            for symbol in symbols:
+                print(f"Iniciando entrenamiento para {symbol}...")
+                result = entrenador.train_initial_model(symbol, days_back=365)
+                if result.get('status') == 'success':
+                    print(f"Entrenamiento completado para {symbol}")
+                else:
+                    print(f"Error en entrenamiento para {symbol}: {result.get('error', 'Error desconocido')}")
+                    
+        except Exception as e:
+            print(f"Error en entrenamiento: {e}")
+    
     def verificar_modelo_existente(self):
         """Verifica que el modelo existente esté disponible"""
-        print("\n🧠 VERIFICANDO MODELO EXISTENTE...")
+        print("\nVERIFICANDO MODELO EXISTENTE...")
         print("=" * 50)
         
         model_path = "models/saved_models/best_lstm_attention_20250906_223751.h5"
@@ -129,14 +157,14 @@ class TradingBotMain:
             
             print("Componentes de trading cargados")
             print("🎯 Modo: Paper Trading")
-            print("💵 Balance inicial: $10,000")
+            print("Balance inicial: $10,000")
             print("Símbolos: ADAUSDT, SOLUSDT")
-            print("🧠 Modelo: LSTM con Atención")
+            print("Modelo: LSTM con Atención")
             
             # Iniciar trading
-            print("\n🚀 Iniciando estrategia de trading...")
+            print("\nIniciando estrategia de trading...")
             print("Paper trading iniciado")
-            print("📈 Monitorea el dashboard para ver las operaciones")
+            print("Monitorea el dashboard para ver las operaciones")
             
             return True
             
@@ -162,7 +190,7 @@ class TradingBotMain:
         print("   • Estadísticas de backtesting")
         print("   • Métricas de riesgo")
         print()
-        print("🚀 PRÓXIMOS PASOS:")
+        print("PRÓXIMOS PASOS:")
         print("   1. Revisa las métricas en el dashboard")
         print("   2. Ajusta parámetros si es necesario")
         print("   3. Monitorea las operaciones en el dashboard")
@@ -250,7 +278,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n👋 ¡Hasta luego!")
+        print("\n¡Hasta luego!")
     except Exception as e:
         print(f"Error crítico: {e}")
         import traceback
