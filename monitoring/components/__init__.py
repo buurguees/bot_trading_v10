@@ -14,11 +14,10 @@ from .widgets.top_cycles_widget import TopCyclesWidget
 
 # Componentes básicos
 # AlertComponent no existe, se removió del import
-from .chart_components import ChartComponent
+# ChartComponent no existe, se removió del import
 from .metrics_cards import MetricsCard
 
 __all__ = [
-    'ChartComponent', 
     'create_enhanced_chart_component',
     'create_enhanced_pnl_chart_with_navigation',
     'MetricsCard',
