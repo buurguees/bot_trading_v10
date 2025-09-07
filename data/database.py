@@ -1007,6 +1007,185 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Error obteniendo estadísticas de BD: {e}")
             return {}
+    
+    def get_historical_data_summary(self) -> Dict[str, Any]:
+        """
+        Obtiene un resumen detallado de los datos históricos
+        Reemplaza la funcionalidad de scripts/verificar_historico*.py
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Obtener todos los símbolos
+                cursor.execute("SELECT DISTINCT symbol FROM market_data ORDER BY symbol")
+                symbols = [row[0] for row in cursor.fetchall()]
+                
+                summary = {
+                    'total_symbols': len(symbols),
+                    'symbols': [],
+                    'total_records': 0,
+                    'date_ranges': {},
+                    'recommendations': []
+                }
+                
+                for symbol in symbols:
+                    # Estadísticas por símbolo
+                    cursor.execute("""
+                        SELECT 
+                            COUNT(*) as count,
+                            MIN(timestamp) as min_ts,
+                            MAX(timestamp) as max_ts
+                        FROM market_data 
+                        WHERE symbol = ?
+                    """, (symbol,))
+                    
+                    result = cursor.fetchone()
+                    if result:
+                        count, min_ts, max_ts = result
+                        summary['total_records'] += count
+                        
+                        # Convertir timestamps a fechas
+                        try:
+                            min_date = datetime.fromtimestamp(min_ts)
+                            max_date = datetime.fromtimestamp(max_ts)
+                            duration_days = (max_date - min_date).days
+                            
+                            symbol_info = {
+                                'symbol': symbol,
+                                'count': count,
+                                'start_date': min_date.strftime('%Y-%m-%d %H:%M'),
+                                'end_date': max_date.strftime('%Y-%m-%d %H:%M'),
+                                'duration_days': duration_days,
+                                'status': 'OK'
+                            }
+                            
+                            summary['symbols'].append(symbol_info)
+                            summary['date_ranges'][symbol] = {
+                                'start': min_date,
+                                'end': max_date,
+                                'duration_days': duration_days
+                            }
+                            
+                        except Exception as e:
+                            symbol_info = {
+                                'symbol': symbol,
+                                'count': count,
+                                'start_date': None,
+                                'end_date': None,
+                                'duration_days': 0,
+                                'status': f'ERROR: {str(e)}'
+                            }
+                            summary['symbols'].append(symbol_info)
+                
+                # Generar recomendaciones
+                if summary['total_symbols'] >= 2:
+                    summary['recommendations'].append("✅ Suficientes símbolos para entrenamiento")
+                else:
+                    summary['recommendations'].append("⚠️ Necesitas más símbolos para entrenamiento")
+                
+                # Verificar cobertura temporal
+                valid_symbols = [s for s in summary['symbols'] if s['status'] == 'OK']
+                if valid_symbols:
+                    min_duration = min(s['duration_days'] for s in valid_symbols)
+                    if min_duration >= 365:
+                        summary['recommendations'].append("✅ Excelente cobertura temporal (1+ años)")
+                    elif min_duration >= 180:
+                        summary['recommendations'].append("✅ Buena cobertura temporal (6+ meses)")
+                    else:
+                        summary['recommendations'].append("⚠️ Cobertura temporal limitada")
+                
+                return summary
+                
+        except Exception as e:
+            logger.error(f"Error obteniendo resumen de datos históricos: {e}")
+            return {'error': str(e)}
+    
+    def fix_timestamp_issues(self, symbol: str = None) -> Dict[str, Any]:
+        """
+        Corrige problemas de timestamps (milisegundos vs segundos)
+        Reemplaza la funcionalidad de scripts/corregir_timestamps.py
+        """
+        try:
+            symbols_to_fix = [symbol] if symbol else []
+            if not symbols_to_fix:
+                # Obtener símbolos con timestamps problemáticos
+                with self._get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        SELECT DISTINCT symbol 
+                        FROM market_data 
+                        WHERE timestamp > 10000000000
+                    """)
+                    symbols_to_fix = [row[0] for row in cursor.fetchall()]
+            
+            results = {}
+            
+            for sym in symbols_to_fix:
+                with self._get_connection() as conn:
+                    cursor = conn.cursor()
+                    
+                    # Contar registros problemáticos
+                    cursor.execute("""
+                        SELECT COUNT(*) 
+                        FROM market_data 
+                        WHERE symbol = ? AND timestamp > 10000000000
+                    """, (sym,))
+                    count_problematic = cursor.fetchone()[0]
+                    
+                    if count_problematic == 0:
+                        results[sym] = {'status': 'OK', 'message': 'No hay timestamps problemáticos'}
+                        continue
+                    
+                    # Estrategia más segura: eliminar duplicados primero, luego corregir
+                    print(f"🔧 Procesando {sym}: {count_problematic} registros problemáticos")
+                    
+                    # Obtener registros problemáticos
+                    cursor.execute("""
+                        SELECT id, timestamp, open, high, low, close, volume
+                        FROM market_data 
+                        WHERE symbol = ? AND timestamp > 10000000000
+                        ORDER BY timestamp
+                    """, (sym,))
+                    problematic_records = cursor.fetchall()
+                    
+                    # Eliminar registros problemáticos
+                    cursor.execute("""
+                        DELETE FROM market_data 
+                        WHERE symbol = ? AND timestamp > 10000000000
+                    """, (sym,))
+                    deleted_count = cursor.rowcount
+                    
+                    # Reinsertar con timestamps corregidos
+                    inserted_count = 0
+                    for record in problematic_records:
+                        record_id, timestamp_ms, open_price, high_price, low_price, close_price, volume = record
+                        timestamp_sec = timestamp_ms / 1000
+                        
+                        try:
+                            cursor.execute("""
+                                INSERT INTO market_data (symbol, timestamp, open, high, low, close, volume)
+                                VALUES (?, ?, ?, ?, ?, ?, ?)
+                            """, (sym, timestamp_sec, open_price, high_price, low_price, close_price, volume))
+                            inserted_count += 1
+                        except Exception as e:
+                            # Si hay conflicto, continuar con el siguiente
+                            continue
+                    
+                    conn.commit()
+                    
+                    results[sym] = {
+                        'status': 'FIXED',
+                        'deleted_count': deleted_count,
+                        'inserted_count': inserted_count,
+                        'message': f'Eliminados {deleted_count}, reinsertados {inserted_count} registros'
+                    }
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Error corrigiendo timestamps: {e}")
+            return {'error': str(e)}
 
 # Instancia global del gestor de base de datos
 db_manager = DatabaseManager()

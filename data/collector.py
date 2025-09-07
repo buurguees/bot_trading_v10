@@ -425,3 +425,148 @@ async def collect_and_save_historical_data(symbol: str, timeframe: str = "1h",
     except Exception as e:
         logger.error(f"❌ Error en recolección completa para {symbol}: {e}")
         return 0
+
+async def download_extensive_historical_data(symbols: List[str] = None, 
+                                           years: int = 2, 
+                                           timeframe: str = "1h") -> Dict[str, int]:
+    """
+    Descarga datos históricos extensos para múltiples símbolos
+    Reemplaza la funcionalidad de scripts/descargar_historico_*.py
+    
+    Args:
+        symbols: Lista de símbolos a descargar (default: símbolos principales)
+        years: Años de datos históricos a descargar
+        timeframe: Marco temporal (1h, 4h, 1d)
+    
+    Returns:
+        Diccionario con resultados por símbolo
+    """
+    try:
+        if symbols is None:
+            # Usar símbolos principales de la configuración
+            try:
+                config_data = user_config.config
+                symbols = config_data.get('bot_settings', {}).get('main_symbols', 
+                                                                 ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT'])
+            except:
+                symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+        
+        logger.info(f"🚀 Iniciando descarga extensa: {len(symbols)} símbolos, {years} años")
+        
+        results = {}
+        total_downloaded = 0
+        
+        for symbol in symbols:
+            logger.info(f"📥 Procesando {symbol}...")
+            
+            try:
+                # Descargar datos por períodos para evitar límites de API
+                days_back = years * 365
+                downloaded = await collect_and_save_historical_data(symbol, timeframe, days_back)
+                
+                results[symbol] = downloaded
+                total_downloaded += downloaded
+                
+                logger.info(f"✅ {symbol}: {downloaded} registros descargados")
+                
+                # Pausa entre descargas para respetar límites de API
+                await asyncio.sleep(2)
+                
+            except Exception as e:
+                logger.error(f"❌ Error descargando {symbol}: {e}")
+                results[symbol] = 0
+        
+        logger.info(f"🎉 Descarga completada: {total_downloaded} registros totales")
+        return results
+        
+    except Exception as e:
+        logger.error(f"❌ Error en descarga extensa: {e}")
+        return {}
+
+async def download_missing_data(symbols: List[str] = None, 
+                              target_days: int = 365) -> Dict[str, Any]:
+    """
+    Descarga solo los datos faltantes para completar el histórico
+    Reemplaza funcionalidad de scripts de verificación y descarga
+    
+    Args:
+        symbols: Lista de símbolos a verificar
+        target_days: Días objetivo de datos históricos
+    
+    Returns:
+        Diccionario con resultados de verificación y descarga
+    """
+    try:
+        if symbols is None:
+            try:
+                config_data = user_config.config
+                symbols = config_data.get('bot_settings', {}).get('main_symbols', 
+                                                                 ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT'])
+            except:
+                symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+        
+        results = {
+            'symbols_checked': len(symbols),
+            'symbols_ok': 0,
+            'symbols_updated': 0,
+            'total_downloaded': 0,
+            'details': {}
+        }
+        
+        for symbol in symbols:
+            logger.info(f"🔍 Verificando {symbol}...")
+            
+            try:
+                # Verificar datos existentes
+                from .database import db_manager
+                summary = db_manager.get_historical_data_summary()
+                
+                symbol_info = next((s for s in summary['symbols'] if s['symbol'] == symbol), None)
+                
+                if symbol_info and symbol_info['status'] == 'OK':
+                    current_days = symbol_info['duration_days']
+                    
+                    if current_days >= target_days:
+                        results['symbols_ok'] += 1
+                        results['details'][symbol] = {
+                            'status': 'OK',
+                            'current_days': current_days,
+                            'message': f'Ya tiene {current_days} días de datos'
+                        }
+                    else:
+                        # Descargar datos faltantes
+                        missing_days = target_days - current_days
+                        downloaded = await collect_and_save_historical_data(symbol, "1h", missing_days)
+                        
+                        results['symbols_updated'] += 1
+                        results['total_downloaded'] += downloaded
+                        results['details'][symbol] = {
+                            'status': 'UPDATED',
+                            'current_days': current_days,
+                            'missing_days': missing_days,
+                            'downloaded': downloaded
+                        }
+                else:
+                    # No hay datos, descargar completo
+                    downloaded = await collect_and_save_historical_data(symbol, "1h", target_days)
+                    
+                    results['symbols_updated'] += 1
+                    results['total_downloaded'] += downloaded
+                    results['details'][symbol] = {
+                        'status': 'NEW',
+                        'downloaded': downloaded,
+                        'message': 'Datos descargados desde cero'
+                    }
+                
+            except Exception as e:
+                logger.error(f"❌ Error verificando {symbol}: {e}")
+                results['details'][symbol] = {
+                    'status': 'ERROR',
+                    'error': str(e)
+                }
+        
+        return results
+        
+    except Exception as e:
+        logger.error(f"❌ Error en verificación de datos faltantes: {e}")
+        return {'error': str(e)}

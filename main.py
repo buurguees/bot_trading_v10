@@ -14,11 +14,10 @@ from datetime import datetime
 # Agregar el directorio raíz al path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from scripts.verificar_historico import verificar_historico
-from scripts.descargar_datos_mejorado import DescargaMejorada
-from scripts.entrenamiento_inicial import EntrenamientoInicial
-from scripts.iniciar_dashboard import DashboardIniciador
 from data.database import db_manager
+from data.collector import download_missing_data
+from monitoring.dashboard import start_dashboard_thread
+from entrenar_agente import EntrenadorAgente
 
 class TradingBotMain:
     """Clase principal del bot de trading"""
@@ -32,38 +31,38 @@ class TradingBotMain:
         print("🔍 VERIFICANDO DATOS HISTÓRICOS...")
         print("=" * 50)
         
-        # Verificar datos existentes
-        data_status = verificar_historico()
-        
-        if not data_status:
-            print("❌ No se pudo verificar los datos")
-            return False
-        
-        if data_status['sufficient']:
-            print("✅ DATOS SUFICIENTES - Continuando con análisis...")
-            return True
-        else:
-            print("⚠️  DATOS INSUFICIENTES - Iniciando descarga...")
-            print("📥 Descargando datos históricos...")
+        try:
+            # Verificar datos existentes usando el nuevo método
+            summary = db_manager.get_historical_data_summary()
             
-            try:
-                descarga = DescargaMejorada()
-                await descarga.ejecutar_descarga_completa()
-                
-                # Verificar nuevamente después de la descarga
-                print("\n🔍 Verificando datos después de la descarga...")
-                data_status_after = verificar_historico()
-                
-                if data_status_after and data_status_after['sufficient']:
-                    print("✅ Descarga completada - Datos suficientes")
-                    return True
-                else:
-                    print("❌ Descarga completada pero datos aún insuficientes")
-                    return False
-                    
-            except Exception as e:
-                print(f"❌ Error en descarga: {e}")
+            if 'error' in summary:
+                print(f"❌ Error verificando datos: {summary['error']}")
                 return False
+            
+            print(f"📊 Símbolos disponibles: {summary['total_symbols']}")
+            print(f"📈 Total registros: {summary['total_records']:,}")
+            
+            # Verificar si necesitamos más datos
+            valid_symbols = [s for s in summary['symbols'] if s['status'] == 'OK']
+            symbols_insuficientes = [s for s in valid_symbols if s['duration_days'] < 365]
+            
+            if symbols_insuficientes:
+                print(f"\n📥 Descargando datos faltantes para {len(symbols_insuficientes)} símbolos...")
+                results = await download_missing_data(target_days=365)
+                
+                if 'error' in results:
+                    print(f"❌ Error descargando datos: {results['error']}")
+                    return False
+                
+                print(f"✅ Descarga completada: {results['total_downloaded']:,} registros")
+            else:
+                print("✅ Datos suficientes disponibles")
+            
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error en verificación: {e}")
+            return False
     
     def iniciar_dashboard_background(self):
         """Inicia el dashboard en segundo plano"""
@@ -96,8 +95,8 @@ class TradingBotMain:
     def _run_dashboard(self):
         """Ejecuta el dashboard en el hilo separado"""
         try:
-            dashboard_iniciador = DashboardIniciador()
-            dashboard_iniciador.iniciar_dashboard()
+            from monitoring.dashboard import start_dashboard
+            start_dashboard(host='127.0.0.1', port=8050, debug=False)
         except Exception as e:
             print(f"❌ Error en dashboard: {e}")
     
