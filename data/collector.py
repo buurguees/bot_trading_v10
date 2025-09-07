@@ -181,8 +181,8 @@ class BitgetDataCollector:
             
             all_data = []
             current_start = start_date
-            limit = 200  # Límite conservador
-            max_attempts = 10  # Máximo intentos de paginación
+            limit = 1000  # Límite más alto para descargas extensas
+            max_attempts = 50  # Más intentos para cubrir 3 años
             attempts = 0
             
             while current_start < end_date and attempts < max_attempts:
@@ -211,15 +211,46 @@ class BitgetDataCollector:
                     logger.debug(f"Obtenidos {len(ohlcv)} registros")
                     all_data.extend(ohlcv)
                     
+                    # Log de progreso cada 10 intentos
+                    if attempts % 10 == 0:
+                        total_records = len(all_data)
+                        progress_days = (current_start - start_date).days
+                        total_days = (end_date - start_date).days
+                        progress_pct = (progress_days / total_days) * 100 if total_days > 0 else 0
+                        logger.info(f"📊 Progreso {symbol}: {total_records:,} registros, {progress_days}/{total_days} días ({progress_pct:.1f}%)")
+                    
                     # Actualizar fecha de inicio para la siguiente iteración
                     if len(ohlcv) > 0:
                         last_timestamp = ohlcv[-1][0]
-                        current_start = datetime.fromtimestamp(last_timestamp / 1000) + timedelta(
-                            hours=1 if timeframe == '1h' else 
-                            (4 if timeframe == '4h' else 24)
-                        )
+                        # Calcular el siguiente período basado en el timeframe
+                        if timeframe == '1h':
+                            time_delta = timedelta(hours=1)
+                        elif timeframe == '4h':
+                            time_delta = timedelta(hours=4)
+                        elif timeframe == '1d':
+                            time_delta = timedelta(days=1)
+                        else:
+                            time_delta = timedelta(hours=1)  # Default a 1h
+                        
+                        current_start = datetime.fromtimestamp(last_timestamp / 1000) + time_delta
+                        
+                        # Verificar si hemos alcanzado la fecha final
+                        if current_start >= end_date:
+                            break
                     else:
-                        break
+                        # Si no hay más datos, avanzar un período
+                        if timeframe == '1h':
+                            current_start += timedelta(hours=limit)
+                        elif timeframe == '4h':
+                            current_start += timedelta(hours=limit * 4)
+                        elif timeframe == '1d':
+                            current_start += timedelta(days=limit)
+                        else:
+                            current_start += timedelta(hours=limit)
+                        
+                        # Si hemos pasado la fecha final, terminar
+                        if current_start >= end_date:
+                            break
                     
                     # Pausa para evitar rate limiting
                     await asyncio.sleep(0.2)
@@ -426,6 +457,78 @@ async def collect_and_save_historical_data(symbol: str, timeframe: str = "1h",
         logger.error(f"❌ Error en recolección completa para {symbol}: {e}")
         return 0
 
+async def download_extensive_historical_data_chunked(symbols: List[str] = None, 
+                                                   years: int = 2, 
+                                                   timeframe: str = "1h") -> Dict[str, int]:
+    """
+    Descarga datos históricos en chunks para evitar límites de API
+    """
+    try:
+        if symbols is None:
+            try:
+                config_data = user_config.config
+                symbols = config_data.get('bot_settings', {}).get('main_symbols', 
+                                                                 ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT'])
+            except:
+                symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+        
+        logger.info(f"🚀 Iniciando descarga extensa por chunks: {len(symbols)} símbolos, {years} años")
+        
+        results = {}
+        total_downloaded = 0
+        
+        for symbol in symbols:
+            logger.info(f"📥 Procesando {symbol} en chunks...")
+            
+            try:
+                # Descargar en chunks de 6 meses para evitar límites
+                chunk_months = 6
+                total_chunks = (years * 12) // chunk_months
+                if (years * 12) % chunk_months > 0:
+                    total_chunks += 1
+                
+                symbol_total = 0
+                
+                for chunk in range(total_chunks):
+                    chunk_start_months = chunk * chunk_months
+                    chunk_end_months = min((chunk + 1) * chunk_months, years * 12)
+                    
+                    # Calcular días para este chunk
+                    chunk_days = (chunk_end_months - chunk_start_months) * 30
+                    
+                    logger.info(f"📦 Chunk {chunk + 1}/{total_chunks}: {chunk_days} días")
+                    
+                    downloaded = await collect_and_save_historical_data(symbol, timeframe, chunk_days)
+                    symbol_total += downloaded
+                    
+                    logger.info(f"✅ Chunk {chunk + 1}: {downloaded:,} registros")
+                    
+                    # Pausa entre chunks
+                    await asyncio.sleep(2)
+                
+                results[symbol] = symbol_total
+                total_downloaded += symbol_total
+                
+                # Calcular cobertura
+                expected_records = years * 365 * 24 if timeframe == '1h' else years * 365 * 6 if timeframe == '4h' else years * 365
+                coverage_pct = (symbol_total / expected_records) * 100 if expected_records > 0 else 0
+                
+                logger.info(f"✅ {symbol}: {symbol_total:,} registros totales ({coverage_pct:.1f}% cobertura)")
+                
+                # Pausa entre símbolos
+                await asyncio.sleep(3)
+                
+            except Exception as e:
+                logger.error(f"❌ Error descargando {symbol}: {e}")
+                results[symbol] = 0
+        
+        logger.info(f"🎉 Descarga por chunks completada: {total_downloaded} registros totales")
+        return results
+        
+    except Exception as e:
+        logger.error(f"❌ Error en descarga por chunks: {e}")
+        return {}
+
 async def download_extensive_historical_data(symbols: List[str] = None, 
                                            years: int = 2, 
                                            timeframe: str = "1h") -> Dict[str, int]:
@@ -451,6 +554,11 @@ async def download_extensive_historical_data(symbols: List[str] = None,
             except:
                 symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
         
+        # Para 3+ años, usar descarga por chunks para evitar límites de API
+        if years >= 3:
+            logger.info(f"🔄 Usando descarga por chunks para {years} años")
+            return await download_extensive_historical_data_chunked(symbols, years, timeframe)
+        
         logger.info(f"🚀 Iniciando descarga extensa: {len(symbols)} símbolos, {years} años")
         
         results = {}
@@ -462,15 +570,21 @@ async def download_extensive_historical_data(symbols: List[str] = None,
             try:
                 # Descargar datos por períodos para evitar límites de API
                 days_back = years * 365
+                logger.info(f"🎯 Objetivo: {days_back} días de datos históricos para {symbol}")
+                
                 downloaded = await collect_and_save_historical_data(symbol, timeframe, days_back)
                 
                 results[symbol] = downloaded
                 total_downloaded += downloaded
                 
-                logger.info(f"✅ {symbol}: {downloaded} registros descargados")
+                # Calcular días reales descargados
+                expected_records = days_back * 24 if timeframe == '1h' else days_back * 6 if timeframe == '4h' else days_back
+                coverage_pct = (downloaded / expected_records) * 100 if expected_records > 0 else 0
+                
+                logger.info(f"✅ {symbol}: {downloaded:,} registros descargados ({coverage_pct:.1f}% cobertura)")
                 
                 # Pausa entre descargas para respetar límites de API
-                await asyncio.sleep(2)
+                await asyncio.sleep(3)
                 
             except Exception as e:
                 logger.error(f"❌ Error descargando {symbol}: {e}")
