@@ -1,4 +1,4 @@
-"""
+r"""
 data/collector.py - VERSIÓN CORREGIDA
 Recolector de datos de mercado desde Bitget API
 Ubicación: C:\TradingBot_v10\data\collector.py
@@ -182,7 +182,7 @@ class BitgetDataCollector:
             all_data = []
             current_start = start_date
             limit = 1000  # Límite más alto para descargas extensas
-            max_attempts = 50  # Más intentos para cubrir 3 años
+            max_attempts = 200  # Suficientes intentos para cubrir 3 años (26,280 horas / 1000 = ~27 intentos)
             attempts = 0
             
             while current_start < end_date and attempts < max_attempts:
@@ -222,15 +222,15 @@ class BitgetDataCollector:
                     # Actualizar fecha de inicio para la siguiente iteración
                     if len(ohlcv) > 0:
                         last_timestamp = ohlcv[-1][0]
-                        # Calcular el siguiente período basado en el timeframe
+                        # Avanzar por el número de registros obtenidos, no solo 1 período
                         if timeframe == '1h':
-                            time_delta = timedelta(hours=1)
+                            time_delta = timedelta(hours=len(ohlcv))
                         elif timeframe == '4h':
-                            time_delta = timedelta(hours=4)
+                            time_delta = timedelta(hours=len(ohlcv) * 4)
                         elif timeframe == '1d':
-                            time_delta = timedelta(days=1)
+                            time_delta = timedelta(days=len(ohlcv))
                         else:
-                            time_delta = timedelta(hours=1)  # Default a 1h
+                            time_delta = timedelta(hours=len(ohlcv))  # Default a 1h
                         
                         current_start = datetime.fromtimestamp(last_timestamp / 1000) + time_delta
                         
@@ -238,7 +238,7 @@ class BitgetDataCollector:
                         if current_start >= end_date:
                             break
                     else:
-                        # Si no hay más datos, avanzar un período
+                        # Si no hay más datos, avanzar un período más grande
                         if timeframe == '1h':
                             current_start += timedelta(hours=limit)
                         elif timeframe == '4h':

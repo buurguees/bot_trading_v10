@@ -137,7 +137,7 @@ class TradingBotApp:
             print("✅ confidence_estimator: Disponible")
             
             # Verificar estado de entrenamiento
-            training_status = adaptive_trainer.get_training_status()
+            training_status = await adaptive_trainer.get_training_status()
             print(f"\n📊 Estado del entrenamiento:")
             print(f"   Modelo entrenado: {'✅ Sí' if training_status.get('is_trained', False) else '❌ No'}")
             print(f"   Última actualización: {training_status.get('last_update', 'Nunca')}")
@@ -145,7 +145,7 @@ class TradingBotApp:
             
             # Verificar predicciones
             try:
-                health = prediction_engine.health_check()
+                health = await prediction_engine.health_check()
                 print(f"\n🧠 Motor de predicciones:")
                 print(f"   Estado: {'✅ Saludable' if health.get('status') == 'healthy' else '❌ Problemas'}")
                 print(f"   Último procesamiento: {health.get('last_prediction', 'Nunca')}")
@@ -154,7 +154,7 @@ class TradingBotApp:
             
             # Verificar confianza
             try:
-                conf_health = confidence_estimator.health_check()
+                conf_health = await confidence_estimator.health_check()
                 print(f"\n💪 Estimador de confianza:")
                 print(f"   Calibrado: {'✅ Sí' if conf_health.get('calibrated', False) else '❌ No'}")
                 print(f"   Última calibración: {conf_health.get('last_calibration', 'Nunca')}")
