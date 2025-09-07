@@ -183,6 +183,9 @@ monitoring:
   # Dashboard web
   dashboard:
     enabled: true
+    host: "127.0.0.1"      # Solo acceso local por seguridad
+    port: 8050             # Puerto del dashboard
+    auto_open: false       # Abrir automáticamente en browser
     auto_refresh_seconds: 30
     show_detailed_metrics: true
     show_model_predictions: true

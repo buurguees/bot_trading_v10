@@ -34,6 +34,11 @@ from trading.risk_manager import risk_manager
 from trading.order_manager import order_manager
 from agents.trading_agent import TradingAgent
 
+# ============================================================================
+# IMPORTS ADICIONALES PARA EL DASHBOARD
+# ============================================================================
+from monitoring.dashboard import start_dashboard_thread
+
 logger = logging.getLogger(__name__)
 
 class TradingBotOrchestrator:
@@ -55,6 +60,9 @@ class TradingBotOrchestrator:
         
         # Inicializar Agente de IA
         self.ai_agent = TradingAgent()
+        
+        # Dashboard thread
+        self.dashboard_thread = None
         
         # Control de ciclo de vida
         self._stop_event = threading.Event()
@@ -112,6 +120,41 @@ class TradingBotOrchestrator:
             
         except Exception as e:
             logger.error(f"❌ Error iniciando recolección de datos: {e}")
+    
+    async def start_monitoring_dashboard(self):
+        """Inicia el dashboard de monitoreo"""
+        try:
+            monitoring_settings = user_config.get_monitoring_settings()
+            
+            if monitoring_settings['dashboard']['enabled']:
+                logger.info("📱 Iniciando dashboard web...")
+                
+                # Configuración del dashboard
+                host = monitoring_settings['dashboard'].get('host', '127.0.0.1')
+                port = monitoring_settings['dashboard'].get('port', 8050)
+                debug = self.environment == Environment.DEVELOPMENT
+                
+                # Iniciar dashboard en thread separado
+                self.dashboard_thread = start_dashboard_thread(
+                    host=host,
+                    port=port,
+                    debug=debug
+                )
+                
+                logger.info(f"✅ Dashboard iniciado en http://{host}:{port}")
+                logger.info("🎯 Páginas disponibles:")
+                logger.info(f"   🏠 Home: http://{host}:{port}/")
+                logger.info(f"   📊 Trading: http://{host}:{port}/trading")
+                logger.info(f"   📈 Performance: http://{host}:{port}/performance")
+                logger.info(f"   🚨 Alerts: http://{host}:{port}/alerts")
+                logger.info(f"   ⚙️ Settings: http://{host}:{port}/settings")
+                logger.info(f"   💬 Chat: http://{host}:{port}/chat (Coming Soon)")
+                
+            else:
+                logger.info("📱 Dashboard deshabilitado en configuración")
+            
+        except Exception as e:
+            logger.error(f"❌ Error iniciando dashboard: {e}")
     
     def _handle_tick_data(self, tick_data: dict):
         """Maneja datos de tick en tiempo real"""
@@ -417,6 +460,11 @@ class TradingBotOrchestrator:
         self.running = False
         self._stop_event.set()
         
+        # Detener dashboard si está ejecutándose
+        if self.dashboard_thread and self.dashboard_thread.is_alive():
+            logger.info("📱 Deteniendo dashboard...")
+            # El dashboard thread es daemon, se detendrá automáticamente
+        
         # Detener recolección de datos
         data_collector.stop_websocket_stream()
         
@@ -437,6 +485,20 @@ class TradingBotOrchestrator:
             logger.error(f"Error creando backup: {e}")
         
         logger.info("✅ Bot detenido correctamente")
+
+# ============================================================================
+# COMANDO ESPECÍFICO PARA DASHBOARD
+# ============================================================================
+async def start_dashboard_only(host='127.0.0.1', port=8050):
+    """Inicia solo el dashboard sin el bot de trading"""
+    logger.info("📱 Iniciando dashboard standalone...")
+    
+    from monitoring.dashboard import start_dashboard
+    
+    try:
+        start_dashboard(host=host, port=port, debug=True)
+    except KeyboardInterrupt:
+        logger.info("📱 Dashboard detenido por el usuario")
 
 async def run_development_mode():
     """Ejecuta el bot en modo desarrollo"""
@@ -484,6 +546,7 @@ Ejemplos de uso:
   python main.py --collect-data           # Solo recolectar datos históricos
   python main.py --train-model            # Solo entrenar modelo
   python main.py --health-check           # Verificar estado del sistema
+  python main.py --dashboard-only         # Solo ejecutar dashboard
         """
     )
     
@@ -543,6 +606,25 @@ Ejemplos de uso:
         type=bool,
         default=False,
         help='Usar mercado de futuros (default: False)'
+    )
+    
+    parser.add_argument(
+        '--dashboard-only',
+        action='store_true',
+        help='Ejecutar solo el dashboard web sin el bot de trading'
+    )
+    
+    parser.add_argument(
+        '--dashboard-host',
+        default='127.0.0.1',
+        help='Host para el dashboard (default: 127.0.0.1)'
+    )
+    
+    parser.add_argument(
+        '--dashboard-port',
+        type=int,
+        default=8050,
+        help='Puerto para el dashboard (default: 8050)'
     )
     
     return parser
@@ -615,6 +697,11 @@ async def main():
         logger.info("🔧 Logging detallado activado")
     
     try:
+        # Dashboard standalone
+        if args.dashboard_only:
+            await start_dashboard_only(args.dashboard_host, args.dashboard_port)
+            return True
+        
         # Ejecutar funciones específicas si se solicitan
         if args.collect_data:
             return await collect_data_only(args.symbol, args.days_back)
