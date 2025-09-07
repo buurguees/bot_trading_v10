@@ -9,6 +9,7 @@ import os
 import asyncio
 import threading
 import time
+import argparse
 from datetime import datetime
 
 # Agregar el directorio raíz al path
@@ -219,8 +220,25 @@ class TradingBotMain:
 
 async def main():
     """Función principal"""
+    # Parsear argumentos de línea de comandos
+    parser = argparse.ArgumentParser(description='Trading Bot v10 - Flujo Principal')
+    parser.add_argument('--mode', choices=['paper_trading', 'backtesting', 'development'], 
+                       default='paper_trading', help='Modo de operación del bot')
+    parser.add_argument('--dashboard', action='store_true', 
+                       help='Iniciar dashboard automáticamente')
+    
+    args = parser.parse_args()
+    
+    print(f"🤖 Iniciando Trading Bot v10 en modo: {args.mode}")
+    
     bot = TradingBotMain()
-    success = await bot.ejecutar_flujo_completo()
+    
+    if args.dashboard:
+        print("🌐 Iniciando dashboard...")
+        # Iniciar dashboard en modo específico
+        success = await bot.iniciar_dashboard_background()
+    else:
+        success = await bot.ejecutar_flujo_completo()
     
     if success:
         print("✅ Sistema detenido correctamente")
