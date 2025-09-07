@@ -32,7 +32,7 @@ from config.config_loader import user_config
 from .data_provider import DashboardDataProvider
 from .layout_components import LayoutComponents
 from .chart_components import ChartComponents
-from .callbacks import DashboardCallbacks
+from .callbacks import register_callbacks
 
 logger = logging.getLogger(__name__)
 
@@ -145,8 +145,7 @@ class TradingDashboard:
                 return {}, {}
         
         # Registrar callbacks específicos de cada página
-        callbacks_handler = DashboardCallbacks(self.app, self.data_provider, self.chart_components)
-        callbacks_handler.register_all_callbacks()
+        register_callbacks(self.app)
     
     def run(self):
         """Ejecuta el servidor del dashboard"""
