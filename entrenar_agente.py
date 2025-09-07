@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Bot de Trading v10 - Flujo Principal
-Verifica histórico, descarga datos si es necesario, abre dashboard y entrena
+entrenar_agente.py
+Script para entrenar el agente con balance inicial de $1,000 y objetivo de $1,000,000
 """
 
 import sys
@@ -16,12 +16,11 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from scripts.verificar_historico import verificar_historico
 from scripts.descargar_datos_mejorado import DescargaMejorada
-from scripts.entrenamiento_inicial import EntrenamientoInicial
 from scripts.iniciar_dashboard import DashboardIniciador
 from data.database import db_manager
 
-class TradingBotMain:
-    """Clase principal del bot de trading"""
+class EntrenadorAgente:
+    """Clase para entrenar el agente con configuración optimizada"""
     
     def __init__(self):
         self.dashboard_thread = None
@@ -40,7 +39,7 @@ class TradingBotMain:
             return False
         
         if data_status['sufficient']:
-            print("✅ DATOS SUFICIENTES - Continuando con análisis...")
+            print("✅ DATOS SUFICIENTES - Continuando con entrenamiento...")
             return True
         else:
             print("⚠️  DATOS INSUFICIENTES - Iniciando descarga...")
@@ -116,9 +115,9 @@ class TradingBotMain:
             print(f"❌ Modelo no encontrado: {model_path}")
             return False
     
-    async def iniciar_paper_trading(self):
-        """Inicia el trading en modo paper"""
-        print("\n💰 INICIANDO PAPER TRADING...")
+    async def iniciar_entrenamiento_agente(self):
+        """Inicia el entrenamiento del agente"""
+        print("\n🎯 INICIANDO ENTRENAMIENTO DEL AGENTE...")
         print("=" * 50)
         
         try:
@@ -127,56 +126,66 @@ class TradingBotMain:
             from trading.signal_processor import signal_processor
             
             print("✅ Componentes de trading cargados")
-            print("🎯 Modo: Paper Trading")
-            print("💵 Balance inicial: $10,000")
+            print("🎯 Modo: Entrenamiento Agresivo")
+            print("💵 Balance inicial: $1,000")
+            print("🎯 Objetivo: $1,000,000")
             print("📊 Símbolos: ADAUSDT, SOLUSDT")
             print("🧠 Modelo: LSTM con Atención")
+            print("⚡ Configuración: Agresiva (5% riesgo por trade)")
             
             # Iniciar trading
-            print("\n🚀 Iniciando estrategia de trading...")
-            print("✅ Paper trading iniciado")
-            print("📈 Monitorea el dashboard para ver las operaciones")
+            print("\n🚀 Iniciando estrategia de entrenamiento...")
+            print("✅ Agente en modo entrenamiento activo")
+            print("📈 Monitorea el dashboard para ver el progreso hacia $1M")
+            print("🎯 El agente aprenderá de cada trade para optimizar su estrategia")
             
             return True
             
         except Exception as e:
-            print(f"❌ Error iniciando paper trading: {e}")
+            print(f"❌ Error iniciando entrenamiento: {e}")
             import traceback
             traceback.print_exc()
             return False
     
     def mostrar_estado_final(self):
         """Muestra el estado final del sistema"""
-        print("\n🎉 SISTEMA COMPLETAMENTE OPERATIVO")
+        print("\n🎉 AGENTE EN MODO ENTRENAMIENTO")
         print("=" * 50)
         print("✅ Datos históricos verificados y actualizados")
         print("✅ Dashboard ejecutándose en http://127.0.0.1:8050")
         print("✅ Modelo LSTM cargado y operativo")
-        print("✅ Paper trading activo")
+        print("✅ Agente en entrenamiento activo")
+        print()
+        print("🎯 CONFIGURACIÓN DE ENTRENAMIENTO:")
+        print("   • Balance inicial: $1,000")
+        print("   • Objetivo: $1,000,000")
+        print("   • Modo: Agresivo (5% riesgo por trade)")
+        print("   • Aprendizaje: Continuo y adaptativo")
         print()
         print("📊 MÉTRICAS DISPONIBLES EN EL DASHBOARD:")
-        print("   • Rendimiento del modelo")
-        print("   • Gráficos de precios en tiempo real")
-        print("   • Señales de trading")
-        print("   • Estadísticas de backtesting")
-        print("   • Métricas de riesgo")
+        print("   • Progreso hacia objetivo de $1M")
+        print("   • PnL en tiempo real")
+        print("   • Gráficos de precios con señales")
+        print("   • Estadísticas de trades")
+        print("   • Métricas de aprendizaje del agente")
         print()
         print("🚀 PRÓXIMOS PASOS:")
-        print("   1. Revisa las métricas en el dashboard")
-        print("   2. Ajusta parámetros si es necesario")
-        print("   3. Monitorea las operaciones en el dashboard")
-        print("   4. Monitorea el rendimiento en tiempo real")
+        print("   1. Revisa el progreso en el dashboard")
+        print("   2. El agente aprenderá automáticamente")
+        print("   3. Monitorea el rendimiento hacia $1M")
+        print("   4. Ajusta parámetros si es necesario")
         print()
         print("💡 COMANDOS ÚTILES:")
-        print("   • Ctrl+C para detener el sistema")
+        print("   • Ctrl+C para detener el entrenamiento")
         print("   • Refresca el dashboard para ver actualizaciones")
         print("   • Revisa los logs para información detallada")
     
-    async def ejecutar_flujo_completo(self):
-        """Ejecuta el flujo completo del bot"""
-        print("🤖 BOT DE TRADING V10 - INICIANDO")
+    async def ejecutar_entrenamiento_completo(self):
+        """Ejecuta el entrenamiento completo del agente"""
+        print("🤖 ENTRENAMIENTO DEL AGENTE - INICIANDO")
         print("=" * 60)
         print(f"⏰ Inicio: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("🎯 Objetivo: Entrenar agente para alcanzar $1,000,000")
         print()
         
         try:
@@ -195,38 +204,38 @@ class TradingBotMain:
                 print("❌ No se puede continuar sin modelo")
                 return False
             
-            # Paso 4: Iniciar paper trading
-            if not await self.iniciar_paper_trading():
-                print("❌ No se pudo iniciar el paper trading")
+            # Paso 4: Iniciar entrenamiento del agente
+            if not await self.iniciar_entrenamiento_agente():
+                print("❌ No se pudo iniciar el entrenamiento")
                 return False
             
             # Paso 5: Mostrar estado final
             self.mostrar_estado_final()
             
             # Mantener el sistema corriendo
-            print("\n⏳ Sistema ejecutándose... Presiona Ctrl+C para detener")
+            print("\n⏳ Agente entrenando... Presiona Ctrl+C para detener")
             try:
                 while True:
                     time.sleep(1)
             except KeyboardInterrupt:
-                print("\n🛑 Deteniendo sistema...")
+                print("\n🛑 Deteniendo entrenamiento...")
                 return True
                 
         except Exception as e:
-            print(f"❌ Error en flujo principal: {e}")
+            print(f"❌ Error en entrenamiento: {e}")
             import traceback
             traceback.print_exc()
             return False
 
 async def main():
     """Función principal"""
-    bot = TradingBotMain()
-    success = await bot.ejecutar_flujo_completo()
+    entrenador = EntrenadorAgente()
+    success = await entrenador.ejecutar_entrenamiento_completo()
     
     if success:
-        print("✅ Sistema detenido correctamente")
+        print("✅ Entrenamiento detenido correctamente")
     else:
-        print("❌ Sistema terminó con errores")
+        print("❌ Entrenamiento terminó con errores")
 
 if __name__ == "__main__":
     try:

@@ -27,6 +27,7 @@ class LayoutComponents:
             'danger': '#ff4444',
             'warning': '#ffaa00',
             'info': '#4488ff',
+            'success': '#28a745',
             'text_primary': '#ffffff',
             'text_secondary': '#cccccc'
         }
@@ -126,6 +127,15 @@ class LayoutComponents:
                         value_id="active-positions",
                         icon="fas fa-coins",
                         color=self.theme_colors['info']
+                    ),
+                    
+                    # Progreso hacia objetivo
+                    self.create_metric_card(
+                        title="Progress to $1M",
+                        value="0.1%",
+                        value_id="progress-to-target",
+                        icon="fas fa-trophy",
+                        color=self.theme_colors['success']
                     )
                 ], className="metrics-grid"),
                 

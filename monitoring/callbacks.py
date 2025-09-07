@@ -41,23 +41,30 @@ class DashboardCallbacks:
             [Output('total-balance', 'children'),
              Output('daily-pnl', 'children'),
              Output('win-rate', 'children'),
-             Output('active-positions', 'children')],
+             Output('active-positions', 'children'),
+             Output('progress-to-target', 'children')],
             Input('dashboard-data', 'data')
         )
         def update_home_metrics(data):
             if not data or 'portfolio' not in data:
-                return "$10,000.00", "+$0.00", "0%", "0"
+                return "$1,000.00", "+$0.00", "0%", "0", "0.1%"
             
             portfolio = data['portfolio']
             performance = data.get('performance', {})
             positions = data.get('positions', [])
             
-            balance = f"${portfolio.get('total_balance', 0):,.2f}"
+            balance = f"${portfolio.get('total_balance', 1000):,.2f}"
             daily_pnl = f"+${portfolio.get('daily_pnl', 0):,.2f}" if portfolio.get('daily_pnl', 0) >= 0 else f"-${abs(portfolio.get('daily_pnl', 0)):,.2f}"
             win_rate = f"{performance.get('win_rate', 0)*100:.0f}%"
             active_pos = str(len(positions))
             
-            return balance, daily_pnl, win_rate, active_pos
+            # Calcular progreso hacia objetivo de $1M
+            current_balance = portfolio.get('total_balance', 1000)
+            target_balance = portfolio.get('target_balance', 1000000)
+            progress_pct = (current_balance / target_balance) * 100
+            progress = f"{progress_pct:.2f}%"
+            
+            return balance, daily_pnl, win_rate, active_pos, progress
         
         # Actualizar gráfico P&L
         @self.app.callback(

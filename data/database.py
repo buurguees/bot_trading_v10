@@ -1,7 +1,7 @@
 """
 data/database.py
 Gestor de base de datos para el sistema de trading
-Ubicación: C:\TradingBot_v10\data\database.py
+Ubicación: C:\\TradingBot_v10\\data\\database.py
 
 Maneja todas las operaciones de base de datos incluyendo:
 - Datos de mercado históricos y en tiempo real
@@ -292,6 +292,291 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Error insertando datos de mercado en bulk: {e}")
             return 0
+    
+    def save_market_data(self, market_data: MarketData) -> bool:
+        """
+        Guarda un registro de datos de mercado en la base de datos
+        
+        Args:
+            market_data: Objeto MarketData a guardar
+            
+        Returns:
+            True si se guardó exitosamente, False en caso contrario
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Verificar si ya existe el registro (evitar duplicados)
+                cursor.execute("""
+                    SELECT id FROM market_data 
+                    WHERE symbol = ? AND timestamp = ?
+                """, (market_data.symbol, market_data.timestamp))
+                
+                existing = cursor.fetchone()
+                
+                if existing:
+                    # Actualizar registro existente
+                    cursor.execute("""
+                        UPDATE market_data 
+                        SET open = ?, high = ?, low = ?, close = ?, volume = ?
+                        WHERE symbol = ? AND timestamp = ?
+                    """, (market_data.open, market_data.high, market_data.low, 
+                          market_data.close, market_data.volume, 
+                          market_data.symbol, market_data.timestamp))
+                    logger.debug(f"Actualizado registro existente: {market_data.symbol} - {market_data.timestamp}")
+                else:
+                    # Insertar nuevo registro
+                    cursor.execute("""
+                        INSERT INTO market_data (symbol, timestamp, open, high, low, close, volume)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (market_data.symbol, market_data.timestamp, market_data.open,
+                          market_data.high, market_data.low, market_data.close, market_data.volume))
+                    logger.debug(f"Insertado nuevo registro: {market_data.symbol} - {market_data.timestamp}")
+                
+                conn.commit()
+                return True
+                
+        except Exception as e:
+            logger.error(f"Error guardando datos de mercado: {e}")
+            return False
+
+    def bulk_save_market_data(self, market_data_list: List[MarketData]) -> int:
+        """
+        Guarda múltiples registros de datos de mercado de forma eficiente
+        
+        Args:
+            market_data_list: Lista de objetos MarketData
+            
+        Returns:
+            Número de registros guardados exitosamente
+        """
+        if not market_data_list:
+            return 0
+        
+        saved_count = 0
+        batch_size = 1000  # Procesar en lotes para evitar memory issues
+        
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                for i in range(0, len(market_data_list), batch_size):
+                    batch = market_data_list[i:i + batch_size]
+                    
+                    for market_data in batch:
+                        try:
+                            # Verificar duplicados
+                            cursor.execute("""
+                                SELECT id FROM market_data 
+                                WHERE symbol = ? AND timestamp = ?
+                            """, (market_data.symbol, market_data.timestamp))
+                            
+                            existing = cursor.fetchone()
+                            
+                            if not existing:
+                                cursor.execute("""
+                                    INSERT INTO market_data (symbol, timestamp, open, high, low, close, volume)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                                """, (market_data.symbol, market_data.timestamp, market_data.open,
+                                      market_data.high, market_data.low, market_data.close, market_data.volume))
+                                saved_count += 1
+                            
+                        except Exception as e:
+                            logger.error(f"Error en registro individual: {e}")
+                            continue
+                    
+                    # Commit del lote
+                    conn.commit()
+                    logger.debug(f"Lote {i//batch_size + 1} procesado: {len(batch)} registros")
+                
+            logger.info(f"Bulk save completado: {saved_count} registros guardados de {len(market_data_list)} totales")
+            return saved_count
+            
+        except Exception as e:
+            logger.error(f"Error en bulk save: {e}")
+            return saved_count
+
+    def get_market_data_count(self, symbol: str = None) -> int:
+        """
+        Obtiene el conteo de registros de datos de mercado
+        
+        Args:
+            symbol: Símbolo específico (opcional)
+            
+        Returns:
+            Número de registros
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                if symbol:
+                    cursor.execute("SELECT COUNT(*) FROM market_data WHERE symbol = ?", (symbol,))
+                else:
+                    cursor.execute("SELECT COUNT(*) FROM market_data")
+                
+                count = cursor.fetchone()[0]
+                return count
+                
+        except Exception as e:
+            logger.error(f"Error obteniendo conteo de datos: {e}")
+            return 0
+
+    def get_symbols_list(self) -> List[str]:
+        """
+        Obtiene lista de símbolos únicos en la base de datos
+        
+        Returns:
+            Lista de símbolos únicos
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT DISTINCT symbol FROM market_data ORDER BY symbol")
+                symbols = [row[0] for row in cursor.fetchall()]
+                return symbols
+                
+        except Exception as e:
+            logger.error(f"Error obteniendo lista de símbolos: {e}")
+            return []
+
+    def get_data_date_range(self, symbol: str) -> tuple:
+        """
+        Obtiene el rango de fechas disponible para un símbolo
+        
+        Args:
+            symbol: Símbolo del activo
+            
+        Returns:
+            Tupla (fecha_inicio, fecha_fin) o (None, None) si no hay datos
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT MIN(timestamp), MAX(timestamp) 
+                    FROM market_data 
+                    WHERE symbol = ?
+                """, (symbol,))
+                
+                result = cursor.fetchone()
+                
+                if result and result[0] is not None and result[1] is not None:
+                    try:
+                        start_date = datetime.fromtimestamp(result[0])
+                        end_date = datetime.fromtimestamp(result[1])
+                        return (start_date, end_date)
+                    except (ValueError, OSError) as e:
+                        logger.error(f"Error convirtiendo timestamp: {e}")
+                        return (None, None)
+                else:
+                    return (None, None)
+                    
+        except Exception as e:
+            logger.error(f"Error obteniendo rango de fechas: {e}")
+            return (None, None)
+
+    def clean_old_data(self, days_to_keep: int = 365) -> int:
+        """
+        Limpia datos antiguos para mantener la base de datos optimizada
+        
+        Args:
+            days_to_keep: Días de datos a mantener
+            
+        Returns:
+            Número de registros eliminados
+        """
+        try:
+            cutoff_date = datetime.now() - timedelta(days=days_to_keep)
+            cutoff_timestamp = int(cutoff_date.timestamp())
+            
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    DELETE FROM market_data 
+                    WHERE timestamp < ?
+                """, (cutoff_timestamp,))
+                
+                deleted = cursor.rowcount
+                conn.commit()
+                
+            logger.info(f"Limpieza completada: {deleted} registros antiguos eliminados")
+            return deleted
+            
+        except Exception as e:
+            logger.error(f"Error limpiando datos antiguos: {e}")
+            return 0
+
+    def verify_data_integrity(self, symbol: str = None) -> Dict[str, Any]:
+        """
+        Verifica la integridad de los datos en la base de datos
+        
+        Args:
+            symbol: Símbolo específico a verificar (opcional)
+            
+        Returns:
+            Diccionario con estadísticas de integridad
+        """
+        try:
+            stats = {
+                'total_records': 0,
+                'symbols': [],
+                'date_ranges': {},
+                'gaps_detected': {},
+                'duplicate_timestamps': {},
+                'invalid_data': 0
+            }
+            
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Estadísticas generales
+                if symbol:
+                    cursor.execute("SELECT COUNT(*) FROM market_data WHERE symbol = ?", (symbol,))
+                    stats['total_records'] = cursor.fetchone()[0]
+                    symbols_to_check = [symbol]
+                else:
+                    cursor.execute("SELECT COUNT(*) FROM market_data")
+                    stats['total_records'] = cursor.fetchone()[0]
+                    cursor.execute("SELECT DISTINCT symbol FROM market_data")
+                    symbols_to_check = [row[0] for row in cursor.fetchall()]
+                stats['symbols'] = symbols_to_check
+                
+                # Verificar cada símbolo
+                for sym in symbols_to_check:
+                    # Rango de fechas
+                    date_range = self.get_data_date_range(sym)
+                    stats['date_ranges'][sym] = date_range
+                    
+                    # Detectar duplicados
+                    cursor.execute("""
+                        SELECT timestamp, COUNT(*) as count
+                        FROM market_data 
+                        WHERE symbol = ?
+                        GROUP BY timestamp
+                        HAVING COUNT(*) > 1
+                    """, (sym,))
+                    
+                    duplicates = cursor.fetchall()
+                    stats['duplicate_timestamps'][sym] = len(duplicates)
+                    
+                    # Detectar datos inválidos (precios <= 0)
+                    cursor.execute("""
+                        SELECT COUNT(*) FROM market_data 
+                        WHERE symbol = ? AND (
+                            open <= 0 OR high <= 0 OR low <= 0 OR close <= 0 OR volume < 0
+                        )
+                    """, (sym,))
+                    
+                    invalid = cursor.fetchone()[0]
+                    stats['invalid_data'] += invalid
+            
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Error verificando integridad de datos: {e}")
+            return {'error': str(e)}
     
     def get_market_data(
         self, 

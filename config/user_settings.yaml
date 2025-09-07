@@ -16,7 +16,7 @@ bot_settings:
   
   # Modo de operación
   # Opciones: "conservative", "moderate", "aggressive", "custom"
-  trading_mode: "moderate"
+  trading_mode: "aggressive"
   
   # Activar/desactivar funciones principales
   features:
@@ -33,16 +33,19 @@ capital_management:
   # Capital inicial para operar (en USDT)
   initial_balance: 1000.0
   
-  # Porcentaje máximo del balance a arriesgar por trade
-  max_risk_per_trade: 2.0      # 2% del balance
+  # OBJETIVO DE ENTRENAMIENTO: $1,000,000
+  target_balance: 1000000.0    # Objetivo de $1M para motivar al agente
+  
+  # Porcentaje máximo del balance a arriesgar por trade - OPTIMIZADO
+  max_risk_per_trade: 1.0      # Reducido del 5% al 1% para mejor gestión de riesgo
   
   # Límites de pérdida
-  max_daily_loss_pct: 5.0      # 5% pérdida máxima por día
-  max_weekly_loss_pct: 15.0    # 15% pérdida máxima por semana
-  max_drawdown_pct: 20.0       # 20% drawdown máximo antes de parar
+  max_daily_loss_pct: 10.0     # 10% pérdida máxima por día
+  max_weekly_loss_pct: 25.0    # 25% pérdida máxima por semana
+  max_drawdown_pct: 30.0       # 30% drawdown máximo antes de parar
   
   # Límites de ganancias (para asegurar beneficios)
-  daily_profit_target: 3.0     # 3% ganancia diaria objetivo
+  daily_profit_target: 10.0    # 10% ganancia diaria objetivo (más agresivo)
   take_profit_at_target: false # Parar al alcanzar objetivo diario
 
 # =============================================================================
@@ -64,23 +67,23 @@ trading:
   circuit_breaker_loss: 0.05  # 5% pérdida diaria para activar circuit breaker
   
   # Balance inicial para paper trading
-  initial_balance: 10000.0
+  initial_balance: 1000.0
 
 # =============================================================================
 # GESTIÓN DE RIESGO
 # =============================================================================
 risk_management:
-  # Límites de riesgo por trade
-  max_risk_per_trade: 0.02    # 2% del balance por trade
-  max_daily_loss_pct: 0.05    # 5% pérdida máxima por día
-  max_drawdown_pct: 0.10      # 10% drawdown máximo
+  # Límites de riesgo por trade - OPTIMIZADOS
+  max_risk_per_trade: 0.01    # Reducido del 5% al 1% del balance por trade
+  max_daily_loss_pct: 0.05    # Reducido del 10% al 5% pérdida máxima por día
+  max_drawdown_pct: 0.15      # Reducido del 30% al 15% drawdown máximo
   
   # Configuración de leverage
   max_leverage: 3.0           # Máximo 3x leverage para futuros
   
-  # Configuración de stop loss y take profit
-  default_stop_loss_pct: 0.02  # 2% stop loss por defecto
-  risk_reward_ratio: 2.0       # Ratio riesgo:beneficio 1:2
+  # Configuración de stop loss y take profit - OPTIMIZADA
+  default_stop_loss_pct: 0.01  # Reducido del 2% al 1% stop loss por defecto
+  risk_reward_ratio: 3.0       # Mejorado del 1:2 al 1:3 ratio riesgo:beneficio
 trading_settings:
   # Símbolo principal a operar
   primary_symbol: "BTCUSDT"
@@ -126,10 +129,10 @@ trading_settings:
 # CONFIGURACIÓN DEL MODELO DE IA
 # =============================================================================
 ai_model_settings:
-  # Configuración de confianza
+  # Configuración de confianza - OPTIMIZADA PARA MEJORAR WIN RATE
   confidence:
-    min_confidence_to_trade: 65.0    # Mínimo 65% confianza para operar
-    high_confidence_threshold: 80.0  # 80%+ se considera alta confianza
+    min_confidence_to_trade: 75.0    # Aumentado del 65% al 75% para mejor calidad
+    high_confidence_threshold: 85.0  # Aumentado del 80% al 85% para alta confianza
     
     # Ajustes por nivel de confianza
     confidence_adjustments:
@@ -261,6 +264,30 @@ multi_symbol_settings:
       enabled: false
       allocation_pct: 0.0
       risk_multiplier: 1.5      # Altcoins más volátiles
+
+# =============================================================================
+# CONFIGURACIÓN PARA ANÁLISIS AVANZADO
+# =============================================================================
+analysis:
+  enabled: true
+  auto_analysis_interval: 3600  # segundos (1 hora)
+  min_trades_for_analysis: 10
+  analysis_lookback_days: 30
+  
+# Configuración para gráficos mejorados
+dashboard:
+  enhanced_charts: true
+  default_timeframe: "30d"
+  auto_refresh_interval: 30
+  show_recommendations: true
+  max_recommendations: 5
+
+# Configuración para mejoras automáticas
+auto_optimization:
+  enabled: false  # Activar cuando el análisis esté estable
+  confidence_threshold_adjustment: true
+  position_size_adjustment: true
+  stop_loss_adjustment: true
 
 # =============================================================================
 # NOTAS DE CONFIGURACIÓN

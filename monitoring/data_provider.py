@@ -74,63 +74,73 @@ class DashboardDataProvider:
     def _get_portfolio_data(self) -> Dict[str, Any]:
         """Datos del portfolio"""
         try:
-            # Obtener datos del position manager
-            portfolio_state = position_manager.get_portfolio_state() if hasattr(position_manager, 'get_portfolio_state') else {}
+            # Obtener datos reales del position manager
+            portfolio_metrics = position_manager.calculate_portfolio_metrics()
+            
+            # Obtener balance actual del order manager
+            current_balance = getattr(trading_executor, 'current_balance', 1000.0)
+            
+            # Calcular métricas reales
+            total_unrealized_pnl = portfolio_metrics.get('total_unrealized_pnl', 0.0)
+            total_realized_pnl = portfolio_metrics.get('total_realized_pnl', 0.0)
+            total_pnl = total_unrealized_pnl + total_realized_pnl
+            
+            # Calcular balance total
+            total_balance = current_balance + total_pnl
+            
+            # Calcular retorno porcentual
+            initial_balance = 1000.0  # Balance inicial configurado
+            total_return_pct = (total_pnl / initial_balance) * 100 if initial_balance > 0 else 0.0
             
             return {
-                'total_balance': portfolio_state.get('total_balance', 10000.0),
-                'available_balance': portfolio_state.get('available_balance', 8500.0),
-                'invested_balance': portfolio_state.get('invested_balance', 1500.0),
-                'unrealized_pnl': portfolio_state.get('unrealized_pnl', 0.0),
-                'realized_pnl': portfolio_state.get('realized_pnl', 0.0),
-                'daily_pnl': portfolio_state.get('daily_pnl', 0.0),
-                'total_return': portfolio_state.get('total_return', 0.0),
-                'total_return_pct': portfolio_state.get('total_return_pct', 0.0)
+                'total_balance': total_balance,
+                'available_balance': current_balance,
+                'invested_balance': total_unrealized_pnl,
+                'unrealized_pnl': total_unrealized_pnl,
+                'realized_pnl': total_realized_pnl,
+                'daily_pnl': total_pnl,  # Por ahora usamos PnL total
+                'total_return': total_pnl,
+                'total_return_pct': total_return_pct,
+                'initial_balance': initial_balance,
+                'target_balance': 1000000.0  # Objetivo de $1M
             }
         except Exception as e:
             logger.error(f"Error obteniendo datos de portfolio: {e}")
             return {
-                'total_balance': 10000.0,
-                'available_balance': 8500.0,
-                'invested_balance': 1500.0,
+                'total_balance': 1000.0,
+                'available_balance': 1000.0,
+                'invested_balance': 0.0,
                 'unrealized_pnl': 0.0,
                 'realized_pnl': 0.0,
                 'daily_pnl': 0.0,
                 'total_return': 0.0,
-                'total_return_pct': 0.0
+                'total_return_pct': 0.0,
+                'initial_balance': 1000.0,
+                'target_balance': 1000000.0
             }
     
     def _get_positions_data(self) -> List[Dict[str, Any]]:
         """Datos de posiciones activas"""
         try:
-            # Obtener posiciones del position manager
-            positions = []
+            # Obtener posiciones reales del position manager
+            active_positions = position_manager.active_positions
             
-            # Simulamos algunas posiciones para el demo
-            positions = [
-                {
-                    'symbol': 'BTCUSDT',
-                    'side': 'LONG',
-                    'size': 0.025,
-                    'entry_price': 45230.50,
-                    'current_price': 45678.20,
-                    'unrealized_pnl': 11.19,
-                    'unrealized_pnl_pct': 0.99,
-                    'entry_time': datetime.now() - timedelta(hours=2, minutes=15),
-                    'confidence': 0.85
-                },
-                {
-                    'symbol': 'ETHUSDT',
-                    'side': 'SHORT',
-                    'size': 0.45,
-                    'entry_price': 2456.80,
-                    'current_price': 2434.20,
-                    'unrealized_pnl': 10.17,
-                    'unrealized_pnl_pct': 0.92,
-                    'entry_time': datetime.now() - timedelta(minutes=45),
-                    'confidence': 0.72
-                }
-            ]
+            positions = []
+            for symbol, position in active_positions.items():
+                positions.append({
+                    'symbol': symbol,
+                    'side': position.side,
+                    'size': position.size_qty,
+                    'entry_price': position.entry_price,
+                    'current_price': position.current_price,
+                    'unrealized_pnl': position.unrealized_pnl,
+                    'unrealized_pnl_pct': position.unrealized_pnl_pct,
+                    'entry_time': position.entry_time,
+                    'confidence': position.confidence,
+                    'stop_loss': position.stop_loss,
+                    'take_profit': position.take_profit,
+                    'position_id': position.position_id
+                })
             
             return positions
             

@@ -154,7 +154,7 @@ class TradingDashboard:
         try:
             logger.info(f"🚀 Iniciando dashboard en http://{self.host}:{self.port}")
             
-            self.app.run_server(
+            self.app.run(
                 host=self.host,
                 port=self.port,
                 debug=self.debug,
