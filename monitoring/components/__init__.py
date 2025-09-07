@@ -13,12 +13,11 @@ from .widgets.top_cycles_widget import TopCyclesWidget
 # DataTable no existe, se removió del import
 
 # Componentes básicos
-from .alerts import AlertComponent
+# AlertComponent no existe, se removió del import
 from .chart_components import ChartComponent
 from .metrics_cards import MetricsCard
 
 __all__ = [
-    'AlertComponent',
     'ChartComponent', 
     'create_enhanced_chart_component',
     'create_enhanced_pnl_chart_with_navigation',
