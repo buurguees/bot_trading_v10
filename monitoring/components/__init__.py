@@ -10,7 +10,7 @@ from .charts.enhanced_chart import create_enhanced_chart_component, create_enhan
 from .widgets.top_cycles_widget import TopCyclesWidget
 
 # Tablas y listas
-from .tables.data_tables import DataTable
+# DataTable no existe, se removió del import
 
 # Componentes básicos
 from .alerts import AlertComponent
@@ -23,6 +23,5 @@ __all__ = [
     'create_enhanced_chart_component',
     'create_enhanced_pnl_chart_with_navigation',
     'MetricsCard',
-    'DataTable',
     'TopCyclesWidget'
 ]
