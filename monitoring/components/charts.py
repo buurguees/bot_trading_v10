@@ -1,14 +1,16 @@
 from dash import html, dcc
-from .. import data_provider as dp
-from ..chart_components import ChartComponents
+from monitoring.core.data_provider import DashboardDataProvider
+# ChartComponents se importará localmente para evitar imports circulares
 
 
 def render_price_section(symbol: str = "ETHUSDT"):
     """Renderiza la sección de gráficos de precio"""
+    from monitoring.components.charts import ChartComponents
     chart_components = ChartComponents()
     
     # Obtener datos del proveedor
-    data = dp.get_dashboard_data()
+    data_provider = DashboardDataProvider()
+    data = data_provider.get_dashboard_data()
     
     return html.Div([
         # Gráfico P&L
