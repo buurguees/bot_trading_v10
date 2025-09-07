@@ -28,7 +28,7 @@ from enum import Enum
 # Imports del sistema existente
 from config.config_loader import user_config
 from models.predictor import predictor
-from models.trainer import trainer
+from models.adaptive_trainer import adaptive_trainer
 from trading.execution_engine import execution_engine
 from trading.risk_manager import risk_manager
 from trading.order_manager import order_manager
@@ -481,7 +481,7 @@ class TradingAgent:
             
             # Detectar cambios en volatilidad, volumen, etc.
             recent_vol = np.std([float(k['close']) for k in recent_klines[-10:]])
-            historical_vol = np.std([float(k['close']) for k in historical_klines[-50:])
+            historical_vol = np.std([float(k['close']) for k in historical_klines[-50:]])
             
             return {
                 'volatility_change': recent_vol / historical_vol if historical_vol > 0 else 1.0,

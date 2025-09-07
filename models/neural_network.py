@@ -129,8 +129,8 @@ class TradingModel:
         try:
             path = Path(path)
             
-            # Cargar modelo Keras
-            self.model = keras.models.load_model(str(path))
+            # Cargar modelo Keras con safe_mode=False para Lambda layers
+            self.model = keras.models.load_model(str(path), safe_mode=False)
             
             # Cargar metadata
             metadata_path = path.with_suffix('.json')

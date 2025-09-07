@@ -1,0 +1,79 @@
+# 🌙 Configuración para Entrenamiento Nocturno
+# =============================================
+
+# Configuración general del entrenamiento
+entrenamiento:
+  # Años de datos históricos a probar (en orden de prioridad)
+  años_historicos: [5, 4, 3, 2, 1]
+  
+  # Símbolos para entrenar
+  símbolos: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT"]
+  
+  # Timeframes para descargar datos
+  timeframes: ["1h", "4h", "1d"]
+  
+  # Configuración de descarga
+  descarga:
+    max_intentos: 3
+    timeout_segundos: 30
+    delay_entre_símbolos: 2  # segundos
+    
+  # Configuración de entrenamiento
+  entrenamiento:
+    min_accuracy: 0.6  # Accuracy mínima aceptable
+    max_epochs: 100
+    early_stopping_patience: 10
+    validation_split: 0.2
+    
+  # Configuración de tiempo real
+  tiempo_real:
+    websocket_timeout: 30
+    reconnect_attempts: 5
+    data_buffer_size: 1000
+    
+# Configuración de logging
+logging:
+  nivel: "INFO"
+  archivo: "logs/entrenamiento_nocturno.log"
+  max_tamaño_mb: 100
+  archivos_respaldo: 5
+  
+# Configuración de monitoreo
+monitoreo:
+  intervalo_estado: 300  # segundos (5 minutos)
+  mostrar_estadisticas: true
+  guardar_estado_cada: 3600  # segundos (1 hora)
+  
+# Configuración de seguridad
+seguridad:
+  max_perdida_diaria: 0.05  # 5% máximo de pérdida diaria
+  stop_loss_automatico: true
+  max_posiciones_abiertas: 3
+  
+# Configuración de aprendizaje
+aprendizaje:
+  auto_retraining: true
+  min_trades_para_retraining: 10
+  confidence_threshold: 0.7
+  learning_rate_adaptativo: true
+  
+# Configuración de portfolio
+portfolio:
+  max_allocation_por_simbolo: 0.4  # 40% máximo por símbolo
+  min_diversificacion: 0.6
+  rebalance_threshold: 0.05  # 5% desviación para rebalance
+  
+# Configuración de notificaciones
+notificaciones:
+  email_enabled: false
+  email_destinatarios: []
+  webhook_enabled: false
+  webhook_url: ""
+  
+# Configuración de respaldo
+respaldo:
+  guardar_modelos: true
+  guardar_datos: true
+  comprimir_logs: true
+  limpiar_logs_antiguos: true
+  dias_retener_logs: 30

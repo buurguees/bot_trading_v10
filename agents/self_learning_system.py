@@ -28,7 +28,7 @@ import json
 
 # Imports del sistema existente
 from config.config_loader import user_config
-from models.trainer import trainer
+from models.adaptive_trainer import adaptive_trainer
 from models.predictor import predictor
 
 logger = logging.getLogger(__name__)

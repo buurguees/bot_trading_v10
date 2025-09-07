@@ -19,7 +19,7 @@ import os
 from pathlib import Path
 
 # Imports del proyecto
-from models.neural_network import TradingNeuralNetwork
+from models.neural_network import TradingModel
 from data.preprocessor import data_preprocessor
 from data.database import db_manager
 from config.config_loader import user_config
@@ -60,7 +60,7 @@ class PredictionEngine:
         """Inicializa el modelo de ML"""
         try:
             # Crear instancia del modelo
-            self.model = TradingNeuralNetwork()
+            self.model = TradingModel()
             
             # Intentar cargar modelo existente
             model_path = self._find_best_model()

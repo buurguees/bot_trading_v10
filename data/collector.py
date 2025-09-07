@@ -117,7 +117,7 @@ class BitgetDataCollector:
     
     async def fetch_historical_data(self, symbol: str, timeframe: str = "1h", 
                                   days_back: int = 30) -> pd.DataFrame:
-        """Obtiene datos históricos"""
+        """Obtiene datos históricos con paginación para manejar límites de API"""
         try:
             if not self.exchange:
                 raise Exception("Exchange no configurado")
@@ -128,24 +128,57 @@ class BitgetDataCollector:
             
             logger.info(f"Descargando datos históricos para {symbol} desde {start_date} hasta {end_date}")
             
-            # Obtener datos usando CCXT
-            ohlcv = await asyncio.get_event_loop().run_in_executor(
-                None,
-                self.exchange.fetch_ohlcv,
-                symbol.replace('USDT', '/USDT'),
-                timeframe,
-                int(start_date.timestamp() * 1000),
-                None,
-                {'limit': 1000}
-            )
+            all_data = []
+            current_start = start_date
+            limit = 500  # Límite más pequeño para evitar errores de API
+            
+            while current_start < end_date:
+                try:
+                    # Obtener datos usando CCXT con límite más pequeño
+                    ohlcv = await asyncio.get_event_loop().run_in_executor(
+                        None,
+                        self.exchange.fetch_ohlcv,
+                        symbol.replace('USDT', '/USDT'),
+                        timeframe,
+                        int(current_start.timestamp() * 1000),
+                        None,
+                        {'limit': limit}
+                    )
+                    
+                    if not ohlcv:
+                        break
+                    
+                    all_data.extend(ohlcv)
+                    
+                    # Actualizar fecha de inicio para la siguiente iteración
+                    if len(ohlcv) > 0:
+                        last_timestamp = ohlcv[-1][0]
+                        current_start = datetime.fromtimestamp(last_timestamp / 1000) + timedelta(hours=1)
+                    else:
+                        break
+                    
+                    # Pequeña pausa para evitar rate limiting
+                    await asyncio.sleep(0.1)
+                    
+                except Exception as e:
+                    logger.warning(f"Error en paginación: {e}")
+                    break
+            
+            if not all_data:
+                logger.warning(f"No se obtuvieron datos para {symbol}")
+                return pd.DataFrame()
             
             # Convertir a DataFrame
-            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            df = pd.DataFrame(all_data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
             df.set_index('timestamp', inplace=True)
             df['symbol'] = symbol
             
-            logger.info(f"Descargados {len(df)} registros históricos")
+            # Eliminar duplicados
+            df = df[~df.index.duplicated(keep='first')]
+            df = df.sort_index()
+            
+            logger.info(f"Descargados {len(df)} registros históricos para {symbol}")
             return df
             
         except Exception as e:

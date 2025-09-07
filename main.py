@@ -531,6 +531,20 @@ Ejemplos de uso:
         help='Logging detallado (DEBUG level)'
     )
     
+    parser.add_argument(
+        '--timeframes',
+        nargs='+',
+        default=['1h', '4h', '1d'],
+        help='Timeframes para recolección de datos (default: 1h 4h 1d)'
+    )
+    
+    parser.add_argument(
+        '--futures',
+        type=bool,
+        default=False,
+        help='Usar mercado de futuros (default: False)'
+    )
+    
     return parser
 
 async def collect_data_only(symbol: str, days_back: int):

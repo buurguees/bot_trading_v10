@@ -20,7 +20,7 @@ from pathlib import Path
 import pickle
 
 # Imports del proyecto
-from models.neural_network import TradingNeuralNetwork
+from models.neural_network import TradingModel
 from models.prediction_engine import prediction_engine
 from data.preprocessor import data_preprocessor
 from data.database import db_manager
@@ -83,7 +83,7 @@ class AdaptiveTrainer:
     def _initialize_model(self):
         """Inicializa el modelo de ML"""
         try:
-            self.model = TradingNeuralNetwork()
+            self.model = TradingModel()
             logger.info("✅ Modelo inicializado")
         except Exception as e:
             logger.error(f"❌ Error inicializando modelo: {e}")
