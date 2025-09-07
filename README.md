@@ -1,193 +1,66 @@
-# 🤖 Trading Bot Autónomo v10
+# 🤖 Trading Bot v10
 
-Sistema de trading automatizado con inteligencia artificial que aprende y mejora continuamente.
-
-## 🌟 Características Principales
-
-- **🧠 IA Avanzada**: Sistema de aprendizaje automático con LSTM + Transformer
-- **📊 Procesamiento Inteligente**: Filtrado avanzado de señales multi-timeframe
-- **💼 Gestión de Portfolio**: Optimización automática multi-símbolo
-- **🔄 Aprendizaje Continuo**: Mejora automática basada en resultados
-- **⚡ Tiempo Real**: Análisis y trading en tiempo real
-- **🛡️ Gestión de Riesgo**: Control automático de riesgo y diversificación
-
-## 📁 Estructura del Proyecto
-
-```
-bot_trading_v10/
-├── 📁 agents/              # Sistema de IA y aprendizaje
-├── 📁 config/              # Configuraciones del sistema
-├── 📁 data/                # Gestión de datos y base de datos
-├── 📁 docs/                # Documentación completa
-├── 📁 logs/                # Logs del sistema
-├── 📁 models/              # Modelos de ML y entrenamiento
-├── 📁 monitoring/          # Monitoreo del sistema
-├── 📁 scripts/             # Scripts de utilidad
-├── 📁 tests/               # Tests y pruebas
-├── 📁 trading/             # Motor de trading
-├── 📄 main.py              # Punto de entrada principal
-├── 📄 iniciar_entrenamiento.py  # Script de inicio rápido
-└── 📄 requirements.txt     # Dependencias
-```
+Bot de trading automatizado con IA avanzada, análisis de mercado en tiempo real y dashboard web interactivo.
 
 ## 🚀 Inicio Rápido
 
-### 1. Instalación
 ```bash
-# Clonar el repositorio
-git clone <repository-url>
-cd bot_trading_v10
-
-# Crear entorno virtual
-python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Linux/Mac
-
 # Instalar dependencias
 pip install -r requirements.txt
+
+# Ejecutar la aplicación
+python app.py
 ```
 
-### 2. Configuración
-```bash
-# Copiar configuración de ejemplo
-copy config\user_settings.yaml.example config\user_settings.yaml
-
-# Editar configuración
-notepad config\user_settings.yaml
-```
-
-### 3. Entrenamiento Nocturno
-```bash
-# Iniciar entrenamiento completo
-python iniciar_entrenamiento.py
-
-# O ejecutar directamente
-python scripts\entrenamiento_nocturno.py
-```
-
-### 4. Verificar Estado
-```bash
-# Verificación rápida
-python scripts\estado_bot_rapido.py
-
-# Verificación completa
-python scripts\verificar_estado_bot.py
-```
-
-## 🎯 Modos de Operación
-
-### 🌙 Entrenamiento Nocturno
-- Entrena con datos históricos (5 años → 4 → 3 → 2 → 1 año si falla)
-- Continúa aprendiendo en tiempo real
-- Modo paper trading (sin riesgo)
-- Aprendizaje automático activado
-
-### 📊 Desarrollo
-- Modo de desarrollo y testing
-- Sin ejecución de trades reales
-- Logging detallado
-
-### 🎮 Paper Trading
-- Simulación de trading en tiempo real
-- Sin riesgo financiero
-- Aprendizaje activo
-
-### 💰 Live Trading
-- Trading real con dinero
-- **⚠️ USAR CON PRECAUCIÓN**
-- Requiere configuración cuidadosa
-
-## 🧠 Sistema de Aprendizaje
-
-El bot mejora automáticamente a través de:
-
-1. **📚 Memoria Episódica**: Recuerda trades exitosos y fallidos
-2. **🔄 Reentrenamiento Automático**: Se reentrena cuando la precisión baja
-3. **📊 Análisis de Patrones**: Identifica patrones de mercado automáticamente
-4. **⚙️ Adaptación de Parámetros**: Ajusta parámetros basado en performance
-5. **🎯 Optimización de Portfolio**: Rebalancea automáticamente
-6. **📈 Análisis de Correlaciones**: Gestiona riesgo de concentración
-
-## 📊 Componentes Principales
-
-### 🎯 Signal Processor
-- Filtrado inteligente de señales
-- Análisis multi-timeframe
-- Scoring de calidad de señales
-
-### 💼 Portfolio Optimizer
-- Gestión multi-símbolo
-- Optimización de asignación de capital
-- Rebalanceo automático
-
-### 🧠 Adaptive Trainer
-- Entrenamiento inicial de modelos
-- Aprendizaje online continuo
-- Auto-retraining basado en performance
-
-### 🔄 Self Learning System
-- Aprendizaje por refuerzo
-- Memoria episódica y semántica
-- Adaptación automática de estrategias
-
-## 📚 Documentación
-
-- **📖 [Documentación Completa](docs/README.md)**
-- **⚙️ [Instrucciones de Setup](docs/INSTRUCCIONES_SETUP.md)**
-- **🤖 [Cómo Mejora el Bot](docs/COMO_MEJORA_EL_BOT.md)**
-- **🔍 [Verificar Estado](docs/COMO_VERIFICAR_ESTADO_BOT.md)**
-- **📊 [Análisis del Sistema](docs/SISTEMA_COMPLETO_ANALISIS.md)**
-
-## 🧪 Testing
+## 📋 Modos de Operación
 
 ```bash
-# Ejecutar todos los tests
-python -m pytest tests/
+# Flujo completo (default)
+python app.py --mode full
 
-# Ejecutar test específico
-python tests/test_signal_processor.py
+# Solo verificar datos
+python app.py --mode verify
 
-# Tests con verbose
-python -m pytest tests/ -v
+# Descargar datos históricos
+python app.py --mode download
+
+# Entrenar modelo
+python app.py --mode train
+
+# Modo paper trading
+python app.py --mode paper-trading
+
+# Solo dashboard
+python app.py --mode dashboard
 ```
 
-## 📈 Monitoreo
+## 🌐 Dashboard
 
-El bot incluye monitoreo completo:
-- 📊 Métricas de performance en tiempo real
-- 📝 Logs detallados de todas las operaciones
-- 🔍 Verificación de estado del sistema
-- 📈 Análisis de correlaciones y diversificación
+Una vez ejecutado, accede al dashboard en: **http://127.0.0.1:8050**
 
-## ⚠️ Advertencias Importantes
+## 📁 Estructura del Proyecto
 
-1. **💰 Trading con Dinero Real**: El live trading implica riesgo financiero real
-2. **🧪 Siempre Probar**: Usa paper trading antes de live trading
-3. **📊 Monitoreo Continuo**: Supervisa el bot regularmente
-4. **🔧 Configuración**: Ajusta parámetros según tu perfil de riesgo
-5. **📚 Documentación**: Lee toda la documentación antes de usar
+- `app.py` - Punto de entrada único
+- `core/` - Archivos principales del bot
+- `data/` - Gestión de datos y base de datos
+- `models/` - Modelos de IA y entrenamiento
+- `monitoring/` - Dashboard web y monitoreo
+- `trading/` - Motor de trading y ejecución
+- `config/` - Configuraciones del sistema
 
-## 🤝 Contribuciones
+## 🔧 Configuración
 
-Las contribuciones son bienvenidas. Por favor:
-1. Fork el proyecto
-2. Crea una rama para tu feature
-3. Commit tus cambios
-4. Push a la rama
-5. Abre un Pull Request
+Edita `config/user_settings.yaml` para personalizar el bot.
 
-## 📄 Licencia
+## 📊 Características
 
-Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
+- ✅ IA avanzada con LSTM + Attention
+- ✅ Dashboard web en tiempo real
+- ✅ Paper trading y trading en vivo
+- ✅ Análisis de performance avanzado
+- ✅ Gestión de riesgo automática
+- ✅ Múltiples símbolos de trading
 
 ## 🆘 Soporte
 
-Para soporte y preguntas:
-- 📚 Lee la documentación en `docs/`
-- 🧪 Ejecuta los tests para verificar el sistema
-- 📝 Revisa los logs en `logs/`
-- 🔍 Usa los scripts de verificación en `scripts/`
-
----
-
-**🌙 ¡Disfruta del trading automatizado con IA! 🚀**
+Para más información, consulta la documentación en `docs/`.
