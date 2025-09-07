@@ -96,6 +96,11 @@ class HomePage:
                 
             ], style={'marginBottom': '30px'}),
             
+            # Overview de Ciclos del Agente
+            html.Div([
+                html.Div(id="cycles-overview-widget-container")
+            ], style={'marginBottom': '30px'}),
+            
             # Top 10 Ciclos Cronológicos
             html.Div([
                 html.Div(id="top-cycles-widget-container")

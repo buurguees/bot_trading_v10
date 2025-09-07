@@ -278,3 +278,81 @@ def register_home_callbacks(app, data_provider, chart_components):
         except Exception as e:
             logger.error(f"Error actualizando señales recientes: {e}")
             return html.Div("Error cargando señales", style={'color': '#ff4444'})
+    
+    # Callback para overview de ciclos
+    @app.callback(
+        Output('cycles-overview-widget-container', 'children'),
+        [Input('dashboard-data', 'data')]
+    )
+    def load_cycles_overview_widget(data):
+        """Carga el widget de overview de ciclos"""
+        try:
+            from monitoring.components.widgets.cycles_overview import CyclesOverviewWidget
+            return CyclesOverviewWidget().create_cycles_overview_widget()
+        except Exception as e:
+            logger.error(f"Error cargando widget de overview de ciclos: {e}")
+            return html.Div("Error cargando overview de ciclos", 
+                          style={'color': 'red', 'textAlign': 'center'})
+    
+    # Callback para métricas del overview de ciclos
+    @app.callback(
+        [Output('avg-final-balance', 'children'),
+         Output('avg-daily-pnl', 'children'),
+         Output('avg-progress-target', 'children'),
+         Output('avg-win-rate', 'children'),
+         Output('avg-sharpe-ratio', 'children'),
+         Output('total-completed-cycles', 'children')],
+        [Input('dashboard-data', 'data')]
+    )
+    def update_cycles_overview_metrics(data):
+        """Actualiza las métricas del overview de ciclos"""
+        try:
+            if not data or 'cycles' not in data:
+                return "$0.00", "$0.00", "0.00%", "0.00%", "0.00", "0"
+            
+            cycles_data = data['cycles'].get('top_cycles', [])
+            
+            from monitoring.components.widgets.cycles_overview import CyclesOverviewWidget
+            overview_widget = CyclesOverviewWidget()
+            averages = overview_widget.calculate_cycles_averages(cycles_data)
+            
+            # Formatear valores
+            avg_final_balance = f"${averages['avg_final_balance']:,.2f}"
+            avg_daily_pnl = f"${averages['avg_daily_pnl']:,.2f}"
+            avg_progress_target = f"{averages['avg_progress_target']:.2f}%"
+            avg_win_rate = f"{averages['avg_win_rate']:.1f}%"
+            avg_sharpe_ratio = f"{averages['avg_sharpe_ratio']:.2f}"
+            total_cycles = str(averages['total_completed_cycles'])
+            
+            return avg_final_balance, avg_daily_pnl, avg_progress_target, avg_win_rate, avg_sharpe_ratio, total_cycles
+            
+        except Exception as e:
+            logger.error(f"Error actualizando métricas del overview: {e}")
+            return "$0.00", "$0.00", "0.00%", "0.00%", "0.00", "0"
+    
+    # Callback para gráficos del overview de ciclos
+    @app.callback(
+        [Output('pnl-evolution-chart', 'figure'),
+         Output('performance-distribution-chart', 'figure')],
+        [Input('dashboard-data', 'data')]
+    )
+    def update_cycles_overview_charts(data):
+        """Actualiza los gráficos del overview de ciclos"""
+        try:
+            if not data or 'cycles' not in data:
+                return go.Figure(), go.Figure()
+            
+            cycles_data = data['cycles'].get('top_cycles', [])
+            
+            from monitoring.components.widgets.cycles_overview import CyclesOverviewWidget
+            overview_widget = CyclesOverviewWidget()
+            
+            # Crear gráficos
+            pnl_evolution_fig = overview_widget.create_pnl_evolution_chart(cycles_data)
+            distribution_fig = overview_widget.create_performance_distribution_chart(cycles_data)
+            
+            return pnl_evolution_fig, distribution_fig
+            
+        except Exception as e:
+            logger.error(f"Error actualizando gráficos del overview: {e}")
+            return go.Figure(), go.Figure()
