@@ -1055,8 +1055,14 @@ class DatabaseManager:
                         
                         # Convertir timestamps a fechas
                         try:
-                            min_date = datetime.fromtimestamp(min_ts)
-                            max_date = datetime.fromtimestamp(max_ts)
+                            # Verificar si el timestamp está en milisegundos o segundos
+                            if min_ts > 10000000000:  # Timestamp en milisegundos
+                                min_date = datetime.fromtimestamp(min_ts / 1000)
+                                max_date = datetime.fromtimestamp(max_ts / 1000)
+                            else:  # Timestamp en segundos
+                                min_date = datetime.fromtimestamp(min_ts)
+                                max_date = datetime.fromtimestamp(max_ts)
+                            
                             duration_days = (max_date - min_date).days
                             
                             symbol_info = {

@@ -1,0 +1,14 @@
+2025-09-07 16:24:54,562 - config.settings - INFO - Configuración inicializada para entorno: development
+2025-09-07 16:24:54,565 - data.database - INFO - Esquema de base de datos inicializado exitosamente
+2025-09-07 16:24:54,566 - data.database - INFO - Base de datos inicializada: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-07 16:24:54,875 - config.config_loader - INFO - Configuración de usuario cargada desde C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\config\user_settings.yaml
+2025-09-07 16:24:54,876 - config.config_loader - INFO - Configuración del usuario aplicada exitosamente
+2025-09-07 16:24:54,876 - config.config_loader - INFO - Configuración del usuario validada exitosamente
+2025-09-07 16:24:54,877 - data.collector - INFO - Exchange configurado sin credenciales (solo datos públicos)
+2025-09-07 16:24:59,670 - data.database - ERROR - Error obteniendo últimos datos de mercado: Out of bounds nanosecond timestamp: 57654-09-10 16:00:00
+2025-09-07 16:24:59,673 - data.collector - INFO - 🚀 Iniciando recolección: BTCUSDT - 1h - 1 días
+2025-09-07 16:24:59,674 - data.collector - INFO - 📥 Descargando BTCUSDT (BTC/USDT) - 1h - 1 días
+2025-09-07 16:25:00,202 - data.collector - INFO - ✅ Descargados 22 registros para BTCUSDT (2025-09-06 17:00:00 a 2025-09-07 14:00:00)
+2025-09-07 16:25:00,202 - data.collector - INFO - 💾 Guardando 22 registros en base de datos...
+2025-09-07 16:25:00,364 - data.collector - INFO - ✅ Guardados 22 registros exitosamente
+2025-09-07 16:25:00,365 - data.collector - INFO - ✅ Proceso completado: 22 registros guardados para BTCUSDT
