@@ -13,9 +13,9 @@ Este módulo contiene el dashboard web completo incluyendo:
 
 from .core.dashboard import TradingDashboard, start_dashboard, start_dashboard_thread
 from .core.data_provider import DashboardDataProvider
-from .pages.home import LayoutComponents
-from .components.charts import ChartComponents
-from .callbacks.home_callbacks import DashboardCallbacks
+from .pages.home import HomePage
+# ChartComponents no existe, se removió del import
+# DashboardCallbacks no existe, se removió del import
 
 __version__ = "1.0.0"
 __author__ = "Trading Bot v10"
@@ -28,9 +28,7 @@ __all__ = [
     
     # Componentes
     'DashboardDataProvider',
-    'LayoutComponents', 
-    'ChartComponents',
-    'DashboardCallbacks'
+    'HomePage'
 ]
 
 # Función de conveniencia para inicio rápido
