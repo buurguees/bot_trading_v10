@@ -11,11 +11,11 @@ Este módulo contiene el dashboard web completo incluyendo:
 - Sistema de alertas y notificaciones
 """
 
-from .dashboard import TradingDashboard, start_dashboard, start_dashboard_thread
-from .data_provider import DashboardDataProvider
-from .layout_components import LayoutComponents
-from .chart_components import ChartComponents
-from .callbacks import DashboardCallbacks
+from .core.dashboard import TradingDashboard, start_dashboard, start_dashboard_thread
+from .core.data_provider import DashboardDataProvider
+from .pages.home import LayoutComponents
+from .components.charts import ChartComponents
+from .callbacks.home_callbacks import DashboardCallbacks
 
 __version__ = "1.0.0"
 __author__ = "Trading Bot v10"
