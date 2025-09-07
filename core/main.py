@@ -13,7 +13,8 @@ import argparse
 from datetime import datetime
 
 # Agregar el directorio raíz al path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(project_root)
 
 from data.database import db_manager
 from data.collector import download_missing_data

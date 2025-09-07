@@ -319,23 +319,31 @@ class TradingBotApp:
             # Ejecutar main.py
             cmd = [sys.executable, 'core/main.py', '--mode', mode, '--dashboard']
             
+            print(f"🚀 Ejecutando comando: {' '.join(cmd)}")
+            print(f"📁 Directorio: {os.getcwd()}")
+            
             process = subprocess.Popen(
                 cmd,
                 env=env,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
+                stderr=subprocess.STDOUT,  # Combinar stderr con stdout
+                text=True,
+                bufsize=1,
+                universal_newlines=True
             )
             
             self.dashboard_process = process
             
             # Monitorear output
+            print("📊 Iniciando monitoreo del dashboard...")
             for line in iter(process.stdout.readline, ''):
                 if line:
                     print(f"[DASHBOARD] {line.strip()}")
                     
         except Exception as e:
             print(f"❌ Error en dashboard: {e}")
+            import traceback
+            traceback.print_exc()
     
     async def performance_analysis(self):
         """Opción 5: Análisis de performance"""
