@@ -1,12 +1,12 @@
 """
 monitoring/layout_components.py
-Componentes de layout para el dashboard del Trading Bot v10
-Ubicación: C:\TradingBot_v10\monitoring\layout_components.py
-
-Funcionalidades:
-- Define todos los layouts de las páginas
-- Componentes reutilizables de UI
-- Estructura visual del dashboard
+ENHANCED VERSION 2.0 - Componentes de layout mejorados para el dashboard
+Funcionalidades nuevas:
+- Diseño moderno con mejores métricas visuales
+- Navegación mejorada con iconos
+- Cards interactivas con animaciones
+- Layout responsivo optimizado
+- Integración con gráficos avanzados
 """
 
 from dash import html, dcc, dash_table
@@ -16,552 +16,934 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class LayoutComponents:
-    """Componentes de layout para el dashboard"""
+class EnhancedLayoutComponents:
+    """Componentes de layout mejorados para el dashboard"""
     
     def __init__(self):
         self.theme_colors = {
-            'primary': '#1a1a1a',
-            'secondary': '#2d2d2d',
-            'accent': '#00ff88',
-            'danger': '#ff4444',
-            'warning': '#ffaa00',
-            'info': '#4488ff',
-            'success': '#28a745',
-            'text_primary': '#ffffff',
-            'text_secondary': '#cccccc'
+            'primary': '#0d1117',      # GitHub dark
+            'secondary': '#161b22',    # Más oscuro
+            'surface': '#21262d',      # Superficie
+            'accent': '#58a6ff',       # Azul moderno
+            'success': '#3fb950',      # Verde éxito
+            'danger': '#f85149',       # Rojo peligro
+            'warning': '#d29922',      # Amarillo advertencia
+            'info': '#79c0ff',         # Info azul claro
+            'text_primary': '#f0f6fc', # Texto principal
+            'text_secondary': '#8b949e', # Texto secundario
+            'grid': '#30363d',         # Líneas de grid
+            'border': '#21262d'        # Bordes
         }
     
-    def create_header(self):
-        """Crea el header principal del dashboard"""
+    def create_enhanced_header(self):
+        """Crea un header moderno con navegación mejorada"""
         return html.Div([
+            # Header container
             html.Div([
-                # Logo y título
-                html.Div([
-                    html.I(className="fas fa-robot", style={'color': self.theme_colors['accent'], 'marginRight': '10px'}),
-                    html.H2("Trading Bot v10", style={'margin': '0', 'color': self.theme_colors['text_primary']})
-                ], style={'display': 'flex', 'alignItems': 'center'}),
-                
-                # Navegación
-                html.Div([
-                    dcc.Link([
-                        html.I(className="fas fa-home", style={'marginRight': '5px'}),
-                        "Home"
-                    ], href="/", className="nav-link"),
-                    
-                    dcc.Link([
-                        html.I(className="fas fa-chart-line", style={'marginRight': '5px'}),
-                        "Trading"
-                    ], href="/trading", className="nav-link"),
-                    
-                    dcc.Link([
-                        html.I(className="fas fa-chart-bar", style={'marginRight': '5px'}),
-                        "Performance"
-                    ], href="/performance", className="nav-link"),
-                    
-                    dcc.Link([
-                        html.I(className="fas fa-bell", style={'marginRight': '5px'}),
-                        "Alerts"
-                    ], href="/alerts", className="nav-link"),
-                    
-                    dcc.Link([
-                        html.I(className="fas fa-cog", style={'marginRight': '5px'}),
-                        "Settings"
-                    ], href="/settings", className="nav-link"),
-                    
-                    dcc.Link([
-                        html.I(className="fas fa-comments", style={'marginRight': '5px'}),
-                        "Chat"
-                    ], href="/chat", className="nav-link chat-link"),
-                    
-                ], className="nav-menu"),
-                
-                # Status indicator
-                html.Div([
-                    html.Div(id="status-indicator", className="status-active"),
-                    html.Span("ACTIVE", id="status-text", style={'color': self.theme_colors['accent'], 'fontWeight': 'bold'})
-                ], style={'display': 'flex', 'alignItems': 'center'})
-                
-            ], className="header-content")
-        ], className="dashboard-header")
-    
-    def create_home_page(self):
-        """Página principal del dashboard"""
-        return html.Div([
-            # Métricas principales
-            html.Div([
-                html.H3("📊 Overview", style={'color': self.theme_colors['text_primary'], 'marginBottom': '20px'}),
-                
-                html.Div([
-                    # Balance Total
-                    self.create_metric_card(
-                        title="Total Balance",
-                        value="$10,000.00",
-                        value_id="total-balance",
-                        icon="fas fa-wallet",
-                        color=self.theme_colors['info']
-                    ),
-                    
-                    # P&L Diario
-                    self.create_metric_card(
-                        title="Daily P&L",
-                        value="+$156.30",
-                        value_id="daily-pnl",
-                        icon="fas fa-chart-line",
-                        color=self.theme_colors['accent']
-                    ),
-                    
-                    # Win Rate
-                    self.create_metric_card(
-                        title="Win Rate",
-                        value="75%",
-                        value_id="win-rate",
-                        icon="fas fa-percentage",
-                        color=self.theme_colors['warning']
-                    ),
-                    
-                    # Posiciones Activas
-                    self.create_metric_card(
-                        title="Active Positions",
-                        value="2",
-                        value_id="active-positions",
-                        icon="fas fa-coins",
-                        color=self.theme_colors['info']
-                    ),
-                    
-                    # Progreso hacia objetivo
-                    self.create_metric_card(
-                        title="Progress to $1M",
-                        value="0.1%",
-                        value_id="progress-to-target",
-                        icon="fas fa-trophy",
-                        color=self.theme_colors['success']
-                    )
-                ], className="metrics-grid"),
-                
-            ], style={'marginBottom': '30px'}),
-            
-            # Gráficos principales con navegación
-            html.Div([
-                # Gráfico P&L mejorado con navegación
-                html.Div([
-                    html.H4("📈 P&L Evolution", style={'color': self.theme_colors['text_primary']}),
-                    
-                    # Controles de navegación para P&L
-                    html.Div([
-                        html.Div([
-                            html.Label("Período:"),
-                            dcc.Dropdown(
-                                id='home-pnl-timeframe',
-                                options=[
-                                    {'label': 'Última semana', 'value': '7d'},
-                                    {'label': 'Último mes', 'value': '30d'},
-                                    {'label': 'Últimos 3 meses', 'value': '90d'},
-                                    {'label': 'Último año', 'value': '365d'},
-                                    {'label': 'Todo el histórico', 'value': 'all'}
-                                ],
-                                value='30d',
-                                style={'width': '150px', 'display': 'inline-block'}
-                            )
-                        ], style={'margin': '5px', 'display': 'inline-block'}),
-                        
-                        html.Div([
-                            html.Button("◀", id="home-pnl-prev", className="nav-btn-small", title="Período anterior"),
-                            html.Button("▶", id="home-pnl-next", className="nav-btn-small", title="Período siguiente"),
-                            html.Button("🏠", id="home-pnl-today", className="nav-btn-small", title="Ir a hoy")
-                        ], style={'margin': '5px', 'display': 'inline-block'}),
-                        
-                        html.Div(id="home-pnl-period-info", className="period-info-small")
-                        
-                    ], className="chart-controls-small"),
-                    
-                    dcc.Graph(id="pnl-chart", style={'height': '400px'})
-                ], className="chart-container", style={'width': '60%', 'display': 'inline-block'}),
-                
-                # Distribución de trades
-                html.Div([
-                    html.H4("🎯 Trades Distribution", style={'color': self.theme_colors['text_primary']}),
-                    dcc.Graph(id="trades-distribution-chart", style={'height': '400px'})
-                ], className="chart-container", style={'width': '40%', 'display': 'inline-block'})
-                
-            ], style={'marginBottom': '30px'}),
-            
-            # Top 10 Ciclos Cronológicos
-            html.Div([
-                html.Div(id="top-cycles-widget-container")
-            ], style={'marginBottom': '30px'}),
-            
-            # Posiciones activas y señales recientes
-            html.Div([
-                # Posiciones activas
-                html.Div([
-                    html.H4("💼 Active Positions", style={'color': self.theme_colors['text_primary']}),
-                    html.Div(id="active-positions-table")
-                ], style={'width': '50%', 'display': 'inline-block', 'paddingRight': '15px'}),
-                
-                # Señales recientes
-                html.Div([
-                    html.H4("🎯 Recent Signals", style={'color': self.theme_colors['text_primary']}),
-                    html.Div(id="recent-signals-table")
-                ], style={'width': '50%', 'display': 'inline-block', 'paddingLeft': '15px'})
-            ])
-            
-        ], className="page-content")
-    
-    def create_trading_page(self):
-        """Página de trading en vivo"""
-        return html.Div([
-            html.H3("⚡ Live Trading", style={'color': self.theme_colors['text_primary'], 'marginBottom': '20px'}),
-            
-            # Estado del trading
-            html.Div([
-                self.create_metric_card(
-                    title="Trading Status",
-                    value="ACTIVE",
-                    value_id="trading-status",
-                    icon="fas fa-play",
-                    color=self.theme_colors['accent']
-                ),
-                
-                self.create_metric_card(
-                    title="Model Confidence",
-                    value="78%",
-                    value_id="model-confidence",
-                    icon="fas fa-brain",
-                    color=self.theme_colors['info']
-                ),
-                
-                self.create_metric_card(
-                    title="Trades Today",
-                    value="8",
-                    value_id="trades-today",
-                    icon="fas fa-exchange-alt",
-                    color=self.theme_colors['warning']
-                ),
-                
-                self.create_metric_card(
-                    title="Last Signal",
-                    value="BUY 85%",
-                    value_id="last-signal",
-                    icon="fas fa-signal",
-                    color=self.theme_colors['accent']
-                )
-            ], className="metrics-grid", style={'marginBottom': '30px'}),
-            
-            # Tabla de señales en tiempo real
-            html.Div([
-                html.H4("🔮 Real-time Signals", style={'color': self.theme_colors['text_primary']}),
-                html.Div(id="live-signals-table")
-            ], style={'marginBottom': '30px'}),
-            
-            # Gráfico de precio con señales y navegación
-            html.Div([
-                html.H4("📊 Price Chart with Signals", style={'color': self.theme_colors['text_primary']}),
-                
-                # Controles de navegación para el gráfico de precios
+                # Logo section
                 html.Div([
                     html.Div([
-                        html.Label("Símbolo:"),
-                        dcc.Dropdown(
-                            id='trading-symbol-selector',
-                            options=[
-                                {'label': 'BTCUSDT', 'value': 'BTCUSDT'},
-                                {'label': 'ETHUSDT', 'value': 'ETHUSDT'},
-                                {'label': 'ADAUSDT', 'value': 'ADAUSDT'},
-                                {'label': 'SOLUSDT', 'value': 'SOLUSDT'}
-                            ],
-                            value='BTCUSDT',
-                            style={'width': '120px', 'display': 'inline-block'}
-                        )
-                    ], style={'margin': '5px', 'display': 'inline-block'}),
+                        html.I(className="fas fa-robot", 
+                              style={
+                                  'fontSize': '28px',
+                                  'color': self.theme_colors['accent'],
+                                  'marginRight': '12px',
+                                  'animation': 'pulse 2s infinite'
+                              }),
+                        html.H2("Trading Bot v10", 
+                               style={
+                                   'margin': '0',
+                                   'color': self.theme_colors['text_primary'],
+                                   'fontWeight': '700',
+                                   'fontSize': '24px',
+                                   'fontFamily': 'Inter, sans-serif'
+                               })
+                    ], style={'display': 'flex', 'alignItems': 'center'}),
                     
+                    # Status indicator
                     html.Div([
-                        html.Label("Período:"),
-                        dcc.Dropdown(
-                            id='trading-timeframe-selector',
-                            options=[
-                                {'label': '1H', 'value': '1h'},
-                                {'label': '4H', 'value': '4h'},
-                                {'label': '1D', 'value': '1d'},
-                                {'label': '1W', 'value': '1w'}
-                            ],
-                            value='1h',
-                            style={'width': '80px', 'display': 'inline-block'}
-                        )
-                    ], style={'margin': '5px', 'display': 'inline-block'}),
-                    
-                    html.Div([
-                        html.Label("Rango:"),
-                        dcc.Dropdown(
-                            id='trading-range-selector',
-                            options=[
-                                {'label': 'Última semana', 'value': '7d'},
-                                {'label': 'Último mes', 'value': '30d'},
-                                {'label': 'Últimos 3 meses', 'value': '90d'},
-                                {'label': 'Último año', 'value': '365d'}
-                            ],
-                            value='7d',
-                            style={'width': '120px', 'display': 'inline-block'}
-                        )
-                    ], style={'margin': '5px', 'display': 'inline-block'}),
-                    
-                    html.Div([
-                        html.Button("◀", id="trading-chart-prev", className="nav-btn-small", title="Período anterior"),
-                        html.Button("▶", id="trading-chart-next", className="nav-btn-small", title="Período siguiente"),
-                        html.Button("🏠", id="trading-chart-today", className="nav-btn-small", title="Ir a hoy"),
-                        html.Button("📊", id="trading-chart-zoom", className="nav-btn-small", title="Zoom automático")
-                    ], style={'margin': '5px', 'display': 'inline-block'}),
-                    
-                    html.Div(id="trading-chart-period-info", className="period-info-small")
-                    
-                ], className="chart-controls-small"),
+                        html.Div(id='bot-status-indicator', 
+                                className='status-indicator-running',
+                                children=[
+                                    html.I(className="fas fa-circle", 
+                                          style={'fontSize': '8px', 'marginRight': '6px'}),
+                                    "RUNNING"
+                                ])
+                    ], style={'marginTop': '4px'})
+                ], style={'flex': '1'}),
                 
-                dcc.Graph(id="price-signals-chart", style={'height': '500px'})
-            ])
-            
-        ], className="page-content")
-    
-    def create_performance_page(self):
-        """Página de análisis de performance"""
-        return html.Div([
-            html.H3("📈 Performance Analysis", style={'color': self.theme_colors['text_primary'], 'marginBottom': '20px'}),
-            
-            # Métricas de performance
-            html.Div([
-                self.create_metric_card(
-                    title="Total Trades",
-                    value="145",
-                    value_id="total-trades",
-                    icon="fas fa-hashtag",
-                    color=self.theme_colors['info']
-                ),
-                
-                self.create_metric_card(
-                    title="Profit Factor",
-                    value="1.34",
-                    value_id="profit-factor",
-                    icon="fas fa-trophy",
-                    color=self.theme_colors['accent']
-                ),
-                
-                self.create_metric_card(
-                    title="Sharpe Ratio",
-                    value="1.67",
-                    value_id="sharpe-ratio",
-                    icon="fas fa-chart-area",
-                    color=self.theme_colors['warning']
-                ),
-                
-                self.create_metric_card(
-                    title="Max Drawdown",
-                    value="-8.5%",
-                    value_id="max-drawdown",
-                    icon="fas fa-arrow-down",
-                    color=self.theme_colors['danger']
-                )
-            ], className="metrics-grid", style={'marginBottom': '30px'}),
-            
-            # Gráficos de análisis
-            html.Div([
-                # Evolución de accuracy
+                # Navigation menu
                 html.Div([
-                    html.H4("🧠 Model Accuracy Evolution", style={'color': self.theme_colors['text_primary']}),
-                    dcc.Graph(id="accuracy-evolution-chart", style={'height': '400px'})
-                ], style={'width': '50%', 'display': 'inline-block', 'paddingRight': '15px'}),
+                    self._create_nav_item("fas fa-home", "Overview", "/", "home"),
+                    self._create_nav_item("fas fa-chart-line", "Trading", "/trading", "trading"),
+                    self._create_nav_item("fas fa-brain", "AI Insights", "/ai-insights", "ai"),
+                    self._create_nav_item("fas fa-shield-alt", "Risk", "/risk", "risk"),
+                    self._create_nav_item("fas fa-chart-pie", "Portfolio", "/portfolio", "portfolio"),
+                    self._create_nav_item("fas fa-cog", "Settings", "/settings", "settings")
+                ], className='nav-menu', style={
+                    'display': 'flex',
+                    'gap': '8px',
+                    'alignItems': 'center'
+                }),
                 
-                # Análisis de trades
+                # Real-time metrics (top right)
                 html.Div([
-                    html.H4("📊 Trades Analysis", style={'color': self.theme_colors['text_primary']}),
-                    dcc.Graph(id="trades-analysis-chart", style={'height': '400px'})
-                ], style={'width': '50%', 'display': 'inline-block', 'paddingLeft': '15px'})
-            ], style={'marginBottom': '30px'}),
-            
-            # Tabla de trades históricos
-            html.Div([
-                html.H4("📋 Trade History", style={'color': self.theme_colors['text_primary']}),
-                html.Div(id="trade-history-table")
-            ])
-            
-        ], className="page-content")
-    
-    def create_alerts_page(self):
-        """Página de alertas y notificaciones"""
-        return html.Div([
-            html.H3("🚨 Alerts & Notifications", style={'color': self.theme_colors['text_primary'], 'marginBottom': '20px'}),
-            
-            # Estado de alertas
-            html.Div([
-                self.create_metric_card(
-                    title="Active Alerts",
-                    value="3",
-                    value_id="active-alerts",
-                    icon="fas fa-exclamation-triangle",
-                    color=self.theme_colors['warning']
-                ),
-                
-                self.create_metric_card(
-                    title="System Health",
-                    value="OK",
-                    value_id="system-health",
-                    icon="fas fa-heart",
-                    color=self.theme_colors['accent']
-                ),
-                
-                self.create_metric_card(
-                    title="API Status",
-                    value="Connected",
-                    value_id="api-status",
-                    icon="fas fa-wifi",
-                    color=self.theme_colors['accent']
-                ),
-                
-                self.create_metric_card(
-                    title="Model Status",
-                    value="Training",
-                    value_id="model-status",
-                    icon="fas fa-cogs",
-                    color=self.theme_colors['info']
-                )
-            ], className="metrics-grid", style={'marginBottom': '30px'}),
-            
-            # Lista de alertas
-            html.Div([
-                html.H4("📋 Recent Alerts", style={'color': self.theme_colors['text_primary']}),
-                html.Div(id="alerts-list")
-            ])
-            
-        ], className="page-content")
-    
-    def create_settings_page(self):
-        """Página de configuraciones"""
-        return html.Div([
-            html.H3("⚙️ Settings", style={'color': self.theme_colors['text_primary'], 'marginBottom': '20px'}),
-            
-            # Controles básicos
-            html.Div([
-                html.H4("🎛️ Trading Controls", style={'color': self.theme_colors['text_primary']}),
-                
-                html.Div([
-                    html.Button("⏸️ Pause Trading", id="pause-btn", className="control-btn pause-btn"),
-                    html.Button("▶️ Resume Trading", id="resume-btn", className="control-btn resume-btn"),
-                    html.Button("🛑 Emergency Stop", id="emergency-btn", className="control-btn emergency-btn"),
-                    html.Button("🔄 Retrain Model", id="retrain-btn", className="control-btn retrain-btn")
-                ], style={'marginBottom': '20px'}),
-                
-                html.Div(id="control-feedback", style={'color': self.theme_colors['accent']})
-            ], style={'marginBottom': '30px'}),
-            
-            # Configuraciones
-            html.Div([
-                html.H4("📊 Configuration", style={'color': self.theme_colors['text_primary']}),
-                
-                html.Div([
-                    html.Label("Risk per Trade (%)", style={'color': self.theme_colors['text_secondary']}),
-                    dcc.Slider(
-                        id="risk-slider",
-                        min=0.5,
-                        max=5.0,
-                        step=0.1,
-                        value=2.0,
-                        marks={i: f"{i}%" for i in [0.5, 1, 2, 3, 4, 5]},
-                        tooltip={"placement": "bottom", "always_visible": True}
-                    )
-                ], style={'marginBottom': '20px'}),
-                
-                html.Div([
-                    html.Label("Minimum Confidence (%)", style={'color': self.theme_colors['text_secondary']}),
-                    dcc.Slider(
-                        id="confidence-slider",
-                        min=50,
-                        max=95,
-                        step=1,
-                        value=70,
-                        marks={i: f"{i}%" for i in [50, 60, 70, 80, 90]},
-                        tooltip={"placement": "bottom", "always_visible": True}
-                    )
-                ], style={'marginBottom': '20px'})
-            ])
-            
-        ], className="page-content")
-    
-    def create_chat_page(self):
-        """Página de chat (placeholder para futuro)"""
-        return html.Div([
-            html.H3("💬 AI Assistant Chat", style={'color': self.theme_colors['text_primary'], 'marginBottom': '20px'}),
-            
-            # Mensaje de futuro desarrollo
-            html.Div([
-                html.Div([
-                    html.I(className="fas fa-robot", style={
-                        'fontSize': '64px', 
-                        'color': self.theme_colors['accent'],
-                        'marginBottom': '20px'
-                    }),
-                    html.H4("🚧 Coming Soon!", style={'color': self.theme_colors['text_primary']}),
-                    html.P([
-                        "The AI Assistant Chat will be available in a future update. ",
-                        "This feature will allow you to:"
-                    ], style={'color': self.theme_colors['text_secondary'], 'marginBottom': '20px'}),
-                    
-                    html.Ul([
-                        html.Li("💬 Chat naturally with your trading bot"),
-                        html.Li("🔍 Ask questions about performance and trades"),
-                        html.Li("🐛 Get help debugging issues"),
-                        html.Li("⚙️ Modify settings through conversation"),
-                        html.Li("📊 Request custom analysis and reports"),
-                        html.Li("🎓 Learn about trading strategies")
-                    ], style={'color': self.theme_colors['text_secondary'], 'textAlign': 'left'})
-                    
+                    self._create_header_metric("P&L", "$0.00", "fas fa-dollar-sign", "pnl"),
+                    self._create_header_metric("24h", "0.00%", "fas fa-percentage", "daily-change"),
+                    self._create_header_metric("Pos", "0", "fas fa-layer-group", "positions")
                 ], style={
-                    'textAlign': 'center',
-                    'padding': '60px',
-                    'backgroundColor': self.theme_colors['secondary'],
-                    'borderRadius': '12px',
-                    'border': f"2px dashed {self.theme_colors['accent']}"
+                    'display': 'flex',
+                    'gap': '16px',
+                    'alignItems': 'center'
+                })
+                
+            ], style={
+                'display': 'flex',
+                'justifyContent': 'space-between',
+                'alignItems': 'center',
+                'padding': '16px 24px',
+                'backgroundColor': self.theme_colors['primary'],
+                'borderBottom': f'1px solid {self.theme_colors["border"]}',
+                'boxShadow': '0 2px 8px rgba(0,0,0,0.3)'
+            })
+        ], style={'position': 'sticky', 'top': '0', 'zIndex': '1000'})
+    
+    def _create_nav_item(self, icon, label, href, nav_id):
+        """Crea un elemento de navegación"""
+        return dcc.Link([
+            html.Div([
+                html.I(className=icon, style={'marginRight': '8px', 'fontSize': '14px'}),
+                html.Span(label, style={'fontSize': '14px', 'fontWeight': '500'})
+            ], style={
+                'display': 'flex',
+                'alignItems': 'center',
+                'padding': '8px 16px',
+                'borderRadius': '8px',
+                'transition': 'all 0.2s ease',
+                'color': self.theme_colors['text_secondary']
+            })
+        ], 
+        href=href, 
+        id=f'nav-{nav_id}',
+        className='nav-link-enhanced',
+        style={'textDecoration': 'none'})
+    
+    def _create_header_metric(self, label, value, icon, metric_id):
+        """Crea una métrica en el header"""
+        return html.Div([
+            html.I(className=icon, style={
+                'fontSize': '12px',
+                'color': self.theme_colors['text_secondary'],
+                'marginBottom': '2px'
+            }),
+            html.Div(label, style={
+                'fontSize': '10px',
+                'color': self.theme_colors['text_secondary'],
+                'fontWeight': '500',
+                'lineHeight': '1'
+            }),
+            html.Div(value, id=f'header-{metric_id}', style={
+                'fontSize': '14px',
+                'color': self.theme_colors['text_primary'],
+                'fontWeight': '600',
+                'lineHeight': '1'
+            })
+        ], style={
+            'textAlign': 'center',
+            'minWidth': '60px'
+        })
+    
+    def create_enhanced_home_page(self):
+        """Crea la página principal mejorada"""
+        return html.Div([
+            # Top metrics grid
+            html.Div([
+                self._create_metric_card_large("Portfolio Value", "$50,000", "+2.5%", "fas fa-wallet", "success"),
+                self._create_metric_card_large("Total P&L", "+$1,250", "+2.5%", "fas fa-chart-line", "success"),
+                self._create_metric_card_large("Win Rate", "68.5%", "+1.2%", "fas fa-bullseye", "success"),
+                self._create_metric_card_large("Active Positions", "3", "BTC, ETH, ADA", "fas fa-layer-group", "info")
+            ], className='metrics-grid-large', style={
+                'display': 'grid',
+                'gridTemplateColumns': 'repeat(auto-fit, minmax(280px, 1fr))',
+                'gap': '20px',
+                'marginBottom': '24px'
+            }),
+            
+            # Main charts section
+            html.Div([
+                # Left column - Main chart
+                html.Div([
+                    self._create_chart_container(
+                        "Trading Runs Overview",
+                        "runs-overview-chart",
+                        height="500px",
+                        tools=["fullscreen", "export", "refresh"]
+                    )
+                ], style={'flex': '2', 'marginRight': '20px'}),
+                
+                # Right column - Side charts
+                html.Div([
+                    self._create_chart_container(
+                        "Real-time Performance",
+                        "realtime-performance-chart",
+                        height="240px",
+                        compact=True
+                    ),
+                    self._create_chart_container(
+                        "Risk Metrics",
+                        "risk-summary-chart",
+                        height="240px",
+                        compact=True,
+                        style={'marginTop': '20px'}
+                    )
+                ], style={'flex': '1'})
+            ], style={
+                'display': 'flex',
+                'marginBottom': '24px'
+            }),
+            
+            # Bottom section - Tables and additional metrics
+            html.Div([
+                # Recent trades table
+                html.Div([
+                    self._create_data_table_container(
+                        "Recent Trades",
+                        "recent-trades-table",
+                        tools=["export", "filter"]
+                    )
+                ], style={'flex': '1', 'marginRight': '20px'}),
+                
+                # Active positions
+                html.Div([
+                    self._create_data_table_container(
+                        "Active Positions",
+                        "active-positions-table",
+                        tools=["refresh"]
+                    )
+                ], style={'flex': '1'})
+            ], style={
+                'display': 'flex',
+                'gap': '20px'
+            })
+            
+        ], style={'padding': '24px'})
+    
+    def create_enhanced_trading_page(self):
+        """Crea la página de trading mejorada"""
+        return html.Div([
+            # Trading controls header
+            html.Div([
+                html.Div([
+                    html.H3("Live Trading Dashboard", style={
+                        'margin': '0',
+                        'color': self.theme_colors['text_primary'],
+                        'fontSize': '20px',
+                        'fontWeight': '600'
+                    }),
+                    html.P("Real-time market analysis and trade execution", style={
+                        'margin': '4px 0 0 0',
+                        'color': self.theme_colors['text_secondary'],
+                        'fontSize': '14px'
+                    })
+                ], style={'flex': '1'}),
+                
+                # Trading controls
+                html.Div([
+                    self._create_control_button("Start Trading", "play", "success", "start-trading-btn"),
+                    self._create_control_button("Pause", "pause", "warning", "pause-trading-btn"),
+                    self._create_control_button("Emergency Stop", "stop", "danger", "stop-trading-btn")
+                ], style={'display': 'flex', 'gap': '12px'})
+            ], style={
+                'display': 'flex',
+                'justifyContent': 'space-between',
+                'alignItems': 'center',
+                'marginBottom': '24px',
+                'padding': '20px',
+                'backgroundColor': self.theme_colors['secondary'],
+                'borderRadius': '12px',
+                'border': f'1px solid {self.theme_colors["border"]}'
+            }),
+            
+            # Main trading chart
+            html.Div([
+                self._create_chart_container(
+                    "Live Price Action & Signals",
+                    "live-trading-chart",
+                    height="600px",
+                    tools=["fullscreen", "drawing", "indicators", "timeframe"]
+                )
+            ], style={'marginBottom': '24px'}),
+            
+            # Trading metrics grid
+            html.Div([
+                self._create_metric_card("Current Symbol", "BTCUSDT", "fas fa-coins", "info"),
+                self._create_metric_card("Entry Price", "$43,250", "fas fa-sign-in-alt", "info"),
+                self._create_metric_card("Current Price", "$43,450", "fas fa-dollar-sign", "success"),
+                self._create_metric_card("Unrealized P&L", "+$200", "fas fa-chart-line", "success"),
+                self._create_metric_card("Position Size", "0.1 BTC", "fas fa-weight", "info"),
+                self._create_metric_card("Leverage", "3x", "fas fa-balance-scale", "warning")
+            ], style={
+                'display': 'grid',
+                'gridTemplateColumns': 'repeat(auto-fit, minmax(200px, 1fr))',
+                'gap': '16px',
+                'marginBottom': '24px'
+            }),
+            
+            # Order book and trade history
+            html.Div([
+                html.Div([
+                    self._create_data_table_container(
+                        "Order Book",
+                        "order-book-table",
+                        tools=["refresh"],
+                        realtime=True
+                    )
+                ], style={'flex': '1', 'marginRight': '20px'}),
+                
+                html.Div([
+                    self._create_data_table_container(
+                        "Trade History",
+                        "trade-history-table",
+                        tools=["export", "filter"]
+                    )
+                ], style={'flex': '1'})
+            ], style={'display': 'flex'})
+            
+        ], style={'padding': '24px'})
+    
+    def _create_metric_card(self, title, value, icon, color_type="info"):
+        """Crea una tarjeta de métrica estándar"""
+        colors = {
+            'success': self.theme_colors['success'],
+            'danger': self.theme_colors['danger'],
+            'warning': self.theme_colors['warning'],
+            'info': self.theme_colors['info'],
+            'secondary': self.theme_colors['text_secondary']
+        }
+        
+        return html.Div([
+            html.Div([
+                html.I(className=icon, style={
+                    'fontSize': '18px',
+                    'color': colors.get(color_type, self.theme_colors['info']),
+                    'marginBottom': '8px'
+                }),
+                html.Div(title, style={
+                    'fontSize': '12px',
+                    'color': self.theme_colors['text_secondary'],
+                    'fontWeight': '500',
+                    'marginBottom': '4px'
+                }),
+                html.Div(value, style={
+                    'fontSize': '18px',
+                    'color': self.theme_colors['text_primary'],
+                    'fontWeight': '600'
                 })
             ])
-            
-        ], className="page-content")
+        ], className='metric-card', style={
+            'padding': '16px',
+            'backgroundColor': self.theme_colors['secondary'],
+            'borderRadius': '12px',
+            'border': f'1px solid {self.theme_colors["border"]}',
+            'transition': 'all 0.2s ease',
+            'cursor': 'pointer'
+        })
     
-    def create_404_page(self):
-        """Página de error 404"""
+    def _create_metric_card_large(self, title, value, subtitle, icon, color_type="info"):
+        """Crea una tarjeta de métrica grande"""
+        colors = {
+            'success': self.theme_colors['success'],
+            'danger': self.theme_colors['danger'],
+            'warning': self.theme_colors['warning'],
+            'info': self.theme_colors['info']
+        }
+        
         return html.Div([
             html.Div([
-                html.H1("404", style={'fontSize': '120px', 'color': self.theme_colors['danger'], 'margin': '0'}),
-                html.H3("Page Not Found", style={'color': self.theme_colors['text_primary']}),
-                html.P("The page you're looking for doesn't exist.", style={'color': self.theme_colors['text_secondary']}),
-                dcc.Link("🏠 Go Home", href="/", className="btn btn-primary")
-            ], style={'textAlign': 'center', 'padding': '100px'})
-        ], className="page-content")
-    
-    def create_metric_card(self, title, value, value_id, icon, color):
-        """Crea una tarjeta de métrica"""
-        return html.Div([
-            html.Div([
-                html.I(className=icon, style={'fontSize': '24px', 'color': color}),
                 html.Div([
-                    html.H4(title, style={'margin': '0', 'color': self.theme_colors['text_secondary'], 'fontSize': '14px'}),
-                    html.H2(value, id=value_id, style={'margin': '5px 0 0 0', 'color': self.theme_colors['text_primary']})
-                ])
-            ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center'})
-        ], className="metric-card")
+                    html.I(className=icon, style={
+                        'fontSize': '24px',
+                        'color': colors.get(color_type, self.theme_colors['info'])
+                    }),
+                    html.Div([
+                        html.Div(title, style={
+                            'fontSize': '14px',
+                            'color': self.theme_colors['text_secondary'],
+                            'fontWeight': '500',
+                            'marginBottom': '4px'
+                        }),
+                        html.Div(value, style={
+                            'fontSize': '24px',
+                            'color': self.theme_colors['text_primary'],
+                            'fontWeight': '700',
+                            'lineHeight': '1'
+                        }),
+                        html.Div(subtitle, style={
+                            'fontSize': '12px',
+                            'color': colors.get(color_type, self.theme_colors['info']),
+                            'fontWeight': '500',
+                            'marginTop': '4px'
+                        })
+                    ], style={'flex': '1'})
+                ], style={
+                    'display': 'flex',
+                    'alignItems': 'center',
+                    'gap': '16px'
+                })
+            ])
+        ], className='metric-card-large', style={
+            'padding': '24px',
+            'backgroundColor': self.theme_colors['secondary'],
+            'borderRadius': '16px',
+            'border': f'1px solid {self.theme_colors["border"]}',
+            'transition': 'all 0.2s ease',
+            'cursor': 'pointer'
+        })
+    
+    def _create_chart_container(self, title, chart_id, height="400px", tools=None, compact=False, **kwargs):
+        """Crea un contenedor para gráficos"""
+        tools = tools or []
+        
+        return html.Div([
+            # Chart header
+            html.Div([
+                html.H4(title, style={
+                    'margin': '0',
+                    'fontSize': '16px' if compact else '18px',
+                    'fontWeight': '600',
+                    'color': self.theme_colors['text_primary']
+                }),
+                
+                # Chart tools
+                html.Div([
+                    self._create_chart_tool(tool) for tool in tools
+                ], style={'display': 'flex', 'gap': '8px'}) if tools else None
+                
+            ], style={
+                'display': 'flex',
+                'justifyContent': 'space-between',
+                'alignItems': 'center',
+                'marginBottom': '16px' if not compact else '12px'
+            }),
+            
+            # Chart area
+            dcc.Graph(
+                id=chart_id,
+                style={'height': height},
+                config={
+                    'displayModeBar': True,
+                    'displaylogo': False,
+                    'modeBarButtonsToRemove': ['pan2d', 'lasso2d']
+                }
+            )
+        ], style={
+            'padding': '20px' if not compact else '16px',
+            'backgroundColor': self.theme_colors['secondary'],
+            'borderRadius': '16px',
+            'border': f'1px solid {self.theme_colors["border"]}',
+            **kwargs.get('style', {})
+        })
+    
+    def _create_chart_tool(self, tool_type):
+        """Crea herramientas para gráficos"""
+        icons = {
+            'fullscreen': 'fas fa-expand',
+            'export': 'fas fa-download',
+            'refresh': 'fas fa-sync-alt',
+            'drawing': 'fas fa-pencil-alt',
+            'indicators': 'fas fa-chart-bar',
+            'timeframe': 'fas fa-clock',
+            'scenarios': 'fas fa-flask',
+            'rebalance': 'fas fa-balance-scale',
+            'filter': 'fas fa-filter',
+            'sort': 'fas fa-sort'
+        }
+        
+        return html.Button([
+            html.I(className=icons.get(tool_type, 'fas fa-cog'))
+        ], className=f'chart-tool-btn chart-tool-{tool_type}', style={
+            'padding': '6px 8px',
+            'backgroundColor': 'transparent',
+            'border': f'1px solid {self.theme_colors["border"]}',
+            'borderRadius': '6px',
+            'color': self.theme_colors['text_secondary'],
+            'cursor': 'pointer',
+            'fontSize': '12px',
+            'transition': 'all 0.2s ease'
+        })
+    
+    def _create_data_table_container(self, title, table_id, tools=None, realtime=False):
+        """Crea un contenedor para tablas de datos"""
+        tools = tools or []
+        
+        return html.Div([
+            # Table header
+            html.Div([
+                html.Div([
+                    html.H4(title, style={
+                        'margin': '0',
+                        'fontSize': '16px',
+                        'fontWeight': '600',
+                        'color': self.theme_colors['text_primary']
+                    }),
+                    html.Span("● LIVE" if realtime else "", style={
+                        'fontSize': '10px',
+                        'color': self.theme_colors['success'],
+                        'fontWeight': '600',
+                        'marginLeft': '8px',
+                        'animation': 'pulse 2s infinite' if realtime else 'none'
+                    })
+                ], style={'display': 'flex', 'alignItems': 'center'}),
+                
+                html.Div([
+                    self._create_chart_tool(tool) for tool in tools
+                ], style={'display': 'flex', 'gap': '8px'}) if tools else None
+                
+            ], style={
+                'display': 'flex',
+                'justifyContent': 'space-between',
+                'alignItems': 'center',
+                'marginBottom': '16px'
+            }),
+            
+            # Table area
+            html.Div(id=table_id, style={
+                'maxHeight': '300px',
+                'overflowY': 'auto'
+            })
+            
+        ], style={
+            'padding': '20px',
+            'backgroundColor': self.theme_colors['secondary'],
+            'borderRadius': '16px',
+            'border': f'1px solid {self.theme_colors["border"]}'
+        })
+    
+    def _create_control_button(self, label, icon, color_type, button_id):
+        """Crea botones de control"""
+        colors = {
+            'success': {'bg': self.theme_colors['success'], 'text': self.theme_colors['primary']},
+            'danger': {'bg': self.theme_colors['danger'], 'text': 'white'},
+            'warning': {'bg': self.theme_colors['warning'], 'text': self.theme_colors['primary']},
+            'info': {'bg': self.theme_colors['info'], 'text': self.theme_colors['primary']},
+            'secondary': {'bg': self.theme_colors['border'], 'text': self.theme_colors['text_primary']}
+        }
+        
+        color_config = colors.get(color_type, colors['secondary'])
+        
+        return html.Button([
+            html.I(className=f"fas fa-{icon}", style={'marginRight': '8px'}),
+            label
+        ], id=button_id, style={
+            'padding': '10px 20px',
+            'backgroundColor': color_config['bg'],
+            'color': color_config['text'],
+            'border': 'none',
+            'borderRadius': '8px',
+            'fontWeight': '600',
+            'fontSize': '14px',
+            'cursor': 'pointer',
+            'transition': 'all 0.2s ease',
+            'display': 'flex',
+            'alignItems': 'center'
+        })
 
 
-# Funciones de compatibilidad para el dashboard existente
-def build_layout():
-    """Función de compatibilidad para el dashboard existente"""
-    layout_components = LayoutComponents()
+# === FUNCIONES DE COMPATIBILIDAD ===
+# Mantener la funcionalidad existente
+
+class LayoutComponents(EnhancedLayoutComponents):
+    """Clase de compatibilidad para mantener la funcionalidad existente"""
+    
+    def create_header(self):
+        """Mantiene compatibilidad con header anterior"""
+        return self.create_enhanced_header()
+    
+    def create_home_page(self):
+        """Mantiene compatibilidad con página home anterior"""
+        return self.create_enhanced_home_page()
+    
+    def create_trading_page(self):
+        """Crea página de trading (compatibilidad)"""
+        return self.create_enhanced_trading_page()
+    
+    def create_performance_page(self):
+        """Crea página de performance (nueva)"""
+        return html.Div([
+            html.H2("Performance Analysis", style={
+                'color': self.theme_colors['text_primary'],
+                'marginBottom': '20px'
+            }),
+            
+            # Performance metrics
+            html.Div([
+                self._create_metric_card("Total Return", "12.5%", "fas fa-chart-line", "success"),
+                self._create_metric_card("Sharpe Ratio", "1.85", "fas fa-star", "success"),
+                self._create_metric_card("Max Drawdown", "5.2%", "fas fa-arrow-down", "warning"),
+                self._create_metric_card("Win Rate", "68.5%", "fas fa-bullseye", "success")
+            ], style={
+                'display': 'grid',
+                'gridTemplateColumns': 'repeat(auto-fit, minmax(200px, 1fr))',
+                'gap': '16px',
+                'marginBottom': '24px'
+            }),
+            
+            # Performance charts
+            html.Div([
+                self._create_chart_container(
+                    "Equity Curve & Drawdown",
+                    "equity-curve-chart",
+                    height="500px"
+                )
+            ], style={'marginBottom': '24px'}),
+            
+            html.Div([
+                html.Div([
+                    self._create_chart_container(
+                        "Monthly Returns",
+                        "monthly-returns-chart",
+                        height="350px"
+                    )
+                ], style={'flex': '1', 'marginRight': '20px'}),
+                
+                html.Div([
+                    self._create_chart_container(
+                        "Return Distribution",
+                        "return-distribution-chart",
+                        height="350px"
+                    )
+                ], style={'flex': '1'})
+            ], style={'display': 'flex'})
+            
+        ], style={'padding': '24px'})
+    
+    def create_alerts_page(self):
+        """Crea página de alertas"""
+        return html.Div([
+            html.H2("System Alerts", style={
+                'color': self.theme_colors['text_primary'],
+                'marginBottom': '20px'
+            }),
+            
+            # Alert filters
+            html.Div([
+                html.Div([
+                    html.Label("Filter by Type:", style={
+                        'color': self.theme_colors['text_secondary'],
+                        'marginBottom': '8px',
+                        'display': 'block'
+                    }),
+                    dcc.Dropdown(
+                        id='alert-type-filter',
+                        options=[
+                            {'label': 'All Alerts', 'value': 'all'},
+                            {'label': 'Trading', 'value': 'trading'},
+                            {'label': 'Risk', 'value': 'risk'},
+                            {'label': 'System', 'value': 'system'},
+                            {'label': 'Model', 'value': 'model'}
+                        ],
+                        value='all',
+                        style={'backgroundColor': self.theme_colors['secondary']}
+                    )
+                ], style={'width': '200px', 'marginRight': '20px'}),
+                
+                html.Div([
+                    html.Label("Severity:", style={
+                        'color': self.theme_colors['text_secondary'],
+                        'marginBottom': '8px',
+                        'display': 'block'
+                    }),
+                    dcc.Dropdown(
+                        id='alert-severity-filter',
+                        options=[
+                            {'label': 'All', 'value': 'all'},
+                            {'label': 'Critical', 'value': 'critical'},
+                            {'label': 'Warning', 'value': 'warning'},
+                            {'label': 'Info', 'value': 'info'}
+                        ],
+                        value='all',
+                        style={'backgroundColor': self.theme_colors['secondary']}
+                    )
+                ], style={'width': '200px'})
+            ], style={
+                'display': 'flex',
+                'marginBottom': '24px',
+                'padding': '20px',
+                'backgroundColor': self.theme_colors['secondary'],
+                'borderRadius': '12px'
+            }),
+            
+            # Alerts list
+            html.Div(id='alerts-container', children=[
+                self._create_alert_item(
+                    "Trading Alert",
+                    "Position closed: BTCUSDT +$125.50",
+                    "2 minutes ago",
+                    "success"
+                ),
+                self._create_alert_item(
+                    "Risk Warning",
+                    "Portfolio correlation increased to 0.85",
+                    "15 minutes ago",
+                    "warning"
+                ),
+                self._create_alert_item(
+                    "Model Update",
+                    "AI model retrained with new data",
+                    "1 hour ago",
+                    "info"
+                ),
+                self._create_alert_item(
+                    "System Info",
+                    "Daily backup completed successfully",
+                    "2 hours ago",
+                    "info"
+                )
+            ])
+            
+        ], style={'padding': '24px'})
+    
+    def create_settings_page(self):
+        """Crea página de configuración"""
+        return html.Div([
+            html.H2("Settings & Configuration", style={
+                'color': self.theme_colors['text_primary'],
+                'marginBottom': '20px'
+            }),
+            
+            # Settings sections
+            html.Div([
+                # Trading settings
+                html.Div([
+                    html.H4("Trading Parameters", style={
+                        'color': self.theme_colors['text_primary'],
+                        'marginBottom': '16px'
+                    }),
+                    
+                    self._create_setting_item("Max Position Size", "input", "2.0", "%"),
+                    self._create_setting_item("Stop Loss", "input", "2.5", "%"),
+                    self._create_setting_item("Take Profit", "input", "5.0", "%"),
+                    self._create_setting_item("Max Daily Loss", "input", "5.0", "%"),
+                    
+                ], style={
+                    'flex': '1',
+                    'padding': '20px',
+                    'backgroundColor': self.theme_colors['secondary'],
+                    'borderRadius': '12px',
+                    'marginRight': '20px'
+                }),
+                
+                # AI settings
+                html.Div([
+                    html.H4("AI Model Settings", style={
+                        'color': self.theme_colors['text_primary'],
+                        'marginBottom': '16px'
+                    }),
+                    
+                    self._create_setting_item("Confidence Threshold", "input", "0.75", ""),
+                    self._create_setting_item("Retrain Frequency", "select", "Daily", ""),
+                    self._create_setting_item("Feature Selection", "select", "Auto", ""),
+                    self._create_setting_item("Prediction Horizon", "input", "24", "hours"),
+                    
+                ], style={
+                    'flex': '1',
+                    'padding': '20px',
+                    'backgroundColor': self.theme_colors['secondary'],
+                    'borderRadius': '12px'
+                })
+            ], style={'display': 'flex', 'marginBottom': '24px'}),
+            
+            # Risk settings
+            html.Div([
+                html.H4("Risk Management", style={
+                    'color': self.theme_colors['text_primary'],
+                    'marginBottom': '16px'
+                }),
+                
+                html.Div([
+                    self._create_setting_item("Portfolio VaR Limit", "input", "1000", "$"),
+                    self._create_setting_item("Max Correlation", "input", "0.8", ""),
+                    self._create_setting_item("Leverage Limit", "input", "3", "x"),
+                    self._create_setting_item("Emergency Stop", "toggle", "Enabled", ""),
+                ], style={
+                    'display': 'grid',
+                    'gridTemplateColumns': 'repeat(2, 1fr)',
+                    'gap': '16px'
+                })
+                
+            ], style={
+                'padding': '20px',
+                'backgroundColor': self.theme_colors['secondary'],
+                'borderRadius': '12px',
+                'marginBottom': '24px'
+            }),
+            
+            # Save button
+            html.Div([
+                html.Button([
+                    html.I(className="fas fa-save", style={'marginRight': '8px'}),
+                    "Save Settings"
+                ], style={
+                    'padding': '12px 24px',
+                    'backgroundColor': self.theme_colors['success'],
+                    'color': self.theme_colors['primary'],
+                    'border': 'none',
+                    'borderRadius': '8px',
+                    'fontWeight': '600',
+                    'fontSize': '14px',
+                    'cursor': 'pointer'
+                }),
+                
+                html.Button([
+                    html.I(className="fas fa-undo", style={'marginRight': '8px'}),
+                    "Reset to Defaults"
+                ], style={
+                    'padding': '12px 24px',
+                    'backgroundColor': 'transparent',
+                    'color': self.theme_colors['text_secondary'],
+                    'border': f'1px solid {self.theme_colors["border"]}',
+                    'borderRadius': '8px',
+                    'fontWeight': '600',
+                    'fontSize': '14px',
+                    'cursor': 'pointer',
+                    'marginLeft': '12px'
+                })
+            ], style={'textAlign': 'right'})
+            
+        ], style={'padding': '24px'})
+    
+    def _create_alert_item(self, title, message, time, severity):
+        """Crea un elemento de alerta"""
+        severity_colors = {
+            'success': self.theme_colors['success'],
+            'warning': self.theme_colors['warning'],
+            'danger': self.theme_colors['danger'],
+            'info': self.theme_colors['info']
+        }
+        
+        severity_icons = {
+            'success': 'fas fa-check-circle',
+            'warning': 'fas fa-exclamation-triangle',
+            'danger': 'fas fa-times-circle',
+            'info': 'fas fa-info-circle'
+        }
+        
+        return html.Div([
+            html.Div([
+                html.I(className=severity_icons.get(severity, 'fas fa-info-circle'), style={
+                    'fontSize': '18px',
+                    'color': severity_colors.get(severity, self.theme_colors['info']),
+                    'marginRight': '12px'
+                }),
+                html.Div([
+                    html.Div(title, style={
+                        'fontWeight': '600',
+                        'color': self.theme_colors['text_primary'],
+                        'marginBottom': '4px'
+                    }),
+                    html.Div(message, style={
+                        'color': self.theme_colors['text_secondary'],
+                        'fontSize': '14px'
+                    })
+                ], style={'flex': '1'}),
+                html.Div(time, style={
+                    'fontSize': '12px',
+                    'color': self.theme_colors['text_secondary']
+                })
+            ], style={
+                'display': 'flex',
+                'alignItems': 'center'
+            })
+        ], style={
+            'padding': '16px',
+            'backgroundColor': self.theme_colors['secondary'],
+            'borderRadius': '8px',
+            'border': f'1px solid {self.theme_colors["border"]}',
+            'marginBottom': '12px',
+            'transition': 'all 0.2s ease',
+            'cursor': 'pointer'
+        })
+    
+    def _create_setting_item(self, label, input_type, value, unit=""):
+        """Crea un elemento de configuración"""
+        input_element = None
+        
+        if input_type == "input":
+            input_element = dcc.Input(
+                value=value,
+                type="number" if unit in ["%", "$", "x", "hours"] else "text",
+                style={
+                    'width': '100%',
+                    'padding': '8px 12px',
+                    'backgroundColor': self.theme_colors['primary'],
+                    'border': f'1px solid {self.theme_colors["border"]}',
+                    'borderRadius': '6px',
+                    'color': self.theme_colors['text_primary']
+                }
+            )
+        elif input_type == "select":
+            input_element = dcc.Dropdown(
+                value=value,
+                options=[{'label': value, 'value': value}],  # Simplificado
+                style={'backgroundColor': self.theme_colors['primary']}
+            )
+        elif input_type == "toggle":
+            input_element = html.Div([
+                html.Span("Enabled", style={
+                    'color': self.theme_colors['success'],
+                    'fontWeight': '600'
+                })
+            ])
+        
+        return html.Div([
+            html.Label(label, style={
+                'color': self.theme_colors['text_secondary'],
+                'fontSize': '14px',
+                'fontWeight': '500',
+                'marginBottom': '8px',
+                'display': 'block'
+            }),
+            html.Div([
+                input_element,
+                html.Span(unit, style={
+                    'color': self.theme_colors['text_secondary'],
+                    'marginLeft': '8px',
+                    'fontSize': '14px'
+                }) if unit else None
+            ], style={'display': 'flex', 'alignItems': 'center'})
+        ], style={'marginBottom': '16px'})
+    
+    def create_metric_card(self, title, value, icon, color_type="info"):
+        """Función de compatibilidad para crear tarjetas de métricas"""
+        return self._create_metric_card(title, value, icon, color_type)
+
+
+# === FUNCIONES AUXILIARES ===
+
+def create_page_layout(page_content):
+    """Crea el layout base de una página"""
+    layout_components = EnhancedLayoutComponents()
     
     return html.Div([
-        dcc.Location(id="url"),
-        layout_components.create_header(),
-        html.Div(id="page-content", children=[
-            layout_components.create_home_page()
-        ])
-    ], className="dashboard-container")
+        layout_components.create_enhanced_header(),
+        html.Div([
+            page_content
+        ], id='page-content')
+    ])
 
-
-def render_home_page():
-    """Función de compatibilidad para la página home"""
-    layout_components = LayoutComponents()
-    return layout_components.create_home_page()
+def get_theme_colors():
+    """Retorna los colores del tema"""
+    return {
+        'primary': '#0d1117',
+        'secondary': '#161b22',
+        'surface': '#21262d',
+        'accent': '#58a6ff',
+        'success': '#3fb950',
+        'danger': '#f85149',
+        'warning': '#d29922',
+        'info': '#79c0ff',
+        'text_primary': '#f0f6fc',
+        'text_secondary': '#8b949e',
+        'grid': '#30363d',
+        'border': '#21262d'
+    }
