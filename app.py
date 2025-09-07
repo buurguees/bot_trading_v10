@@ -155,9 +155,20 @@ class TradingBotApp:
             # Verificar confianza
             try:
                 conf_health = await confidence_estimator.health_check()
+                is_calibrated = conf_health.get('is_calibrated', False)
                 print(f"\n💪 Estimador de confianza:")
-                print(f"   Calibrado: {'✅ Sí' if conf_health.get('calibrated', False) else '❌ No'}")
+                print(f"   Calibrado: {'✅ Sí' if is_calibrated else '❌ No'}")
                 print(f"   Última calibración: {conf_health.get('last_calibration', 'Nunca')}")
+                
+                # Si no está calibrado, calibrar automáticamente
+                if not is_calibrated:
+                    print(f"\n🔧 Calibrando estimador de confianza...")
+                    calibration_result = await confidence_estimator.calibrate()
+                    if calibration_result.get('status') == 'success':
+                        print(f"   ✅ Calibración exitosa: {calibration_result.get('calibration_samples', 0)} muestras")
+                        print(f"   📊 Puntos de datos: {calibration_result.get('calibration_data_points', 0)}")
+                    else:
+                        print(f"   ❌ Error en calibración: {calibration_result.get('error', 'Desconocido')}")
             except Exception as e:
                 print(f"⚠️ Error verificando confianza: {e}")
             

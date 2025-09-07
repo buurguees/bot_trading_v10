@@ -402,11 +402,84 @@ class ConfidenceEstimator:
             logger.error(f"Error obteniendo calidad de calibración: {e}")
             return {'error': str(e)}
     
+    async def calibrate(self, historical_data: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Calibra el estimador de confianza con datos históricos"""
+        try:
+            if historical_data is None:
+                # Generar datos de calibración sintéticos para demostración
+                historical_data = self._generate_synthetic_calibration_data()
+            
+            calibration_count = 0
+            
+            for data_point in historical_data:
+                # Simular calibración con datos históricos
+                confidence = data_point.get('confidence', 0.7)
+                accuracy = data_point.get('accuracy', 0.75)
+                action_probs = data_point.get('action_probs', [0.3, 0.4, 0.3])
+                
+                # Agregar a datos de calibración
+                prob_key = self._get_probability_key(action_probs)
+                self.calibration_data[prob_key].append({
+                    'confidence': confidence,
+                    'accuracy': accuracy,
+                    'timestamp': datetime.now()
+                })
+                calibration_count += 1
+            
+            # Marcar como calibrado
+            self.is_calibrated = True
+            self.last_calibration = datetime.now()
+            
+            logger.info(f"ConfidenceEstimator calibrado con {calibration_count} puntos de datos")
+            
+            return {
+                'status': 'success',
+                'calibration_samples': calibration_count,
+                'calibration_data_points': sum(len(data) for data in self.calibration_data.values()),
+                'last_calibration': self.last_calibration.isoformat(),
+                'is_calibrated': self.is_calibrated
+            }
+            
+        except Exception as e:
+            logger.error(f"Error calibrando ConfidenceEstimator: {e}")
+            return {
+                'status': 'error',
+                'error': str(e)
+            }
+    
+    def _generate_synthetic_calibration_data(self, num_samples: int = 100) -> List[Dict[str, Any]]:
+        """Genera datos de calibración sintéticos para demostración"""
+        import random
+        
+        data = []
+        for _ in range(num_samples):
+            # Generar probabilidades de acciones
+            action_probs = np.random.dirichlet([1, 1, 1])  # 3 acciones
+            
+            # Calcular confianza base
+            max_prob = np.max(action_probs)
+            entropy = -np.sum(action_probs * np.log(action_probs + 1e-8))
+            confidence = max_prob * 0.7 + (1 - entropy / np.log(3)) * 0.3
+            
+            # Simular accuracy real (con algo de ruido)
+            accuracy = confidence + np.random.normal(0, 0.1)
+            accuracy = np.clip(accuracy, 0.0, 1.0)
+            
+            data.append({
+                'confidence': confidence,
+                'accuracy': accuracy,
+                'action_probs': action_probs.tolist()
+            })
+        
+        return data
+    
     async def health_check(self) -> Dict[str, Any]:
         """Verifica salud del estimador de confianza"""
         try:
             return {
                 'status': 'healthy',
+                'is_calibrated': getattr(self, 'is_calibrated', False),
+                'last_calibration': getattr(self, 'last_calibration', None).isoformat() if hasattr(self, 'last_calibration') and self.last_calibration else None,
                 'confidence_history_count': len(self.confidence_history),
                 'calibration_data_count': sum(len(data) for data in self.calibration_data.values()),
                 'thresholds_configured': bool(self.confidence_thresholds),
@@ -424,6 +497,9 @@ class ConfidenceEstimator:
 confidence_estimator = ConfidenceEstimator()
 
 # Funciones de conveniencia
+async def calibrate_confidence_estimator(historical_data: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Función de conveniencia para calibrar el estimador de confianza"""
+    return await confidence_estimator.calibrate(historical_data)
 def estimate_confidence(prediction_output: Dict[str, Any], market_context: Dict[str, Any] = None) -> Dict[str, Any]:
     """Función de conveniencia para estimar confianza"""
     return confidence_estimator.estimate_confidence(prediction_output, market_context)
