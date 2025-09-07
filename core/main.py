@@ -96,7 +96,15 @@ class TradingBotMain:
             training_thread.start()
             
             self.dashboard_running = True
-            return True
+            
+            # Mantener el sistema ejecutándose
+            print("\nSistema ejecutándose... Presiona Ctrl+C para detener")
+            try:
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                print("\nDeteniendo sistema...")
+                return True
             
         except Exception as e:
             print(f"Error iniciando dashboard: {e}")
