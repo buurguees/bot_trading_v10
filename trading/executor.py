@@ -84,7 +84,7 @@ class TradingExecutor:
         # Historial de predicciones para accuracy tracking
         self.prediction_history = []
         
-        logger.info("⚡ TradingExecutor inicializado")
+        logger.info("TradingExecutor inicializado")
     
     async def execute_trading_cycle(self, symbol: str) -> Dict[str, Any]:
         """

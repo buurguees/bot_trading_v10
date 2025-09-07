@@ -14,10 +14,9 @@ from datetime import datetime
 # Agregar el directorio raíz al path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from scripts.verificar_historico import verificar_historico
-from scripts.descargar_datos_mejorado import DescargaMejorada
-from scripts.iniciar_dashboard import DashboardIniciador
 from data.database import db_manager
+from data.collector import download_missing_data
+from monitoring.dashboard import start_dashboard_thread
 
 class EntrenadorAgente:
     """Clase para entrenar el agente con configuración optimizada"""
@@ -32,32 +31,34 @@ class EntrenadorAgente:
         print("=" * 50)
         
         # Verificar datos existentes
-        data_status = verificar_historico()
+        data_status = db_manager.get_historical_data_summary()
         
         if not data_status:
             print("❌ No se pudo verificar los datos")
             return False
         
-        if data_status['sufficient']:
-            print("✅ DATOS SUFICIENTES - Continuando con entrenamiento...")
+        total_records = data_status.get('total_records', 0)
+        if total_records >= 1000:  # Mínimo de 1000 registros
+            print(f"✅ DATOS SUFICIENTES ({total_records} registros) - Continuando con entrenamiento...")
             return True
         else:
-            print("⚠️  DATOS INSUFICIENTES - Iniciando descarga...")
+            print(f"⚠️  DATOS INSUFICIENTES ({total_records} registros) - Iniciando descarga...")
             print("📥 Descargando datos históricos...")
             
             try:
-                descarga = DescargaMejorada()
-                await descarga.ejecutar_descarga_completa()
+                # Descargar datos faltantes
+                await download_missing_data()
                 
                 # Verificar nuevamente después de la descarga
                 print("\n🔍 Verificando datos después de la descarga...")
-                data_status_after = verificar_historico()
+                data_status_after = db_manager.get_historical_data_summary()
                 
-                if data_status_after and data_status_after['sufficient']:
-                    print("✅ Descarga completada - Datos suficientes")
+                total_records_after = data_status_after.get('total_records', 0)
+                if total_records_after >= 1000:
+                    print(f"✅ Descarga completada - Datos suficientes ({total_records_after} registros)")
                     return True
                 else:
-                    print("❌ Descarga completada pero datos aún insuficientes")
+                    print(f"❌ Descarga completada pero datos aún insuficientes ({total_records_after} registros)")
                     return False
                     
             except Exception as e:
@@ -95,8 +96,7 @@ class EntrenadorAgente:
     def _run_dashboard(self):
         """Ejecuta el dashboard en el hilo separado"""
         try:
-            dashboard_iniciador = DashboardIniciador()
-            dashboard_iniciador.iniciar_dashboard()
+            start_dashboard_thread()
         except Exception as e:
             print(f"❌ Error en dashboard: {e}")
     

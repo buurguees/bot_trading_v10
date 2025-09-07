@@ -234,7 +234,7 @@ class PositionManager:
             'last_update': datetime.now().isoformat()
         }
         
-        logger.info("📊 PositionManager inicializado")
+        logger.info("PositionManager inicializado")
     
     async def add_position(self, trade_record: TradeRecord) -> Position:
         """
