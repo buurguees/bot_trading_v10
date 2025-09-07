@@ -131,7 +131,7 @@ class TradingBotMain:
             asyncio.set_event_loop(loop)
             
             async def run_training_async():
-                entrenador = EntrenadorAgente()
+                from models.adaptive_trainer import train_initial_model
                 
                 # Ejecutar entrenamiento para cada símbolo
                 symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
@@ -139,7 +139,7 @@ class TradingBotMain:
                 for symbol in symbols:
                     print(f"[TRAINING] Iniciando entrenamiento para {symbol}...")
                     try:
-                        result = await entrenador.train_initial_model(symbol, days_back=365)
+                        result = await train_initial_model(symbol, days_back=365)
                         if result.get('status') == 'success':
                             print(f"[TRAINING] Entrenamiento completado para {symbol}")
                         else:

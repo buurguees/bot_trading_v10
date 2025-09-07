@@ -159,7 +159,7 @@ class AdaptiveTrainer:
             return training_result
             
         except Exception as e:
-            logger.error(f"❌ Error en entrenamiento inicial: {e}")
+            logger.error(f"Error en entrenamiento inicial: {e}")
             return {
                 'symbol': symbol,
                 'status': 'failed',

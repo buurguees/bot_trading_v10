@@ -1,0 +1,812 @@
+[
+  {
+    "cycle_id": "sample_sync_cycle_001",
+    "start_time": "2025-07-05 23:24:59.582582",
+    "end_time": "2025-07-12 23:24:59.582582",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 2534.9523475157403,
+    "total_pnl": 1534.9523475157405,
+    "daily_pnl": 219.27890678796294,
+    "pnl_percentage": 153.49523475157406,
+    "progress_to_target": 0.25349523475157404,
+    "total_trades": 33,
+    "avg_win_rate": 0.47115384615384615,
+    "max_drawdown": 0.2389047512560974,
+    "avg_sharpe_ratio": 1.2801147093759506,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 13,
+        "pnl": 418.0509716746153,
+        "win_rate": 0.38461538461538464,
+        "sharpe_ratio": 1.4135120385038196,
+        "avg_confidence": 0.6703963526423531
+      },
+      "ETHUSDT": {
+        "trades": 7,
+        "pnl": 351.08832346599877,
+        "win_rate": 0.5714285714285714,
+        "sharpe_ratio": 1.1990982343169936,
+        "avg_confidence": 0.8138202232908891
+      },
+      "ADAUSDT": {
+        "trades": 6,
+        "pnl": 442.61000478273155,
+        "win_rate": 0.5,
+        "sharpe_ratio": 1.5278251037505337,
+        "avg_confidence": 0.8328413630062785
+      },
+      "SOLUSDT": {
+        "trades": 7,
+        "pnl": 361.18227970820567,
+        "win_rate": 0.42857142857142855,
+        "sharpe_ratio": 0.9800234609324556,
+        "avg_confidence": 0.764817894606741
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 33
+  },
+  {
+    "cycle_id": "sample_sync_cycle_002",
+    "start_time": "2025-06-16 23:24:59.583309",
+    "end_time": "2025-06-24 23:24:59.583309",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 1297.482464551627,
+    "total_pnl": 297.4824645516269,
+    "daily_pnl": 37.18530806895336,
+    "pnl_percentage": 29.74824645516269,
+    "progress_to_target": 0.1297482464551627,
+    "total_trades": 43,
+    "avg_win_rate": 0.6390931372549019,
+    "max_drawdown": 0.1897345959645469,
+    "avg_sharpe_ratio": 1.0919545991241546,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 12,
+        "pnl": 80.48124169354185,
+        "win_rate": 0.5,
+        "sharpe_ratio": 0.7878765297357857,
+        "avg_confidence": 0.7946677501450776
+      },
+      "ETHUSDT": {
+        "trades": 17,
+        "pnl": 5.543863079839767,
+        "win_rate": 0.7647058823529411,
+        "sharpe_ratio": 1.3154670599866498,
+        "avg_confidence": 0.8086862767053213
+      },
+      "ADAUSDT": {
+        "trades": 6,
+        "pnl": 113.59961684417624,
+        "win_rate": 0.6666666666666666,
+        "sharpe_ratio": 0.8148504425467624,
+        "avg_confidence": 0.6543974630651203
+      },
+      "SOLUSDT": {
+        "trades": 8,
+        "pnl": 70.35268430216763,
+        "win_rate": 0.625,
+        "sharpe_ratio": 1.4496243642274205,
+        "avg_confidence": 0.7612195416201966
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 43
+  },
+  {
+    "cycle_id": "sample_sync_cycle_003",
+    "start_time": "2025-07-23 23:24:59.583514",
+    "end_time": "2025-08-03 23:24:59.583514",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 181.5307952302668,
+    "total_pnl": -818.4692047697332,
+    "daily_pnl": -74.40629134270301,
+    "pnl_percentage": -81.84692047697332,
+    "progress_to_target": 0.01815307952302668,
+    "total_trades": 55,
+    "avg_win_rate": 0.5327264239028946,
+    "max_drawdown": 0.07867383232170522,
+    "avg_sharpe_ratio": 1.1054807315342554,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 14,
+        "pnl": -252.94552050678678,
+        "win_rate": 0.5714285714285714,
+        "sharpe_ratio": 1.7693366250254885,
+        "avg_confidence": 0.7257033783166966
+      },
+      "ETHUSDT": {
+        "trades": 15,
+        "pnl": -118.68610842314631,
+        "win_rate": 0.5333333333333333,
+        "sharpe_ratio": 0.516210140478579,
+        "avg_confidence": 0.6655151113511371
+      },
+      "ADAUSDT": {
+        "trades": 17,
+        "pnl": -191.75988912660404,
+        "win_rate": 0.47058823529411764,
+        "sharpe_ratio": 0.8590841705233008,
+        "avg_confidence": 0.7568235176365099
+      },
+      "SOLUSDT": {
+        "trades": 9,
+        "pnl": -162.5900512853877,
+        "win_rate": 0.5555555555555556,
+        "sharpe_ratio": 1.2772919901096536,
+        "avg_confidence": 0.8934262992631449
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 55
+  },
+  {
+    "cycle_id": "sample_sync_cycle_004",
+    "start_time": "2025-08-16 23:24:59.583745",
+    "end_time": "2025-08-27 23:24:59.583745",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 805.4131171951566,
+    "total_pnl": -194.58688280484338,
+    "daily_pnl": -17.689716618622125,
+    "pnl_percentage": -19.45868828048434,
+    "progress_to_target": 0.08054131171951566,
+    "total_trades": 53,
+    "avg_win_rate": 0.5853982618688501,
+    "max_drawdown": 0.1780268782381237,
+    "avg_sharpe_ratio": 1.4382900959029234,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 9,
+        "pnl": -150.12735381553782,
+        "win_rate": 0.5555555555555556,
+        "sharpe_ratio": 0.9552138956585893,
+        "avg_confidence": 0.718169134938851
+      },
+      "ETHUSDT": {
+        "trades": 17,
+        "pnl": -100.30121711815667,
+        "win_rate": 0.5882352941176471,
+        "sharpe_ratio": 1.7426218633455943,
+        "avg_confidence": 0.688507650170683
+      },
+      "ADAUSDT": {
+        "trades": 14,
+        "pnl": -152.75510995615326,
+        "win_rate": 0.42857142857142855,
+        "sharpe_ratio": 1.6100362440686597,
+        "avg_confidence": 0.7300464843606995
+      },
+      "SOLUSDT": {
+        "trades": 13,
+        "pnl": -4.346356306861686,
+        "win_rate": 0.7692307692307693,
+        "sharpe_ratio": 1.4452883805388508,
+        "avg_confidence": 0.8096380455496459
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 53
+  },
+  {
+    "cycle_id": "sample_sync_cycle_005",
+    "start_time": "2025-07-23 23:24:59.583951",
+    "end_time": "2025-07-29 23:24:59.583951",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 649.4543765930938,
+    "total_pnl": -350.5456234069062,
+    "daily_pnl": -58.4242705678177,
+    "pnl_percentage": -35.05456234069062,
+    "progress_to_target": 0.06494543765930938,
+    "total_trades": 55,
+    "avg_win_rate": 0.5889676113360324,
+    "max_drawdown": 0.06245020591442407,
+    "avg_sharpe_ratio": 1.1210142919158663,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 13,
+        "pnl": -77.95587580730948,
+        "win_rate": 0.46153846153846156,
+        "sharpe_ratio": 1.3752346147879482,
+        "avg_confidence": 0.7754249401753407
+      },
+      "ETHUSDT": {
+        "trades": 10,
+        "pnl": -154.40337294925672,
+        "win_rate": 0.7,
+        "sharpe_ratio": 0.9783702616177063,
+        "avg_confidence": 0.8734657963688608
+      },
+      "ADAUSDT": {
+        "trades": 13,
+        "pnl": -29.618113926647794,
+        "win_rate": 0.6153846153846154,
+        "sharpe_ratio": 1.125955907511281,
+        "avg_confidence": 0.8959362275087528
+      },
+      "SOLUSDT": {
+        "trades": 19,
+        "pnl": -98.15719354341705,
+        "win_rate": 0.5789473684210527,
+        "sharpe_ratio": 1.0044963837465297,
+        "avg_confidence": 0.8590083877505768
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 55
+  },
+  {
+    "cycle_id": "sample_sync_cycle_006",
+    "start_time": "2025-07-10 23:24:59.584137",
+    "end_time": "2025-07-16 23:24:59.584137",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 1137.3997742424456,
+    "total_pnl": 137.3997742424456,
+    "daily_pnl": 22.899962373740934,
+    "pnl_percentage": 13.73997742424456,
+    "progress_to_target": 0.11373997742424456,
+    "total_trades": 44,
+    "avg_win_rate": 0.618371212121212,
+    "max_drawdown": 0.23454362155622394,
+    "avg_sharpe_ratio": 0.9546449262298002,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 16,
+        "pnl": 12.46152995431904,
+        "win_rate": 0.625,
+        "sharpe_ratio": 1.195435900197134,
+        "avg_confidence": 0.6061357431867747
+      },
+      "ETHUSDT": {
+        "trades": 11,
+        "pnl": 33.8274986983378,
+        "win_rate": 0.6363636363636364,
+        "sharpe_ratio": 0.5657270379962973,
+        "avg_confidence": 0.6308528582537242
+      },
+      "ADAUSDT": {
+        "trades": 11,
+        "pnl": -31.96072588596696,
+        "win_rate": 0.5454545454545454,
+        "sharpe_ratio": 1.3510524327493387,
+        "avg_confidence": 0.7807454776991787
+      },
+      "SOLUSDT": {
+        "trades": 6,
+        "pnl": -108.8858586479881,
+        "win_rate": 0.6666666666666666,
+        "sharpe_ratio": 0.7063643339764311,
+        "avg_confidence": 0.8270165516925181
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 44
+  },
+  {
+    "cycle_id": "sample_sync_cycle_007",
+    "start_time": "2025-07-10 23:24:59.584351",
+    "end_time": "2025-07-16 23:24:59.584351",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 829.2765484401167,
+    "total_pnl": -170.7234515598833,
+    "daily_pnl": -28.453908593313884,
+    "pnl_percentage": -17.07234515598833,
+    "progress_to_target": 0.08292765484401167,
+    "total_trades": 58,
+    "avg_win_rate": 0.5702380952380952,
+    "max_drawdown": 0.09038623210663872,
+    "avg_sharpe_ratio": 0.9749967259683676,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 14,
+        "pnl": 10.921672697230015,
+        "win_rate": 0.7142857142857143,
+        "sharpe_ratio": 1.0348421195922763,
+        "avg_confidence": 0.618455758339141
+      },
+      "ETHUSDT": {
+        "trades": 16,
+        "pnl": -35.0149319959764,
+        "win_rate": 0.5,
+        "sharpe_ratio": 1.1227943769534172,
+        "avg_confidence": 0.623803165108925
+      },
+      "ADAUSDT": {
+        "trades": 18,
+        "pnl": -72.29676270441254,
+        "win_rate": 0.6666666666666666,
+        "sharpe_ratio": 1.006555750349807,
+        "avg_confidence": 0.8165201791279374
+      },
+      "SOLUSDT": {
+        "trades": 10,
+        "pnl": 15.589942997346434,
+        "win_rate": 0.4,
+        "sharpe_ratio": 0.7357946569779699,
+        "avg_confidence": 0.6855938865231676
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 58
+  },
+  {
+    "cycle_id": "sample_sync_cycle_008",
+    "start_time": "2025-07-19 23:24:59.584537",
+    "end_time": "2025-07-26 23:24:59.584537",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 1431.4108114219025,
+    "total_pnl": 431.41081142190245,
+    "daily_pnl": 61.630115917414635,
+    "pnl_percentage": 43.141081142190245,
+    "progress_to_target": 0.14314108114219024,
+    "total_trades": 48,
+    "avg_win_rate": 0.6150793650793651,
+    "max_drawdown": 0.2299588424525456,
+    "avg_sharpe_ratio": 1.463380289297205,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 10,
+        "pnl": 71.92965221148654,
+        "win_rate": 0.5,
+        "sharpe_ratio": 1.9711323719508282,
+        "avg_confidence": 0.6634926276500424
+      },
+      "ETHUSDT": {
+        "trades": 14,
+        "pnl": 55.667242804540784,
+        "win_rate": 0.5714285714285714,
+        "sharpe_ratio": 0.6353634959597222,
+        "avg_confidence": 0.7242789611747833
+      },
+      "ADAUSDT": {
+        "trades": 6,
+        "pnl": 80.75640847715277,
+        "win_rate": 0.6666666666666666,
+        "sharpe_ratio": 1.3837963025091915,
+        "avg_confidence": 0.6548950715771763
+      },
+      "SOLUSDT": {
+        "trades": 18,
+        "pnl": 67.89864615162568,
+        "win_rate": 0.7222222222222222,
+        "sharpe_ratio": 1.8632289867690786,
+        "avg_confidence": 0.692947117217267
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 48
+  },
+  {
+    "cycle_id": "sample_sync_cycle_009",
+    "start_time": "2025-06-12 23:24:59.584740",
+    "end_time": "2025-06-18 23:24:59.584740",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 501.5040272428679,
+    "total_pnl": -498.4959727571321,
+    "daily_pnl": -83.08266212618868,
+    "pnl_percentage": -49.84959727571321,
+    "progress_to_target": 0.05015040272428679,
+    "total_trades": 61,
+    "avg_win_rate": 0.5093201754385965,
+    "max_drawdown": 0.23529645535078753,
+    "avg_sharpe_ratio": 1.4841709233734237,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 16,
+        "pnl": -203.26546392875133,
+        "win_rate": 0.375,
+        "sharpe_ratio": 1.9727240037685942,
+        "avg_confidence": 0.6037464335107254
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "pnl": -83.36941965035973,
+        "win_rate": 0.5833333333333334,
+        "sharpe_ratio": 0.8728524525334046,
+        "avg_confidence": 0.8924493211335478
+      },
+      "ADAUSDT": {
+        "trades": 14,
+        "pnl": -100.04920529082497,
+        "win_rate": 0.5,
+        "sharpe_ratio": 1.1908552772035028,
+        "avg_confidence": 0.7705060060588353
+      },
+      "SOLUSDT": {
+        "trades": 19,
+        "pnl": -44.09172653251814,
+        "win_rate": 0.5789473684210527,
+        "sharpe_ratio": 1.9002519599881933,
+        "avg_confidence": 0.8904764084888046
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 61
+  },
+  {
+    "cycle_id": "sample_sync_cycle_010",
+    "start_time": "2025-07-07 23:24:59.584954",
+    "end_time": "2025-07-14 23:24:59.584954",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 937.2747363529256,
+    "total_pnl": -62.72526364707437,
+    "daily_pnl": -8.960751949582052,
+    "pnl_percentage": -6.272526364707437,
+    "progress_to_target": 0.09372747363529256,
+    "total_trades": 43,
+    "avg_win_rate": 0.5054137039431157,
+    "max_drawdown": 0.08928224783145938,
+    "avg_sharpe_ratio": 1.209473722052551,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 6,
+        "pnl": -34.88210982753616,
+        "win_rate": 0.5,
+        "sharpe_ratio": 0.7798151583911151,
+        "avg_confidence": 0.700296523542321
+      },
+      "ETHUSDT": {
+        "trades": 13,
+        "pnl": -92.13912568385079,
+        "win_rate": 0.5384615384615384,
+        "sharpe_ratio": 1.9037870602686824,
+        "avg_confidence": 0.7131625500377277
+      },
+      "ADAUSDT": {
+        "trades": 7,
+        "pnl": -56.79583256403091,
+        "win_rate": 0.5714285714285714,
+        "sharpe_ratio": 1.1514826063897066,
+        "avg_confidence": 0.6368417603084936
+      },
+      "SOLUSDT": {
+        "trades": 17,
+        "pnl": -14.783423890913772,
+        "win_rate": 0.4117647058823529,
+        "sharpe_ratio": 1.0028100631607004,
+        "avg_confidence": 0.7511282891780382
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 43
+  },
+  {
+    "cycle_id": "sample_sync_cycle_011",
+    "start_time": "2025-07-21 23:24:59.585177",
+    "end_time": "2025-07-26 23:24:59.585177",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 1615.3666855872282,
+    "total_pnl": 615.3666855872282,
+    "daily_pnl": 123.07333711744563,
+    "pnl_percentage": 61.536668558722816,
+    "progress_to_target": 0.1615366685587228,
+    "total_trades": 44,
+    "avg_win_rate": 0.5513392857142857,
+    "max_drawdown": 0.23388587067230998,
+    "avg_sharpe_ratio": 1.3790151890652176,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 7,
+        "pnl": 140.65181097303937,
+        "win_rate": 0.42857142857142855,
+        "sharpe_ratio": 1.9723275830353946,
+        "avg_confidence": 0.8520420386901968
+      },
+      "ETHUSDT": {
+        "trades": 14,
+        "pnl": 177.574466076717,
+        "win_rate": 0.6428571428571429,
+        "sharpe_ratio": 1.222757245438943,
+        "avg_confidence": 0.8602966417265963
+      },
+      "ADAUSDT": {
+        "trades": 7,
+        "pnl": 121.29142476157176,
+        "win_rate": 0.5714285714285714,
+        "sharpe_ratio": 1.0136383810670297,
+        "avg_confidence": 0.8942738626561781
+      },
+      "SOLUSDT": {
+        "trades": 16,
+        "pnl": 217.8410672560487,
+        "win_rate": 0.5625,
+        "sharpe_ratio": 1.3073375467195028,
+        "avg_confidence": 0.7251911621255202
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 44
+  },
+  {
+    "cycle_id": "sample_sync_cycle_012",
+    "start_time": "2025-07-13 23:24:59.585379",
+    "end_time": "2025-07-20 23:24:59.585379",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 1103.8863838069635,
+    "total_pnl": 103.88638380696356,
+    "daily_pnl": 14.840911972423367,
+    "pnl_percentage": 10.388638380696356,
+    "progress_to_target": 0.11038863838069635,
+    "total_trades": 60,
+    "avg_win_rate": 0.5800653594771241,
+    "max_drawdown": 0.16717778509897274,
+    "avg_sharpe_ratio": 1.48833368861302,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 15,
+        "pnl": 43.486774585078024,
+        "win_rate": 0.6666666666666666,
+        "sharpe_ratio": 1.6835330754260085,
+        "avg_confidence": 0.7853053192086232
+      },
+      "ETHUSDT": {
+        "trades": 10,
+        "pnl": -65.31078742825832,
+        "win_rate": 0.5,
+        "sharpe_ratio": 1.717379159281512,
+        "avg_confidence": 0.6968147802181627
+      },
+      "ADAUSDT": {
+        "trades": 17,
+        "pnl": -24.526136972622712,
+        "win_rate": 0.7647058823529411,
+        "sharpe_ratio": 1.7570719666613503,
+        "avg_confidence": 0.8567090499950043
+      },
+      "SOLUSDT": {
+        "trades": 18,
+        "pnl": -11.525454975611982,
+        "win_rate": 0.3888888888888889,
+        "sharpe_ratio": 0.7953505530832095,
+        "avg_confidence": 0.7439623154921743
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 60
+  },
+  {
+    "cycle_id": "sample_sync_cycle_013",
+    "start_time": "2025-07-24 23:24:59.585585",
+    "end_time": "2025-08-06 23:24:59.585585",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 1307.4193619559505,
+    "total_pnl": 307.4193619559506,
+    "daily_pnl": 23.647643227380815,
+    "pnl_percentage": 30.74193619559506,
+    "progress_to_target": 0.13074193619559504,
+    "total_trades": 39,
+    "avg_win_rate": 0.4739583333333333,
+    "max_drawdown": 0.085357959258095,
+    "avg_sharpe_ratio": 1.029966060575017,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 9,
+        "pnl": 186.17501604089685,
+        "win_rate": 0.3333333333333333,
+        "sharpe_ratio": 1.2066097511809306,
+        "avg_confidence": 0.6139849231696498
+      },
+      "ETHUSDT": {
+        "trades": 7,
+        "pnl": 43.982650363431546,
+        "win_rate": 0.42857142857142855,
+        "sharpe_ratio": 0.9805523271123835,
+        "avg_confidence": 0.7161076893318625
+      },
+      "ADAUSDT": {
+        "trades": 16,
+        "pnl": 91.2998578033521,
+        "win_rate": 0.5625,
+        "sharpe_ratio": 0.6290650492324513,
+        "avg_confidence": 0.8474701539145132
+      },
+      "SOLUSDT": {
+        "trades": 7,
+        "pnl": 73.1050898509159,
+        "win_rate": 0.5714285714285714,
+        "sharpe_ratio": 1.303637114774303,
+        "avg_confidence": 0.8343725863903406
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 39
+  },
+  {
+    "cycle_id": "sample_sync_cycle_014",
+    "start_time": "2025-07-08 23:24:59.585787",
+    "end_time": "2025-07-14 23:24:59.585787",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 851.4493563434279,
+    "total_pnl": -148.55064365657208,
+    "daily_pnl": -24.75844060942868,
+    "pnl_percentage": -14.855064365657208,
+    "progress_to_target": 0.08514493563434279,
+    "total_trades": 39,
+    "avg_win_rate": 0.48717948717948717,
+    "max_drawdown": 0.1851822072062263,
+    "avg_sharpe_ratio": 1.4914522748522208,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 13,
+        "pnl": -96.13515734332708,
+        "win_rate": 0.6153846153846154,
+        "sharpe_ratio": 1.8479420122465076,
+        "avg_confidence": 0.7561874694697756
+      },
+      "ETHUSDT": {
+        "trades": 15,
+        "pnl": -21.675266606384444,
+        "win_rate": 0.6,
+        "sharpe_ratio": 0.8055971699151955,
+        "avg_confidence": 0.7063565122868529
+      },
+      "ADAUSDT": {
+        "trades": 5,
+        "pnl": -46.296458405446955,
+        "win_rate": 0.4,
+        "sharpe_ratio": 1.8691943763669532,
+        "avg_confidence": 0.7289024905587578
+      },
+      "SOLUSDT": {
+        "trades": 6,
+        "pnl": -12.557942880271789,
+        "win_rate": 0.3333333333333333,
+        "sharpe_ratio": 1.4430755408802274,
+        "avg_confidence": 0.7309875633284041
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 39
+  },
+  {
+    "cycle_id": "sample_sync_cycle_015",
+    "start_time": "2025-06-14 23:24:59.585998",
+    "end_time": "2025-06-27 23:24:59.585998",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "ADAUSDT",
+      "SOLUSDT"
+    ],
+    "initial_balance": 1000.0,
+    "final_balance": 805.0284182257814,
+    "total_pnl": -194.97158177421863,
+    "daily_pnl": -14.997813982632202,
+    "pnl_percentage": -19.497158177421863,
+    "progress_to_target": 0.08050284182257814,
+    "total_trades": 35,
+    "avg_win_rate": 0.5694444444444444,
+    "max_drawdown": 0.0672377957238402,
+    "avg_sharpe_ratio": 1.2040124580835543,
+    "symbol_performance": {
+      "BTCUSDT": {
+        "trades": 6,
+        "pnl": 17.668533835890827,
+        "win_rate": 0.5,
+        "sharpe_ratio": 1.8954804612607665,
+        "avg_confidence": 0.8482786614737057
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "pnl": 5.0943601838226655,
+        "win_rate": 0.5833333333333334,
+        "sharpe_ratio": 1.087417774540718,
+        "avg_confidence": 0.6750159551289001
+      },
+      "ADAUSDT": {
+        "trades": 8,
+        "pnl": -50.35752241489572,
+        "win_rate": 0.75,
+        "sharpe_ratio": 0.5489740296307342,
+        "avg_confidence": 0.7053656371637613
+      },
+      "SOLUSDT": {
+        "trades": 9,
+        "pnl": 0.4271397813568143,
+        "win_rate": 0.4444444444444444,
+        "sharpe_ratio": 1.2841775669019988,
+        "avg_confidence": 0.712832634909728
+      }
+    },
+    "synchronized_timestamps": [],
+    "status": "completed",
+    "parallel_decisions": 35
+  }
+]

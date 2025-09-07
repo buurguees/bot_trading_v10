@@ -6,6 +6,7 @@ Callbacks específicos para la página principal
 from dash import html, dcc, Input, Output, State, callback
 import plotly.graph_objects as go
 import pandas as pd
+import numpy as np
 from datetime import datetime, timedelta
 import logging
 

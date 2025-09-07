@@ -310,8 +310,8 @@ class DashboardDataProvider:
                 cycles_list.append({
                     'cycle_id': cycle.cycle_id,
                     'symbols': ', '.join(cycle.symbols),  # Todos los símbolos procesados
-                    'start_time': cycle.start_time.isoformat(),
-                    'end_time': cycle.end_time.isoformat() if cycle.end_time else None,
+                    'start_time': cycle.start_time.isoformat() if hasattr(cycle.start_time, 'isoformat') else str(cycle.start_time),
+                    'end_time': cycle.end_time.isoformat() if cycle.end_time and hasattr(cycle.end_time, 'isoformat') else (str(cycle.end_time) if cycle.end_time else None),
                     'final_balance': cycle.final_balance,
                     'daily_pnl': cycle.daily_pnl,
                     'total_pnl': cycle.total_pnl,
