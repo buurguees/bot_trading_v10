@@ -27,6 +27,7 @@ from trading.risk_manager import risk_manager
 from trading.executor import trading_executor
 from models.prediction_engine import prediction_engine
 from monitoring.cycle_tracker import cycle_tracker
+from monitoring.core.synchronized_cycle_manager import synchronized_cycle_manager
 from models.adaptive_trainer import adaptive_trainer
 from models.confidence_estimator import confidence_estimator
 from data.collector import data_collector
@@ -291,45 +292,89 @@ class DashboardDataProvider:
             return {}
     
     def _get_cycles_data(self) -> Dict[str, Any]:
-        """Datos de ciclos cronológicos"""
+        """Datos de ciclos sincronizados"""
         try:
-            # Obtener estadísticas de ciclos
-            stats = cycle_tracker.get_cycle_statistics()
+            # Generar ciclos sincronizados de ejemplo si no existen
+            if not synchronized_cycle_manager.cycles:
+                synchronized_cycle_manager.generate_sample_synchronized_cycles(15)
             
-            # Obtener top 10 ciclos
-            top_cycles = cycle_tracker.get_top_cycles(limit=10, metric='daily_pnl')
+            # Obtener estadísticas de ciclos sincronizados
+            stats = self._get_synchronized_cycle_statistics()
             
-            # Si no hay ciclos, generar datos de ejemplo más realistas
-            if not top_cycles:
-                top_cycles = self._generate_realistic_cycles_data()
+            # Obtener top 10 ciclos sincronizados
+            top_cycles = synchronized_cycle_manager.get_top_synchronized_cycles(limit=10, metric='final_balance')
             
             # Convertir a formato serializable
             cycles_list = []
             for cycle in top_cycles:
                 cycles_list.append({
                     'cycle_id': cycle.cycle_id,
-                    'symbol': cycle.symbol,
+                    'symbols': ', '.join(cycle.symbols),  # Todos los símbolos procesados
                     'start_time': cycle.start_time.isoformat(),
                     'end_time': cycle.end_time.isoformat() if cycle.end_time else None,
+                    'final_balance': cycle.final_balance,
                     'daily_pnl': cycle.daily_pnl,
                     'total_pnl': cycle.total_pnl,
                     'pnl_percentage': cycle.pnl_percentage,
                     'progress_to_target': cycle.progress_to_target,
-                    'trades_count': cycle.trades_count,
-                    'win_rate': cycle.win_rate,
+                    'trades_count': cycle.total_trades,
+                    'win_rate': cycle.avg_win_rate,
                     'max_drawdown': cycle.max_drawdown,
-                    'sharpe_ratio': cycle.sharpe_ratio,
+                    'sharpe_ratio': cycle.avg_sharpe_ratio,
+                    'parallel_decisions': cycle.parallel_decisions,
+                    'symbol_performance': cycle.symbol_performance,
                     'status': cycle.status
                 })
             
             return {
                 'statistics': stats,
                 'top_cycles': cycles_list,
-                'total_cycles': len(cycle_tracker.cycles)
+                'total_cycles': len(synchronized_cycle_manager.cycles)
             }
             
         except Exception as e:
-            logger.error(f"Error obteniendo datos de ciclos: {e}")
+            logger.error(f"Error obteniendo datos de ciclos sincronizados: {e}")
+            return {}
+    
+    def _get_synchronized_cycle_statistics(self) -> Dict[str, Any]:
+        """Obtiene estadísticas de ciclos sincronizados"""
+        try:
+            if not synchronized_cycle_manager.cycles:
+                return {
+                    'total_cycles': 0,
+                    'completed_cycles': 0,
+                    'avg_final_balance': 0.0,
+                    'avg_progress': 0.0,
+                    'best_final_balance': 0.0,
+                    'best_progress': 0.0,
+                    'total_parallel_decisions': 0
+                }
+            
+            completed_cycles = [c for c in synchronized_cycle_manager.cycles if c.status == 'completed']
+            
+            if not completed_cycles:
+                return {
+                    'total_cycles': len(synchronized_cycle_manager.cycles),
+                    'completed_cycles': 0,
+                    'avg_final_balance': 0.0,
+                    'avg_progress': 0.0,
+                    'best_final_balance': 0.0,
+                    'best_progress': 0.0,
+                    'total_parallel_decisions': 0
+                }
+            
+            return {
+                'total_cycles': len(synchronized_cycle_manager.cycles),
+                'completed_cycles': len(completed_cycles),
+                'avg_final_balance': np.mean([c.final_balance for c in completed_cycles]),
+                'avg_progress': np.mean([c.progress_to_target for c in completed_cycles]),
+                'best_final_balance': max([c.final_balance for c in completed_cycles]),
+                'best_progress': max([c.progress_to_target for c in completed_cycles]),
+                'total_parallel_decisions': sum([c.parallel_decisions for c in completed_cycles])
+            }
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo estadísticas de ciclos sincronizados: {e}")
             return {}
     
     def _generate_realistic_cycles_data(self) -> list:

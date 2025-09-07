@@ -305,26 +305,40 @@ def register_home_callbacks(app, data_provider, chart_components):
         [Input('dashboard-data', 'data')]
     )
     def update_cycles_overview_metrics(data):
-        """Actualiza las métricas del overview de ciclos"""
+        """Actualiza las métricas del overview de ciclos sincronizados"""
         try:
             if not data or 'cycles' not in data:
                 return "$0.00", "$0.00", "0.00%", "0.00%", "0.00", "0"
             
             cycles_data = data['cycles'].get('top_cycles', [])
             
-            from monitoring.components.widgets.cycles_overview import CyclesOverviewWidget
-            overview_widget = CyclesOverviewWidget()
-            averages = overview_widget.calculate_cycles_averages(cycles_data)
+            # Calcular promedios de ciclos sincronizados
+            if not cycles_data:
+                return "$0.00", "$0.00", "0.00%", "0.00%", "0.00", "0"
+            
+            # Filtrar solo ciclos completados
+            completed_cycles = [c for c in cycles_data if c.get('status') == 'completed']
+            
+            if not completed_cycles:
+                return "$0.00", "$0.00", "0.00%", "0.00%", "0.00", "0"
+            
+            # Calcular promedios
+            avg_final_balance = np.mean([c.get('final_balance', 0) for c in completed_cycles])
+            avg_daily_pnl = np.mean([c.get('daily_pnl', 0) for c in completed_cycles])
+            avg_progress_target = np.mean([c.get('progress_to_target', 0) for c in completed_cycles])
+            avg_win_rate = np.mean([c.get('win_rate', 0) for c in completed_cycles])
+            avg_sharpe_ratio = np.mean([c.get('sharpe_ratio', 0) for c in completed_cycles])
+            total_cycles = len(completed_cycles)
             
             # Formatear valores
-            avg_final_balance = f"${averages['avg_final_balance']:,.2f}"
-            avg_daily_pnl = f"${averages['avg_daily_pnl']:,.2f}"
-            avg_progress_target = f"{averages['avg_progress_target']:.2f}%"
-            avg_win_rate = f"{averages['avg_win_rate']:.1f}%"
-            avg_sharpe_ratio = f"{averages['avg_sharpe_ratio']:.2f}"
-            total_cycles = str(averages['total_completed_cycles'])
+            avg_final_balance_str = f"${avg_final_balance:,.2f}"
+            avg_daily_pnl_str = f"${avg_daily_pnl:,.2f}"
+            avg_progress_target_str = f"{avg_progress_target:.2f}%"
+            avg_win_rate_str = f"{avg_win_rate:.1f}%"
+            avg_sharpe_ratio_str = f"{avg_sharpe_ratio:.2f}"
+            total_cycles_str = str(total_cycles)
             
-            return avg_final_balance, avg_daily_pnl, avg_progress_target, avg_win_rate, avg_sharpe_ratio, total_cycles
+            return avg_final_balance_str, avg_daily_pnl_str, avg_progress_target_str, avg_win_rate_str, avg_sharpe_ratio_str, total_cycles_str
             
         except Exception as e:
             logger.error(f"Error actualizando métricas del overview: {e}")

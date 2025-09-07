@@ -226,7 +226,7 @@ def register_chart_callbacks(app, data_provider, chart_components):
             logger.error(f"Error actualizando gráfico de trading: {e}")
             return go.Figure(), "Error cargando datos"
     
-    # Callback para widget de ciclos
+    # Callback para widget de ciclos sincronizados
     @app.callback(
         [Output('top-cycles-table', 'data'),
          Output('cycles-performance-chart', 'figure'),
@@ -236,19 +236,19 @@ def register_chart_callbacks(app, data_provider, chart_components):
          Input('refresh-cycles-btn', 'n_clicks')]
     )
     def update_cycles_data(sort_metric, symbol_filter, refresh_clicks):
-        """Actualiza los datos del widget de ciclos"""
+        """Actualiza los datos del widget de ciclos sincronizados"""
         try:
             from monitoring.components.widgets.top_cycles_widget import TopCyclesWidget
-            from monitoring.core.cycle_tracker import cycle_tracker
+            from monitoring.core.synchronized_cycle_manager import synchronized_cycle_manager
             
             cycles_widget = TopCyclesWidget()
             
-            # Obtener ciclos del tracker
-            cycles = cycle_tracker.get_top_cycles(limit=10, metric=sort_metric)
+            # Obtener ciclos sincronizados del manager
+            cycles = synchronized_cycle_manager.get_top_synchronized_cycles(limit=10, metric=sort_metric)
             
-            # Filtrar por símbolo si no es 'all'
+            # Filtrar por símbolo si no es 'all' (buscar en la lista de símbolos)
             if symbol_filter != 'all':
-                cycles = [c for c in cycles if c.symbol == symbol_filter]
+                cycles = [c for c in cycles if symbol_filter in c.symbols]
             
             # Convertir a datos de tabla
             table_data = []
@@ -256,25 +256,33 @@ def register_chart_callbacks(app, data_provider, chart_components):
                 table_data.append({
                     'rank': i + 1,
                     'cycle_id': cycle.cycle_id.split('_')[-1],  # Solo la parte final del ID
-                    'symbol': cycle.symbol,
+                    'symbols': ', '.join(cycle.symbols),  # Todos los símbolos procesados
                     'date': cycle.start_time.strftime('%Y-%m-%d'),
-                    'daily_pnl': cycle.daily_pnl,
-                    'pnl_pct': cycle.pnl_percentage,
+                    'final_balance': cycle.final_balance,
+                    'win_rate': cycle.avg_win_rate,
+                    'trades': cycle.total_trades,
                     'progress': cycle.progress_to_target,
-                    'trades': cycle.trades_count,
-                    'win_rate': cycle.win_rate,
-                    'sharpe': cycle.sharpe_ratio
+                    'daily_pnl': cycle.daily_pnl,
+                    'sharpe': cycle.avg_sharpe_ratio
                 })
             
             # Crear gráfico de rendimiento
             chart_figure = cycles_widget.create_cycles_performance_chart(table_data)
             
-            # Obtener estadísticas resumen
-            stats = cycle_tracker.get_cycle_statistics()
+            # Obtener estadísticas resumen de ciclos sincronizados
+            stats = {
+                'total_cycles': len(synchronized_cycle_manager.cycles),
+                'completed_cycles': len([c for c in synchronized_cycle_manager.cycles if c.status == 'completed']),
+                'avg_final_balance': np.mean([c.final_balance for c in cycles]) if cycles else 0,
+                'avg_progress': np.mean([c.progress_to_target for c in cycles]) if cycles else 0,
+                'best_final_balance': max([c.final_balance for c in cycles]) if cycles else 0,
+                'best_progress': max([c.progress_to_target for c in cycles]) if cycles else 0,
+                'total_parallel_decisions': sum([c.parallel_decisions for c in cycles]) if cycles else 0
+            }
             summary_stats = cycles_widget.create_cycles_summary_stats(stats)
             
             return table_data, chart_figure, summary_stats
             
         except Exception as e:
-            logger.error(f"Error actualizando datos de ciclos: {e}")
+            logger.error(f"Error actualizando datos de ciclos sincronizados: {e}")
             return [], go.Figure(), html.Div("Error cargando datos", style={'color': 'red'})

@@ -41,9 +41,9 @@ class TopCyclesWidget:
         return html.Div([
             # Header del widget
             html.Div([
-                html.H4("🏆 Top 10 Ciclos Cronológicos", 
+                html.H4("🏆 Top 10 Mejores Ciclos Sincronizados", 
                        style={'color': self.theme_colors['text_primary'], 'marginBottom': '10px'}),
-                html.P("Mejores rendimientos históricos del bot", 
+                html.P("Ciclos con mejor balance final, win rate, trades y progreso hacia objetivo", 
                       style={'color': self.theme_colors['text_secondary'], 'marginBottom': '20px'})
             ]),
             
@@ -54,13 +54,14 @@ class TopCyclesWidget:
                     dcc.Dropdown(
                         id='cycles-sort-metric',
                         options=[
-                            {'label': 'PnL Diario', 'value': 'daily_pnl'},
-                            {'label': '% PnL', 'value': 'pnl_percentage'},
-                            {'label': 'Progreso Objetivo', 'value': 'progress_to_target'},
+                            {'label': 'Balance Final', 'value': 'final_balance'},
                             {'label': 'Win Rate', 'value': 'win_rate'},
+                            {'label': 'Número de Trades', 'value': 'trades_count'},
+                            {'label': 'Progreso Objetivo', 'value': 'progress_to_target'},
+                            {'label': 'PnL Diario', 'value': 'daily_pnl'},
                             {'label': 'Sharpe Ratio', 'value': 'sharpe_ratio'}
                         ],
-                        value='daily_pnl',
+                        value='final_balance',
                         style={'width': '150px', 'display': 'inline-block'}
                     )
                 ], style={'margin': '5px', 'display': 'inline-block'}),
@@ -90,18 +91,18 @@ class TopCyclesWidget:
             
             # Tabla de Top 10 ciclos
             html.Div([
-                dash_table.DataTable(
+                    dash_table.DataTable(
                     id='top-cycles-table',
                     columns=[
                         {'name': 'Rank', 'id': 'rank', 'type': 'numeric', 'width': '60px'},
                         {'name': 'Ciclo', 'id': 'cycle_id', 'type': 'text', 'width': '120px'},
-                        {'name': 'Símbolo', 'id': 'symbol', 'type': 'text', 'width': '80px'},
+                        {'name': 'Símbolos', 'id': 'symbols', 'type': 'text', 'width': '100px'},
                         {'name': 'Fecha', 'id': 'date', 'type': 'text', 'width': '100px'},
-                        {'name': 'PnL Diario', 'id': 'daily_pnl', 'type': 'numeric', 'format': {'specifier': '$,.2f'}, 'width': '100px'},
-                        {'name': '% PnL', 'id': 'pnl_pct', 'type': 'numeric', 'format': {'specifier': '.2f'}, 'width': '80px'},
-                        {'name': 'Progreso', 'id': 'progress', 'type': 'numeric', 'format': {'specifier': '.2f'}, 'width': '80px'},
-                        {'name': 'Trades', 'id': 'trades', 'type': 'numeric', 'width': '70px'},
+                        {'name': 'Balance Final', 'id': 'final_balance', 'type': 'numeric', 'format': {'specifier': '$,.2f'}, 'width': '120px'},
                         {'name': 'Win Rate', 'id': 'win_rate', 'type': 'numeric', 'format': {'specifier': '.1%'}, 'width': '80px'},
+                        {'name': 'Trades', 'id': 'trades', 'type': 'numeric', 'width': '70px'},
+                        {'name': 'Progreso', 'id': 'progress', 'type': 'numeric', 'format': {'specifier': '.2f'}, 'width': '80px'},
+                        {'name': 'PnL Diario', 'id': 'daily_pnl', 'type': 'numeric', 'format': {'specifier': '$,.2f'}, 'width': '100px'},
                         {'name': 'Sharpe', 'id': 'sharpe', 'type': 'numeric', 'format': {'specifier': '.2f'}, 'width': '70px'}
                     ],
                     data=[],
