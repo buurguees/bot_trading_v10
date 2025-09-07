@@ -178,6 +178,19 @@ def start_dashboard(host='127.0.0.1', port=8050, debug=False):
     try:
         global dashboard
         dashboard = TradingDashboard(host=host, port=port, debug=debug)
+        
+        # Abrir navegador automáticamente
+        import webbrowser
+        import time
+        
+        def open_browser():
+            time.sleep(2)  # Esperar a que el servidor se inicie
+            webbrowser.open(f'http://{host}:{port}')
+        
+        # Iniciar hilo para abrir navegador
+        browser_thread = threading.Thread(target=open_browser, daemon=True)
+        browser_thread.start()
+        
         dashboard.run()
         
     except KeyboardInterrupt:
