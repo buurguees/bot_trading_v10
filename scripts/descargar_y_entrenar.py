@@ -32,7 +32,7 @@ sys.path.append(project_root)
 from config.config_loader import user_config
 from models.adaptive_trainer import adaptive_trainer
 from data.collector import data_collector
-from data.database import db_manager
+from data.database import db_manager, MarketData
 from trading.executor import trading_executor
 from agents.self_learning_system import SelfLearningSystem
 
@@ -54,7 +54,7 @@ class DescargaYEntrenamiento:
         self.config = user_config
         self.symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
         self.timeframes = ['1h', '4h', '1d']
-        self.years = 5
+        self.years = 1  # Usar 1 año en lugar de 5 para evitar límites de API
         self.downloaded_data = {}
         self.training_results = {}
         
@@ -194,7 +194,7 @@ class DescargaYEntrenamiento:
             print(f"TOTAL DESCARGADO: {total_downloaded:,} registros")
             print()
             
-            if total_downloaded < 10000:
+            if total_downloaded < 1000:
                 raise Exception(f"Datos insuficientes: solo {total_downloaded} registros")
             
         except Exception as e:
@@ -210,27 +210,23 @@ class DescargaYEntrenamiento:
             # Convertir DataFrame a MarketData objects
             market_data_list = []
             for timestamp, row in df.iterrows():
-                market_data = {
-                    'symbol': symbol,
-                    'timestamp': int(timestamp.timestamp() * 1000),
-                    'open': float(row['open']),
-                    'high': float(row['high']),
-                    'low': float(row['low']),
-                    'close': float(row['close']),
-                    'volume': float(row['volume'])
-                }
+                market_data = MarketData(
+                    symbol=symbol,
+                    timestamp=int(timestamp.timestamp()),
+                    open=float(row['open']),
+                    high=float(row['high']),
+                    low=float(row['low']),
+                    close=float(row['close']),
+                    volume=float(row['volume'])
+                )
                 market_data_list.append(market_data)
             
-            # Insertar en base de datos
-            saved_count = 0
-            for data in market_data_list:
-                try:
-                    success = db_manager.insert_market_data(data)
-                    if success:
-                        saved_count += 1
-                except Exception as e:
-                    logger.error(f"Error insertando dato: {e}")
-                    continue
+            # Insertar en base de datos usando bulk insert
+            try:
+                saved_count = db_manager.insert_market_data_bulk(market_data_list)
+            except Exception as e:
+                logger.error(f"Error insertando datos en bulk: {e}")
+                saved_count = 0
             
             return saved_count
             
