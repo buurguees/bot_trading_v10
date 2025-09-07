@@ -38,10 +38,10 @@ class TradingBotMain:
             summary = db_manager.get_historical_data_summary()
             
             if 'error' in summary:
-                print(f"❌ Error verificando datos: {summary['error']}")
+                print(f"Error verificando datos: {summary['error']}")
                 return False
             
-            print(f"📊 Símbolos disponibles: {summary['total_symbols']}")
+            print(f"Símbolos disponibles: {summary['total_symbols']}")
             print(f"📈 Total registros: {summary['total_records']:,}")
             
             # Verificar si necesitamos más datos
@@ -53,17 +53,17 @@ class TradingBotMain:
                 results = await download_missing_data(target_days=365)
                 
                 if 'error' in results:
-                    print(f"❌ Error descargando datos: {results['error']}")
+                    print(f"Error descargando datos: {results['error']}")
                     return False
                 
-                print(f"✅ Descarga completada: {results['total_downloaded']:,} registros")
+                print(f"Descarga completada: {results['total_downloaded']:,} registros")
             else:
-                print("✅ Datos suficientes disponibles")
+                print("Datos suficientes disponibles")
             
             return True
             
         except Exception as e:
-            print(f"❌ Error en verificación: {e}")
+            print(f"Error en verificación: {e}")
             return False
     
     def iniciar_dashboard_background(self):
@@ -82,8 +82,8 @@ class TradingBotMain:
             # Esperar un poco para que se inicie
             time.sleep(3)
             
-            print("✅ Dashboard iniciado en http://127.0.0.1:8050")
-            print("📊 Abre tu navegador para ver las métricas en tiempo real")
+            print("Dashboard iniciado en http://127.0.0.1:8050")
+            print("Abre tu navegador para ver las métricas en tiempo real")
             print("⏳ Esperando 5 segundos para que se cargue completamente...")
             time.sleep(5)
             
@@ -91,7 +91,7 @@ class TradingBotMain:
             return True
             
         except Exception as e:
-            print(f"❌ Error iniciando dashboard: {e}")
+            print(f"Error iniciando dashboard: {e}")
             return False
     
     def _run_dashboard(self):
@@ -100,7 +100,7 @@ class TradingBotMain:
             from monitoring.dashboard import start_dashboard
             start_dashboard(host='127.0.0.1', port=8050, debug=False)
         except Exception as e:
-            print(f"❌ Error en dashboard: {e}")
+            print(f"Error en dashboard: {e}")
     
     def verificar_modelo_existente(self):
         """Verifica que el modelo existente esté disponible"""
@@ -110,11 +110,11 @@ class TradingBotMain:
         model_path = "models/saved_models/best_lstm_attention_20250906_223751.h5"
         
         if os.path.exists(model_path):
-            print(f"✅ Modelo encontrado: {model_path}")
-            print("✅ Modelo LSTM con Atención cargado y operativo")
+            print(f"Modelo encontrado: {model_path}")
+            print("Modelo LSTM con Atención cargado y operativo")
             return True
         else:
-            print(f"❌ Modelo no encontrado: {model_path}")
+            print(f"Modelo no encontrado: {model_path}")
             return False
     
     async def iniciar_paper_trading(self):
@@ -127,21 +127,21 @@ class TradingBotMain:
             from trading.executor import trading_executor
             from trading.signal_processor import signal_processor
             
-            print("✅ Componentes de trading cargados")
+            print("Componentes de trading cargados")
             print("🎯 Modo: Paper Trading")
             print("💵 Balance inicial: $10,000")
-            print("📊 Símbolos: ADAUSDT, SOLUSDT")
+            print("Símbolos: ADAUSDT, SOLUSDT")
             print("🧠 Modelo: LSTM con Atención")
             
             # Iniciar trading
             print("\n🚀 Iniciando estrategia de trading...")
-            print("✅ Paper trading iniciado")
+            print("Paper trading iniciado")
             print("📈 Monitorea el dashboard para ver las operaciones")
             
             return True
             
         except Exception as e:
-            print(f"❌ Error iniciando paper trading: {e}")
+            print(f"Error iniciando paper trading: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -150,12 +150,12 @@ class TradingBotMain:
         """Muestra el estado final del sistema"""
         print("\n🎉 SISTEMA COMPLETAMENTE OPERATIVO")
         print("=" * 50)
-        print("✅ Datos históricos verificados y actualizados")
-        print("✅ Dashboard ejecutándose en http://127.0.0.1:8050")
-        print("✅ Modelo LSTM cargado y operativo")
-        print("✅ Paper trading activo")
+        print("Datos históricos verificados y actualizados")
+        print("Dashboard ejecutándose en http://127.0.0.1:8050")
+        print("Modelo LSTM cargado y operativo")
+        print("Paper trading activo")
         print()
-        print("📊 MÉTRICAS DISPONIBLES EN EL DASHBOARD:")
+        print("MÉTRICAS DISPONIBLES EN EL DASHBOARD:")
         print("   • Rendimiento del modelo")
         print("   • Gráficos de precios en tiempo real")
         print("   • Señales de trading")
@@ -168,14 +168,14 @@ class TradingBotMain:
         print("   3. Monitorea las operaciones en el dashboard")
         print("   4. Monitorea el rendimiento en tiempo real")
         print()
-        print("💡 COMANDOS ÚTILES:")
+        print("COMANDOS ÚTILES:")
         print("   • Ctrl+C para detener el sistema")
         print("   • Refresca el dashboard para ver actualizaciones")
         print("   • Revisa los logs para información detallada")
     
     async def ejecutar_flujo_completo(self):
         """Ejecuta el flujo completo del bot"""
-        print("🤖 BOT DE TRADING V10 - INICIANDO")
+        print("BOT DE TRADING V10 - INICIANDO")
         print("=" * 60)
         print(f"⏰ Inicio: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print()
@@ -183,22 +183,22 @@ class TradingBotMain:
         try:
             # Paso 1: Verificar y preparar datos
             if not await self.verificar_y_preparar_datos():
-                print("❌ No se pudieron preparar los datos necesarios")
+                print("No se pudieron preparar los datos necesarios")
                 return False
             
             # Paso 2: Iniciar dashboard
             if not self.iniciar_dashboard_background():
-                print("❌ No se pudo iniciar el dashboard")
+                print("No se pudo iniciar el dashboard")
                 return False
             
             # Paso 3: Verificar modelo existente
             if not self.verificar_modelo_existente():
-                print("❌ No se puede continuar sin modelo")
+                print("No se puede continuar sin modelo")
                 return False
             
             # Paso 4: Iniciar paper trading
             if not await self.iniciar_paper_trading():
-                print("❌ No se pudo iniciar el paper trading")
+                print("No se pudo iniciar el paper trading")
                 return False
             
             # Paso 5: Mostrar estado final
@@ -214,7 +214,7 @@ class TradingBotMain:
                 return True
                 
         except Exception as e:
-            print(f"❌ Error en flujo principal: {e}")
+            print(f"Error en flujo principal: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -230,21 +230,21 @@ async def main():
     
     args = parser.parse_args()
     
-    print(f"🤖 Iniciando Trading Bot v10 en modo: {args.mode}")
+    print(f"Iniciando Trading Bot v10 en modo: {args.mode}")
     
     bot = TradingBotMain()
     
     if args.dashboard:
-        print("🌐 Iniciando dashboard...")
+        print("Iniciando dashboard...")
         # Iniciar dashboard en modo específico
         success = bot.iniciar_dashboard_background()
     else:
         success = await bot.ejecutar_flujo_completo()
     
     if success:
-        print("✅ Sistema detenido correctamente")
+        print("Sistema detenido correctamente")
     else:
-        print("❌ Sistema terminó con errores")
+        print("Sistema terminó con errores")
 
 if __name__ == "__main__":
     try:
@@ -252,6 +252,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n👋 ¡Hasta luego!")
     except Exception as e:
-        print(f"❌ Error crítico: {e}")
+        print(f"Error crítico: {e}")
         import traceback
         traceback.print_exc()

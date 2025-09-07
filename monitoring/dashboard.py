@@ -1,4 +1,4 @@
-"""
+r"""
 monitoring/dashboard.py
 Dashboard web interactivo para el Trading Bot v10
 Ubicación: C:\TradingBot_v10\monitoring\dashboard.py
