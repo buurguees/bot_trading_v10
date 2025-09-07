@@ -56,7 +56,7 @@ class ConfidenceEstimator:
             'high_confidence': 1.5
         })
         
-        logger.info("💪 ConfidenceEstimator inicializado")
+        logger.info("ConfidenceEstimator inicializado")
     
     def estimate_confidence(self, prediction_output: Dict[str, Any], market_context: Dict[str, Any] = None) -> Dict[str, Any]:
         """

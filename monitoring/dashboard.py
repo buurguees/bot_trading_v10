@@ -152,7 +152,7 @@ class TradingDashboard:
     def run(self):
         """Ejecuta el servidor del dashboard"""
         try:
-            logger.info(f"🚀 Iniciando dashboard en http://{self.host}:{self.port}")
+            logger.info(f"Iniciando dashboard en http://{self.host}:{self.port}")
             
             self.app.run(
                 host=self.host,

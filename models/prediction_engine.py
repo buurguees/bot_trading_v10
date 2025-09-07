@@ -54,7 +54,7 @@ class PredictionEngine:
         # Inicializar modelo
         self._initialize_model()
         
-        logger.info("🧠 PredictionEngine inicializado")
+        logger.info("PredictionEngine inicializado")
     
     def _initialize_model(self):
         """Inicializa el modelo de ML"""
@@ -67,7 +67,7 @@ class PredictionEngine:
             if model_path:
                 self.model.load_model(model_path)
                 self.model_loaded = True
-                logger.info(f"✅ Modelo cargado desde: {model_path}")
+                logger.info(f"Modelo cargado desde: {model_path}")
             else:
                 logger.warning("⚠️ No se encontró modelo entrenado. Usando modelo por defecto.")
                 self.model_loaded = False

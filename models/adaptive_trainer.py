@@ -73,7 +73,7 @@ class AdaptiveTrainer:
         # Inicializar modelo
         self._initialize_model()
         
-        logger.info("🎓 AdaptiveTrainer inicializado")
+        logger.info("AdaptiveTrainer inicializado")
     
     def _create_directories(self):
         """Crea directorios necesarios"""
@@ -84,7 +84,7 @@ class AdaptiveTrainer:
         """Inicializa el modelo de ML"""
         try:
             self.model = TradingModel()
-            logger.info("✅ Modelo inicializado")
+            logger.info("Modelo inicializado")
         except Exception as e:
             logger.error(f"❌ Error inicializando modelo: {e}")
             self.model = None
@@ -101,7 +101,7 @@ class AdaptiveTrainer:
             Dict con resultados del entrenamiento
         """
         try:
-            logger.info(f"🎓 Iniciando entrenamiento inicial para {symbol} ({days_back} días)")
+            logger.info(f"Iniciando entrenamiento inicial para {symbol} ({days_back} días)")
             
             if not self.model:
                 raise Exception("Modelo no inicializado")
@@ -116,7 +116,7 @@ class AdaptiveTrainer:
             if X.shape[0] == 0:
                 raise Exception("No hay datos suficientes para entrenamiento")
             
-            logger.info(f"📊 Datos preparados: {X.shape[0]} muestras, {X.shape[1]} features")
+            logger.info(f"Datos preparados: {X.shape[0]} muestras, {X.shape[1]} features")
             
             # Dividir datos
             split_idx = int(0.8 * len(X))
@@ -155,7 +155,7 @@ class AdaptiveTrainer:
             self.training_history.append(training_result)
             self.performance_metrics[symbol] = val_accuracy
             
-            logger.info(f"✅ Entrenamiento inicial completado. Accuracy: {val_accuracy:.3f}")
+            logger.info(f"Entrenamiento inicial completado. Accuracy: {val_accuracy:.3f}")
             return training_result
             
         except Exception as e:
@@ -200,7 +200,7 @@ class AdaptiveTrainer:
             # Actualizar métricas
             self._update_performance_metrics(trade_results)
             
-            logger.info("✅ Online learning update completado")
+            logger.info("Online learning update completado")
             return retrain_result
             
         except Exception as e:
@@ -327,7 +327,7 @@ class AdaptiveTrainer:
             # Verificar si accuracy está por debajo del threshold
             needs_retrain = recent_accuracy < self.retrain_threshold
             
-            logger.info(f"📊 Accuracy reciente: {recent_accuracy:.3f}, Threshold: {self.retrain_threshold}")
+            logger.info(f"Accuracy reciente: {recent_accuracy:.3f}, Threshold: {self.retrain_threshold}")
             
             return needs_retrain
             
@@ -402,7 +402,7 @@ class AdaptiveTrainer:
                 'retrain_time': datetime.now().isoformat()
             }
             
-            logger.info("✅ Reentrenamiento completado")
+            logger.info("Reentrenamiento completado")
             return retrain_result
             
         except Exception as e:
@@ -432,7 +432,7 @@ class AdaptiveTrainer:
                 'last_update': datetime.now().isoformat()
             })
             
-            logger.info(f"📊 Métricas actualizadas: Win rate: {win_rate:.3f}, Avg PnL: {avg_pnl:.2f}")
+            logger.info(f"Métricas actualizadas: Win rate: {win_rate:.3f}, Avg PnL: {avg_pnl:.2f}")
             
         except Exception as e:
             logger.error(f"Error actualizando métricas: {e}")

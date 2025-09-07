@@ -54,7 +54,7 @@ class ModelEvaluator:
             'min_win_rate': 0.5
         })
         
-        logger.info("📊 ModelEvaluator inicializado")
+        logger.info("ModelEvaluator inicializado")
     
     async def evaluate_model_performance(self, symbol: str, days_back: int = 30) -> Dict[str, Any]:
         """
@@ -68,7 +68,7 @@ class ModelEvaluator:
             Dict con métricas de evaluación
         """
         try:
-            logger.info(f"📊 Evaluando performance del modelo para {symbol} ({days_back} días)")
+            logger.info(f"Evaluando performance del modelo para {symbol} ({days_back} días)")
             
             # Obtener datos de trades
             trades_data = await self._get_trades_data(symbol, days_back)
@@ -114,7 +114,7 @@ class ModelEvaluator:
             # Verificar alertas de performance
             await self._check_performance_alerts(symbol, evaluation_result)
             
-            logger.info(f"✅ Evaluación completada para {symbol}. Score: {evaluation_result['overall_score']:.3f}")
+            logger.info(f"Evaluación completada para {symbol}. Score: {evaluation_result['overall_score']:.3f}")
             return evaluation_result
             
         except Exception as e:

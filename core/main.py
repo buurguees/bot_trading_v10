@@ -237,7 +237,7 @@ async def main():
     if args.dashboard:
         print("🌐 Iniciando dashboard...")
         # Iniciar dashboard en modo específico
-        success = await bot.iniciar_dashboard_background()
+        success = bot.iniciar_dashboard_background()
     else:
         success = await bot.ejecutar_flujo_completo()
     
