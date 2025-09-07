@@ -16,7 +16,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from data.database import db_manager
 from data.collector import download_missing_data
-from monitoring.dashboard import start_dashboard_thread
+from monitoring.core.dashboard import start_dashboard_thread
 
 class EntrenadorAgente:
     """Clase para entrenar el agente con configuración optimizada"""
