@@ -56,6 +56,19 @@ from .execution_engine import (
     get_execution_summary
 )
 
+from .position_manager import (
+    Position,
+    PositionManager,
+    position_manager,
+    add_position,
+    remove_position,
+    update_positions_prices,
+    check_exit_conditions,
+    calculate_portfolio_metrics,
+    health_check as position_health_check,
+    get_position_summary
+)
+
 __version__ = "1.0.0"
 __author__ = "Trading Bot v10"
 
@@ -98,5 +111,17 @@ __all__ = [
     'execution_engine',
     'route_signal',
     'check_open_trades',
-    'get_execution_summary'
+    'get_execution_summary',
+    
+    # Gestión de posiciones
+    'Position',
+    'PositionManager',
+    'position_manager',
+    'add_position',
+    'remove_position',
+    'update_positions_prices',
+    'check_exit_conditions',
+    'calculate_portfolio_metrics',
+    'position_health_check',
+    'get_position_summary'
 ]
