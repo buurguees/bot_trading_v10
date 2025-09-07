@@ -18,7 +18,7 @@ sys.path.append(project_root)
 
 from data.database import db_manager
 from data.collector import download_missing_data
-from monitoring.dashboard import start_dashboard_thread
+from monitoring.core.dashboard import start_dashboard_thread
 from entrenar_agente import EntrenadorAgente
 
 class TradingBotMain:
@@ -113,10 +113,12 @@ class TradingBotMain:
     def _run_dashboard(self):
         """Ejecuta el dashboard en el hilo separado"""
         try:
-            from monitoring.dashboard import start_dashboard
+            from monitoring.core.dashboard import start_dashboard
             start_dashboard(host='127.0.0.1', port=8050, debug=False)
         except Exception as e:
             print(f"Error en dashboard: {e}")
+            import traceback
+            traceback.print_exc()
     
     def _run_training(self):
         """Ejecuta el entrenamiento en el hilo separado"""
