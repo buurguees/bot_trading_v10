@@ -672,7 +672,7 @@ def register_temporal_navigation_callbacks(app, data_provider, chart_components)
         
         # Crear gráfico
         from monitoring.components.enhanced_chart import create_enhanced_candlestick_chart
-        figure = create_enhanced_candlestick_chart(df_market, pd.DataFrame(), {})
+        figure = create_enhanced_candlestick_chart(df_market, pd.DataFrame(), {}, symbol)
         period_info = f"{symbol} | {timeframe} | {start_date.strftime('%Y-%m-%d')} a {end_date.strftime('%Y-%m-%d')}"
         
         return figure, period_info

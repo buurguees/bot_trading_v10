@@ -324,7 +324,7 @@ def create_enhanced_pnl_chart_with_navigation():
         
     ], className="enhanced-chart-container")
 
-def create_enhanced_candlestick_chart(df_market, df_trades, options):
+def create_enhanced_candlestick_chart(df_market, df_trades, options, symbol="BTCUSDT"):
     """Crea gráfico de candlesticks mejorado con todas las opciones"""
     
     fig = go.Figure()
