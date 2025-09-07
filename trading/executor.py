@@ -27,6 +27,8 @@ from models.model_evaluator import model_evaluator
 from .risk_manager import risk_manager
 from .order_manager import order_manager, TradeRecord
 from .bitget_client import bitget_client
+from .signal_processor import signal_processor
+from .portfolio_optimizer import portfolio_optimizer
 
 logger = logging.getLogger(__name__)
 
@@ -177,7 +179,7 @@ class TradingExecutor:
     
     async def process_ml_prediction(self, symbol: str) -> Dict[str, Any]:
         """
-        Procesar predicción completa del modelo ML
+        Procesar predicción completa del modelo ML usando signal_processor
         
         Args:
             symbol: Símbolo a procesar
@@ -188,55 +190,49 @@ class TradingExecutor:
         try:
             logger.debug(f"🧠 Procesando predicción ML para {symbol}")
             
-            # 1. Obtener datos de mercado recientes
-            market_data = await self._get_recent_market_data(symbol)
-            if not market_data or len(market_data) < 60:  # Mínimo 60 velas
-                return {'error': 'Datos insuficientes para predicción'}
+            # Usar signal_processor para obtener predicción completa con filtros
+            signal_quality = await signal_processor.process_signal(symbol, timeframe="1h")
             
-            # 2. Preparar features para ML
-            features = data_preprocessor.prepare_features_for_prediction(
-                symbol=symbol,
-                lookback_hours=60
-            )
-            
-            if features is None or len(features) == 0:
-                return {'error': 'Error preparando features'}
-            
-            # 3. Obtener predicción del modelo
-            prediction = await prediction_engine.predict(symbol, features)
-            if not prediction or prediction.get('error'):
-                return {'error': f"Error en predicción: {prediction.get('error', 'Unknown')}"}
-            
-            # 4. Estimar confianza
-            confidence_result = confidence_estimator.estimate_confidence(
-                prediction, 
-                market_context={'volatility': self._calculate_volatility(market_data)}
-            )
-            
-            # 5. Combinar resultados
+            # Convertir SignalQuality a formato compatible con executor
             prediction_result = {
                 'symbol': symbol,
-                'action': prediction['action'],
-                'confidence': confidence_result['calibrated_confidence'],
-                'confidence_level': confidence_result['confidence_level'],
-                'expected_return': prediction.get('expected_return', 0.0),
-                'risk_level': prediction.get('risk_level', 3),
-                'time_horizon': prediction.get('time_horizon', 2.0),
-                'market_regime': prediction.get('market_regime', 'unknown'),
-                'action_probabilities': prediction.get('action_probabilities', {}),
-                'uncertainty': confidence_result.get('uncertainty', 0.5),
-                'is_tradeable': confidence_result.get('is_tradeable', False),
-                'is_high_confidence': confidence_result.get('is_high_confidence', False),
-                'features_used': len(features),
-                'prediction_timestamp': datetime.now().isoformat(),
-                'model_version': prediction.get('model_version', 'unknown')
+                'action': signal_quality.signal,
+                'confidence': signal_quality.confidence,
+                'confidence_level': 'high' if signal_quality.confidence > 0.8 else 'medium' if signal_quality.confidence > 0.6 else 'low',
+                'expected_return': signal_quality.strength,
+                'risk_level': int(signal_quality.risk_score * 5) + 1,  # Convertir 0-1 a 1-5
+                'time_horizon': 2.0,  # Valor por defecto
+                'market_regime': signal_quality.market_regime,
+                'action_probabilities': signal_quality.raw_prediction.get('action_probabilities', {}),
+                'uncertainty': 1.0 - signal_quality.confidence,
+                'is_tradeable': signal_quality.quality_score > 0.7,
+                'is_high_confidence': signal_quality.confidence > 0.8,
+                'features_used': len(signal_quality.raw_prediction.get('features_used', [])),
+                'prediction_timestamp': signal_quality.processing_time.isoformat(),
+                'model_version': signal_quality.raw_prediction.get('model_version', 'unknown'),
+                
+                # Información adicional del signal_processor
+                'quality_score': signal_quality.quality_score,
+                'consistency': signal_quality.consistency,
+                'timing_score': signal_quality.timing_score,
+                'volatility_level': signal_quality.volatility_level,
+                'momentum_direction': signal_quality.momentum_direction,
+                'volume_confirmation': signal_quality.volume_confirmation,
+                'price_action_alignment': signal_quality.price_action_alignment,
+                'indicator_convergence': signal_quality.indicator_convergence,
+                'support_resistance_respect': signal_quality.support_resistance_respect,
+                'session_timing': signal_quality.session_timing,
+                'timeframe_alignment': signal_quality.timeframe_alignment,
+                'timeframe_confidence': signal_quality.timeframe_confidence,
+                'filtering_applied': signal_quality.filtering_applied,
+                'rejection_reasons': signal_quality.rejection_reasons
             }
             
-            # 6. Actualizar métricas
+            # Actualizar métricas
             self.metrics['predictions_processed'] += 1
             self._update_average_confidence(prediction_result['confidence'])
             
-            logger.info(f"🔮 Predicción ML: {prediction_result['action']} (confianza: {prediction_result['confidence']:.2%})")
+            logger.info(f"🔮 Predicción ML: {prediction_result['action']} (confianza: {prediction_result['confidence']:.2%}, calidad: {signal_quality.quality_score:.2%})")
             return prediction_result
             
         except Exception as e:
@@ -245,10 +241,10 @@ class TradingExecutor:
     
     async def evaluate_entry_signal(self, prediction: Dict, symbol: str) -> bool:
         """
-        Decidir si ejecutar un trade basado en predicción ML
+        Decidir si ejecutar un trade basado en predicción ML con signal_processor
         
         Args:
-            prediction: Resultado de la predicción ML
+            prediction: Resultado de la predicción ML (ahora incluye info del signal_processor)
             symbol: Símbolo a evaluar
             
         Returns:
@@ -265,39 +261,63 @@ class TradingExecutor:
                 logger.debug(f"⏸️ Señal HOLD para {symbol}")
                 return False
             
-            # 3. Verificar anti-duplicación
+            # 3. Verificar calidad de la señal (nuevo con signal_processor)
+            quality_score = prediction.get('quality_score', 0.0)
+            if quality_score < 0.7:  # Umbral de calidad
+                logger.debug(f"⏸️ Calidad de señal insuficiente para {symbol}: {quality_score:.2%}")
+                return False
+            
+            # 4. Verificar anti-duplicación
             if symbol in self.active_positions:
                 logger.debug(f"⏸️ Ya hay posición activa para {symbol}")
                 return False
             
-            # 4. Verificar límite de posiciones concurrentes
+            # 5. Verificar límite de posiciones concurrentes
             if len(self.active_positions) >= self.max_positions:
                 logger.debug(f"⏸️ Límite de posiciones alcanzado: {len(self.active_positions)}/{self.max_positions}")
                 return False
             
-            # 5. Verificar cooldown entre trades
+            # 6. Verificar cooldown entre trades
             if symbol in self.last_trade_time:
                 time_since_last = datetime.now() - self.last_trade_time[symbol]
                 if time_since_last.total_seconds() < (self.cooldown_minutes * 60):
                     logger.debug(f"⏸️ Cooldown activo para {symbol}: {time_since_last.total_seconds()/60:.1f}min")
                     return False
             
-            # 6. Verificar límite diario de trades
+            # 7. Verificar límite diario de trades
             if self.daily_trade_count[symbol] >= self.max_daily_trades:
                 logger.debug(f"⏸️ Límite diario de trades alcanzado para {symbol}: {self.daily_trade_count[symbol]}")
                 return False
             
-            # 7. Verificar circuit breakers
+            # 8. Verificar circuit breakers
             if not await self._check_circuit_breakers(symbol):
                 logger.debug(f"⏸️ Circuit breakers activos para {symbol}")
                 return False
             
-            # 8. Verificar condiciones de mercado
-            if not await self._check_market_conditions(symbol, prediction):
-                logger.debug(f"⏸️ Condiciones de mercado desfavorables para {symbol}")
+            # 9. Verificar condiciones de mercado (usando info del signal_processor)
+            volatility_level = prediction.get('volatility_level', 'MEDIUM')
+            if volatility_level == 'EXTREME':
+                logger.debug(f"⏸️ Volatilidad extrema para {symbol}: {volatility_level}")
                 return False
             
-            logger.info(f"✅ Señal de entrada aprobada para {symbol}: {prediction['action']} (confianza: {prediction['confidence']:.2%})")
+            # 10. Verificar consistencia multi-timeframe
+            consistency = prediction.get('consistency', 0.0)
+            if consistency < 0.6:
+                logger.debug(f"⏸️ Baja consistencia multi-TF para {symbol}: {consistency:.2%}")
+                return False
+            
+            # 11. Verificar timing
+            timing_score = prediction.get('timing_score', 0.0)
+            if timing_score < 0.5:
+                logger.debug(f"⏸️ Timing desfavorable para {symbol}: {timing_score:.2%}")
+                return False
+            
+            # 12. Verificar filtros obligatorios si están configurados
+            if prediction.get('volume_confirmation') is False:
+                logger.debug(f"⏸️ Sin confirmación de volumen para {symbol}")
+                return False
+            
+            logger.info(f"✅ Señal de entrada aprobada para {symbol}: {prediction['action']} (confianza: {prediction['confidence']:.2%}, calidad: {quality_score:.2%})")
             return True
             
         except Exception as e:
@@ -881,6 +901,116 @@ class TradingExecutor:
         except Exception as e:
             logger.error(f"Error obteniendo resumen de performance: {e}")
             return {'error': str(e)}
+    
+    async def optimize_portfolio_allocation(self) -> Dict[str, Any]:
+        """
+        Optimiza asignación del portfolio multi-símbolo
+        """
+        try:
+            logger.info("[TradingExecutor] Iniciando optimización de portfolio")
+            
+            # Verificar si se necesita rebalance
+            rebalance_needed, reasons = await portfolio_optimizer.should_rebalance()
+            
+            if not rebalance_needed:
+                logger.info("[TradingExecutor] No se requiere rebalance del portfolio")
+                return {
+                    'rebalance_needed': False,
+                    'reasons': reasons,
+                    'message': 'Portfolio está balanceado'
+                }
+            
+            logger.info(f"[TradingExecutor] Rebalance necesario: {reasons}")
+            
+            # Optimizar portfolio
+            targets = await portfolio_optimizer.optimize_portfolio()
+            
+            if not targets:
+                logger.warning("[TradingExecutor] No se pudieron generar targets de optimización")
+                return {
+                    'rebalance_needed': True,
+                    'reasons': reasons,
+                    'error': 'No se pudieron generar targets'
+                }
+            
+            # Ejecutar rebalance
+            rebalance_result = await portfolio_optimizer.execute_rebalance(targets)
+            
+            logger.info(f"[TradingExecutor] Optimización de portfolio completada: {rebalance_result}")
+            
+            return {
+                'rebalance_needed': True,
+                'reasons': reasons,
+                'targets_generated': len(targets),
+                'rebalance_result': rebalance_result,
+                'targets': {k: {
+                    'symbol': v.symbol,
+                    'target_pct': v.target_allocation_pct,
+                    'current_pct': v.current_allocation_pct,
+                    'action': v.action_required,
+                    'change_pct': v.target_change_pct
+                } for k, v in targets.items()}
+            }
+            
+        except Exception as e:
+            logger.error(f"[TradingExecutor] Error optimizando portfolio: {e}")
+            return {
+                'rebalance_needed': False,
+                'error': str(e)
+            }
+    
+    async def get_portfolio_state(self) -> Dict[str, Any]:
+        """
+        Obtiene estado actual del portfolio
+        """
+        try:
+            portfolio_state = await portfolio_optimizer.get_portfolio_state()
+            
+            if not portfolio_state:
+                return {'error': 'No se pudo obtener estado del portfolio'}
+            
+            return {
+                'total_balance': portfolio_state.total_balance,
+                'available_balance': portfolio_state.available_balance,
+                'invested_balance': portfolio_state.invested_balance,
+                'symbol_allocations': portfolio_state.symbol_allocations,
+                'total_unrealized_pnl': portfolio_state.total_unrealized_pnl,
+                'total_realized_pnl': portfolio_state.total_realized_pnl,
+                'portfolio_return': portfolio_state.portfolio_return,
+                'portfolio_volatility': portfolio_state.portfolio_volatility,
+                'sharpe_ratio': portfolio_state.sharpe_ratio,
+                'diversification_ratio': portfolio_state.diversification_ratio,
+                'correlation_risk_score': portfolio_state.correlation_risk_score,
+                'rebalance_needed': portfolio_state.rebalance_needed
+            }
+            
+        except Exception as e:
+            logger.error(f"[TradingExecutor] Error obteniendo estado del portfolio: {e}")
+            return {'error': str(e)}
+    
+    async def check_portfolio_health(self) -> Dict[str, Any]:
+        """
+        Verifica salud del portfolio
+        """
+        try:
+            # Health check del portfolio optimizer
+            portfolio_health = await portfolio_optimizer.health_check()
+            
+            # Detectar riesgos de concentración
+            concentration_risks = await portfolio_optimizer.detect_concentration_risk()
+            
+            return {
+                'portfolio_optimizer': portfolio_health,
+                'concentration_risks': concentration_risks,
+                'overall_status': 'healthy' if portfolio_health['status'] == 'healthy' and not concentration_risks['risk_detected'] else 'warning'
+            }
+            
+        except Exception as e:
+            logger.error(f"[TradingExecutor] Error verificando salud del portfolio: {e}")
+            return {
+                'overall_status': 'error',
+                'error': str(e)
+            }
 
 # Instancia global del ejecutor de trading
 trading_executor = TradingExecutor()

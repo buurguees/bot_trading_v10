@@ -24,49 +24,42 @@ from .executor import (
 
 from .risk_manager import (
     RiskManager,
-    risk_manager,
-    calculate_position_size,
-    check_risk_limits,
-    get_risk_metrics
+    risk_manager
 )
 
 from .order_manager import (
     OrderManager,
     order_manager,
-    TradeRecord,
-    execute_order,
-    close_trade,
-    get_balance,
-    get_trade_history
+    TradeRecord
 )
 
 from .bitget_client import (
     BitgetClient,
-    bitget_client,
-    fetch_ohlcv,
-    fetch_balance,
-    health_check as bitget_health_check
+    bitget_client
 )
 
 from .execution_engine import (
     ExecutionEngine,
-    execution_engine,
-    route_signal,
-    check_open_trades,
-    get_execution_summary
+    execution_engine
 )
 
 from .position_manager import (
     Position,
     PositionManager,
-    position_manager,
-    add_position,
-    remove_position,
-    update_positions_prices,
-    check_exit_conditions,
-    calculate_portfolio_metrics,
-    health_check as position_health_check,
-    get_position_summary
+    position_manager
+)
+
+from .signal_processor import (
+    SignalQuality,
+    SignalProcessor,
+    signal_processor
+)
+
+from .portfolio_optimizer import (
+    PortfolioState,
+    AllocationTarget,
+    PortfolioOptimizer,
+    portfolio_optimizer
 )
 
 __version__ = "1.0.0"
@@ -86,42 +79,33 @@ __all__ = [
     # Gestión de riesgo
     'RiskManager',
     'risk_manager',
-    'calculate_position_size',
-    'check_risk_limits',
-    'get_risk_metrics',
     
     # Gestión de órdenes
     'OrderManager',
     'order_manager',
     'TradeRecord',
-    'execute_order',
-    'close_trade',
-    'get_balance',
-    'get_trade_history',
     
     # Cliente de exchange
     'BitgetClient',
     'bitget_client',
-    'fetch_ohlcv',
-    'fetch_balance',
-    'bitget_health_check',
     
     # Engine de ejecución
     'ExecutionEngine',
     'execution_engine',
-    'route_signal',
-    'check_open_trades',
-    'get_execution_summary',
     
     # Gestión de posiciones
     'Position',
     'PositionManager',
     'position_manager',
-    'add_position',
-    'remove_position',
-    'update_positions_prices',
-    'check_exit_conditions',
-    'calculate_portfolio_metrics',
-    'position_health_check',
-    'get_position_summary'
+    
+    # Procesador de señales
+    'SignalQuality',
+    'SignalProcessor',
+    'signal_processor',
+    
+    # Optimizador de portfolio
+    'PortfolioState',
+    'AllocationTarget',
+    'PortfolioOptimizer',
+    'portfolio_optimizer'
 ]

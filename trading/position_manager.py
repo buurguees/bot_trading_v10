@@ -39,9 +39,9 @@ class Position:
         current_price: Precio actual
         stop_loss: Precio de stop-loss
         take_profit: Precio de take-profit
-        leverage: Apalancamiento utilizado
         entry_time: Timestamp de entrada
         last_update: Última actualización
+        leverage: Apalancamiento utilizado
         unrealized_pnl: P&L no realizado
         unrealized_pnl_pct: P&L no realizado en %
         max_pnl: Máxima ganancia alcanzada
@@ -59,9 +59,9 @@ class Position:
     current_price: float
     stop_loss: float
     take_profit: float
-    leverage: float = 1.0
     entry_time: datetime
     last_update: datetime
+    leverage: float = 1.0
     unrealized_pnl: float = 0.0
     unrealized_pnl_pct: float = 0.0
     max_pnl: float = 0.0  # High water mark
@@ -831,6 +831,32 @@ class PositionManager:
             logger.error(f"Error persistiendo actualización de posición: {e}")
     
     # Métodos públicos para monitoreo y control
+    
+    def get_total_balance(self) -> float:
+        """Obtener balance total del portfolio"""
+        try:
+            return self.metrics.get('total_balance', 10000.0)  # Default balance
+        except Exception as e:
+            logger.error(f"Error obteniendo balance total: {e}")
+            return 10000.0
+    
+    def get_available_balance(self) -> float:
+        """Obtener balance disponible para trading"""
+        try:
+            total_balance = self.get_total_balance()
+            invested_balance = self.metrics.get('total_invested', 0.0)
+            return total_balance - invested_balance
+        except Exception as e:
+            logger.error(f"Error obteniendo balance disponible: {e}")
+            return 10000.0
+    
+    def get_total_realized_pnl(self) -> float:
+        """Obtener P&L total realizado"""
+        try:
+            return self.metrics.get('total_realized_pnl', 0.0)
+        except Exception as e:
+            logger.error(f"Error obteniendo P&L realizado: {e}")
+            return 0.0
     
     async def health_check(self) -> Dict[str, Any]:
         """Verificar estado del position manager"""
