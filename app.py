@@ -1,33 +1,37 @@
 #!/usr/bin/env python3
 """
-app.py - Punto de Entrada Único - Trading Bot v10
-================================================
+app.py - Punto de Entrada Principal del Trading Bot v10
+======================================================
 
-Aplicación principal que consolida todas las funcionalidades del bot de trading.
-Punto de entrada único para todas las operaciones.
+SISTEMA DE MENÚ INTERACTIVO COMPLETO
 
-Uso:
-    python app.py --mode verify          # Verificar datos históricos
-    python app.py --mode download        # Descargar datos faltantes
-    python app.py --mode train           # Entrenar modelo
-    python app.py --mode paper-trading   # Modo paper trading
-    python app.py --mode dashboard       # Solo dashboard
-    python app.py --mode full            # Flujo completo (default)
+Uso: python app.py
+
+Funcionalidades:
+1. Descargar históricos completos (2+ años)
+2. Validar estado del agente IA
+3. Validar histórico de símbolos
+4. Empezar entrenamiento + dashboard
+5. Análisis de performance
+6. Configuración del sistema
+
 """
 
-import sys
-import os
 import asyncio
-import argparse
+import os
+import sys
+import logging
+from datetime import datetime
+import subprocess
 import threading
 import time
-from datetime import datetime
-import logging
+import webbrowser
 
-# Agregar el directorio raíz al path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Añadir directorio del proyecto al path
+project_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(project_root)
 
-# Configurar logging
+# Configurar logging básico
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
@@ -35,306 +39,570 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class TradingBotApp:
-    """Aplicación principal del Trading Bot v10"""
+    """Aplicación principal del Trading Bot v10 con menú interactivo"""
     
     def __init__(self):
-        self.dashboard_thread = None
-        self.dashboard_running = False
+        self.running = True
+        self.dashboard_process = None
         
-    def print_banner(self):
-        """Muestra el banner de la aplicación"""
-        print("🤖" + "=" * 60)
-        print("🤖 TRADING BOT v10 - APLICACIÓN PRINCIPAL")
-        print("🤖" + "=" * 60)
-        print(f"⏰ Inicio: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    def show_banner(self):
+        """Muestra banner de bienvenida"""
+        print("\n" + "="*70)
+        print("     🤖 TRADING BOT v10 - SISTEMA AUTÓNOMO DE TRADING 🤖")
+        print("="*70)
+        print(f"     Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"     Entorno: Python {sys.version_info.major}.{sys.version_info.minor}")
+        print(f"     Directorio: {project_root}")
+        print("="*70)
         print()
     
-    async def verify_data(self):
-        """Verifica el estado de los datos históricos"""
-        print("🔍 VERIFICANDO DATOS HISTÓRICOS")
+    def show_main_menu(self):
+        """Muestra el menú principal"""
+        print("📋 MENÚ PRINCIPAL")
+        print("-" * 20)
+        print("1. 📥 Descargar datos históricos (2 años)")
+        print("2. 🔍 Validar estado del agente IA")
+        print("3. 📊 Validar histórico de símbolos")
+        print("4. 🚀 Empezar entrenamiento + Dashboard")
+        print("5. 📈 Análisis de performance")
+        print("6. ⚙️  Configurar sistema")
+        print("7. 🧪 Modo de pruebas rápidas")
+        print("8. 📱 Estado del sistema")
+        print("9. ❌ Salir")
+        print()
+    
+    def get_user_choice(self) -> str:
+        """Obtiene la elección del usuario"""
+        try:
+            choice = input("Selecciona una opción (1-9): ").strip()
+            return choice
+        except KeyboardInterrupt:
+            print("\n👋 Saliendo...")
+            return "9"
+        except Exception:
+            return ""
+    
+    async def download_historical_data(self):
+        """Opción 1: Descargar datos históricos completos"""
+        print("\n📥 DESCARGA DE DATOS HISTÓRICOS")
         print("=" * 40)
         
-        try:
-            from data.database import db_manager
-            
-            summary = db_manager.get_historical_data_summary()
-            
-            if 'error' in summary:
-                print(f"❌ Error: {summary['error']}")
-                return False
-            
-            print(f"📊 Símbolos disponibles: {summary['total_symbols']}")
-            print(f"📈 Total registros: {summary['total_records']:,}")
-            print()
-            
-            for symbol_info in summary['symbols']:
-                symbol = symbol_info['symbol']
-                count = symbol_info['count']
-                status = symbol_info['status']
-                
-                if status == 'OK':
-                    start_date = symbol_info['start_date']
-                    end_date = symbol_info['end_date']
-                    duration = symbol_info['duration_days']
-                    
-                    print(f"📈 {symbol}:")
-                    print(f"   📊 Registros: {count:,}")
-                    print(f"   📅 Desde: {start_date}")
-                    print(f"   📅 Hasta: {end_date}")
-                    print(f"   ⏱️  Duración: {duration} días")
+        # Preguntar años de datos
+        while True:
+            try:
+                years_input = input("¿Cuántos años de datos quieres descargar? (1-5): ").strip()
+                years = int(years_input)
+                if 1 <= years <= 5:
+                    break
                 else:
-                    print(f"❌ {symbol}: {status}")
-                print()
+                    print("⚠️ Por favor ingresa un número entre 1 y 5")
+            except ValueError:
+                print("⚠️ Por favor ingresa un número válido")
+        
+        print(f"\n🚀 Descargando {years} años de datos históricos...")
+        print("⏳ Esto puede tomar varios minutos...")
+        print()
+        
+        try:
+            # Importar después de configurar el entorno
+            from core.manage_data import DataManager
             
-            print("💡 RECOMENDACIONES:")
-            for rec in summary['recommendations']:
-                print(f"   {rec}")
+            manager = DataManager()
+            await manager.download_data(years=years)
             
-            return True
+            print(f"\n✅ Descarga de {years} años completada exitosamente")
             
         except Exception as e:
-            print(f"❌ Error en verificación: {e}")
-            return False
+            print(f"\n❌ Error durante la descarga: {e}")
+            logger.error(f"Error en descarga: {e}")
+        
+        input("\nPresiona Enter para continuar...")
     
-    async def download_data(self, years: int = 2):
-        """Descarga datos históricos faltantes"""
-        print(f"📥 DESCARGANDO DATOS HISTÓRICOS ({years} años)")
+    async def validate_ai_agent(self):
+        """Opción 2: Validar estado del agente IA"""
+        print("\n🔍 VALIDACIÓN DEL AGENTE IA")
+        print("=" * 35)
+        
+        try:
+            # Verificar componentes del agente IA
+            print("Verificando componentes del agente...")
+            
+            # Verificar modelos
+            from models.adaptive_trainer import adaptive_trainer
+            from models.prediction_engine import prediction_engine
+            from models.confidence_estimator import confidence_estimator
+            
+            print("✅ adaptive_trainer: Disponible")
+            print("✅ prediction_engine: Disponible") 
+            print("✅ confidence_estimator: Disponible")
+            
+            # Verificar estado de entrenamiento
+            training_status = adaptive_trainer.get_training_status()
+            print(f"\n📊 Estado del entrenamiento:")
+            print(f"   Modelo entrenado: {'✅ Sí' if training_status.get('is_trained', False) else '❌ No'}")
+            print(f"   Última actualización: {training_status.get('last_update', 'Nunca')}")
+            print(f"   Precisión actual: {training_status.get('accuracy', 0):.1%}")
+            
+            # Verificar predicciones
+            try:
+                health = prediction_engine.health_check()
+                print(f"\n🧠 Motor de predicciones:")
+                print(f"   Estado: {'✅ Saludable' if health.get('status') == 'healthy' else '❌ Problemas'}")
+                print(f"   Último procesamiento: {health.get('last_prediction', 'Nunca')}")
+            except Exception as e:
+                print(f"⚠️ Error verificando predicciones: {e}")
+            
+            # Verificar confianza
+            try:
+                conf_health = confidence_estimator.health_check()
+                print(f"\n💪 Estimador de confianza:")
+                print(f"   Calibrado: {'✅ Sí' if conf_health.get('calibrated', False) else '❌ No'}")
+                print(f"   Última calibración: {conf_health.get('last_calibration', 'Nunca')}")
+            except Exception as e:
+                print(f"⚠️ Error verificando confianza: {e}")
+            
+        except ImportError as e:
+            print(f"❌ Error importando módulos del agente: {e}")
+        except Exception as e:
+            print(f"❌ Error validando agente: {e}")
+        
+        input("\nPresiona Enter para continuar...")
+    
+    async def validate_symbols_history(self):
+        """Opción 3: Validar histórico de símbolos"""
+        print("\n📊 VALIDACIÓN DE HISTÓRICO DE SÍMBOLOS")
         print("=" * 45)
         
         try:
-            from data.collector import download_missing_data
+            from core.manage_data import DataManager
             
-            results = await download_missing_data(target_days=years * 365)
+            manager = DataManager()
+            manager.verify_historical_data()
             
-            if 'error' in results:
-                print(f"❌ Error: {results['error']}")
-                return False
+            # Mostrar detalles adicionales
+            from data.database import db_manager
             
-            print(f"📊 Símbolos verificados: {results['symbols_checked']}")
-            print(f"✅ Símbolos OK: {results['symbols_ok']}")
-            print(f"🔄 Símbolos actualizados: {results['symbols_updated']}")
-            print(f"📈 Total descargado: {results['total_downloaded']:,} registros")
+            print("\n🔍 ANÁLISIS DETALLADO:")
+            
+            # Verificar cada símbolo
+            symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+            
+            for symbol in symbols:
+                try:
+                    count = db_manager.get_market_data_count(symbol)
+                    date_range = db_manager.get_data_date_range(symbol)
+                    
+                    print(f"\n📈 {symbol}:")
+                    print(f"   Registros: {count:,}")
+                    
+                    if date_range[0] and date_range[1]:
+                        duration = (date_range[1] - date_range[0]).days
+                        print(f"   Desde: {date_range[0].strftime('%Y-%m-%d')}")
+                        print(f"   Hasta: {date_range[1].strftime('%Y-%m-%d')}")
+                        print(f"   Duración: {duration} días")
+                        
+                        # Evaluación
+                        if duration >= 730:  # 2 años
+                            print("   Estado: ✅ Excelente (2+ años)")
+                        elif duration >= 365:  # 1 año
+                            print("   Estado: ✅ Bueno (1+ año)")
+                        elif duration >= 180:  # 6 meses
+                            print("   Estado: ⚠️ Suficiente (6+ meses)")
+                        else:
+                            print("   Estado: ❌ Insuficiente (<6 meses)")
+                    else:
+                        print("   Estado: ❌ Sin datos")
+                        
+                except Exception as e:
+                    print(f"   Error: {e}")
+            
+        except Exception as e:
+            print(f"❌ Error validando históricos: {e}")
+        
+        input("\nPresiona Enter para continuar...")
+    
+    async def start_training_and_dashboard(self):
+        """Opción 4: Empezar entrenamiento + Dashboard"""
+        print("\n🚀 INICIANDO ENTRENAMIENTO + DASHBOARD")
+        print("=" * 45)
+        
+        try:
+            # Verificar prerequisitos
+            print("🔍 Verificando prerequisitos...")
+            
+            # Verificar datos
+            from data.database import db_manager
+            stats = db_manager.get_database_stats()
+            total_records = stats.get('total_records', 0)
+            
+            if total_records < 1000:
+                print(f"⚠️ Datos insuficientes: {total_records:,} registros")
+                download = input("¿Descargar datos históricos primero? (s/n): ").strip().lower()
+                if download == 's':
+                    await self.download_historical_data()
+                else:
+                    print("❌ Cancelando entrenamiento")
+                    return
+            else:
+                print(f"✅ Datos suficientes: {total_records:,} registros")
+            
+            # Configurar modo
+            mode = self._select_training_mode()
+            
+            print(f"\n🎯 Iniciando en modo: {mode}")
+            print("⏳ Esto abrirá el dashboard en tu navegador...")
             print()
             
-            for symbol, details in results['details'].items():
-                status = details['status']
-                if status == 'OK':
-                    print(f"✅ {symbol}: {details['message']}")
-                elif status == 'UPDATED':
-                    print(f"🔄 {symbol}: {details['downloaded']} registros descargados")
-                elif status == 'NEW':
-                    print(f"🆕 {symbol}: {details['downloaded']} registros descargados")
-                else:
-                    print(f"❌ {symbol}: {details.get('error', 'Error desconocido')}")
+            # Iniciar dashboard en hilo separado
+            dashboard_thread = threading.Thread(
+                target=self._start_dashboard_thread,
+                args=(mode,),
+                daemon=True
+            )
+            dashboard_thread.start()
             
-            return True
+            # Esperar un poco y abrir navegador
+            time.sleep(3)
+            try:
+                webbrowser.open('http://127.0.0.1:8050')
+                print("🌐 Dashboard abierto en: http://127.0.0.1:8050")
+            except Exception:
+                print("🌐 Abre manualmente: http://127.0.0.1:8050")
             
-        except Exception as e:
-            print(f"❌ Error en descarga: {e}")
-            return False
-    
-    def start_dashboard(self, background: bool = False):
-        """Inicia el dashboard"""
-        print("🚀 INICIANDO DASHBOARD")
-        print("=" * 25)
-        
-        try:
-            if background:
-                # Iniciar en hilo separado
-                self.dashboard_thread = threading.Thread(
-                    target=self._run_dashboard,
-                    daemon=True
-                )
-                self.dashboard_thread.start()
-                time.sleep(3)
-                print("✅ Dashboard iniciado en http://127.0.0.1:8050")
-                self.dashboard_running = True
-                return True
-            else:
-                # Iniciar en primer plano
-                from monitoring.dashboard import start_dashboard
-                start_dashboard(host='127.0.0.1', port=8050, debug=False)
-                return True
-                
-        except Exception as e:
-            print(f"❌ Error iniciando dashboard: {e}")
-            return False
-    
-    def _run_dashboard(self):
-        """Ejecuta el dashboard en hilo separado"""
-        try:
-            from monitoring.dashboard import start_dashboard
-            start_dashboard(host='127.0.0.1', port=8050, debug=False)
-        except Exception as e:
-            print(f"❌ Error en dashboard: {e}")
-    
-    async def train_model(self):
-        """Entrena el modelo de IA"""
-        print("🧠 ENTRENANDO MODELO DE IA")
-        print("=" * 30)
-        
-        try:
-            from core.entrenar_agente import EntrenadorAgente
+            # Mantener el dashboard activo
+            print("\n📊 Dashboard activo")
+            print("💡 Presiona Ctrl+C para detener")
             
-            entrenador = EntrenadorAgente()
-            success = await entrenador.ejecutar_entrenamiento_completo()
-            
-            if success:
-                print("✅ Entrenamiento completado exitosamente")
-                return True
-            else:
-                print("❌ Error en el entrenamiento")
-                return False
-                
-        except Exception as e:
-            print(f"❌ Error entrenando modelo: {e}")
-            return False
-    
-    async def paper_trading(self):
-        """Inicia el trading en modo paper"""
-        print("💰 INICIANDO PAPER TRADING")
-        print("=" * 30)
-        
-        try:
-            from core.main_paper_trading import PaperTradingBot
-            
-            bot = PaperTradingBot()
-            success = await bot.ejecutar_paper_trading()
-            
-            if success:
-                print("✅ Paper trading iniciado exitosamente")
-                return True
-            else:
-                print("❌ Error iniciando paper trading")
-                return False
-                
-        except Exception as e:
-            print(f"❌ Error en paper trading: {e}")
-            return False
-    
-    async def full_flow(self):
-        """Ejecuta el flujo completo del bot"""
-        print("🚀 FLUJO COMPLETO DEL BOT")
-        print("=" * 30)
-        
-        try:
-            # Paso 1: Verificar datos
-            if not await self.verify_data():
-                print("❌ Error verificando datos")
-                return False
-            
-            # Paso 2: Descargar datos si es necesario
-            print("\n📥 Verificando si necesitamos más datos...")
-            if not await self.download_data():
-                print("❌ Error descargando datos")
-                return False
-            
-            # Paso 3: Iniciar dashboard en segundo plano
-            if not self.start_dashboard(background=True):
-                print("❌ Error iniciando dashboard")
-                return False
-            
-            # Paso 4: Verificar modelo existente
-            print("\n🧠 Verificando modelo existente...")
-            model_path = "models/saved_models/best_lstm_attention_20250906_223751.h5"
-            if not os.path.exists(model_path):
-                print("❌ Modelo no encontrado, iniciando entrenamiento...")
-                if not await self.train_model():
-                    print("❌ Error entrenando modelo")
-                    return False
-            
-            # Paso 5: Iniciar paper trading
-            print("\n💰 Iniciando paper trading...")
-            if not await self.paper_trading():
-                print("❌ Error iniciando paper trading")
-                return False
-            
-            # Mostrar estado final
-            self.show_final_status()
-            
-            # Mantener el sistema corriendo
-            print("\n⏳ Sistema ejecutándose... Presiona Ctrl+C para detener")
             try:
                 while True:
                     time.sleep(1)
             except KeyboardInterrupt:
-                print("\n🛑 Deteniendo sistema...")
-                return True
+                print("\n⏹️ Deteniendo dashboard...")
                 
         except Exception as e:
-            print(f"❌ Error en flujo completo: {e}")
+            print(f"❌ Error iniciando entrenamiento: {e}")
+            logger.error(f"Error en entrenamiento: {e}")
+        
+        input("\nPresiona Enter para continuar...")
+    
+    def _select_training_mode(self) -> str:
+        """Selecciona modo de entrenamiento"""
+        print("\n🎯 SELECCIONAR MODO DE ENTRENAMIENTO:")
+        print("1. Paper Trading (Recomendado - Sin riesgo)")
+        print("2. Backtesting (Pruebas históricas)")
+        print("3. Development (Desarrollo y debugging)")
+        
+        while True:
+            try:
+                choice = input("Selecciona modo (1-3): ").strip()
+                if choice == "1":
+                    return "paper_trading"
+                elif choice == "2":
+                    return "backtesting"
+                elif choice == "3":
+                    return "development"
+                else:
+                    print("⚠️ Por favor selecciona 1, 2 o 3")
+            except KeyboardInterrupt:
+                return "paper_trading"
+    
+    def _start_dashboard_thread(self, mode: str):
+        """Inicia dashboard en hilo separado"""
+        try:
+            # Cambiar al directorio del proyecto
+            os.chdir(project_root)
+            
+            # Configurar variables de entorno
+            env = os.environ.copy()
+            env['TRADING_MODE'] = mode
+            
+            # Ejecutar main.py
+            cmd = [sys.executable, 'core/main.py', '--mode', mode, '--dashboard']
+            
+            process = subprocess.Popen(
+                cmd,
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            
+            self.dashboard_process = process
+            
+            # Monitorear output
+            for line in iter(process.stdout.readline, ''):
+                if line:
+                    print(f"[DASHBOARD] {line.strip()}")
+                    
+        except Exception as e:
+            print(f"❌ Error en dashboard: {e}")
+    
+    async def performance_analysis(self):
+        """Opción 5: Análisis de performance"""
+        print("\n📈 ANÁLISIS DE PERFORMANCE")
+        print("=" * 30)
+        
+        try:
+            # Verificar si hay datos de trades
+            from data.database import db_manager
+            
+            # Obtener estadísticas básicas
+            stats = db_manager.get_database_stats()
+            print("📊 Estadísticas del sistema:")
+            for key, value in stats.items():
+                if isinstance(value, (int, float)):
+                    if 'count' in key.lower():
+                        print(f"   {key}: {value:,}")
+                    else:
+                        print(f"   {key}: {value}")
+                else:
+                    print(f"   {key}: {value}")
+            
+            # Análisis de trades si existe
+            try:
+                # Intentar análisis avanzado
+                print(f"\n🔍 Ejecutando análisis avanzado...")
+                
+                # Simular análisis básico
+                symbols = db_manager.get_symbols_list()
+                print(f"\n📈 Símbolos disponibles: {len(symbols)}")
+                
+                for symbol in symbols[:4]:  # Mostrar primeros 4
+                    count = db_manager.get_market_data_count(symbol)
+                    date_range = db_manager.get_data_date_range(symbol)
+                    
+                    if date_range[0] and date_range[1]:
+                        duration = (date_range[1] - date_range[0]).days
+                        print(f"   {symbol}: {count:,} registros ({duration} días)")
+                
+                print(f"\n💡 Para análisis detallado, usa la opción 4 (Dashboard)")
+                
+            except Exception as e:
+                print(f"⚠️ Análisis avanzado no disponible: {e}")
+                
+        except Exception as e:
+            print(f"❌ Error en análisis: {e}")
+        
+        input("\nPresiona Enter para continuar...")
+    
+    async def system_configuration(self):
+        """Opción 6: Configurar sistema"""
+        print("\n⚙️ CONFIGURACIÓN DEL SISTEMA")
+        print("=" * 35)
+        
+        try:
+            from config.config_loader import user_config
+            
+            print("📋 Configuración actual:")
+            
+            # Mostrar configuraciones clave
+            bot_name = user_config.get_bot_name()
+            trading_mode = user_config.get_trading_mode()
+            symbols = user_config.get_trading_symbols()
+            
+            print(f"   Nombre del bot: {bot_name}")
+            print(f"   Modo de trading: {trading_mode}")
+            print(f"   Símbolos: {', '.join(symbols)}")
+            
+            print(f"\n📁 Archivos de configuración:")
+            print(f"   config/user_settings.yaml")
+            print(f"   .env")
+            
+            print(f"\n💡 Para modificar la configuración:")
+            print(f"   1. Edita config/user_settings.yaml")
+            print(f"   2. Edita .env para credenciales")
+            print(f"   3. Reinicia la aplicación")
+            
+        except Exception as e:
+            print(f"❌ Error accediendo configuración: {e}")
+        
+        input("\nPresiona Enter para continuar...")
+    
+    async def quick_tests(self):
+        """Opción 7: Modo de pruebas rápidas"""
+        print("\n🧪 MODO DE PRUEBAS RÁPIDAS")
+        print("=" * 30)
+        
+        print("🔍 Ejecutando pruebas del sistema...")
+        
+        tests = [
+            ("Importaciones básicas", self._test_imports),
+            ("Conexión a base de datos", self._test_database),
+            ("Configuración", self._test_config),
+            ("Módulos de IA", self._test_ai_modules)
+        ]
+        
+        results = []
+        
+        for test_name, test_func in tests:
+            try:
+                print(f"   {test_name}...", end=" ")
+                result = await test_func()
+                if result:
+                    print("✅")
+                    results.append(True)
+                else:
+                    print("❌")
+                    results.append(False)
+            except Exception as e:
+                print(f"❌ ({e})")
+                results.append(False)
+        
+        # Resumen
+        passed = sum(results)
+        total = len(results)
+        print(f"\n📊 Resultados: {passed}/{total} pruebas pasaron")
+        
+        if passed == total:
+            print("🎉 Sistema completamente funcional")
+        elif passed >= total * 0.75:
+            print("⚠️ Sistema mayormente funcional")
+        else:
+            print("❌ Sistema tiene problemas significativos")
+        
+        input("\nPresiona Enter para continuar...")
+    
+    async def _test_imports(self) -> bool:
+        """Prueba importaciones básicas"""
+        try:
+            import pandas as pd
+            import numpy as np
+            from data.database import db_manager
+            from config.config_loader import user_config
+            return True
+        except ImportError:
             return False
     
-    def show_final_status(self):
-        """Muestra el estado final del sistema"""
-        print("\n🎉 SISTEMA COMPLETAMENTE OPERATIVO")
-        print("=" * 50)
-        print("✅ Datos históricos verificados y actualizados")
-        print("✅ Dashboard ejecutándose en http://127.0.0.1:8050")
-        print("✅ Modelo LSTM cargado y operativo")
-        print("✅ Paper trading activo")
-        print()
-        print("📊 MÉTRICAS DISPONIBLES EN EL DASHBOARD:")
-        print("   • Rendimiento del modelo")
-        print("   • Gráficos de precios en tiempo real")
-        print("   • Señales de trading")
-        print("   • Estadísticas de backtesting")
-        print("   • Métricas de riesgo")
-        print()
-        print("🚀 PRÓXIMOS PASOS:")
-        print("   1. Revisa las métricas en el dashboard")
-        print("   2. Ajusta parámetros si es necesario")
-        print("   3. Monitorea las operaciones en el dashboard")
-        print("   4. Monitorea el rendimiento en tiempo real")
-        print()
-        print("💡 COMANDOS ÚTILES:")
-        print("   • Ctrl+C para detener el sistema")
-        print("   • Refresca el dashboard para ver actualizaciones")
-        print("   • Revisa los logs para información detallada")
+    async def _test_database(self) -> bool:
+        """Prueba conexión a base de datos"""
+        try:
+            from data.database import db_manager
+            stats = db_manager.get_database_stats()
+            return isinstance(stats, dict)
+        except Exception:
+            return False
+    
+    async def _test_config(self) -> bool:
+        """Prueba configuración"""
+        try:
+            from config.config_loader import user_config
+            bot_name = user_config.get_bot_name()
+            return isinstance(bot_name, str)
+        except Exception:
+            return False
+    
+    async def _test_ai_modules(self) -> bool:
+        """Prueba módulos de IA"""
+        try:
+            from models.adaptive_trainer import adaptive_trainer
+            return True
+        except ImportError:
+            return False
+    
+    async def system_status(self):
+        """Opción 8: Estado del sistema"""
+        print("\n📱 ESTADO DEL SISTEMA")
+        print("=" * 25)
+        
+        try:
+            # Estado general
+            print("🖥️ Sistema:")
+            print(f"   Python: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+            print(f"   Directorio: {project_root}")
+            print(f"   Tiempo de ejecución: {datetime.now().strftime('%H:%M:%S')}")
+            
+            # Estado de archivos críticos
+            print(f"\n📁 Archivos críticos:")
+            critical_files = [
+                'core/main.py',
+                'config/user_settings.yaml',
+                '.env',
+                'data/database.py',
+                'models/adaptive_trainer.py'
+            ]
+            
+            for file_path in critical_files:
+                full_path = os.path.join(project_root, file_path)
+                status = "✅" if os.path.exists(full_path) else "❌"
+                print(f"   {status} {file_path}")
+            
+            # Estado de base de datos
+            try:
+                from data.database import db_manager
+                stats = db_manager.get_database_stats()
+                print(f"\n💾 Base de datos:")
+                print(f"   Total registros: {stats.get('total_records', 0):,}")
+                print(f"   Estado: ✅ Conectada")
+            except Exception as e:
+                print(f"\n💾 Base de datos: ❌ Error - {e}")
+            
+            # Procesos activos
+            print(f"\n🔄 Procesos:")
+            if self.dashboard_process and self.dashboard_process.poll() is None:
+                print(f"   Dashboard: ✅ Activo (PID: {self.dashboard_process.pid})")
+            else:
+                print(f"   Dashboard: ❌ Inactivo")
+            
+        except Exception as e:
+            print(f"❌ Error obteniendo estado: {e}")
+        
+        input("\nPresiona Enter para continuar...")
+    
+    async def run(self):
+        """Ejecuta el bucle principal de la aplicación"""
+        self.show_banner()
+        
+        while self.running:
+            try:
+                self.show_main_menu()
+                choice = self.get_user_choice()
+                
+                if choice == "1":
+                    await self.download_historical_data()
+                elif choice == "2":
+                    await self.validate_ai_agent()
+                elif choice == "3":
+                    await self.validate_symbols_history()
+                elif choice == "4":
+                    await self.start_training_and_dashboard()
+                elif choice == "5":
+                    await self.performance_analysis()
+                elif choice == "6":
+                    await self.system_configuration()
+                elif choice == "7":
+                    await self.quick_tests()
+                elif choice == "8":
+                    await self.system_status()
+                elif choice == "9":
+                    self.running = False
+                    print("\n👋 ¡Hasta luego!")
+                else:
+                    print("\n⚠️ Opción no válida. Por favor selecciona 1-9.")
+                    time.sleep(1)
+                    
+            except KeyboardInterrupt:
+                print("\n\n👋 Saliendo...")
+                self.running = False
+            except Exception as e:
+                print(f"\n❌ Error inesperado: {e}")
+                logger.error(f"Error en bucle principal: {e}")
+                time.sleep(2)
+        
+        # Limpiar procesos
+        if self.dashboard_process and self.dashboard_process.poll() is None:
+            print("🧹 Deteniendo procesos...")
+            self.dashboard_process.terminate()
 
 def main():
     """Función principal"""
-    parser = argparse.ArgumentParser(description='Trading Bot v10 - Aplicación Principal')
-    parser.add_argument('--mode', 
-                       choices=['verify', 'download', 'train', 'paper-trading', 'dashboard', 'full'],
-                       default='full',
-                       help='Modo de operación (default: full)')
-    parser.add_argument('--years', type=int, default=2, help='Años de datos a descargar')
-    parser.add_argument('--background', action='store_true', help='Ejecutar dashboard en segundo plano')
-    
-    args = parser.parse_args()
-    
-    app = TradingBotApp()
-    app.print_banner()
-    
     try:
-        if args.mode == 'verify':
-            success = asyncio.run(app.verify_data())
-        elif args.mode == 'download':
-            success = asyncio.run(app.download_data(args.years))
-        elif args.mode == 'train':
-            success = asyncio.run(app.train_model())
-        elif args.mode == 'paper-trading':
-            success = asyncio.run(app.paper_trading())
-        elif args.mode == 'dashboard':
-            success = app.start_dashboard(background=args.background)
-        elif args.mode == 'full':
-            success = asyncio.run(app.full_flow())
-        else:
-            print(f"❌ Modo no reconocido: {args.mode}")
-            success = False
-        
-        if success:
-            print("\n✅ Operación completada exitosamente")
-        else:
-            print("\n❌ Operación terminó con errores")
-            
+        app = TradingBotApp()
+        asyncio.run(app.run())
     except KeyboardInterrupt:
-        print("\n⏹️ Operación cancelada por el usuario")
+        print("\n👋 Aplicación terminada por el usuario")
     except Exception as e:
-        print(f"\n❌ ERROR CRÍTICO: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"\n❌ Error crítico: {e}")
+        logger.error(f"Error crítico en main: {e}")
 
 if __name__ == "__main__":
     main()
