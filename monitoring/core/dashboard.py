@@ -32,7 +32,7 @@ from config.config_loader import user_config
 from .data_provider import DashboardDataProvider
 from monitoring.pages.home import HomePage
 # ChartComponents no existe, se removió del import
-from monitoring.callbacks.home_callbacks import register_callbacks
+from monitoring.callbacks.home_callbacks import register_home_callbacks
 
 logger = logging.getLogger(__name__)
 
