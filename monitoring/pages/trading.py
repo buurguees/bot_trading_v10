@@ -158,3 +158,9 @@ class TradingPage:
             ])
             
         ], className="page-content")
+
+# Función de conveniencia para compatibilidad
+def create_trading_page():
+    """Función de conveniencia para crear la página de trading"""
+    trading_page = TradingPage()
+    return trading_page.create_trading_page()

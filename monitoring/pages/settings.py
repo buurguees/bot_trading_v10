@@ -163,3 +163,9 @@ class SettingsPage:
             ], style={'marginTop': '30px'})
             
         ], className="page-content")
+
+# Función de conveniencia para compatibilidad
+def create_settings_page():
+    """Función de conveniencia para crear la página de settings"""
+    settings_page = SettingsPage()
+    return settings_page.create_settings_page()

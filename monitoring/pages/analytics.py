@@ -88,3 +88,9 @@ class AnalyticsPage:
             ])
             
         ], className="page-content")
+
+# Función de conveniencia para compatibilidad
+def create_analytics_page():
+    """Función de conveniencia para crear la página de analytics"""
+    analytics_page = AnalyticsPage()
+    return analytics_page.create_analytics_page()

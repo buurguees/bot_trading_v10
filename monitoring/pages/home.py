@@ -122,3 +122,9 @@ class HomePage:
             ])
             
         ], className="page-content")
+
+# Función de conveniencia para compatibilidad
+def create_home_page():
+    """Función de conveniencia para crear la página principal"""
+    home_page = HomePage()
+    return home_page.create_home_page()
