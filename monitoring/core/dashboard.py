@@ -30,7 +30,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from config.config_loader import user_config
 from .data_provider import DashboardDataProvider
-from monitoring.pages.home import LayoutComponents
+from monitoring.pages.home import HomePage
 from monitoring.components.charts import ChartComponents
 from monitoring.callbacks.home_callbacks import register_callbacks
 
@@ -46,7 +46,7 @@ class TradingDashboard:
         
         # Inicializar componentes
         self.data_provider = DashboardDataProvider()
-        self.layout_components = LayoutComponents()
+        self.home_page = HomePage()
         self.chart_components = ChartComponents()
         
         # Configurar Dash app
@@ -78,7 +78,7 @@ class TradingDashboard:
             dcc.Location(id='url', refresh=False),
             
             # Header fijo
-            self.layout_components.create_header(),
+            self._create_header(),
             
             # Container principal
             html.Div(
@@ -110,19 +110,22 @@ class TradingDashboard:
         )
         def display_page(pathname):
             if pathname == '/' or pathname == '/home':
-                return self.layout_components.create_home_page()
+                return self.home_page.create_home_page()
             elif pathname == '/trading':
-                return self.layout_components.create_trading_page()
+                from monitoring.pages.trading import create_trading_page
+                return create_trading_page()
             elif pathname == '/performance':
-                return self.layout_components.create_performance_page()
+                from monitoring.pages.analytics import create_analytics_page
+                return create_analytics_page()
             elif pathname == '/settings':
-                return self.layout_components.create_settings_page()
+                from monitoring.pages.settings import create_settings_page
+                return create_settings_page()
             elif pathname == '/alerts':
-                return self.layout_components.create_alerts_page()
+                return self._create_alerts_page()
             elif pathname == '/chat':
-                return self.layout_components.create_chat_page()
+                return self._create_chat_page()
             else:
-                return self.layout_components.create_404_page()
+                return self._create_404_page()
         
         # Callback para actualización de datos
         @self.app.callback(
@@ -169,6 +172,42 @@ class TradingDashboard:
     def stop(self):
         """Detiene el servidor del dashboard"""
         logger.info("Dashboard detenido")
+
+    def _create_header(self):
+        """Crea el header del dashboard"""
+        return html.Div([
+            html.Div([
+                html.H1("🤖 Trading Bot v10", className="dashboard-title"),
+                html.Div([
+                    html.Span("📊 Dashboard", className="nav-item", id="nav-home"),
+                    html.Span("💹 Trading", className="nav-item", id="nav-trading"),
+                    html.Span("📈 Analytics", className="nav-item", id="nav-performance"),
+                    html.Span("⚙️ Settings", className="nav-item", id="nav-settings"),
+                ], className="nav-menu")
+            ], className="dashboard-header")
+        ], className="header-container")
+
+    def _create_alerts_page(self):
+        """Crea la página de alertas"""
+        return html.Div([
+            html.H2("🚨 Alertas del Sistema"),
+            html.P("Página de alertas en desarrollo...")
+        ], className="page-content")
+
+    def _create_chat_page(self):
+        """Crea la página de chat"""
+        return html.Div([
+            html.H2("💬 Chat con el Bot"),
+            html.P("Página de chat en desarrollo...")
+        ], className="page-content")
+
+    def _create_404_page(self):
+        """Crea la página 404"""
+        return html.Div([
+            html.H2("404 - Página no encontrada"),
+            html.P("La página que buscas no existe."),
+            html.A("Volver al inicio", href="/", className="button-primary")
+        ], className="page-content")
 
 # Instancia global del dashboard
 dashboard = TradingDashboard()
