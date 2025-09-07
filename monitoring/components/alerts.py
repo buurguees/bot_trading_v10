@@ -1,7 +1,7 @@
 from dash import html
 import dash_bootstrap_components as dbc
 
-from ..data_provider import DashboardDataProvider
+from monitoring.core.data_provider import DashboardDataProvider
 
 
 def render_alerts():

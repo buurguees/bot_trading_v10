@@ -1,8 +1,8 @@
 from dash import html
 import dash_bootstrap_components as dbc
 
-from ..data_provider import DashboardDataProvider
-from ..utils import format_currency
+from monitoring.core.data_provider import DashboardDataProvider
+from monitoring.utils.helpers import format_currency
 
 
 def _metric_card(title: str, value: str, color: str = "primary"):
