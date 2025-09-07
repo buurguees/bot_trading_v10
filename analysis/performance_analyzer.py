@@ -465,7 +465,12 @@ class PerformanceAnalyzer:
                 # Fallback a datos simulados
                 return self._create_sample_market_data()
             if not df.empty:
-                df['datetime'] = pd.to_datetime(df['timestamp'], unit='s')
+                # Verificar si el timestamp está en milisegundos o segundos
+                sample_timestamp = df['timestamp'].iloc[0] if len(df) > 0 else 0
+                if sample_timestamp > 10000000000:  # Timestamp en milisegundos
+                    df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
+                else:  # Timestamp en segundos
+                    df['datetime'] = pd.to_datetime(df['timestamp'], unit='s')
                 df.set_index('datetime', inplace=True)
             
             return df
