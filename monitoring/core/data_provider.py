@@ -26,7 +26,7 @@ from trading.position_manager import position_manager
 from trading.risk_manager import risk_manager
 from trading.executor import trading_executor
 from models.prediction_engine import prediction_engine
-from monitoring.cycle_tracker import cycle_tracker
+from monitoring.core.cycle_tracker import cycle_tracker
 from monitoring.core.synchronized_cycle_manager import synchronized_cycle_manager
 from models.adaptive_trainer import adaptive_trainer
 from models.confidence_estimator import confidence_estimator
