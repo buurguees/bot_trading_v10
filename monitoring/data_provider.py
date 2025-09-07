@@ -26,6 +26,7 @@ from trading.position_manager import position_manager
 from trading.risk_manager import risk_manager
 from trading.executor import trading_executor
 from models.prediction_engine import prediction_engine
+from monitoring.cycle_tracker import cycle_tracker
 from models.adaptive_trainer import adaptive_trainer
 from models.confidence_estimator import confidence_estimator
 from data.collector import data_collector
@@ -43,6 +44,10 @@ class DashboardDataProvider:
     def get_dashboard_data(self) -> Dict[str, Any]:
         """Obtiene todos los datos necesarios para el dashboard"""
         try:
+            # Generar ciclos de ejemplo si no existen
+            if not cycle_tracker.cycles:
+                cycle_tracker.generate_sample_cycles(20)
+            
             return {
                 'portfolio': self._get_portfolio_data(),
                 'positions': self._get_positions_data(),
@@ -50,6 +55,7 @@ class DashboardDataProvider:
                 'signals': self._get_signals_data(),
                 'trades': self._get_recent_trades_data(),
                 'charts': self._get_charts_data(),
+                'cycles': self._get_cycles_data(),
                 'timestamp': datetime.now().isoformat()
             }
         except Exception as e:
@@ -282,6 +288,44 @@ class DashboardDataProvider:
             }
         except Exception as e:
             logger.error(f"Error obteniendo datos de gráficos: {e}")
+            return {}
+    
+    def _get_cycles_data(self) -> Dict[str, Any]:
+        """Datos de ciclos cronológicos"""
+        try:
+            # Obtener estadísticas de ciclos
+            stats = cycle_tracker.get_cycle_statistics()
+            
+            # Obtener top 10 ciclos
+            top_cycles = cycle_tracker.get_top_cycles(limit=10, metric='daily_pnl')
+            
+            # Convertir a formato serializable
+            cycles_list = []
+            for cycle in top_cycles:
+                cycles_list.append({
+                    'cycle_id': cycle.cycle_id,
+                    'symbol': cycle.symbol,
+                    'start_time': cycle.start_time.isoformat(),
+                    'end_time': cycle.end_time.isoformat() if cycle.end_time else None,
+                    'daily_pnl': cycle.daily_pnl,
+                    'total_pnl': cycle.total_pnl,
+                    'pnl_percentage': cycle.pnl_percentage,
+                    'progress_to_target': cycle.progress_to_target,
+                    'trades_count': cycle.trades_count,
+                    'win_rate': cycle.win_rate,
+                    'max_drawdown': cycle.max_drawdown,
+                    'sharpe_ratio': cycle.sharpe_ratio,
+                    'status': cycle.status
+                })
+            
+            return {
+                'statistics': stats,
+                'top_cycles': cycles_list,
+                'total_cycles': len(cycle_tracker.cycles)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo datos de ciclos: {e}")
             return {}
     
     def _get_pnl_history_data(self) -> Dict[str, List]:

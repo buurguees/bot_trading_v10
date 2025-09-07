@@ -186,6 +186,11 @@ class LayoutComponents:
                 
             ], style={'marginBottom': '30px'}),
             
+            # Top 10 Ciclos Cronológicos
+            html.Div([
+                html.Div(id="top-cycles-widget-container")
+            ], style={'marginBottom': '30px'}),
+            
             # Posiciones activas y señales recientes
             html.Div([
                 # Posiciones activas

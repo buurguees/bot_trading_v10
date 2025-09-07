@@ -571,6 +571,9 @@ def register_callbacks(app):
     
     # Callbacks para navegación temporal
     register_temporal_navigation_callbacks(app, data_provider, chart_components)
+    
+    # Callbacks para widget de ciclos
+    register_cycles_widget_callbacks(app, data_provider, chart_components)
 
 def register_temporal_navigation_callbacks(app, data_provider, chart_components):
     """Registra callbacks para navegación temporal en gráficos"""
@@ -717,3 +720,73 @@ def generate_sample_trades_data(start_date, end_date):
         })
     
     return pd.DataFrame(trades)
+
+def register_cycles_widget_callbacks(app, data_provider, chart_components):
+    """Registra callbacks para el widget de ciclos cronológicos"""
+    
+    from monitoring.components.top_cycles_widget import TopCyclesWidget
+    from monitoring.cycle_tracker import cycle_tracker
+    
+    cycles_widget = TopCyclesWidget()
+    
+    # Callback para cargar el widget de ciclos
+    @app.callback(
+        Output('top-cycles-widget-container', 'children'),
+        Input('dashboard-data', 'data')
+    )
+    def load_cycles_widget(data):
+        """Carga el widget de ciclos en la página principal"""
+        try:
+            return cycles_widget.create_top_cycles_widget()
+        except Exception as e:
+            logger.error(f"Error cargando widget de ciclos: {e}")
+            return html.Div("Error cargando widget de ciclos", 
+                          style={'color': 'red', 'textAlign': 'center'})
+    
+    # Callback para actualizar la tabla de ciclos
+    @app.callback(
+        [Output('top-cycles-table', 'data'),
+         Output('cycles-performance-chart', 'figure'),
+         Output('cycles-summary-stats', 'children')],
+        [Input('cycles-sort-metric', 'value'),
+         Input('cycles-symbol-filter', 'value'),
+         Input('refresh-cycles-btn', 'n_clicks')]
+    )
+    def update_cycles_data(sort_metric, symbol_filter, refresh_clicks):
+        """Actualiza los datos del widget de ciclos"""
+        try:
+            # Obtener ciclos del tracker
+            cycles = cycle_tracker.get_top_cycles(limit=10, metric=sort_metric)
+            
+            # Filtrar por símbolo si no es 'all'
+            if symbol_filter != 'all':
+                cycles = [c for c in cycles if c.symbol == symbol_filter]
+            
+            # Convertir a datos de tabla
+            table_data = []
+            for i, cycle in enumerate(cycles):
+                table_data.append({
+                    'rank': i + 1,
+                    'cycle_id': cycle.cycle_id.split('_')[-1],  # Solo la parte final del ID
+                    'symbol': cycle.symbol,
+                    'date': cycle.start_time.strftime('%Y-%m-%d'),
+                    'daily_pnl': cycle.daily_pnl,
+                    'pnl_pct': cycle.pnl_percentage,
+                    'progress': cycle.progress_to_target,
+                    'trades': cycle.trades_count,
+                    'win_rate': cycle.win_rate,
+                    'sharpe': cycle.sharpe_ratio
+                })
+            
+            # Crear gráfico de rendimiento
+            chart_figure = cycles_widget.create_cycles_performance_chart(table_data)
+            
+            # Obtener estadísticas resumen
+            stats = cycle_tracker.get_cycle_statistics()
+            summary_stats = cycles_widget.create_cycles_summary_stats(stats)
+            
+            return table_data, chart_figure, summary_stats
+            
+        except Exception as e:
+            logger.error(f"Error actualizando datos de ciclos: {e}")
+            return [], go.Figure(), html.Div("Error cargando datos", style={'color': 'red'})
