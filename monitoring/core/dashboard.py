@@ -31,7 +31,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from config.config_loader import user_config
 from .data_provider import DashboardDataProvider
 from monitoring.pages.home import HomePage
-from monitoring.components.chart_components import ChartComponents
+# ChartComponents no existe, se removió del import
 from monitoring.callbacks.home_callbacks import register_callbacks
 
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class TradingDashboard:
         # Inicializar componentes
         self.data_provider = DashboardDataProvider()
         self.home_page = HomePage()
-        self.chart_components = ChartComponents()
+        # ChartComponents no existe, se removió
         
         # Configurar Dash app
         self.app = dash.Dash(
