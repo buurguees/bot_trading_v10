@@ -278,7 +278,7 @@ analysis:
 dashboard:
   enhanced_charts: true
   default_timeframe: "30d"
-  auto_refresh_interval: 30
+  auto_refresh_interval: 5
   show_recommendations: true
   max_recommendations: 5
 

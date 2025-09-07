@@ -7,7 +7,7 @@ Funcionalidades:
 - Dashboard web con múltiples páginas
 - Visualización en tiempo real de métricas
 - Gráficos interactivos con Plotly
-- Updates automáticos cada 30 segundos
+- Updates automáticos cada 5 segundos
 - Interfaz responsive y moderna
 """
 
@@ -90,7 +90,7 @@ class TradingDashboard:
             # Interval para updates automáticos
             dcc.Interval(
                 id='interval-component',
-                interval=30*1000,  # 30 segundos
+                interval=5*1000,  # 5 segundos
                 n_intervals=0
             ),
             
