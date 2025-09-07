@@ -2,7 +2,7 @@ from dash import html, dash_table
 import dash_bootstrap_components as dbc
 import pandas as pd
 
-from ..data_provider import DashboardDataProvider
+from monitoring.core.data_provider import DashboardDataProvider
 
 
 def render_trades_table(limit: int = 20):
