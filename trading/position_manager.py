@@ -858,6 +858,14 @@ class PositionManager:
             logger.error(f"Error obteniendo P&L realizado: {e}")
             return 0.0
     
+    def get_positions_by_symbol(self, symbol: str) -> List[Position]:
+        """Obtener posiciones activas por símbolo"""
+        try:
+            return self.positions_by_symbol.get(symbol, [])
+        except Exception as e:
+            logger.error(f"Error obteniendo posiciones por símbolo {symbol}: {e}")
+            return []
+    
     async def health_check(self) -> Dict[str, Any]:
         """Verificar estado del position manager"""
         try:
