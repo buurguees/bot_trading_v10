@@ -141,11 +141,40 @@ class LayoutComponents:
                 
             ], style={'marginBottom': '30px'}),
             
-            # Gráficos principales
+            # Gráficos principales con navegación
             html.Div([
-                # Gráfico P&L
+                # Gráfico P&L mejorado con navegación
                 html.Div([
                     html.H4("📈 P&L Evolution", style={'color': self.theme_colors['text_primary']}),
+                    
+                    # Controles de navegación para P&L
+                    html.Div([
+                        html.Div([
+                            html.Label("Período:"),
+                            dcc.Dropdown(
+                                id='home-pnl-timeframe',
+                                options=[
+                                    {'label': 'Última semana', 'value': '7d'},
+                                    {'label': 'Último mes', 'value': '30d'},
+                                    {'label': 'Últimos 3 meses', 'value': '90d'},
+                                    {'label': 'Último año', 'value': '365d'},
+                                    {'label': 'Todo el histórico', 'value': 'all'}
+                                ],
+                                value='30d',
+                                style={'width': '150px', 'display': 'inline-block'}
+                            )
+                        ], style={'margin': '5px', 'display': 'inline-block'}),
+                        
+                        html.Div([
+                            html.Button("◀", id="home-pnl-prev", className="nav-btn-small", title="Período anterior"),
+                            html.Button("▶", id="home-pnl-next", className="nav-btn-small", title="Período siguiente"),
+                            html.Button("🏠", id="home-pnl-today", className="nav-btn-small", title="Ir a hoy")
+                        ], style={'margin': '5px', 'display': 'inline-block'}),
+                        
+                        html.Div(id="home-pnl-period-info", className="period-info-small")
+                        
+                    ], className="chart-controls-small"),
+                    
                     dcc.Graph(id="pnl-chart", style={'height': '400px'})
                 ], className="chart-container", style={'width': '60%', 'display': 'inline-block'}),
                 
@@ -220,9 +249,68 @@ class LayoutComponents:
                 html.Div(id="live-signals-table")
             ], style={'marginBottom': '30px'}),
             
-            # Gráfico de precio con señales
+            # Gráfico de precio con señales y navegación
             html.Div([
                 html.H4("📊 Price Chart with Signals", style={'color': self.theme_colors['text_primary']}),
+                
+                # Controles de navegación para el gráfico de precios
+                html.Div([
+                    html.Div([
+                        html.Label("Símbolo:"),
+                        dcc.Dropdown(
+                            id='trading-symbol-selector',
+                            options=[
+                                {'label': 'BTCUSDT', 'value': 'BTCUSDT'},
+                                {'label': 'ETHUSDT', 'value': 'ETHUSDT'},
+                                {'label': 'ADAUSDT', 'value': 'ADAUSDT'},
+                                {'label': 'SOLUSDT', 'value': 'SOLUSDT'}
+                            ],
+                            value='BTCUSDT',
+                            style={'width': '120px', 'display': 'inline-block'}
+                        )
+                    ], style={'margin': '5px', 'display': 'inline-block'}),
+                    
+                    html.Div([
+                        html.Label("Período:"),
+                        dcc.Dropdown(
+                            id='trading-timeframe-selector',
+                            options=[
+                                {'label': '1H', 'value': '1h'},
+                                {'label': '4H', 'value': '4h'},
+                                {'label': '1D', 'value': '1d'},
+                                {'label': '1W', 'value': '1w'}
+                            ],
+                            value='1h',
+                            style={'width': '80px', 'display': 'inline-block'}
+                        )
+                    ], style={'margin': '5px', 'display': 'inline-block'}),
+                    
+                    html.Div([
+                        html.Label("Rango:"),
+                        dcc.Dropdown(
+                            id='trading-range-selector',
+                            options=[
+                                {'label': 'Última semana', 'value': '7d'},
+                                {'label': 'Último mes', 'value': '30d'},
+                                {'label': 'Últimos 3 meses', 'value': '90d'},
+                                {'label': 'Último año', 'value': '365d'}
+                            ],
+                            value='7d',
+                            style={'width': '120px', 'display': 'inline-block'}
+                        )
+                    ], style={'margin': '5px', 'display': 'inline-block'}),
+                    
+                    html.Div([
+                        html.Button("◀", id="trading-chart-prev", className="nav-btn-small", title="Período anterior"),
+                        html.Button("▶", id="trading-chart-next", className="nav-btn-small", title="Período siguiente"),
+                        html.Button("🏠", id="trading-chart-today", className="nav-btn-small", title="Ir a hoy"),
+                        html.Button("📊", id="trading-chart-zoom", className="nav-btn-small", title="Zoom automático")
+                    ], style={'margin': '5px', 'display': 'inline-block'}),
+                    
+                    html.Div(id="trading-chart-period-info", className="period-info-small")
+                    
+                ], className="chart-controls-small"),
+                
                 dcc.Graph(id="price-signals-chart", style={'height': '500px'})
             ])
             

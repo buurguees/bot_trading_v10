@@ -593,6 +593,108 @@ body {
 }
 
 /* =============================================================================
+   CONTROLES DE NAVEGACIÓN TEMPORAL
+   ============================================================================= */
+.chart-controls {
+    background: var(--bg-secondary);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.chart-controls-small {
+    background: var(--bg-secondary);
+    padding: 10px;
+    border-radius: var(--border-radius);
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-btn {
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition);
+    margin: 0 5px;
+}
+
+.nav-btn:hover {
+    background: #3366cc;
+    transform: translateY(-1px);
+}
+
+.nav-btn-small {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: var(--transition);
+    margin: 0 2px;
+}
+
+.nav-btn-small:hover {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    transform: translateY(-1px);
+}
+
+.period-info {
+    background: var(--bg-tertiary);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    margin-left: 10px;
+}
+
+.period-info-small {
+    background: var(--bg-tertiary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    margin-left: 5px;
+}
+
+.control-group {
+    display: inline-block;
+    margin: 5px;
+}
+
+.control-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.navigation-controls {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    margin-left: 15px;
+}
+
+.timeframe-dropdown {
+    min-width: 150px;
+}
+
+/* =============================================================================
    IMPRESIÓN
    ============================================================================= */
 @media print {

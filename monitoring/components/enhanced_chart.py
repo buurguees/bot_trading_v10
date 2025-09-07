@@ -48,6 +48,26 @@ def create_enhanced_chart_component():
                 )
             ], className="control-group"),
             
+            # Rango de fechas personalizado (oculto por defecto)
+            html.Div([
+                html.Label("Rango personalizado:"),
+                dcc.DatePickerRange(
+                    id='custom-date-range',
+                    start_date=datetime.now() - timedelta(days=30),
+                    end_date=datetime.now(),
+                    display_format='YYYY-MM-DD',
+                    style={'display': 'none'}
+                )
+            ], className="control-group", id="custom-range-group"),
+            
+            # Controles de navegación
+            html.Div([
+                html.Button("◀ Anterior", id="prev-period-btn", className="nav-btn"),
+                html.Button("▶ Siguiente", id="next-period-btn", className="nav-btn"),
+                html.Button("🏠 Hoy", id="today-btn", className="nav-btn"),
+                html.Button("📊 Zoom Auto", id="auto-zoom-btn", className="nav-btn")
+            ], className="navigation-controls"),
+            
             # Selector de fechas personalizado
             html.Div([
                 html.Label("Rango personalizado:"),
@@ -246,6 +266,63 @@ def get_historical_trades_data(symbol, start_date=None, end_date=None):
     except Exception as e:
         print(f"Error obteniendo datos de trades: {e}")
         return create_sample_trades_data(symbol, start_date, end_date)
+
+def create_enhanced_pnl_chart_with_navigation():
+    """Crea gráfico P&L con navegación temporal completa"""
+    
+    return html.Div([
+        # Controles de navegación para P&L
+        html.Div([
+            html.H4("📈 Análisis de P&L Histórico", className="chart-title"),
+            
+            # Selector de período
+            html.Div([
+                html.Label("Período de análisis:"),
+                dcc.Dropdown(
+                    id='pnl-timeframe-selector',
+                    options=[
+                        {'label': 'Última semana', 'value': '7d'},
+                        {'label': 'Último mes', 'value': '30d'},
+                        {'label': 'Últimos 3 meses', 'value': '90d'},
+                        {'label': 'Último año', 'value': '365d'},
+                        {'label': 'Todo el histórico', 'value': 'all'}
+                    ],
+                    value='30d',
+                    style={'width': '200px', 'display': 'inline-block'}
+                )
+            ], style={'margin': '10px', 'display': 'inline-block'}),
+            
+            # Controles de navegación
+            html.Div([
+                html.Button("◀", id="pnl-prev-btn", className="nav-btn-small", title="Período anterior"),
+                html.Button("▶", id="pnl-next-btn", className="nav-btn-small", title="Período siguiente"),
+                html.Button("🏠", id="pnl-today-btn", className="nav-btn-small", title="Ir a hoy"),
+                html.Button("📊", id="pnl-zoom-btn", className="nav-btn-small", title="Zoom automático")
+            ], style={'margin': '10px', 'display': 'inline-block'}),
+            
+            # Información del período actual
+            html.Div(id="pnl-period-info", className="period-info")
+            
+        ], className="chart-controls"),
+        
+        # Gráfico P&L principal
+        dcc.Graph(
+            id='enhanced-pnl-chart',
+            config={
+                'displayModeBar': True,
+                'displaylogo': False,
+                'modeBarButtonsToRemove': ['pan2d', 'lasso2d'],
+                'modeBarButtonsToAdd': ['drawline', 'drawopenpath', 'drawclosedpath', 'drawcircle', 'drawrect', 'eraseshape']
+            }
+        ),
+        
+        # Gráfico de distribución de trades
+        dcc.Graph(
+            id='trades-distribution-chart',
+            config={'displayModeBar': False}
+        )
+        
+    ], className="enhanced-chart-container")
 
 def create_enhanced_candlestick_chart(df_market, df_trades, options):
     """Crea gráfico de candlesticks mejorado con todas las opciones"""

@@ -12,8 +12,9 @@ Funcionalidades:
 from dash import Input, Output, State, callback, dash_table, html
 import plotly.graph_objects as go
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
+import dash
 
 logger = logging.getLogger(__name__)
 
@@ -567,3 +568,152 @@ def register_callbacks(app):
     # Crear instancia de callbacks avanzados
     callbacks_handler = DashboardCallbacks(app, data_provider, chart_components)
     callbacks_handler.register_all_callbacks()
+    
+    # Callbacks para navegación temporal
+    register_temporal_navigation_callbacks(app, data_provider, chart_components)
+
+def register_temporal_navigation_callbacks(app, data_provider, chart_components):
+    """Registra callbacks para navegación temporal en gráficos"""
+    
+    # Callback para navegación del gráfico P&L en home
+    @app.callback(
+        [Output('pnl-chart', 'figure'),
+         Output('home-pnl-period-info', 'children')],
+        [Input('home-pnl-timeframe', 'value'),
+         Input('home-pnl-prev', 'n_clicks'),
+         Input('home-pnl-next', 'n_clicks'),
+         Input('home-pnl-today', 'n_clicks')],
+        [State('home-pnl-timeframe', 'value')]
+    )
+    def update_home_pnl_chart(timeframe, prev_clicks, next_clicks, today_clicks, current_timeframe):
+        """Actualiza el gráfico P&L con navegación temporal"""
+        ctx = dash.callback_context
+        if not ctx.triggered:
+            return chart_components.create_pnl_chart({}), "Período: Último mes"
+        
+        # Determinar acción
+        trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+        
+        # Obtener datos históricos basados en el período
+        end_date = datetime.now()
+        if timeframe == '7d':
+            start_date = end_date - timedelta(days=7)
+            period_text = "Última semana"
+        elif timeframe == '30d':
+            start_date = end_date - timedelta(days=30)
+            period_text = "Último mes"
+        elif timeframe == '90d':
+            start_date = end_date - timedelta(days=90)
+            period_text = "Últimos 3 meses"
+        elif timeframe == '365d':
+            start_date = end_date - timedelta(days=365)
+            period_text = "Último año"
+        else:  # 'all'
+            start_date = end_date - timedelta(days=1095)  # 3 años
+            period_text = "Todo el histórico"
+        
+        # Crear datos de ejemplo para el gráfico
+        chart_data = {
+            'pnl_data': generate_sample_pnl_data(start_date, end_date),
+            'trades_data': generate_sample_trades_data(start_date, end_date)
+        }
+        
+        figure = chart_components.create_pnl_chart(chart_data)
+        period_info = f"Período: {period_text} ({start_date.strftime('%Y-%m-%d')} a {end_date.strftime('%Y-%m-%d')})"
+        
+        return figure, period_info
+    
+    # Callback para navegación del gráfico de precios en trading
+    @app.callback(
+        [Output('price-signals-chart', 'figure'),
+         Output('trading-chart-period-info', 'children')],
+        [Input('trading-symbol-selector', 'value'),
+         Input('trading-timeframe-selector', 'value'),
+         Input('trading-range-selector', 'value'),
+         Input('trading-chart-prev', 'n_clicks'),
+         Input('trading-chart-next', 'n_clicks'),
+         Input('trading-chart-today', 'n_clicks'),
+         Input('trading-chart-zoom', 'n_clicks')]
+    )
+    def update_trading_chart(symbol, timeframe, range_period, prev_clicks, next_clicks, today_clicks, zoom_clicks):
+        """Actualiza el gráfico de precios con navegación temporal"""
+        # Obtener datos históricos reales
+        end_date = datetime.now()
+        if range_period == '7d':
+            start_date = end_date - timedelta(days=7)
+        elif range_period == '30d':
+            start_date = end_date - timedelta(days=30)
+        elif range_period == '90d':
+            start_date = end_date - timedelta(days=90)
+        else:  # '365d'
+            start_date = end_date - timedelta(days=365)
+        
+        # Obtener datos de la base de datos
+        try:
+            from data.database import db_manager
+            with db_manager._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT timestamp, open, high, low, close, volume
+                    FROM market_data 
+                    WHERE symbol = ? AND timestamp >= ? AND timestamp <= ?
+                    ORDER BY timestamp ASC
+                ''', (symbol, int(start_date.timestamp() * 1000), int(end_date.timestamp() * 1000)))
+                
+                results = cursor.fetchall()
+                if results:
+                    df_market = pd.DataFrame(results, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+                    df_market['timestamp'] = pd.to_datetime(df_market['timestamp'], unit='ms')
+                else:
+                    df_market = pd.DataFrame()
+        except Exception as e:
+            logger.error(f"Error obteniendo datos de mercado: {e}")
+            df_market = pd.DataFrame()
+        
+        # Crear gráfico
+        from monitoring.components.enhanced_chart import create_enhanced_candlestick_chart
+        figure = create_enhanced_candlestick_chart(df_market, pd.DataFrame(), {})
+        period_info = f"{symbol} | {timeframe} | {start_date.strftime('%Y-%m-%d')} a {end_date.strftime('%Y-%m-%d')}"
+        
+        return figure, period_info
+
+def generate_sample_pnl_data(start_date, end_date):
+    """Genera datos de ejemplo para el gráfico P&L"""
+    import numpy as np
+    
+    # Crear serie temporal
+    date_range = pd.date_range(start=start_date, end=end_date, freq='H')
+    
+    # Simular PnL acumulativo con tendencia positiva
+    np.random.seed(42)  # Para reproducibilidad
+    returns = np.random.normal(0.0001, 0.02, len(date_range))  # 0.01% promedio por hora
+    cumulative_pnl = np.cumsum(returns) * 1000  # Escalar a $1000 inicial
+    
+    return pd.DataFrame({
+        'timestamp': date_range,
+        'pnl': cumulative_pnl,
+        'balance': 1000 + cumulative_pnl
+    })
+
+def generate_sample_trades_data(start_date, end_date):
+    """Genera datos de ejemplo para trades"""
+    import numpy as np
+    
+    # Crear algunos trades de ejemplo
+    np.random.seed(42)
+    n_trades = max(10, int((end_date - start_date).days / 3))  # ~1 trade cada 3 días
+    
+    trades = []
+    for i in range(n_trades):
+        trade_time = start_date + timedelta(days=np.random.uniform(0, (end_date - start_date).days))
+        pnl = np.random.normal(50, 200)  # PnL promedio $50, std $200
+        
+        trades.append({
+            'timestamp': trade_time,
+            'symbol': np.random.choice(['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']),
+            'side': np.random.choice(['BUY', 'SELL']),
+            'pnl': pnl,
+            'confidence': np.random.uniform(0.6, 0.95)
+        })
+    
+    return pd.DataFrame(trades)
