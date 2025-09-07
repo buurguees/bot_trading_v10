@@ -995,9 +995,17 @@ class DatabaseManager:
                 
                 # Contar registros en cada tabla
                 tables = ['market_data', 'trades', 'model_metrics', 'system_config', 'system_logs']
+                total_records = 0
+                
                 for table in tables:
                     cursor.execute(f"SELECT COUNT(*) FROM {table}")
-                    stats[f"{table}_count"] = cursor.fetchone()[0]
+                    count = cursor.fetchone()[0]
+                    stats[f"{table}_count"] = count
+                    total_records += count
+                
+                # Agregar total de registros (principalmente market_data)
+                stats['total_records'] = stats.get('market_data_count', 0)
+                stats['all_records'] = total_records
                 
                 # Tamaño de archivo
                 stats['file_size_mb'] = self.db_path.stat().st_size / (1024 * 1024)
