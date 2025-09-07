@@ -466,15 +466,29 @@ class DatabaseManager:
                     try:
                         # Verificar si el timestamp está en milisegundos o segundos
                         min_ts, max_ts = result[0], result[1]
+                        
+                        # Validar que los timestamps sean válidos
+                        if min_ts is None or max_ts is None or min_ts <= 0 or max_ts <= 0:
+                            logger.warning(f"Timestamps inválidos: min={min_ts}, max={max_ts}")
+                            return (None, None)
+                        
+                        # Convertir timestamps
                         if min_ts > 10000000000:  # Timestamp en milisegundos
                             start_date = datetime.fromtimestamp(min_ts / 1000)
                             end_date = datetime.fromtimestamp(max_ts / 1000)
                         else:  # Timestamp en segundos
                             start_date = datetime.fromtimestamp(min_ts)
                             end_date = datetime.fromtimestamp(max_ts)
+                        
+                        # Validar que las fechas sean razonables (no en el futuro lejano)
+                        now = datetime.now()
+                        if start_date > now or end_date > now:
+                            logger.warning(f"Fechas en el futuro: start={start_date}, end={end_date}")
+                            return (None, None)
+                        
                         return (start_date, end_date)
-                    except (ValueError, OSError) as e:
-                        logger.error(f"Error convirtiendo timestamp: {e}")
+                    except (ValueError, OSError, OverflowError) as e:
+                        logger.error(f"Error convirtiendo timestamp: {e} - min_ts: {min_ts}, max_ts: {max_ts}")
                         return (None, None)
                 else:
                     return (None, None)
