@@ -113,22 +113,36 @@ class TradingBotMain:
     def _run_training(self):
         """Ejecuta el entrenamiento en el hilo separado"""
         try:
+            import asyncio
             from core.entrenar_agente import EntrenadorAgente
-            entrenador = EntrenadorAgente()
             
-            # Ejecutar entrenamiento para cada símbolo
-            symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+            # Crear nuevo loop de asyncio para este hilo
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
             
-            for symbol in symbols:
-                print(f"Iniciando entrenamiento para {symbol}...")
-                result = entrenador.train_initial_model(symbol, days_back=365)
-                if result.get('status') == 'success':
-                    print(f"Entrenamiento completado para {symbol}")
-                else:
-                    print(f"Error en entrenamiento para {symbol}: {result.get('error', 'Error desconocido')}")
+            async def run_training_async():
+                entrenador = EntrenadorAgente()
+                
+                # Ejecutar entrenamiento para cada símbolo
+                symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+                
+                for symbol in symbols:
+                    print(f"[TRAINING] Iniciando entrenamiento para {symbol}...")
+                    try:
+                        result = await entrenador.train_initial_model(symbol, days_back=365)
+                        if result.get('status') == 'success':
+                            print(f"[TRAINING] Entrenamiento completado para {symbol}")
+                        else:
+                            print(f"[TRAINING] Error en entrenamiento para {symbol}: {result.get('error', 'Error desconocido')}")
+                    except Exception as e:
+                        print(f"[TRAINING] Error en entrenamiento para {symbol}: {e}")
+            
+            # Ejecutar el loop de asyncio
+            loop.run_until_complete(run_training_async())
+            loop.close()
                     
         except Exception as e:
-            print(f"Error en entrenamiento: {e}")
+            print(f"[TRAINING] Error en entrenamiento: {e}")
     
     def verificar_modelo_existente(self):
         """Verifica que el modelo existente esté disponible"""
