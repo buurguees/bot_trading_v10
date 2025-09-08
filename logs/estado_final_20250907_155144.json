@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-09-07T15:51:44.861604",
+  "años_entrenados": null,
+  "símbolos": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "ADAUSDT",
+    "SOLUSDT"
+  ],
+  "resultados_entrenamiento": {},
+  "aprendizaje_tiempo_real": false,
+  "websocket_activo": false
+}

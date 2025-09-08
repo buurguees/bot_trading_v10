@@ -1,0 +1,36 @@
+
+# Configuración Enterprise del Trading Bot v10
+# Generada automáticamente durante la migración
+
+enterprise:
+  training:
+    duration: 3600  # 1 hora por defecto
+    checkpoint_interval: 600  # 10 minutos
+    max_epochs: 100
+    batch_size: 32
+    learning_rate: 0.001
+    distributed: true
+    mixed_precision: true
+    
+  monitoring:
+    prometheus_port: 9090
+    grafana_port: 3000
+    dashboard_port: 8050
+    metrics_interval: 30
+    
+  security:
+    encryption_enabled: true
+    audit_logging: true
+    compliance_mode: true
+    secrets_management: true
+    
+  mlflow:
+    tracking_uri: "file:./mlruns"
+    experiment_name: "trading_bot_enterprise"
+    auto_log: true
+    
+  hyperparameter_tuning:
+    enabled: true
+    n_trials: 50
+    timeout: 3600
+    pruning: true

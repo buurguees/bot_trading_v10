@@ -1,34 +1,28 @@
 #!/usr/bin/env python3
 """
-app_enterprise.py - Aplicación Enterprise-Grade del Trading Bot v10
-================================================================
+app_enterprise.py - Punto de Entrada Enterprise del Trading Bot v10
+===============================================================
 
-SISTEMA DE MENÚ INTERACTIVO ENTERPRISE CON:
-- Type hints completos
-- Manejo robusto de errores
-- Timeouts y retries
-- Logging estructurado
-- Validación de inputs
-- Métricas de performance
-- Soporte CLI y headless
-- Integración con sistema enterprise
+SISTEMA ENTERPRISE COMPLETO CON ML AVANZADO
 
-Uso: 
-    python app_enterprise.py
-    python app_enterprise.py --option 1 --headless
-    python app_enterprise.py --help
+Uso: python app_enterprise.py [--mode MODE] [--duration DURATION] [--headless]
 
-Funcionalidades:
-1. Descargar históricos completos (2+ años)
-2. Validar estado del agente IA
-3. Validar histórico de símbolos
-4. Empezar entrenamiento + dashboard
-5. Análisis de performance
-6. Configuración del sistema
-7. Modo de pruebas rápidas
-8. Estado del sistema
-9. Integración enterprise
-10. Monitoreo avanzado
+Modos disponibles:
+- train: Entrenamiento enterprise con ML avanzado
+- monitor: Monitoreo en tiempo real
+- deploy: Despliegue de modelos
+- analyze: Análisis de performance
+- config: Configuración del sistema
+
+Características Enterprise:
+- Distributed training con PyTorch Lightning
+- MLflow para experiment tracking
+- Prometheus/Grafana para monitoreo
+- Hyperparameter tuning con Optuna
+- Fault tolerance y graceful shutdown
+- Security y compliance features
+- Testing exhaustivo
+- CI/CD pipeline
 
 """
 
@@ -37,542 +31,374 @@ import os
 import sys
 import logging
 import argparse
-import time
-import subprocess
-import threading
-import webbrowser
-from datetime import datetime, timedelta
-from typing import Optional, Dict, List, Tuple, Any, Callable, Union
-from dataclasses import dataclass
-from pathlib import Path
-import json
 import signal
-import traceback
-from contextlib import asynccontextmanager
+import time
+from datetime import datetime
+from typing import Optional, Dict, Any
+from pathlib import Path
 
 # Añadir directorio del proyecto al path
-project_root = Path(__file__).parent.absolute()
-sys.path.append(str(project_root))
+project_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(project_root)
 
 # Configurar logging enterprise
-from logging.handlers import RotatingFileHandler
-import structlog
-
-# Configurar structlog para logging estructurado
-structlog.configure(
-    processors=[
-        structlog.stdlib.filter_by_level,
-        structlog.stdlib.add_logger_name,
-        structlog.stdlib.add_log_level,
-        structlog.stdlib.PositionalArgumentsFormatter(),
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
-        structlog.processors.UnicodeDecoder(),
-        structlog.processors.JSONRenderer()
-    ],
-    context_class=dict,
-    logger_factory=structlog.stdlib.LoggerFactory(),
-    wrapper_class=structlog.stdlib.BoundLogger,
-    cache_logger_on_first_use=True,
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('logs/enterprise_app.log'),
+        logging.StreamHandler()
+    ]
 )
+logger = logging.getLogger(__name__)
 
-# Configurar logging básico
-def setup_logging(log_level: str = "INFO") -> logging.Logger:
-    """Configura logging enterprise con rotación y formato estructurado"""
-    logger = logging.getLogger("trading_bot_enterprise")
-    logger.setLevel(getattr(logging, log_level.upper()))
+class EnterpriseTradingBot:
+    """Sistema Enterprise del Trading Bot v10"""
     
-    # Handler para consola
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    console_handler.setFormatter(console_formatter)
-    
-    # Handler para archivo con rotación
-    file_handler = RotatingFileHandler(
-        'logs/enterprise_app.log',
-        maxBytes=10*1024*1024,  # 10MB
-        backupCount=5
-    )
-    file_handler.setLevel(logging.DEBUG)
-    file_formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
-    )
-    file_handler.setFormatter(file_formatter)
-    
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
-    
-    return logger
-
-# Crear logger
-logger = setup_logging()
-
-@dataclass
-class MenuOption:
-    """Representa una opción del menú"""
-    key: str
-    description: str
-    handler: Callable
-    requires_data: bool = False
-    requires_ai: bool = False
-    timeout: int = 300  # 5 minutos por defecto
-
-@dataclass
-class PerformanceMetrics:
-    """Métricas de performance de la aplicación"""
-    start_time: float
-    operation_times: Dict[str, float]
-    error_count: int
-    success_count: int
-    
-    def add_operation_time(self, operation: str, duration: float):
-        """Agrega tiempo de operación"""
-        self.operation_times[operation] = duration
-    
-    def get_summary(self) -> Dict[str, Any]:
-        """Obtiene resumen de métricas"""
-        total_time = time.time() - self.start_time
-        return {
-            "total_runtime": total_time,
-            "operations": len(self.operation_times),
-            "success_rate": self.success_count / (self.success_count + self.error_count) if (self.success_count + self.error_count) > 0 else 0,
-            "avg_operation_time": sum(self.operation_times.values()) / len(self.operation_times) if self.operation_times else 0,
-            "error_count": self.error_count,
-            "success_count": self.success_count
-        }
-
-class EnterpriseTradingBotApp:
-    """Aplicación enterprise del Trading Bot v10 con características avanzadas"""
-    
-    def __init__(self, headless: bool = False, log_level: str = "INFO"):
-        self.running: bool = True
-        self.dashboard_process: Optional[subprocess.Popen] = None
-        self.headless: bool = headless
-        self.logger = logger
-        self.metrics = PerformanceMetrics(
-            start_time=time.time(),
-            operation_times={},
-            error_count=0,
-            success_count=0
-        )
+    def __init__(self):
+        self.running = True
+        self.config = self.load_enterprise_config()
+        self.setup_signal_handlers()
         
-        # Configurar manejo de señales
-        signal.signal(signal.SIGINT, self._signal_handler)
-        signal.signal(signal.SIGTERM, self._signal_handler)
-        
-        # Configurar menú dinámico
-        self._setup_menu_options()
-        
-        # Configurar enterprise config si está disponible
-        self.enterprise_config = None
-        self._setup_enterprise_integration()
-    
-    def _setup_enterprise_integration(self):
-        """Configura integración con sistema enterprise"""
+    def load_enterprise_config(self) -> Dict[str, Any]:
+        """Cargar configuración enterprise"""
         try:
             from core.enterprise_config import EnterpriseConfigManager
-            self.enterprise_config = EnterpriseConfigManager()
-            self.logger.info("Enterprise configuration loaded successfully")
-        except ImportError:
-            self.logger.warning("Enterprise configuration not available")
+            config_manager = EnterpriseConfigManager()
+            return config_manager.get_config()
         except Exception as e:
-            self.logger.error(f"Error loading enterprise config: {e}")
+            logger.warning(f"No se pudo cargar configuración enterprise: {e}")
+            return self.get_default_config()
     
-    def _setup_menu_options(self):
-        """Configura opciones del menú dinámicamente"""
-        self.menu_options: Dict[str, MenuOption] = {
-            "1": MenuOption(
-                key="1",
-                description="📥 Descargar datos históricos (2 años)",
-                handler=self.download_historical_data,
-                requires_data=False,
-                timeout=1800  # 30 minutos
-            ),
-            "2": MenuOption(
-                key="2", 
-                description="🔍 Validar estado del agente IA",
-                handler=self.validate_ai_agent,
-                requires_ai=True,
-                timeout=60
-            ),
-            "3": MenuOption(
-                key="3",
-                description="📊 Validar histórico de símbolos", 
-                handler=self.validate_symbols_history,
-                requires_data=True,
-                timeout=120
-            ),
-            "4": MenuOption(
-                key="4",
-                description="🔄 Alinear datos históricos (Multi-símbolo)",
-                handler=self.align_historical_data,
-                requires_data=True,
-                timeout=600  # 10 minutos
-            ),
-            "5": MenuOption(
-                key="5",
-                description="🚀 Empezar entrenamiento + Dashboard",
-                handler=self.start_training_and_dashboard,
-                requires_data=True,
-                requires_ai=True,
-                timeout=3600  # 1 hora
-            ),
-            "6": MenuOption(
-                key="6",
-                description="🤖 Entrenamiento sin Dashboard (Background)",
-                handler=self.start_training_background,
-                requires_data=True,
-                requires_ai=True,
-                timeout=7200  # 2 horas
-            ),
-            "7": MenuOption(
-                key="7",
-                description="📈 Análisis de performance",
-                handler=self.performance_analysis,
-                requires_data=True,
-                timeout=300
-            ),
-            "8": MenuOption(
-                key="8",
-                description="⚙️ Configurar sistema",
-                handler=self.system_configuration,
-                timeout=60
-            ),
-            "9": MenuOption(
-                key="9",
-                description="🧪 Modo de pruebas rápidas",
-                handler=self.quick_tests,
-                timeout=120
-            ),
-            "10": MenuOption(
-                key="10",
-                description="📱 Estado del sistema",
-                handler=self.system_status,
-                timeout=30
-            ),
-            "11": MenuOption(
-                key="11",
-                description="🏢 Configuración Enterprise",
-                handler=self.enterprise_configuration,
-                timeout=60
-            ),
-            "12": MenuOption(
-                key="12",
-                description="📊 Métricas y Monitoreo",
-                handler=self.show_metrics,
-                timeout=30
-            ),
-            "13": MenuOption(
-                key="13",
-                description="❌ Salir",
-                handler=self.exit_application,
-                timeout=5
-            )
+    def get_default_config(self) -> Dict[str, Any]:
+        """Configuración por defecto"""
+        return {
+            'training': {
+                'duration': 3600,  # 1 hora por defecto
+                'checkpoint_interval': 600,  # 10 minutos
+                'max_epochs': 100,
+                'batch_size': 32,
+                'learning_rate': 0.001
+            },
+            'monitoring': {
+                'prometheus_port': 9090,
+                'grafana_port': 3000,
+                'dashboard_port': 8050
+            },
+            'security': {
+                'encryption_enabled': True,
+                'audit_logging': True,
+                'compliance_mode': True
+            }
         }
     
-    def _signal_handler(self, signum, frame):
-        """Maneja señales del sistema para shutdown graceful"""
-        self.logger.info(f"Received signal {signum}, initiating graceful shutdown")
-        self.running = False
-        self._cleanup_processes()
-        sys.exit(0)
+    def setup_signal_handlers(self):
+        """Configurar manejo de señales para shutdown graceful"""
+        signal.signal(signal.SIGINT, self.signal_handler)
+        signal.signal(signal.SIGTERM, self.signal_handler)
     
-    def _cleanup_processes(self):
-        """Limpia procesos activos"""
-        if self.dashboard_process and self.dashboard_process.poll() is None:
-            self.logger.info("Terminating dashboard process")
-            self.dashboard_process.terminate()
-            try:
-                self.dashboard_process.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                self.logger.warning("Force killing dashboard process")
-                self.dashboard_process.kill()
+    def signal_handler(self, signum, frame):
+        """Manejar señales del sistema"""
+        logger.info(f"Recibida señal {signum}, iniciando shutdown graceful...")
+        self.running = False
     
     def show_banner(self):
-        """Muestra banner de bienvenida enterprise"""
-        banner = f"""
-{'='*80}
-     🤖 TRADING BOT v10 - SISTEMA ENTERPRISE DE TRADING 🤖
-{'='*80}
-     Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-     Entorno: Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}
-     Directorio: {project_root}
-     Modo: {'Headless' if self.headless else 'Interactive'}
-     Enterprise: {'✅ Disponible' if self.enterprise_config else '❌ No disponible'}
-{'='*80}
-"""
-        print(banner)
-        self.logger.info("Application started", 
-                        mode="headless" if self.headless else "interactive",
-                        enterprise_available=self.enterprise_config is not None)
+        """Mostrar banner enterprise"""
+        print("\n" + "="*80)
+        print("🚀 TRADING BOT v10 - ENTERPRISE EDITION")
+        print("="*80)
+        print("🏢 Sistema Enterprise con ML Avanzado")
+        print("⚡ Distributed Training | 🔍 MLflow | 📊 Prometheus/Grafana")
+        print("🛡️ Security & Compliance | 🧪 Testing Exhaustivo")
+        print("="*80)
     
-    def show_main_menu(self):
-        """Muestra el menú principal dinámico"""
-        print("\n📋 MENÚ PRINCIPAL ENTERPRISE")
-        print("-" * 35)
-        
-        for key, option in self.menu_options.items():
-            # Verificar si la opción está disponible
-            available = self._is_option_available(option)
-            status = "✅" if available else "❌"
-            print(f"{status} {key}. {option.description}")
-        
-        print()
+    def show_menu(self):
+        """Mostrar menú enterprise"""
+        print("\n📋 MENÚ ENTERPRISE:")
+        print("1. 🚀 Entrenamiento Enterprise (1 hora)")
+        print("2. ⚡ Entrenamiento Rápido (15 min)")
+        print("3. 📊 Monitoreo en Tiempo Real")
+        print("4. 🔧 Configuración del Sistema")
+        print("5. 📈 Análisis de Performance")
+        print("6. 🚀 Despliegue de Modelos")
+        print("7. 🧪 Testing Suite")
+        print("8. 📊 Dashboard Web")
+        print("9. 🔍 Logs y Debugging")
+        print("0. 🚪 Salir")
+        print("-" * 50)
     
-    def _is_option_available(self, option: MenuOption) -> bool:
-        """Verifica si una opción está disponible basada en prerequisitos"""
-        if option.requires_data:
-            try:
-                from data.database import db_manager
-                stats = db_manager.get_data_summary_optimized()
-                if stats.get('total_records', 0) < 1000:
-                    return False
-            except Exception:
-                return False
-        
-        if option.requires_ai:
-            try:
-                from models.adaptive_trainer import adaptive_trainer
-                return True
-            except ImportError:
-                return False
-        
-        return True
-    
-    def get_user_choice(self) -> str:
-        """Obtiene la elección del usuario con validación robusta"""
-        max_retries = 3
-        retry_count = 0
-        
-        while retry_count < max_retries:
-            try:
-                choice = input("Selecciona una opción (1-13): ").strip()
-                
-                # Validar input
-                if not choice:
-                    print("⚠️ Por favor ingresa una opción")
-                    retry_count += 1
-                    continue
-                
-                if not choice.isdigit():
-                    print("⚠️ Por favor ingresa un número válido")
-                    retry_count += 1
-                    continue
-                
-                choice_int = int(choice)
-                if not (1 <= choice_int <= 13):
-                    print("⚠️ Por favor selecciona una opción entre 1 y 13")
-                    retry_count += 1
-                    continue
-                
-                # Verificar si la opción está disponible
-                option = self.menu_options.get(choice)
-                if option and not self._is_option_available(option):
-                    print("⚠️ Esta opción no está disponible (prerequisitos no cumplidos)")
-                    retry_count += 1
-                    continue
-                
-                return choice
-                
-            except KeyboardInterrupt:
-                print("\n👋 Saliendo...")
-                return "13"
-            except Exception as e:
-                self.logger.error(f"Error getting user choice: {e}")
-                retry_count += 1
-                if retry_count >= max_retries:
-                    print("❌ Demasiados intentos fallidos")
-                    return "13"
-        
-        return "13"
-    
-    @asynccontextmanager
-    async def _operation_timeout(self, timeout: int):
-        """Context manager para timeouts en operaciones"""
+    async def run_training_enterprise(self, duration: int = 3600):
+        """Ejecutar entrenamiento enterprise"""
         try:
-            async with asyncio.timeout(timeout):
-                yield
-        except asyncio.TimeoutError:
-            self.logger.error(f"Operation timed out after {timeout} seconds")
-            raise TimeoutError(f"Operation timed out after {timeout} seconds")
-    
-    async def _execute_operation(self, operation_name: str, operation_func: Callable, timeout: int = 300):
-        """Ejecuta una operación con métricas y manejo de errores"""
-        start_time = time.time()
-        
-        try:
-            self.logger.info(f"Starting operation: {operation_name}")
+            logger.info(f"🚀 Iniciando entrenamiento enterprise de {duration} segundos...")
             
-            async with self._operation_timeout(timeout):
-                result = await operation_func()
+            # Importar sistema enterprise de entrenamiento
+            from models.enterprise.training_engine import EnterpriseTrainingEngine
+            from models.enterprise.monitoring_system import EnterpriseMonitoringSystem
             
-            duration = time.time() - start_time
-            self.metrics.add_operation_time(operation_name, duration)
-            self.metrics.success_count += 1
+            # Inicializar sistemas
+            training_engine = EnterpriseTrainingEngine()
+            monitoring_system = EnterpriseMonitoringSystem()
             
-            self.logger.info(f"Operation completed: {operation_name}", 
-                           duration=duration,
-                           success=True)
+            # Configurar monitoreo
+            await monitoring_system.start()
             
-            return result
+            # Ejecutar entrenamiento
+            results = await training_engine.train(
+                duration=duration,
+                config=self.config['training']
+            )
+            
+            logger.info(f"✅ Entrenamiento completado: {results}")
+            return results
             
         except Exception as e:
-            duration = time.time() - start_time
-            self.metrics.add_operation_time(operation_name, duration)
-            self.metrics.error_count += 1
-            
-            self.logger.error(f"Operation failed: {operation_name}", 
-                            duration=duration,
-                            error=str(e),
-                            success=False)
-            
-            # Re-raise para manejo en el nivel superior
+            logger.error(f"❌ Error en entrenamiento enterprise: {e}")
             raise
     
-    async def download_historical_data(self):
-        """Opción 1: Descargar datos históricos completos con validación robusta"""
-        print("\n📥 DESCARGA DE DATOS HISTÓRICOS")
-        print("=" * 40)
-        
-        # Validar años de datos con retry
-        years = await self._get_years_input()
-        
-        print(f"\n🚀 Descargando {years} años de datos históricos...")
-        print("⏳ Esto puede tomar varios minutos...")
-        print()
-        
+    async def run_quick_training(self):
+        """Ejecutar entrenamiento rápido"""
         try:
-            await self._execute_operation(
-                "download_historical_data",
-                lambda: self._download_data_async(years),
-                timeout=1800  # 30 minutos
+            logger.info("⚡ Iniciando entrenamiento rápido...")
+            
+            # Usar el sistema enterprise pero con configuración rápida
+            from models.enterprise.training_engine import EnterpriseTrainingEngine
+            
+            training_engine = EnterpriseTrainingEngine()
+            quick_config = {
+                'duration': 900,  # 15 minutos
+                'max_epochs': 20,
+                'batch_size': 64,
+                'learning_rate': 0.01
+            }
+            
+            results = await training_engine.train(
+                duration=quick_config['duration'],
+                config=quick_config
             )
             
-            print(f"\n✅ Descarga de {years} años completada exitosamente")
+            logger.info(f"✅ Entrenamiento rápido completado: {results}")
+            return results
             
-        except TimeoutError:
-            print(f"\n⏰ La descarga excedió el tiempo límite de 30 minutos")
-            print("💡 Considera descargar menos años o verificar la conexión")
         except Exception as e:
-            print(f"\n❌ Error durante la descarga: {e}")
-            self.logger.error(f"Error in download_historical_data: {e}")
-        
-        if not self.headless:
-            input("\nPresiona Enter para continuar...")
+            logger.error(f"❌ Error en entrenamiento rápido: {e}")
+            raise
     
-    async def _get_years_input(self) -> int:
-        """Obtiene años de datos con validación robusta"""
-        max_retries = 3
-        retry_count = 0
+    async def start_monitoring(self):
+        """Iniciar monitoreo en tiempo real"""
+        try:
+            logger.info("📊 Iniciando monitoreo enterprise...")
+            
+            from models.enterprise.monitoring_system import EnterpriseMonitoringSystem
+            
+            monitoring = EnterpriseMonitoringSystem()
+            await monitoring.start()
+            
+            # Mantener corriendo
+            while self.running:
+                await asyncio.sleep(1)
+                
+        except Exception as e:
+            logger.error(f"❌ Error en monitoreo: {e}")
+            raise
+    
+    async def run_analysis(self):
+        """Ejecutar análisis de performance"""
+        try:
+            logger.info("📈 Iniciando análisis de performance...")
+            
+            from models.enterprise.analysis_engine import EnterpriseAnalysisEngine
+            
+            analysis_engine = EnterpriseAnalysisEngine()
+            results = await analysis_engine.analyze_performance()
+            
+            logger.info(f"✅ Análisis completado: {results}")
+            return results
+            
+        except Exception as e:
+            logger.error(f"❌ Error en análisis: {e}")
+            raise
+    
+    async def run_testing_suite(self):
+        """Ejecutar suite de testing"""
+        try:
+            logger.info("🧪 Iniciando testing suite...")
+            
+            import subprocess
+            result = subprocess.run(['pytest', 'tests/', '-v', '--cov=models/enterprise'], 
+                                  capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                logger.info("✅ Todos los tests pasaron")
+            else:
+                logger.error(f"❌ Tests fallaron: {result.stderr}")
+            
+            return result.returncode == 0
+            
+        except Exception as e:
+            logger.error(f"❌ Error en testing: {e}")
+            raise
+    
+    def show_config(self):
+        """Mostrar configuración actual"""
+        print("\n🔧 CONFIGURACIÓN ENTERPRISE:")
+        print(f"⏱️  Duración de entrenamiento: {self.config['training']['duration']}s")
+        print(f"💾 Intervalo de checkpoints: {self.config['training']['checkpoint_interval']}s")
+        print(f"🎯 Máximo de epochs: {self.config['training']['max_epochs']}")
+        print(f"📦 Batch size: {self.config['training']['batch_size']}")
+        print(f"📚 Learning rate: {self.config['training']['learning_rate']}")
+        print(f"🔒 Encryption: {self.config['security']['encryption_enabled']}")
+        print(f"📝 Audit logging: {self.config['security']['audit_logging']}")
+    
+    async def start_dashboard(self):
+        """Iniciar dashboard web"""
+        try:
+            logger.info("📊 Iniciando dashboard web...")
+            
+            import subprocess
+            import threading
+            
+            def run_dashboard():
+                subprocess.run(['python', 'monitoring/main_dashboard.py'])
+            
+            # Ejecutar en hilo separado
+            dashboard_thread = threading.Thread(target=run_dashboard)
+            dashboard_thread.daemon = True
+            dashboard_thread.start()
+            
+            logger.info("✅ Dashboard iniciado en http://localhost:8050")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Error iniciando dashboard: {e}")
+            raise
+    
+    async def show_logs(self):
+        """Mostrar logs recientes"""
+        try:
+            log_file = 'logs/enterprise_app.log'
+            if os.path.exists(log_file):
+                with open(log_file, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                    print("\n📝 ÚLTIMOS LOGS:")
+                    print("-" * 50)
+                    for line in lines[-20:]:  # Últimas 20 líneas
+                        print(line.strip())
+            else:
+                print("❌ No se encontraron logs")
+                
+        except Exception as e:
+            logger.error(f"❌ Error leyendo logs: {e}")
+    
+    async def run_interactive_mode(self):
+        """Modo interactivo"""
+        self.show_banner()
         
-        while retry_count < max_retries:
+        while self.running:
             try:
-                years_input = input("¿Cuántos años de datos quieres descargar? (1-5): ").strip()
+                self.show_menu()
+                choice = input("\n🎯 Selecciona una opción: ").strip()
                 
-                if not years_input:
-                    print("⚠️ Por favor ingresa un valor")
-                    retry_count += 1
-                    continue
-                
-                years = int(years_input)
-                
-                if not (1 <= years <= 5):
-                    print("⚠️ Por favor ingresa un número entre 1 y 5")
-                    retry_count += 1
-                    continue
-                
-                return years
-                
-            except ValueError:
-                print("⚠️ Por favor ingresa un número válido")
-                retry_count += 1
-            except KeyboardInterrupt:
-                print("\n👋 Cancelando descarga...")
-                return 1
-        
-        # Si llegamos aquí, usar valor por defecto
-        print("⚠️ Usando valor por defecto: 2 años")
-        return 2
-    
-    async def _download_data_async(self, years: int):
-        """Descarga datos de forma asíncrona"""
-        from core.manage_data import DataManager
-        
-        manager = DataManager()
-        await manager.download_data(years=years)
-    
-    async def validate_ai_agent(self):
-        """Opción 2: Validar estado del agente IA con métricas detalladas"""
-        print("\n🔍 VALIDACIÓN DEL AGENTE IA")
-        print("=" * 35)
-        
-        try:
-            await self._execute_operation(
-                "validate_ai_agent",
-                self._validate_ai_components,
-                timeout=60
-            )
-            
-        except TimeoutError:
-            print(f"\n⏰ La validación excedió el tiempo límite")
-        except Exception as e:
-            print(f"\n❌ Error validando agente: {e}")
-            self.logger.error(f"Error in validate_ai_agent: {e}")
-        
-        if not self.headless:
-            input("\nPresiona Enter para continuar...")
-    
-    async def _validate_ai_components(self):
-        """Valida componentes del agente IA"""
-        print("Verificando componentes del agente...")
-        
-        # Verificar modelos
-        from models.adaptive_trainer import adaptive_trainer
-        from models.prediction_engine import prediction_engine
-        from models.confidence_estimator import confidence_estimator
-        
-        print("✅ adaptive_trainer: Disponible")
-        print("✅ prediction_engine: Disponible") 
-        print("✅ confidence_estimator: Disponible")
-        
-        # Verificar estado de entrenamiento
-        training_status = await adaptive_trainer.get_training_status()
-        print(f"\n📊 Estado del entrenamiento:")
-        print(f"   Modelo entrenado: {'✅ Sí' if training_status.get('is_trained', False) else '❌ No'}")
-        print(f"   Última actualización: {training_status.get('last_update', 'Nunca')}")
-        print(f"   Precisión actual: {training_status.get('accuracy', 0):.1%}")
-        
-        # Verificar predicciones
-        try:
-            health = await prediction_engine.health_check()
-            print(f"\n🧠 Motor de predicciones:")
-            print(f"   Estado: {'✅ Saludable' if health.get('status') == 'healthy' else '❌ Problemas'}")
-            print(f"   Último procesamiento: {health.get('last_prediction', 'Nunca')}")
-        except Exception as e:
-            print(f"⚠️ Error verificando predicciones: {e}")
-        
-        # Verificar confianza
-        try:
-            conf_health = await confidence_estimator.health_check()
-            is_calibrated = conf_health.get('is_calibrated', False)
-            print(f"\n💪 Estimador de confianza:")
-            print(f"   Calibrado: {'✅ Sí' if is_calibrated else '❌ No'}")
-            print(f"   Última calibración: {conf_health.get('last_calibration', 'Nunca')}")
-            
-            # Si no está calibrado, calibrar automáticamente
-            if not is_calibrated:
-                print(f"\n🔧 Calibrando estimador de confianza...")
-                calibration_result = await confidence_estimator.calibrate()
-                if calibration_result.get('status') == 'success':
-                    print(f"   ✅ Calibración exitosa: {calibration_result.get('calibration_samples', 0)} muestras")
-                    print(f"   📊 Puntos de datos: {calibration_result.get('calibration_data_points', 0)}")
+                if choice == '1':
+                    duration = input("⏱️  Duración en segundos (3600 para 1 hora): ").strip()
+                    duration = int(duration) if duration else 3600
+                    await self.run_training_enterprise(duration)
+                    
+                elif choice == '2':
+                    await self.run_quick_training()
+                    
+                elif choice == '3':
+                    await self.start_monitoring()
+                    
+                elif choice == '4':
+                    self.show_config()
+                    
+                elif choice == '5':
+                    await self.run_analysis()
+                    
+                elif choice == '6':
+                    logger.info("🚀 Despliegue de modelos...")
+                    # Implementar despliegue
+                    
+                elif choice == '7':
+                    await self.run_testing_suite()
+                    
+                elif choice == '8':
+                    await self.start_dashboard()
+                    
+                elif choice == '9':
+                    await self.show_logs()
+                    
+                elif choice == '0':
+                    logger.info("👋 Saliendo del sistema enterprise...")
+                    break
+                    
                 else:
-                    print(f"   ❌ Error en calibración: {calibration_result.get('error', 'Desconocido')}")
+                    print("❌ Opción inválida")
+                    
+            except KeyboardInterrupt:
+                logger.info("👋 Interrumpido por usuario")
+                break
+            except Exception as e:
+                logger.error(f"❌ Error: {e}")
+    
+    async def run_headless_mode(self, mode: str, duration: int = 3600):
+        """Modo headless para automatización"""
+        try:
+            logger.info(f"🤖 Iniciando modo headless: {mode}")
+            
+            if mode == 'train':
+                await self.run_training_enterprise(duration)
+            elif mode == 'quick':
+                await self.run_quick_training()
+            elif mode == 'monitor':
+                await self.start_monitoring()
+            elif mode == 'analyze':
+                await self.run_analysis()
+            elif mode == 'test':
+                await self.run_testing_suite()
+            else:
+                raise ValueError(f"Modo no válido: {mode}")
+                
+            logger.info("✅ Modo headless completado")
+            
         except Exception as e:
-            print(f"⚠️ Error verificando confianza: {e}")
+            logger.error(f"❌ Error en modo headless: {e}")
+            raise
 
-    # Continuará en la siguiente parte...
+async def main():
+    """Función principal"""
+    parser = argparse.ArgumentParser(description='Trading Bot v10 Enterprise')
+    parser.add_argument('--mode', choices=['train', 'quick', 'monitor', 'analyze', 'test'], 
+                       help='Modo de ejecución')
+    parser.add_argument('--duration', type=int, default=3600, 
+                       help='Duración en segundos (solo para modo train)')
+    parser.add_argument('--headless', action='store_true', 
+                       help='Modo headless (sin interfaz)')
+    
+    args = parser.parse_args()
+    
+    # Crear directorios necesarios
+    os.makedirs('logs', exist_ok=True)
+    os.makedirs('checkpoints', exist_ok=True)
+    os.makedirs('models/enterprise', exist_ok=True)
+    
+    # Inicializar sistema enterprise
+    bot = EnterpriseTradingBot()
+    
+    try:
+        if args.headless and args.mode:
+            # Modo headless
+            await bot.run_headless_mode(args.mode, args.duration)
+        else:
+            # Modo interactivo
+            await bot.run_interactive_mode()
+            
+    except Exception as e:
+        logger.error(f"❌ Error fatal: {e}")
+        sys.exit(1)
+    finally:
+        logger.info("🏁 Sistema enterprise finalizado")
+
+if __name__ == "__main__":
+    asyncio.run(main())

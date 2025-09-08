@@ -38,12 +38,30 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Importar sistema enterprise
+try:
+    from app_enterprise_simple import EnterpriseTradingBot
+    ENTERPRISE_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️ Sistema enterprise no disponible: {e}")
+    ENTERPRISE_AVAILABLE = False
+
 class TradingBotApp:
     """Aplicación principal del Trading Bot v10 con menú interactivo"""
     
     def __init__(self):
         self.running = True
         self.dashboard_process = None
+        self.enterprise_bot = None
+        
+        # Inicializar sistema enterprise si está disponible
+        if ENTERPRISE_AVAILABLE:
+            try:
+                self.enterprise_bot = EnterpriseTradingBot()
+                print("✅ Sistema enterprise inicializado")
+            except Exception as e:
+                print(f"⚠️ Error inicializando sistema enterprise: {e}")
+                self.enterprise_bot = None
         
     def show_banner(self):
         """Muestra banner de bienvenida"""
@@ -58,29 +76,39 @@ class TradingBotApp:
     
     def show_main_menu(self):
         """Muestra el menú principal"""
-        print("📋 MENÚ PRINCIPAL")
-        print("-" * 20)
+        print("📋 MENÚ PRINCIPAL - ENTERPRISE EDITION")
+        print("-" * 40)
         print("1. 📥 Descargar datos históricos (2 años)")
         print("2. 🔍 Validar estado del agente IA")
         print("3. 📊 Validar histórico de símbolos")
         print("4. 🔄 Alinear datos históricos (Multi-símbolo)")
-        print("5. 🚀 Empezar entrenamiento + Dashboard")
-        print("6. 🤖 Entrenamiento sin Dashboard (Background)")
-        print("7. 📈 Análisis de performance")
-        print("8. ⚙️  Configurar sistema")
-        print("9. 🧪 Modo de pruebas rápidas")
-        print("10. 📱 Estado del sistema")
-        print("11. ❌ Salir")
+        print("5. 🚀 Entrenamiento Enterprise (1 hora)")
+        print("6. ⚡ Entrenamiento Rápido (15 min)")
+        print("7. 🤖 Entrenamiento Background (Sin Dashboard)")
+        print("8. 📈 Análisis de performance")
+        print("9. 🔧 Configurar sistema enterprise")
+        print("10. 🧪 Modo de pruebas rápidas")
+        print("11. 📱 Estado del sistema")
+        print("12. 🔄 Reanudar entrenamiento desde checkpoint")
+        print("13. 📊 Dashboard Web Enterprise")
+        print("14. ❌ Salir")
+        print()
+        
+        # Mostrar estado del sistema enterprise
+        if self.enterprise_bot:
+            print("🏢 Sistema Enterprise: ✅ Disponible")
+        else:
+            print("🏢 Sistema Enterprise: ❌ No disponible")
         print()
     
     def get_user_choice(self) -> str:
         """Obtiene la elección del usuario"""
         try:
-            choice = input("Selecciona una opción (1-11): ").strip()
+            choice = input("Selecciona una opción (1-14): ").strip()
             return choice
         except KeyboardInterrupt:
             print("\n👋 Saliendo...")
-            return "10"
+            return "14"
         except Exception:
             return ""
     
@@ -1085,6 +1113,119 @@ class TradingBotApp:
         
         input("\nPresiona Enter para continuar...")
     
+    async def start_enterprise_training(self):
+        """Opción 5: Entrenamiento Enterprise (1 hora)"""
+        print("\n🚀 ENTRENAMIENTO ENTERPRISE")
+        print("=" * 40)
+        
+        if not self.enterprise_bot:
+            print("❌ Sistema enterprise no disponible")
+            return
+        
+        try:
+            # Configurar duración
+            duration = input("⏱️ Duración en segundos (3600 para 1 hora): ").strip()
+            duration = int(duration) if duration else 3600
+            
+            print(f"🚀 Iniciando entrenamiento enterprise de {duration} segundos...")
+            results = await self.enterprise_bot.run_training_enterprise(duration)
+            
+            print("✅ Entrenamiento enterprise completado!")
+            print(f"📊 Resultados: {results['metrics']}")
+            
+        except Exception as e:
+            print(f"❌ Error en entrenamiento enterprise: {e}")
+            logger.error(f"Error en entrenamiento enterprise: {e}")
+    
+    async def start_quick_training(self):
+        """Opción 6: Entrenamiento Rápido (15 min)"""
+        print("\n⚡ ENTRENAMIENTO RÁPIDO")
+        print("=" * 30)
+        
+        if not self.enterprise_bot:
+            print("❌ Sistema enterprise no disponible")
+            return
+        
+        try:
+            print("🏢 Iniciando entrenamiento rápido...")
+            results = await self.enterprise_bot.run_quick_training()
+            
+            print("✅ Entrenamiento rápido completado!")
+            print(f"📊 Resultados: {results['metrics']}")
+            
+        except Exception as e:
+            print(f"❌ Error en entrenamiento rápido: {e}")
+            logger.error(f"Error en entrenamiento rápido: {e}")
+    
+    async def resume_enterprise_training(self):
+        """Opción 12: Reanudar entrenamiento desde checkpoint"""
+        print("\n🔄 REANUDAR ENTRENAMIENTO")
+        print("=" * 35)
+        
+        if not self.enterprise_bot:
+            print("❌ Sistema enterprise no disponible")
+            return
+        
+        try:
+            print("🏢 Cargando sistema enterprise...")
+            results = await self.enterprise_bot.resume_training()
+            
+            if results:
+                print("✅ Entrenamiento reanudado!")
+                print(f"📊 Checkpoint: {results['timestamp']}")
+                print(f"📊 Métricas: {results['metrics']}")
+            else:
+                print("❌ No se pudo reanudar el entrenamiento")
+                
+        except Exception as e:
+            print(f"❌ Error reanudando entrenamiento: {e}")
+            logger.error(f"Error reanudando entrenamiento: {e}")
+    
+    async def start_enterprise_dashboard(self):
+        """Opción 13: Dashboard Web Enterprise"""
+        print("\n📊 DASHBOARD WEB ENTERPRISE")
+        print("=" * 35)
+        
+        if not self.enterprise_bot:
+            print("❌ Sistema enterprise no disponible")
+            return
+        
+        try:
+            print("🏢 Iniciando dashboard enterprise...")
+            await self.enterprise_bot.start_dashboard()
+            
+            print("✅ Dashboard iniciado en http://localhost:8050")
+            print("🌐 Abriendo navegador...")
+            
+            # Abrir navegador
+            webbrowser.open('http://localhost:8050')
+            
+            input("\n⏸️ Presiona Enter para continuar...")
+            
+        except Exception as e:
+            print(f"❌ Error iniciando dashboard: {e}")
+            logger.error(f"Error iniciando dashboard: {e}")
+    
+    async def configure_enterprise_system(self):
+        """Opción 9: Configurar sistema enterprise"""
+        print("\n🔧 CONFIGURACIÓN ENTERPRISE")
+        print("=" * 35)
+        
+        if not self.enterprise_bot:
+            print("❌ Sistema enterprise no disponible")
+            return
+        
+        try:
+            print("🏢 Cargando configuración enterprise...")
+            self.enterprise_bot.show_config()
+            
+            print("\n📝 Configuración actual mostrada arriba")
+            print("💡 Para modificar, edita el archivo de configuración")
+            
+        except Exception as e:
+            print(f"❌ Error mostrando configuración: {e}")
+            logger.error(f"Error mostrando configuración: {e}")
+
     async def run(self):
         """Ejecuta el bucle principal de la aplicación"""
         self.show_banner()
@@ -1103,22 +1244,28 @@ class TradingBotApp:
                 elif choice == "4":
                     await self.align_historical_data()
                 elif choice == "5":
-                    await self.start_training_and_dashboard()
+                    await self.start_enterprise_training()
                 elif choice == "6":
-                    await self.start_training_background()
+                    await self.start_quick_training()
                 elif choice == "7":
-                    await self.performance_analysis()
+                    await self.start_training_background()
                 elif choice == "8":
-                    await self.system_configuration()
+                    await self.performance_analysis()
                 elif choice == "9":
-                    await self.quick_tests()
+                    await self.configure_enterprise_system()
                 elif choice == "10":
-                    await self.system_status()
+                    await self.quick_tests()
                 elif choice == "11":
+                    await self.system_status()
+                elif choice == "12":
+                    await self.resume_enterprise_training()
+                elif choice == "13":
+                    await self.start_enterprise_dashboard()
+                elif choice == "14":
                     self.running = False
                     print("\n👋 ¡Hasta luego!")
                 else:
-                    print("\n⚠️ Opción no válida. Por favor selecciona 1-11.")
+                    print("\n⚠️ Opción no válida. Por favor selecciona 1-14.")
                     time.sleep(1)
                     
             except KeyboardInterrupt:

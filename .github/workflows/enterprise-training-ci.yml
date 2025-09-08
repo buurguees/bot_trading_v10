@@ -1,0 +1,509 @@
+name: Enterprise Training CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'models/enterprise/**'
+      - 'tests/test_enterprise_training.py'
+      - '.github/workflows/enterprise-training-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'models/enterprise/**'
+      - 'tests/test_enterprise_training.py'
+  schedule:
+    # Ejecutar tests de entrenamiento cada noche
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      training_type:
+        description: 'Tipo de entrenamiento'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - quick
+          - distributed
+      gpu_enabled:
+        description: 'Habilitar GPU'
+        required: true
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.9'
+  CUDA_VERSION: '11.8'
+  PYTORCH_VERSION: '2.0.1'
+
+jobs:
+  # Job 1: Tests Unitarios y de Integración
+  test:
+    name: Tests Unitarios e Integración
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+        test-type: ['unit', 'integration', 'performance']
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Configurar Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache dependencias
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Instalar dependencias base
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-enterprise.txt
+        pip install -r requirements-testing.txt
+    
+    - name: Instalar dependencias específicas para training
+      run: |
+        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        pip install pytorch-lightning
+        pip install optuna
+        pip install dask[complete]
+        pip install prometheus-client
+        pip install mlflow
+        pip install cryptography
+    
+    - name: Ejecutar tests unitarios
+      if: matrix.test-type == 'unit'
+      run: |
+        pytest tests/test_enterprise_training.py::TestTrainingConfig -v --cov=models/enterprise --cov-report=xml
+        pytest tests/test_enterprise_training.py::TestEnterpriseTradingDataset -v --cov=models/enterprise --cov-report=xml
+        pytest tests/test_enterprise_training.py::TestLSTMAttentionModel -v --cov=models/enterprise --cov-report=xml
+    
+    - name: Ejecutar tests de integración
+      if: matrix.test-type == 'integration'
+      run: |
+        pytest tests/test_enterprise_training.py::TestIntegration -v --cov=models/enterprise --cov-report=xml
+        pytest tests/test_enterprise_training.py::TestEnterpriseTrainingEngine -v --cov=models/enterprise --cov-report=xml
+    
+    - name: Ejecutar tests de performance
+      if: matrix.test-type == 'performance'
+      run: |
+        pytest tests/test_enterprise_training.py::TestPerformance -v --benchmark-only --benchmark-save=performance_results
+        pytest tests/test_enterprise_training.py::TestFaultTolerance -v
+    
+    - name: Subir coverage a Codecov
+      if: matrix.python-version == '3.9' && matrix.test-type == 'unit'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: training
+        name: training-coverage
+    
+    - name: Subir resultados de performance
+      if: matrix.test-type == 'performance'
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-results-${{ matrix.python-version }}
+        path: .benchmarks/
+
+  # Job 2: Tests de Distributed Training
+  test-distributed:
+    name: Tests Distributed Training
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.training_type == 'distributed'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-enterprise.txt
+        pip install -r requirements-testing.txt
+        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        pip install pytorch-lightning
+        pip install dask[complete]
+    
+    - name: Ejecutar tests distributed
+      run: |
+        pytest tests/test_enterprise_training.py::TestEnterpriseTrainingEngine -v -k "distributed"
+    
+    - name: Test Dask cluster
+      run: |
+        python -c "
+        import dask
+        from dask.distributed import Client, LocalCluster
+        cluster = LocalCluster(n_workers=2, threads_per_worker=1)
+        client = Client(cluster)
+        print('Dask cluster funcionando:', client)
+        client.close()
+        cluster.close()
+        "
+
+  # Job 3: Tests con GPU
+  test-gpu:
+    name: Tests con GPU
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.gpu_enabled == true
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Instalar CUDA
+      uses: Jimver/cuda-toolkit@v0.2.11
+      with:
+        cuda: ${{ env.CUDA_VERSION }}
+    
+    - name: Instalar PyTorch con CUDA
+      run: |
+        python -m pip install --upgrade pip
+        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+        pip install pytorch-lightning
+        pip install -r requirements-enterprise.txt
+        pip install -r requirements-testing.txt
+    
+    - name: Verificar GPU
+      run: |
+        python -c "
+        import torch
+        print('CUDA disponible:', torch.cuda.is_available())
+        print('Número de GPUs:', torch.cuda.device_count())
+        if torch.cuda.is_available():
+            print('GPU actual:', torch.cuda.get_device_name(0))
+        "
+    
+    - name: Ejecutar tests con GPU
+      run: |
+        pytest tests/test_enterprise_training.py::TestPerformance -v -k "gpu"
+        pytest tests/test_enterprise_training.py::TestLSTMAttentionModel -v
+
+  # Job 4: Linting y Code Quality
+  lint:
+    name: Linting y Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Instalar dependencias de linting
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort mypy bandit safety
+        pip install -r requirements-enterprise.txt
+    
+    - name: Ejecutar Black (formatter)
+      run: |
+        black --check --diff models/enterprise/ tests/test_enterprise_training.py
+    
+    - name: Ejecutar isort (import sorter)
+      run: |
+        isort --check-only --diff models/enterprise/ tests/test_enterprise_training.py
+    
+    - name: Ejecutar flake8 (linter)
+      run: |
+        flake8 models/enterprise/ tests/test_enterprise_training.py --max-line-length=100 --extend-ignore=E203,W503
+    
+    - name: Ejecutar mypy (type checker)
+      run: |
+        mypy models/enterprise/ --ignore-missing-imports --no-strict-optional
+    
+    - name: Ejecutar bandit (security linter)
+      run: |
+        bandit -r models/enterprise/ -f json -o bandit-report.json || true
+        bandit -r models/enterprise/ -ll
+    
+    - name: Ejecutar safety (vulnerability scanner)
+      run: |
+        safety check --json --output safety-report.json || true
+        safety check
+    
+    - name: Subir reportes de seguridad
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+
+  # Job 5: Tests de Entrenamiento Completo
+  training-test:
+    name: Test de Entrenamiento Completo
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-enterprise.txt
+        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        pip install pytorch-lightning
+        pip install optuna
+        pip install dask[complete]
+        pip install prometheus-client
+        pip install mlflow
+        pip install cryptography
+    
+    - name: Crear directorios necesarios
+      run: |
+        mkdir -p logs checkpoints cache data secrets
+    
+    - name: Test entrenamiento rápido
+      if: inputs.training_type == 'quick'
+      run: |
+        python -c "
+        import asyncio
+        import sys
+        sys.path.append('.')
+        from models.enterprise.training_engine import EnterpriseTrainingEngine, TrainingConfig
+        
+        async def test_training():
+            config = TrainingConfig(max_epochs=1, batch_size=16)
+            engine = EnterpriseTrainingEngine('test_quick', 'quick_test')
+            
+            data_config = {'n_samples': 100, 'n_features': 5}
+            
+            try:
+                results = await engine.train_distributed(data_config, config)
+                print('Entrenamiento rápido exitoso:', results)
+            except Exception as e:
+                print('Error en entrenamiento:', e)
+                sys.exit(1)
+        
+        asyncio.run(test_training())
+        "
+    
+    - name: Test entrenamiento completo
+      if: inputs.training_type == 'full'
+      run: |
+        python -c "
+        import asyncio
+        import sys
+        sys.path.append('.')
+        from models.enterprise.training_engine import EnterpriseTrainingEngine, TrainingConfig
+        
+        async def test_training():
+            config = TrainingConfig(max_epochs=5, batch_size=32)
+            engine = EnterpriseTrainingEngine('test_full', 'full_test')
+            
+            data_config = {'n_samples': 1000, 'n_features': 5}
+            
+            try:
+                results = await engine.train_distributed(data_config, config)
+                print('Entrenamiento completo exitoso:', results)
+            except Exception as e:
+                print('Error en entrenamiento:', e)
+                sys.exit(1)
+        
+        asyncio.run(test_training())
+        "
+    
+    - name: Test hyperparameter tuning
+      run: |
+        python -c "
+        import asyncio
+        import sys
+        sys.path.append('.')
+        from models.enterprise.hyperparameter_tuning import EnterpriseHyperparameterTuner, TuningConfig
+        
+        async def mock_training(config, data_config):
+            import numpy as np
+            return {'val_loss': np.random.exponential(0.5)}
+        
+        async def test_tuning():
+            tuner_config = TuningConfig(n_trials=3, timeout=60)
+            tuner = EnterpriseHyperparameterTuner(tuner_config)
+            
+            data_config = {'n_samples': 100, 'n_features': 5}
+            
+            try:
+                results = await tuner.optimize(mock_training, data_config)
+                print('Hyperparameter tuning exitoso:', results)
+            except Exception as e:
+                print('Error en tuning:', e)
+                sys.exit(1)
+        
+        asyncio.run(test_tuning())
+        "
+    
+    - name: Test data pipeline
+      run: |
+        python -c "
+        import asyncio
+        import sys
+        sys.path.append('.')
+        from models.enterprise.data_pipeline import EnterpriseDataPipeline, DataPipelineConfig
+        import pandas as pd
+        import numpy as np
+        
+        async def test_pipeline():
+            config = DataPipelineConfig(n_workers=2, enable_caching=False)
+            pipeline = EnterpriseDataPipeline(config)
+            
+            # Crear datos de prueba
+            data = pd.DataFrame(np.random.randn(100, 5), columns=['open', 'high', 'low', 'close', 'volume'])
+            data.to_csv('test_data.csv', index=False)
+            
+            data_config = {'type': 'csv', 'file_path': 'test_data.csv'}
+            
+            try:
+                await pipeline.start()
+                processed_data = await pipeline.process_trading_data(data_config)
+                print('Data pipeline exitoso:', len(processed_data))
+                await pipeline.stop()
+            except Exception as e:
+                print('Error en pipeline:', e)
+                sys.exit(1)
+        
+        asyncio.run(test_pipeline())
+        "
+    
+    - name: Test monitoring system
+      run: |
+        python -c "
+        import asyncio
+        import sys
+        sys.path.append('.')
+        from models.enterprise.monitoring_system import EnterpriseMonitoringSystem, MonitoringConfig
+        
+        async def test_monitoring():
+            config = MonitoringConfig(enable_alerts=False, log_metrics=False)
+            monitor = EnterpriseMonitoringSystem(config)
+            
+            try:
+                await monitor.start_monitoring()
+                
+                # Simular métricas
+                monitor.update_training_metrics(epoch=1, train_loss=0.5, val_loss=0.6)
+                
+                summary = monitor.get_metrics_summary()
+                print('Monitoring system exitoso:', summary)
+                
+                await monitor.stop_monitoring()
+            except Exception as e:
+                print('Error en monitoring:', e)
+                sys.exit(1)
+        
+        asyncio.run(test_monitoring())
+        "
+    
+    - name: Test security system
+      run: |
+        python -c "
+        import asyncio
+        import sys
+        sys.path.append('.')
+        from models.enterprise.security_system import EnterpriseSecuritySystem, SecurityConfig
+        
+        async def test_security():
+            config = SecurityConfig(enable_audit_logging=False)
+            security = EnterpriseSecuritySystem(config)
+            
+            try:
+                # Test encriptación
+                data = {'test': 'data', 'sensitive': 'info'}
+                encrypted = await security.encrypt_sensitive_data(data)
+                decrypted = await security.decrypt_sensitive_data(encrypted)
+                
+                assert data == decrypted
+                print('Security system exitoso')
+            except Exception as e:
+                print('Error en security:', e)
+                sys.exit(1)
+        
+        asyncio.run(test_security())
+        "
+
+  # Job 6: Build y Deploy
+  build-deploy:
+    name: Build y Deploy
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Build package
+      run: |
+        python -m build
+    
+    - name: Subir artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: enterprise-training-package
+        path: dist/
+    
+    - name: Deploy a PyPI (si es release)
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        echo "Deploying to PyPI..."
+        # twine upload dist/* --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }}
+
+  # Job 7: Notificaciones
+  notify:
+    name: Notificaciones
+    runs-on: ubuntu-latest
+    needs: [test, lint, training-test]
+    if: always()
+    
+    steps:
+    - name: Notificar éxito
+      if: needs.test.result == 'success' && needs.lint.result == 'success' && needs.training-test.result == 'success'
+      run: |
+        echo "✅ Todos los tests pasaron exitosamente"
+        echo "🚀 Sistema de entrenamiento enterprise listo para producción"
+    
+    - name: Notificar fallo
+      if: needs.test.result == 'failure' || needs.lint.result == 'failure' || needs.training-test.result == 'failure'
+      run: |
+        echo "❌ Algunos tests fallaron"
+        echo "🔍 Revisar logs para más detalles"
+        exit 1

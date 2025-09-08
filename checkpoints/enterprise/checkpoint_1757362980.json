@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-09-08T22:23:00.850545",
+  "duration": 57.1700177192688,
+  "metrics": {
+    "mse": 256188.62463544222,
+    "mae": 399.69058309976776,
+    "r2": 0.6591942513607544
+  },
+  "model_path": "checkpoints\\enterprise\\enterprise_model.pkl",
+  "scaler_path": "checkpoints\\enterprise\\enterprise_scaler.pkl",
+  "data_shape": {
+    "X_train": [
+      7912,
+      960
+    ],
+    "X_test": [
+      1979,
+      960
+    ],
+    "y_train": [
+      7912
+    ],
+    "y_test": [
+      1979
+    ]
+  }
+}
