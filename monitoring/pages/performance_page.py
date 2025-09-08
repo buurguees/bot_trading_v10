@@ -1,4 +1,728 @@
-# Calcular drawdowns
+"""
+monitoring/pages/performance_page.py
+Página de Análisis de Rendimiento - Trading Bot v10
+
+Esta página proporciona análisis avanzado de rendimiento:
+- Métricas financieras detalladas (Sharpe, Sortino, Calmar, etc.)
+- Análisis de drawdown y volatilidad
+- Comparación con benchmarks
+- Análisis de atribución de rendimiento
+- Optimización de tamaño de posiciones
+- Reportes de rendimiento exportables
+"""
+import logging
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any, Tuple
+
+import dash
+from dash import html, dcc, Input, Output, State, callback
+import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
+import plotly.express as px
+from plotly.subplots import make_subplots
+import pandas as pd
+import numpy as np
+
+from monitoring.pages.base_page import BasePage
+
+logger = logging.getLogger(__name__)
+
+class RiskAnalysisPage(BasePage):
+    """
+    Página de análisis integral de riesgo del Trading Bot v10
+    
+    Proporciona análisis avanzado de riesgo de mercado, operacional
+    y de portfolio con herramientas de gestión y monitoreo.
+    """
+    
+    def __init__(self, data_provider=None):
+        """
+        Inicializa la página de análisis de riesgo
+        
+        Args:
+            data_provider: Proveedor de datos centralizado
+        """
+        super().__init__(data_provider=data_provider)
+        
+        # Configuración específica de la página Risk Analysis
+        self.page_config.update({
+            'title': 'Análisis de Riesgo',
+            'update_interval': 30000,  # 30 segundos
+            'auto_refresh': True,
+            'enable_stress_testing': True,
+            'enable_monte_carlo': True,
+            'confidence_levels': [0.90, 0.95, 0.99],
+            'default_confidence': 0.95,
+            'chart_height': 450,
+            'risk_alert_threshold': 0.15  # 15% para alertas
+        })
+        
+        # Tipos de riesgo a analizar
+        self.risk_categories = {
+            'market': {
+                'name': 'Riesgo de Mercado',
+                'color': 'danger',
+                'icon': 'fas fa-chart-line',
+                'metrics': ['var', 'cvar', 'volatility', 'beta']
+            },
+            'credit': {
+                'name': 'Riesgo de Crédito',
+                'color': 'warning',
+                'icon': 'fas fa-handshake',
+                'metrics': ['counterparty_exposure', 'credit_rating']
+            },
+            'liquidity': {
+                'name': 'Riesgo de Liquidez',
+                'color': 'info',
+                'icon': 'fas fa-tint',
+                'metrics': ['bid_ask_spread', 'market_impact', 'trading_volume']
+            },
+            'operational': {
+                'name': 'Riesgo Operacional',
+                'color': 'secondary',
+                'icon': 'fas fa-cogs',
+                'metrics': ['system_uptime', 'execution_slippage', 'api_failures']
+            },
+            'concentration': {
+                'name': 'Riesgo de Concentración',
+                'color': 'primary',
+                'icon': 'fas fa-bullseye',
+                'metrics': ['position_concentration', 'sector_exposure', 'correlation_risk']
+            }
+        }
+        
+        # Escenarios de stress testing
+        self.stress_scenarios = {
+            'market_crash': {
+                'name': 'Crash de Mercado',
+                'description': 'Caída del 20% en todos los activos',
+                'shock': -0.20,
+                'duration_days': 1
+            },
+            'flash_crash': {
+                'name': 'Flash Crash',
+                'description': 'Caída súbita del 10% en 1 hora',
+                'shock': -0.10,
+                'duration_days': 0.04  # 1 hora
+            },
+            'volatility_spike': {
+                'name': 'Spike de Volatilidad',
+                'description': 'Aumento de volatilidad 5x',
+                'shock': 0,
+                'volatility_multiplier': 5
+            },
+            'liquidity_crisis': {
+                'name': 'Crisis de Liquidez',
+                'description': 'Spreads bid-ask aumentan 10x',
+                'shock': 0,
+                'liquidity_impact': 10
+            },
+            'correlation_breakdown': {
+                'name': 'Breakdown de Correlaciones',
+                'description': 'Correlaciones tienden a 1',
+                'correlation_shock': 0.9
+            },
+            'black_swan': {
+                'name': 'Evento Cisne Negro',
+                'description': 'Evento extremo improbable',
+                'shock': -0.50,
+                'probability': 0.001
+            }
+        }
+        
+        # Límites de riesgo configurables
+        self.risk_limits = {
+            'max_portfolio_var': 0.05,  # 5% VaR máximo
+            'max_position_size': 0.20,  # 20% máximo por posición
+            'max_sector_exposure': 0.40,  # 40% máximo por sector
+            'max_correlation': 0.80,  # 80% correlación máxima
+            'max_drawdown': 0.15,  # 15% drawdown máximo
+            'min_liquidity_ratio': 0.30  # 30% mínimo en activos líquidos
+        }
+        
+        logger.info("RiskAnalysisPage inicializada")
+    
+    def get_layout(self) -> dbc.Container:
+        """
+        Obtiene el layout principal de la página de análisis de riesgo
+        
+        Returns:
+            dbc.Container: Layout completo de la página
+        """
+        try:
+            return dbc.Container([
+                # Header de la página
+                self.create_page_header(
+                    title="Análisis de Riesgo",
+                    subtitle="Gestión integral de riesgo y monitoreo de exposiciones",
+                    show_refresh=True,
+                    show_export=True
+                ),
+                
+                # Panel de alertas de riesgo
+                self._create_risk_alerts_section(),
+                
+                # Controles de configuración
+                self._create_risk_controls_section(),
+                
+                # Dashboard de riesgo principal
+                self._create_risk_dashboard_section(),
+                
+                # Análisis de VaR y métricas de mercado
+                dbc.Row([
+                    dbc.Col([
+                        self._create_var_analysis_section()
+                    ], width=8),
+                    dbc.Col([
+                        self._create_risk_limits_monitor_section()
+                    ], width=4)
+                ], className="mb-4"),
+                
+                # Matriz de correlaciones y exposiciones
+                dbc.Row([
+                    dbc.Col([
+                        self._create_correlation_matrix_section()
+                    ], width=6),
+                    dbc.Col([
+                        self._create_exposure_analysis_section()
+                    ], width=6)
+                ], className="mb-4"),
+                
+                # Stress testing y análisis de escenarios
+                self._create_stress_testing_section(),
+                
+                # Monte Carlo y simulaciones
+                self._create_monte_carlo_section(),
+                
+                # Componentes de actualización y stores
+                self.create_refresh_interval("risk-refresh-interval"),
+                dcc.Store(id='risk-data-store'),
+                dcc.Store(id='risk-config-store', data={
+                    'confidence_level': self.page_config['default_confidence'],
+                    'time_horizon': 1,  # días
+                    'enable_alerts': True,
+                    'stress_scenario': 'market_crash'
+                }),
+                
+            ], fluid=True, className="risk-analysis-page")
+            
+        except Exception as e:
+            logger.error(f"Error al crear layout de RiskAnalysisPage: {e}")
+            return dbc.Container([
+                self.create_error_alert(f"Error al cargar la página de análisis de riesgo: {e}")
+            ])
+    
+    def _create_risk_alerts_section(self) -> dbc.Row:
+        """Crea la sección de alertas de riesgo"""
+        return dbc.Row([
+            dbc.Col([
+                html.Div(id="risk-alerts-container")
+            ], width=12)
+        ], className="mb-4")
+    
+    def _create_risk_controls_section(self) -> dbc.Row:
+        """Crea la sección de controles de configuración"""
+        return dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        dbc.Row([
+                            # Nivel de confianza
+                            dbc.Col([
+                                html.Label("Nivel de Confianza:", className="form-label mb-1"),
+                                dcc.Dropdown(
+                                    id="confidence-level-selector",
+                                    options=[
+                                        {'label': '90%', 'value': 0.90},
+                                        {'label': '95%', 'value': 0.95},
+                                        {'label': '99%', 'value': 0.99}
+                                    ],
+                                    value=self.page_config['default_confidence'],
+                                    placeholder="Nivel de confianza"
+                                )
+                            ], width=12, md=2),
+                            
+                            # Horizonte temporal
+                            dbc.Col([
+                                html.Label("Horizonte (días):", className="form-label mb-1"),
+                                dbc.Input(
+                                    id="time-horizon-input",
+                                    type="number",
+                                    value=1,
+                                    min=1,
+                                    max=30,
+                                    step=1
+                                )
+                            ], width=12, md=2),
+                            
+                            # Método de cálculo
+                            dbc.Col([
+                                html.Label("Método VaR:", className="form-label mb-1"),
+                                dcc.Dropdown(
+                                    id="var-method-selector",
+                                    options=[
+                                        {'label': 'Histórico', 'value': 'historical'},
+                                        {'label': 'Paramétrico', 'value': 'parametric'},
+                                        {'label': 'Monte Carlo', 'value': 'monte_carlo'}
+                                    ],
+                                    value='historical',
+                                    placeholder="Método"
+                                )
+                            ], width=12, md=2),
+                            
+                            # Alertas activas
+                            dbc.Col([
+                                html.Label("Alertas:", className="form-label mb-1"),
+                                dbc.Switch(
+                                    id="enable-alerts-switch",
+                                    label="Activar alertas automáticas",
+                                    value=True
+                                )
+                            ], width=12, md=3),
+                            
+                            # Botones de acción
+                            dbc.Col([
+                                html.Label("Acciones:", className="form-label mb-1"),
+                                dbc.ButtonGroup([
+                                    dbc.Button("Recalcular", id="recalculate-risk-btn", 
+                                              color="primary", size="sm"),
+                                    dbc.Button("Configurar Límites", id="config-limits-btn", 
+                                              color="secondary", size="sm")
+                                ])
+                            ], width=12, md=3)
+                        ])
+                    ])
+                ])
+            ], width=12)
+        ], className="mb-4")
+    
+    def _create_risk_dashboard_section(self) -> dbc.Row:
+        """Crea el dashboard principal de riesgo"""
+        return dbc.Row([
+            dbc.Col([
+                html.H5("Dashboard de Riesgo", className="section-title mb-3"),
+                self.create_loading_component(
+                    "risk-dashboard",
+                    html.Div(id="risk-dashboard-cards"),
+                    loading_type="default"
+                )
+            ], width=12)
+        ], className="mb-4")
+    
+    def _create_var_analysis_section(self) -> dbc.Card:
+        """Crea la sección de análisis de VaR"""
+        return dbc.Card([
+            dbc.CardHeader([
+                html.H6("Análisis de Value at Risk (VaR)", className="mb-0")
+            ]),
+            dbc.CardBody([
+                self.create_loading_component(
+                    "var-analysis",
+                    dcc.Graph(
+                        id="var-analysis-chart",
+                        config=self.get_default_chart_config(),
+                        style={'height': f"{self.page_config['chart_height']}px"}
+                    ),
+                    loading_type="default"
+                )
+            ])
+        ])
+    
+    def _create_risk_limits_monitor_section(self) -> dbc.Card:
+        """Crea la sección de monitoreo de límites"""
+        return dbc.Card([
+            dbc.CardHeader([
+                html.H6("Monitor de Límites de Riesgo", className="mb-0")
+            ]),
+            dbc.CardBody([
+                self.create_loading_component(
+                    "risk-limits",
+                    html.Div(id="risk-limits-container"),
+                    loading_type="default"
+                )
+            ])
+        ])
+    
+    def _create_correlation_matrix_section(self) -> dbc.Card:
+        """Crea la sección de matriz de correlaciones"""
+        return dbc.Card([
+            dbc.CardHeader([
+                html.H6("Matriz de Correlaciones", className="mb-0")
+            ]),
+            dbc.CardBody([
+                self.create_loading_component(
+                    "correlation-matrix",
+                    dcc.Graph(
+                        id="correlation-matrix-chart",
+                        config=self.get_default_chart_config(),
+                        style={'height': '400px'}
+                    ),
+                    loading_type="default"
+                )
+            ])
+        ])
+    
+    def _create_exposure_analysis_section(self) -> dbc.Card:
+        """Crea la sección de análisis de exposiciones"""
+        return dbc.Card([
+            dbc.CardHeader([
+                html.H6("Análisis de Exposiciones", className="mb-0")
+            ]),
+            dbc.CardBody([
+                self.create_loading_component(
+                    "exposure-analysis",
+                    dcc.Graph(
+                        id="exposure-analysis-chart",
+                        config=self.get_default_chart_config(),
+                        style={'height': '400px'}
+                    ),
+                    loading_type="default"
+                )
+            ])
+        ])
+    
+    def _create_stress_testing_section(self) -> dbc.Row:
+        """Crea la sección de stress testing"""
+        return dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        dbc.Row([
+                            dbc.Col([
+                                html.H6("Stress Testing", className="mb-0")
+                            ], width="auto"),
+                            dbc.Col([
+                                dcc.Dropdown(
+                                    id="stress-scenario-selector",
+                                    options=[
+                                        {'label': scenario['name'], 'value': key}
+                                        for key, scenario in self.stress_scenarios.items()
+                                    ],
+                                    value='market_crash',
+                                    placeholder="Escenario",
+                                    className="stress-scenario-dropdown"
+                                )
+                            ], width="auto", className="ms-auto")
+                        ])
+                    ]),
+                    dbc.CardBody([
+                        dbc.Row([
+                            dbc.Col([
+                                self.create_loading_component(
+                                    "stress-test-results",
+                                    dcc.Graph(
+                                        id="stress-test-chart",
+                                        config=self.get_default_chart_config(),
+                                        style={'height': '400px'}
+                                    ),
+                                    loading_type="default"
+                                )
+                            ], width=8),
+                            dbc.Col([
+                                html.Div(id="stress-test-summary")
+                            ], width=4)
+                        ])
+                    ])
+                ])
+            ], width=12)
+        ], className="mb-4")
+    
+    def _create_monte_carlo_section(self) -> dbc.Row:
+        """Crea la sección de simulaciones Monte Carlo"""
+        return dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        dbc.Row([
+                            dbc.Col([
+                                html.H6("Simulación Monte Carlo", className="mb-0")
+                            ], width="auto"),
+                            dbc.Col([
+                                dbc.InputGroup([
+                                    dbc.Input(
+                                        id="monte-carlo-simulations",
+                                        type="number",
+                                        value=10000,
+                                        min=1000,
+                                        max=100000,
+                                        step=1000
+                                    ),
+                                    dbc.InputGroupText("simulaciones")
+                                ], size="sm")
+                            ], width="auto"),
+                            dbc.Col([
+                                dbc.Button("Ejecutar", id="run-monte-carlo-btn", 
+                                          color="primary", size="sm")
+                            ], width="auto")
+                        ])
+                    ]),
+                    dbc.CardBody([
+                        dbc.Row([
+                            dbc.Col([
+                                self.create_loading_component(
+                                    "monte-carlo-results",
+                                    dcc.Graph(
+                                        id="monte-carlo-chart",
+                                        config=self.get_default_chart_config(),
+                                        style={'height': '400px'}
+                                    ),
+                                    loading_type="default"
+                                )
+                            ], width=8),
+                            dbc.Col([
+                                html.Div(id="monte-carlo-statistics")
+                            ], width=4)
+                        ])
+                    ])
+                ])
+            ], width=12)
+        ], className="mb-4")
+    
+    def register_callbacks(self, app: dash.Dash) -> None:
+        """
+        Registra todos los callbacks de la página de análisis de riesgo
+        
+        Args:
+            app (dash.Dash): Instancia de la aplicación Dash
+        """
+        
+        # Callback para actualizar configuración de riesgo
+        @app.callback(
+            Output('risk-config-store', 'data'),
+            [Input('confidence-level-selector', 'value'),
+             Input('time-horizon-input', 'value'),
+             Input('var-method-selector', 'value'),
+             Input('enable-alerts-switch', 'value'),
+             Input('stress-scenario-selector', 'value')],
+            [State('risk-config-store', 'data')]
+        )
+        def update_risk_config(confidence, horizon, method, alerts, scenario, current_config):
+            """Actualiza configuración de análisis de riesgo"""
+            return {
+                'confidence_level': confidence or self.page_config['default_confidence'],
+                'time_horizon': horizon or 1,
+                'var_method': method or 'historical',
+                'enable_alerts': alerts if alerts is not None else True,
+                'stress_scenario': scenario or 'market_crash',
+                'last_update': datetime.now().isoformat()
+            }
+        
+        # Callback principal para cargar datos de riesgo
+        @app.callback(
+            Output('risk-data-store', 'data'),
+            [Input('risk-config-store', 'data'),
+             Input('risk-refresh-interval', 'n_intervals'),
+             Input('risk-refresh-btn', 'n_clicks'),
+             Input('recalculate-risk-btn', 'n_clicks')]
+        )
+        def update_risk_data(config, n_intervals, refresh_clicks, recalc_clicks):
+            """Actualiza datos de análisis de riesgo"""
+            try:
+                risk_data = self._calculate_risk_metrics(config)
+                correlation_data = self._calculate_correlations()
+                exposure_data = self._calculate_exposures()
+                
+                self.update_page_stats()
+                
+                return {
+                    'risk_metrics': risk_data,
+                    'correlations': correlation_data,
+                    'exposures': exposure_data,
+                    'config': config,
+                    'last_update': datetime.now().isoformat()
+                }
+                
+            except Exception as e:
+                logger.error(f"Error al actualizar datos de riesgo: {e}")
+                return {}
+        
+        # Callback para alertas de riesgo
+        @app.callback(
+            Output('risk-alerts-container', 'children'),
+            [Input('risk-data-store', 'data')]
+        )
+        def update_risk_alerts(risk_data):
+            """Actualiza alertas de riesgo"""
+            try:
+                if not risk_data or not risk_data.get('risk_metrics'):
+                    return html.Div()
+                
+                return self._create_risk_alerts(risk_data['risk_metrics'])
+                
+            except Exception as e:
+                logger.error(f"Error al crear alertas de riesgo: {e}")
+                return html.Div()
+        
+        # Callback para dashboard de riesgo
+        @app.callback(
+            Output('risk-dashboard-cards', 'children'),
+            [Input('risk-data-store', 'data')]
+        )
+        def update_risk_dashboard(risk_data):
+            """Actualiza dashboard principal de riesgo"""
+            try:
+                if not risk_data or not risk_data.get('risk_metrics'):
+                    return self.create_empty_state(
+                        title="Calculando métricas de riesgo...",
+                        message="Procesando datos para análisis de riesgo",
+                        icon="fas fa-calculator"
+                    )
+                
+                return self._create_risk_dashboard_cards(risk_data['risk_metrics'])
+                
+            except Exception as e:
+                logger.error(f"Error al crear dashboard de riesgo: {e}")
+                return self.create_error_alert("Error al calcular métricas de riesgo")
+        
+        # Callback para análisis de VaR
+        @app.callback(
+            Output('var-analysis-chart', 'figure'),
+            [Input('risk-data-store', 'data')]
+        )
+        def update_var_analysis(risk_data):
+            """Actualiza análisis de VaR"""
+            try:
+                if not risk_data or not risk_data.get('risk_metrics'):
+                    return self._create_empty_chart("Calculando VaR...")
+                
+                return self._create_var_analysis_chart(risk_data['risk_metrics'])
+                
+            except Exception as e:
+                logger.error(f"Error al crear análisis de VaR: {e}")
+                return self._create_empty_chart("Error en análisis de VaR")
+        
+        # Callback para monitor de límites
+        @app.callback(
+            Output('risk-limits-container', 'children'),
+            [Input('risk-data-store', 'data')]
+        )
+        def update_risk_limits_monitor(risk_data):
+            """Actualiza monitor de límites de riesgo"""
+            try:
+                if not risk_data or not risk_data.get('risk_metrics'):
+                    return html.P("Cargando límites de riesgo...", className="text-muted")
+                
+                return self._create_risk_limits_monitor(risk_data['risk_metrics'])
+                
+            except Exception as e:
+                logger.error(f"Error al crear monitor de límites: {e}")
+                return self.create_error_alert("Error en monitor de límites")
+        
+        # Callback para matriz de correlaciones
+        @app.callback(
+            Output('correlation-matrix-chart', 'figure'),
+            [Input('risk-data-store', 'data')]
+        )
+        def update_correlation_matrix(risk_data):
+            """Actualiza matriz de correlaciones"""
+            try:
+                if not risk_data or not risk_data.get('correlations'):
+                    return self._create_empty_chart("Calculando correlaciones...")
+                
+                return self._create_correlation_heatmap(risk_data['correlations'])
+                
+            except Exception as e:
+                logger.error(f"Error al crear matriz de correlaciones: {e}")
+                return self._create_empty_chart("Error en matriz de correlaciones")
+        
+        # Callback para análisis de exposiciones
+        @app.callback(
+            Output('exposure-analysis-chart', 'figure'),
+            [Input('risk-data-store', 'data')]
+        )
+        def update_exposure_analysis(risk_data):
+            """Actualiza análisis de exposiciones"""
+            try:
+                if not risk_data or not risk_data.get('exposures'):
+                    return self._create_empty_chart("Calculando exposiciones...")
+                
+                return self._create_exposure_chart(risk_data['exposures'])
+                
+            except Exception as e:
+                logger.error(f"Error al crear análisis de exposiciones: {e}")
+                return self._create_empty_chart("Error en análisis de exposiciones")
+        
+        # Callback para stress testing
+        @app.callback(
+            [Output('stress-test-chart', 'figure'),
+             Output('stress-test-summary', 'children')],
+            [Input('risk-data-store', 'data'),
+             Input('stress-scenario-selector', 'value')]
+        )
+        def update_stress_testing(risk_data, scenario):
+            """Actualiza análisis de stress testing"""
+            try:
+                if not risk_data or not scenario:
+                    return (
+                        self._create_empty_chart("Seleccione un escenario..."),
+                        html.P("Configurando stress test...", className="text-muted")
+                    )
+                
+                stress_results = self._run_stress_test(risk_data, scenario)
+                chart = self._create_stress_test_chart(stress_results, scenario)
+                summary = self._create_stress_test_summary(stress_results, scenario)
+                
+                return chart, summary
+                
+            except Exception as e:
+                logger.error(f"Error en stress testing: {e}")
+                return (
+                    self._create_empty_chart("Error en stress test"),
+                    self.create_error_alert("Error en stress testing")
+                )
+        
+        # Callback para Monte Carlo
+        @app.callback(
+            [Output('monte-carlo-chart', 'figure'),
+             Output('monte-carlo-statistics', 'children')],
+            [Input('run-monte-carlo-btn', 'n_clicks'),
+             Input('risk-data-store', 'data')],
+            [State('monte-carlo-simulations', 'value')]
+        )
+        def update_monte_carlo(n_clicks, risk_data, num_simulations):
+            """Actualiza simulación Monte Carlo"""
+            try:
+                if not n_clicks or not risk_data:
+                    return (
+                        self._create_empty_chart("Presione 'Ejecutar' para iniciar simulación"),
+                        html.P("Listo para ejecutar Monte Carlo", className="text-muted")
+                    )
+                
+                mc_results = self._run_monte_carlo_simulation(risk_data, num_simulations or 10000)
+                chart = self._create_monte_carlo_chart(mc_results)
+                stats = self._create_monte_carlo_statistics(mc_results)
+                
+                return chart, stats
+                
+            except Exception as e:
+                logger.error(f"Error en Monte Carlo: {e}")
+                return (
+                    self._create_empty_chart("Error en simulación"),
+                    self.create_error_alert("Error en Monte Carlo")
+                )
+        
+        logger.info("Callbacks de RiskAnalysisPage registrados")
+    
+    def _calculate_risk_metrics(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Calcula métricas de riesgo según configuración"""
+        try:
+            confidence_level = config.get('confidence_level', 0.95)
+            time_horizon = config.get('time_horizon', 1)
+            
+            # Obtener datos de portfolio si disponible
+            if self.data_provider:
+                symbols = self.data_provider.get_configured_symbols()
+                portfolio_data = {}
+                
+                for symbol in symbols:
+                    metrics = self.data_provider.get_symbol_metrics(symbol)
+                    if metrics:
+                        portfolio_data[symbol] = metrics
+            else:
+                # Datos simulados
+                symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'BNBUSDT']
+                portfolio_data = self._generate_sample_portfolio_data(symbols)
+        
         running_max = np.maximum.accumulate(cumulative_returns + 1)
         drawdowns = (running_max - (cumulative_returns + 1)) / running_max
         
@@ -702,7 +1426,8 @@
             yaxis=dict(showgrid=False, showticklabels=False)
         )
         
-        return fig"""
+        return fig
+"""
 monitoring/pages/performance_page.py
 Página de Análisis de Rendimiento - Trading Bot v10
 

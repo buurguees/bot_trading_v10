@@ -1059,7 +1059,7 @@ class CyclesPage(BasePage):
                 {'name': 'Fin', 'id': 'end_date', 'type': 'text'},
                 {'name': 'Duración', 'id': 'duration_days', 'type': 'text'},
                 {'name': 'PnL %', 'id': 'pnl_percentage', 'type': 'numeric'},
-                {'name': 'PnL , 'id': 'pnl', 'type': 'numeric'},
+                {'name': 'PnL $', 'id': 'pnl', 'type': 'numeric'},
                 {'name': 'Balance Inicial', 'id': 'start_balance', 'type': 'numeric'},
                 {'name': 'Balance Final', 'id': 'end_balance', 'type': 'numeric'},
                 {'name': 'Total Trades', 'id': 'total_trades', 'type': 'numeric'},
