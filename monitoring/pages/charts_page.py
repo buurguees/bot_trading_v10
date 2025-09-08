@@ -968,7 +968,7 @@ class ChartsPage(BasePage):
                 {'name': 'ID Ciclo', 'id': 'cycle_id', 'type': 'text'},
                 {'name': 'Símbolo', 'id': 'symbol', 'type': 'text'},
                 {'name': 'PnL %', 'id': 'pnl_percentage', 'type': 'numeric'},
-                {'name': 'PnL , 'id': 'pnl', 'type': 'numeric'},
+                {'name': 'PnL %', 'id': 'pnl', 'type': 'numeric'},
                 {'name': 'Duración', 'id': 'duration_days', 'type': 'text'},
                 {'name': 'Win Rate', 'id': 'win_rate', 'type': 'numeric'},
                 {'name': 'Trades', 'id': 'total_trades', 'type': 'numeric'},

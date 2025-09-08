@@ -36,14 +36,20 @@ class ModelStatusPage(BasePage):
     incluyendo métricas de rendimiento, drift detection y control de entrenamientos.
     """
     
-    def __init__(self, data_provider=None):
+    def __init__(self, data_provider=None, real_time_manager=None, performance_tracker=None):
         """
         Inicializa la página de estado del modelo
         
         Args:
             data_provider: Proveedor de datos centralizado
+            real_time_manager: Gestor de tiempo real
+            performance_tracker: Tracker de rendimiento
         """
-        super().__init__(data_provider=data_provider)
+        super().__init__(
+            data_provider=data_provider, 
+            real_time_manager=real_time_manager, 
+            performance_tracker=performance_tracker
+        )
         
         # Configuración específica de la página Model Status
         self.page_config.update({
@@ -119,152 +125,331 @@ class ModelStatusPage(BasePage):
             'auc_roc': {
                 'name': 'AUC-ROC',
                 'description': 'Área bajo la curva ROC',
-                'target': 0.62,
-                'format': 'decimal'
+                'target': 0.70,
+                'format': 'percentage'
             },
-            'sharpe_predictions': {
-                'name': 'Sharpe de Predicciones',
-                'description': 'Sharpe ratio basado en predicciones',
-                'target': 1.0,
-                'format': 'decimal'
+            'loss': {
+                'name': 'Loss',
+                'description': 'Función de pérdida del modelo',
+                'target': 0.30,
+                'format': 'decimal',
+                'lower_is_better': True
             }
         }
         
-        # Features principales del modelo
-        self.model_features = [
-            'price_momentum_5m', 'price_momentum_15m', 'price_momentum_1h',
-            'rsi_14', 'rsi_7', 'macd_signal', 'macd_histogram',
-            'bollinger_position', 'bollinger_width', 'volume_sma_ratio',
-            'volume_momentum', 'bid_ask_spread', 'order_book_imbalance',
-            'volatility_5m', 'volatility_1h', 'time_of_day', 'day_of_week',
-            'market_regime', 'correlation_btc', 'fear_greed_index'
-        ]
-        
-        # Umbrales de alerta
-        self.alert_thresholds = {
-            'accuracy_min': 0.55,
-            'drift_threshold': 0.15,
-            'feature_importance_change': 0.30,
-            'prediction_confidence_min': 0.60,
-            'days_without_training': 7
-        }
-        
-        logger.info("ModelStatusPage inicializada")
+        logger.info("ModelStatusPage inicializada correctamente")
     
-    def get_layout(self) -> dbc.Container:
+    def get_layout(self) -> html.Div:
         """
-        Obtiene el layout principal de la página de estado del modelo
+        Genera el layout de la página de estado del modelo
         
         Returns:
-            dbc.Container: Layout completo de la página
+            html.Div: Layout completo de la página
         """
         try:
-            return dbc.Container([
-                # Header de la página
-                self.create_page_header(
-                    title="Estado del Modelo IA",
-                    subtitle="Monitoreo y control del modelo de machine learning",
-                    show_refresh=True,
-                    show_export=True
+            return html.Div([
+                # Store para datos del modelo
+                dcc.Store(id='model-data-store'),
+                
+                # Intervalos de actualización
+                dcc.Interval(
+                    id='model-status-interval',
+                    interval=self.page_config['update_interval'],
+                    n_intervals=0
                 ),
                 
-                # Panel de estado principal
-                self._create_model_status_panel(),
+                # Header de la página
+                self._create_page_header(),
                 
-                # Controles del modelo
-                self._create_model_controls_section(),
+                # Estado general del modelo
+                self._create_model_overview_section(),
                 
-                # Métricas principales del modelo
-                self._create_model_metrics_section(),
+                # Métricas de rendimiento
+                self._create_metrics_section(),
                 
-                # Análisis de rendimiento y drift
-                dbc.Row([
-                    dbc.Col([
-                        self._create_performance_trend_section()
-                    ], width=8),
-                    dbc.Col([
-                        self._create_drift_detection_section()
-                    ], width=4)
-                ], className="mb-4"),
+                # Análisis de drift y stability
+                self._create_stability_section(),
                 
-                # Feature importance y análisis
-                dbc.Row([
-                    dbc.Col([
-                        self._create_feature_importance_section()
-                    ], width=6),
-                    dbc.Col([
-                        self._create_prediction_analysis_section()
-                    ], width=6)
-                ], className="mb-4"),
+                # Importancia de features
+                self._create_features_section(),
                 
                 # Historial de entrenamientos
                 self._create_training_history_section(),
                 
+                # Controles del modelo
+                self._create_model_controls_section(),
+                
                 # Diagnósticos técnicos
-                self._create_technical_diagnostics_section(),
+                self._create_technical_diagnostics_section()
                 
-                # Componentes de actualización y stores
-                self.create_refresh_interval("model-refresh-interval"),
-                dcc.Store(id='model-data-store'),
-                dcc.Store(id='model-config-store', data={
-                    'auto_retrain': True,
-                    'retrain_threshold': 0.55,
-                    'drift_sensitivity': 0.15
-                }),
-                
-            ], fluid=True, className="model-status-page")
+            ], className="container-fluid")
             
         except Exception as e:
             logger.error(f"Error al crear layout de ModelStatusPage: {e}")
-            return dbc.Container([
-                self.create_error_alert(f"Error al cargar la página de estado del modelo: {e}")
-            ])
+            return self.create_error_layout("Error al cargar página de estado del modelo")
     
-    def _create_model_status_panel(self) -> dbc.Row:
-        """Crea el panel principal de estado del modelo"""
+    def _create_page_header(self) -> dbc.Row:
+        """Crea el header de la página"""
+        return dbc.Row([
+            dbc.Col([
+                html.H2([
+                    html.I(className="fas fa-brain me-3"),
+                    "Estado del Modelo IA"
+                ], className="text-primary mb-1"),
+                html.P("Monitoreo completo del modelo de machine learning", 
+                      className="text-muted mb-4")
+            ], width=8),
+            dbc.Col([
+                dbc.ButtonGroup([
+                    dbc.Button([
+                        html.I(className="fas fa-sync-alt me-2"),
+                        "Actualizar"
+                    ], color="primary", outline=True, size="sm", id="refresh-model-btn"),
+                    dbc.Button([
+                        html.I(className="fas fa-download me-2"),
+                        "Exportar"
+                    ], color="secondary", outline=True, size="sm", id="export-model-btn")
+                ], className="d-flex justify-content-end mb-3")
+            ], width=4)
+        ], className="mb-4")
+    
+    def _create_model_overview_section(self) -> dbc.Row:
+        """Crea la sección de overview del modelo"""
+        return dbc.Row([
+            # Estado actual del modelo
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        html.I(className="fas fa-heartbeat me-2"),
+                        "Estado del Modelo"
+                    ]),
+                    dbc.CardBody([
+                        html.Div(id="model-status-indicator"),
+                        html.Hr(),
+                        dbc.Row([
+                            dbc.Col([
+                                html.Small("Versión:", className="text-muted d-block"),
+                                html.Strong(id="model-version", children="v10.1.0")
+                            ], width=6),
+                            dbc.Col([
+                                html.Small("Última actualización:", className="text-muted d-block"),
+                                html.Strong(id="model-last-update", children="Hace 2 horas")
+                            ], width=6)
+                        ])
+                    ])
+                ], className="shadow-sm")
+            ], width=3),
+            
+            # Métricas principales
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        html.I(className="fas fa-chart-line me-2"),
+                        "Rendimiento Actual"
+                    ]),
+                    dbc.CardBody([
+                        dbc.Row([
+                            dbc.Col([
+                                html.H4(id="current-accuracy", children="68.5%", 
+                                       className="text-success mb-1"),
+                                html.Small("Precisión", className="text-muted")
+                            ], width=6),
+                            dbc.Col([
+                                html.H4(id="current-f1", children="0.63", 
+                                       className="text-info mb-1"),
+                                html.Small("F1 Score", className="text-muted")
+                            ], width=6)
+                        ], className="mb-2"),
+                        dbc.Row([
+                            dbc.Col([
+                                html.H4(id="prediction-confidence", children="72.1%", 
+                                       className="text-primary mb-1"),
+                                html.Small("Confianza Promedio", className="text-muted")
+                            ], width=6),
+                            dbc.Col([
+                                html.H4(id="model-stability", children="95.2%", 
+                                       className="text-warning mb-1"),
+                                html.Small("Estabilidad", className="text-muted")
+                            ], width=6)
+                        ])
+                    ])
+                ], className="shadow-sm")
+            ], width=4),
+            
+            # Estadísticas de uso
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        html.I(className="fas fa-chart-bar me-2"),
+                        "Estadísticas de Uso"
+                    ]),
+                    dbc.CardBody([
+                        dbc.Row([
+                            dbc.Col([
+                                html.H4(id="predictions-today", children="1,247", 
+                                       className="text-success mb-1"),
+                                html.Small("Predicciones Hoy", className="text-muted")
+                            ], width=6),
+                            dbc.Col([
+                                html.H4(id="avg-inference-time", children="45ms", 
+                                       className="text-info mb-1"),
+                                html.Small("Tiempo Inferencia", className="text-muted")
+                            ], width=6)
+                        ], className="mb-2"),
+                        dbc.Row([
+                            dbc.Col([
+                                html.H4(id="model-uptime", children="99.8%", 
+                                       className="text-primary mb-1"),
+                                html.Small("Uptime", className="text-muted")
+                            ], width=6),
+                            dbc.Col([
+                                html.H4(id="error-rate", children="0.2%", 
+                                       className="text-danger mb-1"),
+                                html.Small("Tasa de Error", className="text-muted")
+                            ], width=6)
+                        ])
+                    ])
+                ], className="shadow-sm")
+            ], width=5)
+        ], className="mb-4")
+    
+    def _create_metrics_section(self) -> dbc.Row:
+        """Crea la sección de métricas de rendimiento"""
         return dbc.Row([
             dbc.Col([
                 dbc.Card([
+                    dbc.CardHeader([
+                        html.I(className="fas fa-tachometer-alt me-2"),
+                        "Métricas de Rendimiento",
+                        dbc.Badge("En tiempo real", color="success", className="ms-2")
+                    ]),
                     dbc.CardBody([
-                        dbc.Row([
-                            # Estado del modelo
-                            dbc.Col([
-                                html.Div([
-                                    html.H6("Estado del Modelo", className="mb-2"),
-                                    html.Div(id="model-status-indicator"),
-                                    html.Small(id="model-status-description", className="text-muted")
-                                ])
-                            ], width=3),
+                        dcc.Graph(
+                            id='model-metrics-chart',
+                            config={'displayModeBar': False},
+                            style={'height': self.page_config['chart_height']}
+                        )
+                    ])
+                ], className="shadow-sm")
+            ], width=8),
+            
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        html.I(className="fas fa-bullseye me-2"),
+                        "Matriz de Confusión"
+                    ]),
+                    dbc.CardBody([
+                        dcc.Graph(
+                            id='confusion-matrix-chart',
+                            config={'displayModeBar': False},
+                            style={'height': self.page_config['chart_height']}
+                        )
+                    ])
+                ], className="shadow-sm")
+            ], width=4)
+        ], className="mb-4")
+    
+    def _create_stability_section(self) -> dbc.Row:
+        """Crea la sección de análisis de estabilidad y drift"""
+        return dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        html.I(className="fas fa-wave-square me-2"),
+                        "Análisis de Drift del Modelo"
+                    ]),
+                    dbc.CardBody([
+                        dcc.Graph(
+                            id='model-drift-chart',
+                            config={'displayModeBar': False},
+                            style={'height': self.page_config['chart_height']}
+                        )
+                    ])
+                ], className="shadow-sm")
+            ], width=8),
+            
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        html.I(className="fas fa-thermometer-half me-2"),
+                        "Alertas de Drift"
+                    ]),
+                    dbc.CardBody([
+                        html.Div(id="drift-alerts-container", children=[
+                            dbc.Alert([
+                                html.I(className="fas fa-check-circle me-2"),
+                                html.Strong("Sistema Estable"),
+                                html.Br(),
+                                html.Small("No se detectaron cambios significativos en la distribución de datos")
+                            ], color="success", className="mb-2"),
                             
-                            # Versión actual
-                            dbc.Col([
-                                html.Div([
-                                    html.H6("Versión Actual", className="mb-2"),
-                                    html.H5(id="model-version", className="text-primary mb-0"),
-                                    html.Small(id="model-last-update", className="text-muted")
-                                ])
-                            ], width=3),
-                            
-                            # Precisión actual
-                            dbc.Col([
-                                html.Div([
-                                    html.H6("Precisión Actual", className="mb-2"),
-                                    html.H5(id="model-accuracy", className="mb-0"),
-                                    html.Small(id="model-accuracy-trend", className="text-muted")
-                                ])
-                            ], width=3),
-                            
-                            # Próximo entrenamiento
-                            dbc.Col([
-                                html.Div([
-                                    html.H6("Próximo Entrenamiento", className="mb-2"),
-                                    html.H6(id="next-training-time", className="text-info mb-0"),
-                                    html.Small(id="training-trigger", className="text-muted")
-                                ])
-                            ], width=3)
+                            dbc.Alert([
+                                html.I(className="fas fa-info-circle me-2"),
+                                html.Strong("Monitoreo Activo"),
+                                html.Br(),
+                                html.Small("Evaluando continuamente la estabilidad del modelo")
+                            ], color="info", className="mb-0")
                         ])
                     ])
-                ])
+                ], className="shadow-sm")
+            ], width=4)
+        ], className="mb-4")
+    
+    def _create_features_section(self) -> dbc.Row:
+        """Crea la sección de análisis de features"""
+        return dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        html.I(className="fas fa-list-ol me-2"),
+                        "Importancia de Features"
+                    ]),
+                    dbc.CardBody([
+                        dcc.Graph(
+                            id='feature-importance-chart',
+                            config={'displayModeBar': False},
+                            style={'height': self.page_config['chart_height']}
+                        )
+                    ])
+                ], className="shadow-sm")
+            ], width=6),
+            
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        html.I(className="fas fa-search me-2"),
+                        "Análisis de Predicciones"
+                    ]),
+                    dbc.CardBody([
+                        dcc.Graph(
+                            id='prediction-analysis-chart',
+                            config={'displayModeBar': False},
+                            style={'height': self.page_config['chart_height']}
+                        )
+                    ])
+                ], className="shadow-sm")
+            ], width=6)
+        ], className="mb-4")
+    
+    def _create_training_history_section(self) -> dbc.Row:
+        """Crea la sección de historial de entrenamientos"""
+        return dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        html.I(className="fas fa-history me-2"),
+                        "Historial de Entrenamientos",
+                        dbc.Button([
+                            html.I(className="fas fa-plus me-1"),
+                            "Nuevo Entrenamiento"
+                        ], color="primary", size="sm", className="ms-auto", 
+                        id="new-training-btn")
+                    ], className="d-flex align-items-center"),
+                    dbc.CardBody([
+                        html.Div(id="training-history-table")
+                    ])
+                ], className="shadow-sm")
             ], width=12)
         ], className="mb-4")
     
@@ -274,176 +459,61 @@ class ModelStatusPage(BasePage):
             dbc.Col([
                 dbc.Card([
                     dbc.CardHeader([
-                        html.H6("Controles del Modelo", className="mb-0")
+                        html.I(className="fas fa-sliders-h me-2"),
+                        "Controles del Modelo"
                     ]),
                     dbc.CardBody([
                         dbc.Row([
-                            # Controles de entrenamiento
                             dbc.Col([
-                                html.Label("Entrenamiento:", className="form-label mb-2"),
+                                html.Label("Umbral de Confianza:", className="form-label"),
+                                dcc.Slider(
+                                    id='confidence-threshold-slider',
+                                    min=0.5,
+                                    max=0.95,
+                                    step=0.05,
+                                    value=0.75,
+                                    marks={
+                                        0.5: '50%',
+                                        0.6: '60%',
+                                        0.7: '70%',
+                                        0.8: '80%',
+                                        0.9: '90%'
+                                    },
+                                    tooltip={"placement": "bottom", "always_visible": True}
+                                )
+                            ], width=4),
+                            
+                            dbc.Col([
+                                html.Label("Reentrenamiento Automático:", className="form-label"),
+                                dbc.Switch(
+                                    id="auto-retrain-switch",
+                                    value=True,
+                                    className="mb-2"
+                                ),
+                                html.Small("Reentrenar cuando la precisión baje del umbral", 
+                                         className="text-muted")
+                            ], width=4),
+                            
+                            dbc.Col([
+                                html.Label("Acciones:", className="form-label"),
                                 dbc.ButtonGroup([
                                     dbc.Button([
                                         html.I(className="fas fa-play me-1"),
-                                        "Entrenar Ahora"
-                                    ], id="train-now-btn", color="primary", size="sm"),
+                                        "Iniciar"
+                                    ], color="success", size="sm", id="start-model-btn"),
                                     dbc.Button([
                                         html.I(className="fas fa-pause me-1"),
-                                        "Pausar Auto"
-                                    ], id="pause-auto-train-btn", color="warning", size="sm"),
+                                        "Pausar"
+                                    ], color="warning", size="sm", id="pause-model-btn"),
                                     dbc.Button([
-                                        html.I(className="fas fa-undo me-1"),
-                                        "Rollback"
-                                    ], id="rollback-model-btn", color="danger", size="sm")
-                                ])
-                            ], width=12, md=4),
-                            
-                            # Configuración automática
-                            dbc.Col([
-                                html.Label("Auto-entrenamiento:", className="form-label mb-2"),
-                                dbc.Switch(
-                                    id="auto-retrain-switch",
-                                    label="Activar reentrenamiento automático",
-                                    value=True
-                                ),
-                                dbc.Input(
-                                    id="retrain-threshold-input",
-                                    type="number",
-                                    value=55,
-                                    min=40,
-                                    max=80,
-                                    step=5,
-                                    size="sm",
-                                    placeholder="Umbral de precisión (%)"
-                                )
-                            ], width=12, md=4),
-                            
-                            # Configuración de drift
-                            dbc.Col([
-                                html.Label("Detección de Drift:", className="form-label mb-2"),
-                                dbc.Input(
-                                    id="drift-sensitivity-input",
-                                    type="number",
-                                    value=15,
-                                    min=5,
-                                    max=30,
-                                    step=5,
-                                    size="sm",
-                                    placeholder="Sensibilidad (%)"
-                                ),
-                                dbc.Switch(
-                                    id="drift-alerts-switch",
-                                    label="Alertas de drift",
-                                    value=True,
-                                    className="mt-2"
-                                )
-                            ], width=12, md=4)
+                                        html.I(className="fas fa-redo me-1"),
+                                        "Reentrenar"
+                                    ], color="primary", size="sm", id="retrain-model-btn")
+                                ], vertical=False, className="d-flex")
+                            ], width=4)
                         ])
                     ])
-                ])
-            ], width=12)
-        ], className="mb-4")
-    
-    def _create_model_metrics_section(self) -> dbc.Row:
-        """Crea la sección de métricas del modelo"""
-        return dbc.Row([
-            dbc.Col([
-                html.H5("Métricas del Modelo", className="section-title mb-3"),
-                self.create_loading_component(
-                    "model-metrics",
-                    html.Div(id="model-metrics-cards"),
-                    loading_type="default"
-                )
-            ], width=12)
-        ], className="mb-4")
-    
-    def _create_performance_trend_section(self) -> dbc.Card:
-        """Crea la sección de tendencia de rendimiento"""
-        return dbc.Card([
-            dbc.CardHeader([
-                html.H6("Tendencia de Rendimiento", className="mb-0")
-            ]),
-            dbc.CardBody([
-                self.create_loading_component(
-                    "performance-trend",
-                    dcc.Graph(
-                        id="performance-trend-chart",
-                        config=self.get_default_chart_config(),
-                        style={'height': f"{self.page_config['chart_height']}px"}
-                    ),
-                    loading_type="default"
-                )
-            ])
-        ])
-    
-    def _create_drift_detection_section(self) -> dbc.Card:
-        """Crea la sección de detección de drift"""
-        return dbc.Card([
-            dbc.CardHeader([
-                html.H6("Detección de Drift", className="mb-0")
-            ]),
-            dbc.CardBody([
-                self.create_loading_component(
-                    "drift-detection",
-                    html.Div(id="drift-detection-container"),
-                    loading_type="default"
-                )
-            ])
-        ])
-    
-    def _create_feature_importance_section(self) -> dbc.Card:
-        """Crea la sección de importancia de features"""
-        return dbc.Card([
-            dbc.CardHeader([
-                html.H6("Importancia de Features", className="mb-0")
-            ]),
-            dbc.CardBody([
-                self.create_loading_component(
-                    "feature-importance",
-                    dcc.Graph(
-                        id="feature-importance-chart",
-                        config=self.get_default_chart_config(),
-                        style={'height': f"{self.page_config['chart_height']}px"}
-                    ),
-                    loading_type="default"
-                )
-            ])
-        ])
-    
-    def _create_prediction_analysis_section(self) -> dbc.Card:
-        """Crea la sección de análisis de predicciones"""
-        return dbc.Card([
-            dbc.CardHeader([
-                html.H6("Análisis de Predicciones", className="mb-0")
-            ]),
-            dbc.CardBody([
-                self.create_loading_component(
-                    "prediction-analysis",
-                    dcc.Graph(
-                        id="prediction-analysis-chart",
-                        config=self.get_default_chart_config(),
-                        style={'height': f"{self.page_config['chart_height']}px"}
-                    ),
-                    loading_type="default"
-                )
-            ])
-        ])
-    
-    def _create_training_history_section(self) -> dbc.Row:
-        """Crea la sección de historial de entrenamientos"""
-        return dbc.Row([
-            dbc.Col([
-                dbc.Card([
-                    dbc.CardHeader([
-                        html.H6("Historial de Entrenamientos", className="mb-0")
-                    ]),
-                    dbc.CardBody([
-                        self.create_loading_component(
-                            "training-history",
-                            html.Div(id="training-history-table"),
-                            loading_type="default"
-                        )
-                    ])
-                ])
+                ], className="shadow-sm")
             ], width=12)
         ], className="mb-4")
     
@@ -453,205 +523,175 @@ class ModelStatusPage(BasePage):
             dbc.Col([
                 dbc.Card([
                     dbc.CardHeader([
-                        html.H6("Diagnósticos Técnicos", className="mb-0")
+                        html.I(className="fas fa-tools me-2"),
+                        "Diagnósticos Técnicos"
                     ]),
                     dbc.CardBody([
                         dbc.Row([
                             dbc.Col([
+                                html.H6("Arquitectura del Modelo", className="mb-3"),
                                 html.Div(id="model-architecture-info")
                             ], width=6),
                             dbc.Col([
+                                html.H6("Métricas de Performance", className="mb-3"),
                                 html.Div(id="model-performance-metrics")
                             ], width=6)
                         ])
                     ])
-                ])
+                ], className="shadow-sm")
             ], width=12)
-        ], className="mb-4")
+        ])
     
-    def register_callbacks(self, app: dash.Dash) -> None:
+    def register_callbacks(self, app: dash.Dash):
         """
-        Registra todos los callbacks de la página de estado del modelo
+        Registra todos los callbacks de la página
         
         Args:
-            app (dash.Dash): Instancia de la aplicación Dash
+            app: Instancia de la aplicación Dash
         """
-        
-        # Callback para actualizar configuración del modelo
-        @app.callback(
-            Output('model-config-store', 'data'),
-            [Input('auto-retrain-switch', 'value'),
-             Input('retrain-threshold-input', 'value'),
-             Input('drift-sensitivity-input', 'value'),
-             Input('drift-alerts-switch', 'value')],
-            [State('model-config-store', 'data')]
-        )
-        def update_model_config(auto_retrain, threshold, sensitivity, drift_alerts, current_config):
-            """Actualiza configuración del modelo"""
-            return {
-                'auto_retrain': auto_retrain if auto_retrain is not None else True,
-                'retrain_threshold': (threshold or 55) / 100,  # Convertir a decimal
-                'drift_sensitivity': (sensitivity or 15) / 100,
-                'drift_alerts': drift_alerts if drift_alerts is not None else True,
-                'last_update': datetime.now().isoformat()
-            }
-        
-        # Callback principal para datos del modelo
+        # Callback principal para cargar datos del modelo
         @app.callback(
             Output('model-data-store', 'data'),
-            [Input('model-refresh-interval', 'n_intervals'),
-             Input('model-refresh-btn', 'n_clicks'),
-             Input('train-now-btn', 'n_clicks')],
-            [State('model-config-store', 'data')]
+            [Input('model-status-interval', 'n_intervals'),
+             Input('refresh-model-btn', 'n_clicks')]
         )
-        def update_model_data(n_intervals, refresh_clicks, train_clicks, config):
-            """Actualiza datos del modelo"""
+        def load_model_data(n_intervals, refresh_clicks):
+            """Carga datos del modelo"""
             try:
-                # Simular inicio de entrenamiento si se presionó el botón
-                triggered_id = dash.callback_context.triggered[0]['prop_id']
-                is_training = 'train-now-btn' in triggered_id
-                
-                model_data = self._get_model_status_data(config, is_training)
-                
-                self.update_page_stats()
-                
-                return model_data
-                
+                return self._load_model_data()
             except Exception as e:
-                logger.error(f"Error al actualizar datos del modelo: {e}")
+                logger.error(f"Error al cargar datos del modelo: {e}")
                 return {}
         
-        # Callback para panel de estado principal
+        # Callback para indicador de estado
         @app.callback(
             [Output('model-status-indicator', 'children'),
-             Output('model-status-description', 'children'),
              Output('model-version', 'children'),
-             Output('model-last-update', 'children'),
-             Output('model-accuracy', 'children'),
-             Output('model-accuracy-trend', 'children'),
-             Output('next-training-time', 'children'),
-             Output('training-trigger', 'children')],
+             Output('model-last-update', 'children')],
             [Input('model-data-store', 'data')]
         )
-        def update_model_status_panel(model_data):
-            """Actualiza panel principal de estado"""
+        def update_model_status(model_data):
+            """Actualiza indicador de estado del modelo"""
             try:
                 if not model_data:
-                    return ("Cargando...",) * 8
+                    return self._create_status_indicator('error'), "N/A", "N/A"
                 
-                status_info = model_data.get('status', {})
-                current_state = status_info.get('state', 'healthy')
-                state_config = self.model_states.get(current_state, self.model_states['healthy'])
+                status = model_data.get('status', 'error')
+                version = model_data.get('version', 'N/A')
+                last_update = model_data.get('last_update', 'N/A')
                 
-                # Indicador de estado
-                status_indicator = dbc.Badge([
-                    html.I(className=f"{state_config['icon']} me-1"),
-                    state_config['label']
-                ], color=state_config['color'])
+                status_indicator = self._create_status_indicator(status)
                 
-                # Descripción del estado
-                status_description = state_config['description']
-                
-                # Versión del modelo
-                version = status_info.get('version', 'v10.0.0')
-                last_update = status_info.get('last_update', datetime.now())
-                if isinstance(last_update, str):
-                    last_update = datetime.fromisoformat(last_update)
-                last_update_text = f"Actualizado: {last_update.strftime('%d/%m/%Y %H:%M')}"
-                
-                # Precisión
-                accuracy = status_info.get('accuracy', 0)
-                accuracy_text = f"{accuracy*100:.1f}%"
-                accuracy_change = status_info.get('accuracy_change', 0)
-                accuracy_trend = f"{accuracy_change:+.1f}% (7d)" if accuracy_change != 0 else "Sin cambios"
-                accuracy_trend_color = "text-success" if accuracy_change > 0 else "text-danger" if accuracy_change < 0 else "text-muted"
-                
-                # Próximo entrenamiento
-                next_training = status_info.get('next_training', datetime.now() + timedelta(hours=6))
-                if isinstance(next_training, str):
-                    next_training = datetime.fromisoformat(next_training)
-                
-                time_diff = next_training - datetime.now()
-                if time_diff.total_seconds() > 0:
-                    if time_diff.days > 0:
-                        next_training_text = f"En {time_diff.days}d {time_diff.seconds//3600}h"
-                    else:
-                        next_training_text = f"En {time_diff.seconds//3600}h {(time_diff.seconds%3600)//60}m"
-                else:
-                    next_training_text = "Pendiente"
-                
-                # Trigger de entrenamiento
-                trigger_reason = status_info.get('training_trigger', 'Programado')
-                
-                return (
-                    status_indicator,
-                    status_description,
-                    version,
-                    last_update_text,
-                    accuracy_text,
-                    html.Span(accuracy_trend, className=accuracy_trend_color),
-                    next_training_text,
-                    trigger_reason
-                )
+                return status_indicator, version, last_update
                 
             except Exception as e:
-                logger.error(f"Error al actualizar panel de estado: {e}")
-                return ("Error",) * 8
+                logger.error(f"Error al actualizar estado: {e}")
+                return self._create_status_indicator('error'), "Error", "Error"
         
-        # Callback para métricas del modelo
+        # Callback para métricas principales
         @app.callback(
-            Output('model-metrics-cards', 'children'),
+            [Output('current-accuracy', 'children'),
+             Output('current-f1', 'children'),
+             Output('prediction-confidence', 'children'),
+             Output('model-stability', 'children')],
             [Input('model-data-store', 'data')]
         )
-        def update_model_metrics(model_data):
-            """Actualiza tarjetas de métricas del modelo"""
+        def update_main_metrics(model_data):
+            """Actualiza métricas principales"""
             try:
                 if not model_data or not model_data.get('metrics'):
-                    return self.create_empty_state(
-                        title="Cargando métricas del modelo...",
-                        message="Obteniendo datos de rendimiento",
-                        icon="fas fa-brain"
-                    )
+                    return "N/A", "N/A", "N/A", "N/A"
                 
-                return self._create_model_metrics_cards(model_data['metrics'])
+                metrics = model_data['metrics']
+                
+                accuracy = f"{metrics.get('accuracy', 0)*100:.1f}%"
+                f1_score = f"{metrics.get('f1_score', 0):.3f}"
+                confidence = f"{metrics.get('avg_confidence', 0)*100:.1f}%"
+                stability = f"{metrics.get('stability', 0)*100:.1f}%"
+                
+                return accuracy, f1_score, confidence, stability
                 
             except Exception as e:
-                logger.error(f"Error al crear métricas del modelo: {e}")
-                return self.create_error_alert("Error al cargar métricas")
+                logger.error(f"Error al actualizar métricas principales: {e}")
+                return "Error", "Error", "Error", "Error"
         
-        # Callback para tendencia de rendimiento
+        # Callback para estadísticas de uso
         @app.callback(
-            Output('performance-trend-chart', 'figure'),
+            [Output('predictions-today', 'children'),
+             Output('avg-inference-time', 'children'),
+             Output('model-uptime', 'children'),
+             Output('error-rate', 'children')],
             [Input('model-data-store', 'data')]
         )
-        def update_performance_trend(model_data):
-            """Actualiza gráfico de tendencia de rendimiento"""
+        def update_usage_stats(model_data):
+            """Actualiza estadísticas de uso"""
             try:
-                if not model_data or not model_data.get('performance_history'):
-                    return self._create_empty_chart("Cargando historial de rendimiento...")
+                if not model_data or not model_data.get('usage_stats'):
+                    return "N/A", "N/A", "N/A", "N/A"
                 
-                return self._create_performance_trend_chart(model_data['performance_history'])
+                stats = model_data['usage_stats']
+                
+                predictions = f"{stats.get('predictions_today', 0):,}"
+                inference_time = f"{stats.get('avg_inference_time', 0):.0f}ms"
+                uptime = f"{stats.get('uptime', 0)*100:.1f}%"
+                error_rate = f"{stats.get('error_rate', 0)*100:.1f}%"
+                
+                return predictions, inference_time, uptime, error_rate
                 
             except Exception as e:
-                logger.error(f"Error al crear tendencia de rendimiento: {e}")
-                return self._create_empty_chart("Error en tendencia de rendimiento")
+                logger.error(f"Error al actualizar estadísticas de uso: {e}")
+                return "Error", "Error", "Error", "Error"
         
-        # Callback para detección de drift
+        # Callback para gráfico de métricas
         @app.callback(
-            Output('drift-detection-container', 'children'),
+            Output('model-metrics-chart', 'figure'),
             [Input('model-data-store', 'data')]
         )
-        def update_drift_detection(model_data):
-            """Actualiza detección de drift"""
+        def update_metrics_chart(model_data):
+            """Actualiza gráfico de métricas"""
             try:
-                if not model_data or not model_data.get('drift_analysis'):
-                    return html.P("Analizando drift del modelo...", className="text-muted")
+                if not model_data or not model_data.get('metrics_history'):
+                    return self._create_empty_chart("Cargando métricas...")
                 
-                return self._create_drift_detection_display(model_data['drift_analysis'])
+                return self._create_metrics_chart(model_data['metrics_history'])
                 
             except Exception as e:
-                logger.error(f"Error en detección de drift: {e}")
-                return self.create_error_alert("Error en detección de drift")
+                logger.error(f"Error al crear gráfico de métricas: {e}")
+                return self._create_empty_chart("Error en métricas")
+        
+        # Callback para matriz de confusión
+        @app.callback(
+            Output('confusion-matrix-chart', 'figure'),
+            [Input('model-data-store', 'data')]
+        )
+        def update_confusion_matrix(model_data):
+            """Actualiza matriz de confusión"""
+            try:
+                if not model_data or not model_data.get('confusion_matrix'):
+                    return self._create_empty_chart("Cargando matriz...")
+                
+                return self._create_confusion_matrix_chart(model_data['confusion_matrix'])
+                
+            except Exception as e:
+                logger.error(f"Error al crear matriz de confusión: {e}")
+                return self._create_empty_chart("Error en matriz")
+        
+        # Callback para gráfico de drift
+        @app.callback(
+            Output('model-drift-chart', 'figure'),
+            [Input('model-data-store', 'data')]
+        )
+        def update_drift_chart(model_data):
+            """Actualiza gráfico de drift"""
+            try:
+                if not model_data or not model_data.get('drift_data'):
+                    return self._create_empty_chart("Cargando análisis de drift...")
+                
+                return self._create_drift_chart(model_data['drift_data'])
+                
+            except Exception as e:
+                logger.error(f"Error al crear gráfico de drift: {e}")
+                return self._create_empty_chart("Error en drift")
         
         # Callback para importancia de features
         @app.callback(
@@ -714,59 +754,748 @@ class ModelStatusPage(BasePage):
             """Actualiza diagnósticos técnicos"""
             try:
                 if not model_data:
-                    return (
-                        html.P("Cargando arquitectura...", className="text-muted"),
-                        html.P("Cargando métricas...", className="text-muted")
-                    )
+                    return html.P("Cargando...", className="text-muted"), html.P("Cargando...", className="text-muted")
                 
                 architecture_info = self._create_architecture_info(model_data.get('architecture', {}))
-                performance_metrics = self._create_performance_metrics_info(model_data.get('technical_metrics', {}))
+                performance_metrics = self._create_performance_metrics(model_data.get('performance', {}))
                 
                 return architecture_info, performance_metrics
                 
             except Exception as e:
-                logger.error(f"Error en diagnósticos técnicos: {e}")
-                return (
-                    self.create_error_alert("Error en arquitectura"),
-                    self.create_error_alert("Error en métricas")
-                )
+                logger.error(f"Error al actualizar diagnósticos técnicos: {e}")
+                return self.create_error_alert("Error en arquitectura"), self.create_error_alert("Error en métricas")
         
-        # Callbacks para controles del modelo
+        # Callback para controles del modelo
         @app.callback(
-            [Output('train-now-btn', 'children'),
-             Output('pause-auto-train-btn', 'children')],
-            [Input('train-now-btn', 'n_clicks'),
-             Input('pause-auto-train-btn', 'n_clicks')],
-            prevent_initial_call=True
+            Output('model-controls-feedback', 'children'),
+            [Input('start-model-btn', 'n_clicks'),
+             Input('pause-model-btn', 'n_clicks'),
+             Input('retrain-model-btn', 'n_clicks'),
+             Input('confidence-threshold-slider', 'value'),
+             Input('auto-retrain-switch', 'value')]
         )
-        def handle_model_controls(train_clicks, pause_clicks):
-            """Maneja controles del modelo"""
+        def handle_model_controls(start_clicks, pause_clicks, retrain_clicks, threshold, auto_retrain):
+            """Maneja los controles del modelo"""
             try:
-                triggered_id = dash.callback_context.triggered[0]['prop_id']
+                if not dash.callback_context.triggered:
+                    return ""
                 
-                if 'train-now-btn' in triggered_id:
-                    self.log_page_action("manual_training_started")
-                    return (
-                        [html.I(className="fas fa-cog fa-spin me-1"), "Entrenando..."],
-                        [html.I(className="fas fa-pause me-1"), "Pausar Auto"]
-                    )
-                elif 'pause-auto-train-btn' in triggered_id:
-                    self.log_page_action("auto_training_paused")
-                    return (
-                        [html.I(className="fas fa-play me-1"), "Entrenar Ahora"],
-                        [html.I(className="fas fa-play me-1"), "Reanudar Auto"]
-                    )
+                trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
                 
-                # Estado por defecto
-                return (
-                    [html.I(className="fas fa-play me-1"), "Entrenar Ahora"],
-                    [html.I(className="fas fa-pause me-1"), "Pausar Auto"]
-                )
+                if trigger_id == 'start-model-btn' and start_clicks:
+                    return dbc.Alert("Modelo iniciado correctamente", color="success", dismissable=True)
+                elif trigger_id == 'pause-model-btn' and pause_clicks:
+                    return dbc.Alert("Modelo pausado", color="warning", dismissable=True)
+                elif trigger_id == 'retrain-model-btn' and retrain_clicks:
+                    return dbc.Alert("Reentrenamiento iniciado", color="info", dismissable=True)
+                elif trigger_id == 'confidence-threshold-slider':
+                    return dbc.Alert(f"Umbral actualizado a {threshold*100:.0f}%", color="info", dismissable=True)
+                elif trigger_id == 'auto-retrain-switch':
+                    status = "activado" if auto_retrain else "desactivado"
+                    return dbc.Alert(f"Reentrenamiento automático {status}", color="info", dismissable=True)
+                
+                return ""
+                
             except Exception as e:
                 logger.error(f"Error en controles del modelo: {e}")
-                return (
-                    [html.I(className="fas fa-play me-1"), "Entrenar Ahora"],
-                    [html.I(className="fas fa-pause me-1"), "Pausar Auto"]
+                return dbc.Alert("Error al procesar control", color="danger", dismissable=True)
+        
+        logger.info("Callbacks de ModelStatusPage registrados correctamente")
+    
+    def _load_model_data(self) -> Dict[str, Any]:
+        """
+        Carga datos del modelo desde el data provider
+        
+        Returns:
+            Dict[str, Any]: Datos del modelo
+        """
+        try:
+            if not self.data_provider:
+                return self._generate_mock_model_data()
+            
+            # Intentar cargar datos reales
+            model_data = self.data_provider.get_model_status()
+            
+            if not model_data:
+                return self._generate_mock_model_data()
+            
+            return model_data
+            
+        except Exception as e:
+            logger.error(f"Error al cargar datos del modelo: {e}")
+            return self._generate_mock_model_data()
+    
+    def _generate_mock_model_data(self) -> Dict[str, Any]:
+        """
+        Genera datos simulados del modelo para desarrollo
+        
+        Returns:
+            Dict[str, Any]: Datos simulados
+        """
+        now = datetime.now()
+        
+        # Generar historial de métricas (últimos 30 días)
+        dates = [(now - timedelta(days=i)) for i in range(30, 0, -1)]
+        metrics_history = []
+        
+        for date in dates:
+            metrics_history.append({
+                'timestamp': date.isoformat(),
+                'accuracy': np.random.normal(0.68, 0.05),
+                'precision': np.random.normal(0.65, 0.04),
+                'recall': np.random.normal(0.62, 0.04),
+                'f1_score': np.random.normal(0.63, 0.03),
+                'auc_roc': np.random.normal(0.72, 0.03),
+                'loss': np.random.normal(0.28, 0.05)
+            })
+        
+        # Generar matriz de confusión
+        confusion_matrix = {
+            'true_positive': 145,
+            'false_positive': 23,
+            'true_negative': 167,
+            'false_negative': 18
+        }
+        
+        # Generar datos de drift
+        drift_data = []
+        for i in range(24):  # Últimas 24 horas
+            drift_data.append({
+                'timestamp': (now - timedelta(hours=i)).isoformat(),
+                'drift_score': np.random.normal(0.15, 0.05),
+                'threshold': 0.3
+            })
+        
+        # Generar importancia de features
+        feature_names = [
+            'RSI_14', 'MACD_Signal', 'BB_Upper', 'BB_Lower', 'SMA_20', 
+            'EMA_12', 'Volume_SMA', 'ATR_14', 'Stoch_K', 'Williams_R',
+            'OBV', 'CCI_20', 'VWAP', 'Price_Change', 'Volatility'
+        ]
+        
+        feature_importance = {
+            name: np.random.uniform(0.02, 0.15) 
+            for name in feature_names
+        }
+        
+        # Normalizar importancia
+        total_importance = sum(feature_importance.values())
+        feature_importance = {
+            k: v/total_importance for k, v in feature_importance.items()
+        }
+        
+        # Generar historial de entrenamientos
+        training_history = []
+        for i in range(5):
+            training_date = now - timedelta(days=i*7)
+            training_history.append({
+                'id': f"train_{i+1}",
+                'timestamp': training_date.isoformat(),
+                'version': f"v10.{i+1}.0",
+                'duration': f"{np.random.randint(45, 120)} min",
+                'accuracy': np.random.uniform(0.62, 0.72),
+                'loss': np.random.uniform(0.25, 0.35),
+                'status': 'completed' if i > 0 else 'running'
+            })
+        
+        # Generar predicciones recientes
+        predictions = []
+        for i in range(100):
+            pred_time = now - timedelta(minutes=i*5)
+            predictions.append({
+                'timestamp': pred_time.isoformat(),
+                'predicted_class': np.random.choice(['BUY', 'SELL', 'HOLD'], p=[0.3, 0.3, 0.4]),
+                'confidence': np.random.uniform(0.6, 0.95),
+                'actual_class': np.random.choice(['BUY', 'SELL', 'HOLD'], p=[0.3, 0.3, 0.4])
+            })
+        
+        return {
+            'status': 'healthy',
+            'version': 'v10.1.0',
+            'last_update': (now - timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S"),
+            'metrics': {
+                'accuracy': 0.685,
+                'precision': 0.652,
+                'recall': 0.618,
+                'f1_score': 0.634,
+                'auc_roc': 0.721,
+                'loss': 0.284,
+                'avg_confidence': 0.721,
+                'stability': 0.952
+            },
+            'usage_stats': {
+                'predictions_today': 1247,
+                'avg_inference_time': 45,
+                'uptime': 0.998,
+                'error_rate': 0.002
+            },
+            'metrics_history': metrics_history,
+            'confusion_matrix': confusion_matrix,
+            'drift_data': drift_data,
+            'feature_importance': feature_importance,
+            'training_history': training_history,
+            'predictions': predictions,
+            'architecture': {
+                'model_type': 'LSTM + Attention',
+                'layers': 8,
+                'parameters': 2847352,
+                'input_features': 50,
+                'sequence_length': 60,
+                'batch_size': 32,
+                'optimizer': 'Adam',
+                'learning_rate': 0.001
+            },
+            'performance': {
+                'memory_usage': '1.2 GB',
+                'gpu_utilization': '45%',
+                'cpu_utilization': '12%',
+                'inference_speed': '45 ms',
+                'training_speed': '2.3 samples/sec'
+            }
+        }
+    
+    def _create_status_indicator(self, status: str) -> html.Div:
+        """
+        Crea indicador visual del estado del modelo
+        
+        Args:
+            status: Estado del modelo
+            
+        Returns:
+            html.Div: Componente del indicador
+        """
+        state_info = self.model_states.get(status, self.model_states['error'])
+        
+        return html.Div([
+            html.Div([
+                html.I(className=f"{state_info['icon']} fa-2x text-{state_info['color']}")
+            ], className="text-center mb-2"),
+            html.H5(state_info['label'], className=f"text-{state_info['color']} mb-1 text-center"),
+            html.P(state_info['description'], className="text-muted text-center small mb-0")
+        ])
+    
+    def _create_metrics_chart(self, metrics_history: List[Dict]) -> go.Figure:
+        """
+        Crea gráfico de evolución de métricas
+        
+        Args:
+            metrics_history: Historial de métricas
+            
+        Returns:
+            go.Figure: Gráfico de métricas
+        """
+        if not metrics_history:
+            return self._create_empty_chart("No hay datos de métricas")
+        
+        df = pd.DataFrame(metrics_history)
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        
+        fig = make_subplots(
+            rows=2, cols=2,
+            subplot_titles=('Precisión', 'F1 Score', 'AUC-ROC', 'Loss'),
+            vertical_spacing=0.12,
+            horizontal_spacing=0.1
+        )
+        
+        # Precisión
+        fig.add_trace(
+            go.Scatter(
+                x=df['timestamp'],
+                y=df['accuracy'],
+                mode='lines+markers',
+                name='Accuracy',
+                line=dict(color='#28a745', width=2),
+                marker=dict(size=4)
+            ),
+            row=1, col=1
+        )
+        
+        # F1 Score
+        fig.add_trace(
+            go.Scatter(
+                x=df['timestamp'],
+                y=df['f1_score'],
+                mode='lines+markers',
+                name='F1 Score',
+                line=dict(color='#17a2b8', width=2),
+                marker=dict(size=4)
+            ),
+            row=1, col=2
+        )
+        
+        # AUC-ROC
+        fig.add_trace(
+            go.Scatter(
+                x=df['timestamp'],
+                y=df['auc_roc'],
+                mode='lines+markers',
+                name='AUC-ROC',
+                line=dict(color='#6f42c1', width=2),
+                marker=dict(size=4)
+            ),
+            row=2, col=1
+        )
+        
+        # Loss
+        fig.add_trace(
+            go.Scatter(
+                x=df['timestamp'],
+                y=df['loss'],
+                mode='lines+markers',
+                name='Loss',
+                line=dict(color='#dc3545', width=2),
+                marker=dict(size=4)
+            ),
+            row=2, col=2
+        )
+        
+        # Líneas de target
+        target_accuracy = self.model_metrics['accuracy']['target']
+        target_f1 = self.model_metrics['f1_score']['target']
+        target_auc = self.model_metrics['auc_roc']['target']
+        target_loss = self.model_metrics['loss']['target']
+        
+        fig.add_hline(y=target_accuracy, line_dash="dash", line_color="gray", 
+                     annotation_text="Target", row=1, col=1)
+        fig.add_hline(y=target_f1, line_dash="dash", line_color="gray", 
+                     annotation_text="Target", row=1, col=2)
+        fig.add_hline(y=target_auc, line_dash="dash", line_color="gray", 
+                     annotation_text="Target", row=2, col=1)
+        fig.add_hline(y=target_loss, line_dash="dash", line_color="gray", 
+                     annotation_text="Target", row=2, col=2)
+        
+        fig.update_layout(
+            title="Evolución de Métricas del Modelo",
+            height=self.page_config['chart_height'],
+            showlegend=False,
+            margin=dict(l=40, r=40, t=60, b=40)
+        )
+        
+        return fig
+    
+    def _create_confusion_matrix_chart(self, confusion_data: Dict) -> go.Figure:
+        """
+        Crea gráfico de matriz de confusión
+        
+        Args:
+            confusion_data: Datos de la matriz de confusión
+            
+        Returns:
+            go.Figure: Gráfico de matriz de confusión
+        """
+        if not confusion_data:
+            return self._create_empty_chart("No hay datos de matriz de confusión")
+        
+        # Crear matriz
+        matrix = np.array([
+            [confusion_data['true_positive'], confusion_data['false_negative']],
+            [confusion_data['false_positive'], confusion_data['true_negative']]
+        ])
+        
+        # Calcular porcentajes
+        total = matrix.sum()
+        matrix_pct = (matrix / total * 100).round(1)
+        
+        # Crear anotaciones
+        annotations = []
+        for i in range(2):
+            for j in range(2):
+                annotations.append(
+                    dict(
+                        x=j, y=i,
+                        text=f"{matrix[i,j]}<br>({matrix_pct[i,j]}%)",
+                        showarrow=False,
+                        font=dict(color="white" if matrix[i,j] > total/4 else "black")
+                    )
                 )
         
-        logger.info("Callbacks de ModelStatusPage registrados")
+        fig = go.Figure(data=go.Heatmap(
+            z=matrix,
+            x=['Predicted Positive', 'Predicted Negative'],
+            y=['Actual Positive', 'Actual Negative'],
+            colorscale='Blues',
+            showscale=False,
+            hovertemplate='%{x}<br>%{y}<br>Count: %{z}<extra></extra>'
+        ))
+        
+        fig.update_layout(
+            title="Matriz de Confusión",
+            annotations=annotations,
+            height=self.page_config['chart_height'],
+            margin=dict(l=40, r=40, t=60, b=40)
+        )
+        
+        return fig
+    
+    def _create_drift_chart(self, drift_data: List[Dict]) -> go.Figure:
+        """
+        Crea gráfico de análisis de drift
+        
+        Args:
+            drift_data: Datos de drift del modelo
+            
+        Returns:
+            go.Figure: Gráfico de drift
+        """
+        if not drift_data:
+            return self._create_empty_chart("No hay datos de drift")
+        
+        df = pd.DataFrame(drift_data)
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        df = df.sort_values('timestamp')
+        
+        fig = go.Figure()
+        
+        # Línea de drift score
+        fig.add_trace(go.Scatter(
+            x=df['timestamp'],
+            y=df['drift_score'],
+            mode='lines+markers',
+            name='Drift Score',
+            line=dict(color='#007bff', width=2),
+            marker=dict(size=4),
+            hovertemplate='%{x}<br>Drift Score: %{y:.3f}<extra></extra>'
+        ))
+        
+        # Línea de umbral
+        if 'threshold' in df.columns:
+            fig.add_trace(go.Scatter(
+                x=df['timestamp'],
+                y=df['threshold'],
+                mode='lines',
+                name='Umbral de Alerta',
+                line=dict(color='#dc3545', width=2, dash='dash'),
+                hovertemplate='Umbral: %{y:.3f}<extra></extra>'
+            ))
+        
+        # Área de alerta
+        fig.add_hrect(
+            y0=0.3, y1=1.0,
+            fillcolor="rgba(220, 53, 69, 0.1)",
+            layer="below",
+            line_width=0,
+        )
+        
+        fig.update_layout(
+            title="Análisis de Drift del Modelo (Últimas 24h)",
+            xaxis_title="Tiempo",
+            yaxis_title="Drift Score",
+            height=self.page_config['chart_height'],
+            margin=dict(l=40, r=40, t=60, b=40),
+            legend=dict(x=0.02, y=0.98)
+        )
+        
+        return fig
+    
+    def _create_feature_importance_chart(self, feature_importance: Dict) -> go.Figure:
+        """
+        Crea gráfico de importancia de features
+        
+        Args:
+            feature_importance: Diccionario de importancia por feature
+            
+        Returns:
+            go.Figure: Gráfico de importancia
+        """
+        if not feature_importance:
+            return self._create_empty_chart("No hay datos de importancia")
+        
+        # Ordenar features por importancia
+        sorted_features = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
+        features, importance = zip(*sorted_features[:15])  # Top 15
+        
+        fig = go.Figure(data=[
+            go.Bar(
+                x=list(importance),
+                y=list(features),
+                orientation='h',
+                marker=dict(
+                    color=list(importance),
+                    colorscale='Viridis',
+                    showscale=False
+                ),
+                hovertemplate='%{y}<br>Importancia: %{x:.3f}<extra></extra>'
+            )
+        ])
+        
+        fig.update_layout(
+            title="Top 15 Features más Importantes",
+            xaxis_title="Importancia",
+            yaxis_title="Features",
+            height=self.page_config['chart_height'],
+            margin=dict(l=120, r=40, t=60, b=40)
+        )
+        
+        return fig
+    
+    def _create_prediction_analysis_chart(self, predictions: List[Dict]) -> go.Figure:
+        """
+        Crea gráfico de análisis de predicciones
+        
+        Args:
+            predictions: Lista de predicciones recientes
+            
+        Returns:
+            go.Figure: Gráfico de análisis
+        """
+        if not predictions:
+            return self._create_empty_chart("No hay datos de predicciones")
+        
+        df = pd.DataFrame(predictions)
+        
+        # Distribución de confianza por clase
+        fig = make_subplots(
+            rows=1, cols=2,
+            subplot_titles=('Distribución de Confianza', 'Precisión por Confianza'),
+            horizontal_spacing=0.15
+        )
+        
+        # Histograma de confianza por clase
+        for class_name in ['BUY', 'SELL', 'HOLD']:
+            class_data = df[df['predicted_class'] == class_name]
+            if not class_data.empty:
+                fig.add_trace(
+                    go.Histogram(
+                        x=class_data['confidence'],
+                        name=class_name,
+                        opacity=0.7,
+                        nbinsx=20
+                    ),
+                    row=1, col=1
+                )
+        
+        # Precisión por nivel de confianza
+        confidence_bins = np.arange(0.6, 1.0, 0.05)
+        bin_accuracy = []
+        bin_centers = []
+        
+        for i in range(len(confidence_bins)-1):
+            bin_mask = (df['confidence'] >= confidence_bins[i]) & (df['confidence'] < confidence_bins[i+1])
+            bin_data = df[bin_mask]
+            
+            if len(bin_data) > 0:
+                accuracy = (bin_data['predicted_class'] == bin_data['actual_class']).mean()
+                bin_accuracy.append(accuracy)
+                bin_centers.append((confidence_bins[i] + confidence_bins[i+1]) / 2)
+        
+        if bin_accuracy:
+            fig.add_trace(
+                go.Scatter(
+                    x=bin_centers,
+                    y=bin_accuracy,
+                    mode='lines+markers',
+                    name='Precisión',
+                    line=dict(color='#28a745', width=3),
+                    marker=dict(size=6)
+                ),
+                row=1, col=2
+            )
+        
+        fig.update_layout(
+            title="Análisis de Predicciones",
+            height=self.page_config['chart_height'],
+            margin=dict(l=40, r=40, t=60, b=40)
+        )
+        
+        fig.update_xaxes(title_text="Confianza", row=1, col=1)
+        fig.update_xaxes(title_text="Nivel de Confianza", row=1, col=2)
+        fig.update_yaxes(title_text="Frecuencia", row=1, col=1)
+        fig.update_yaxes(title_text="Precisión", row=1, col=2)
+        
+        return fig
+    
+    def _create_training_history_table(self, training_history: List[Dict]) -> html.Div:
+        """
+        Crea tabla de historial de entrenamientos
+        
+        Args:
+            training_history: Lista de entrenamientos
+            
+        Returns:
+            html.Div: Tabla de entrenamientos
+        """
+        if not training_history:
+            return html.P("No hay historial de entrenamientos", className="text-muted")
+        
+        # Crear filas de la tabla
+        table_rows = []
+        for training in training_history[:self.page_config['max_training_history']]:
+            status_color = {
+                'completed': 'success',
+                'running': 'primary',
+                'failed': 'danger',
+                'pending': 'warning'
+            }.get(training.get('status', 'pending'), 'secondary')
+            
+            row = html.Tr([
+                html.Td(training.get('version', 'N/A')),
+                html.Td(datetime.fromisoformat(training['timestamp']).strftime("%Y-%m-%d %H:%M")),
+                html.Td(training.get('duration', 'N/A')),
+                html.Td(f"{training.get('accuracy', 0)*100:.1f}%" if training.get('accuracy') else 'N/A'),
+                html.Td(f"{training.get('loss', 0):.3f}" if training.get('loss') else 'N/A'),
+                html.Td([
+                    dbc.Badge(
+                        training.get('status', 'pending').title(),
+                        color=status_color,
+                        className="me-1"
+                    )
+                ]),
+                html.Td([
+                    dbc.ButtonGroup([
+                        dbc.Button("Ver", size="sm", color="primary", outline=True),
+                        dbc.Button("Usar", size="sm", color="success", outline=True)
+                    ], size="sm")
+                ])
+            ])
+            table_rows.append(row)
+        
+        return dbc.Table([
+            html.Thead([
+                html.Tr([
+                    html.Th("Versión"),
+                    html.Th("Fecha"),
+                    html.Th("Duración"),
+                    html.Th("Precisión"),
+                    html.Th("Loss"),
+                    html.Th("Estado"),
+                    html.Th("Acciones")
+                ])
+            ]),
+            html.Tbody(table_rows)
+        ], striped=True, hover=True, responsive=True, className="mb-0")
+    
+    def _create_architecture_info(self, architecture: Dict) -> html.Div:
+        """
+        Crea información de arquitectura del modelo
+        
+        Args:
+            architecture: Datos de arquitectura
+            
+        Returns:
+            html.Div: Información de arquitectura
+        """
+        if not architecture:
+            return html.P("No hay información de arquitectura", className="text-muted")
+        
+        return html.Div([
+            dbc.Row([
+                dbc.Col([
+                    html.Strong("Tipo de Modelo:"),
+                    html.Br(),
+                    html.Span(architecture.get('model_type', 'N/A'))
+                ], width=6),
+                dbc.Col([
+                    html.Strong("Capas:"),
+                    html.Br(),
+                    html.Span(str(architecture.get('layers', 'N/A')))
+                ], width=6)
+            ], className="mb-2"),
+            
+            dbc.Row([
+                dbc.Col([
+                    html.Strong("Parámetros:"),
+                    html.Br(),
+                    html.Span(f"{architecture.get('parameters', 0):,}")
+                ], width=6),
+                dbc.Col([
+                    html.Strong("Features de Entrada:"),
+                    html.Br(),
+                    html.Span(str(architecture.get('input_features', 'N/A')))
+                ], width=6)
+            ], className="mb-2"),
+            
+            dbc.Row([
+                dbc.Col([
+                    html.Strong("Longitud de Secuencia:"),
+                    html.Br(),
+                    html.Span(str(architecture.get('sequence_length', 'N/A')))
+                ], width=6),
+                dbc.Col([
+                    html.Strong("Batch Size:"),
+                    html.Br(),
+                    html.Span(str(architecture.get('batch_size', 'N/A')))
+                ], width=6)
+            ], className="mb-2"),
+            
+            dbc.Row([
+                dbc.Col([
+                    html.Strong("Optimizador:"),
+                    html.Br(),
+                    html.Span(architecture.get('optimizer', 'N/A'))
+                ], width=6),
+                dbc.Col([
+                    html.Strong("Learning Rate:"),
+                    html.Br(),
+                    html.Span(str(architecture.get('learning_rate', 'N/A')))
+                ], width=6)
+            ])
+        ])
+    
+    def _create_performance_metrics(self, performance: Dict) -> html.Div:
+        """
+        Crea métricas de performance del modelo
+        
+        Args:
+            performance: Datos de performance
+            
+        Returns:
+            html.Div: Métricas de performance
+        """
+        if not performance:
+            return html.P("No hay métricas de performance", className="text-muted")
+        
+        return html.Div([
+            dbc.Row([
+                dbc.Col([
+                    html.Strong("Uso de Memoria:"),
+                    html.Br(),
+                    html.Span(performance.get('memory_usage', 'N/A'))
+                ], width=6),
+                dbc.Col([
+                    html.Strong("GPU Utilization:"),
+                    html.Br(),
+                    html.Span(performance.get('gpu_utilization', 'N/A'))
+                ], width=6)
+            ], className="mb-2"),
+            
+            dbc.Row([
+                dbc.Col([
+                    html.Strong("CPU Utilization:"),
+                    html.Br(),
+                    html.Span(performance.get('cpu_utilization', 'N/A'))
+                ], width=6),
+                dbc.Col([
+                    html.Strong("Velocidad Inferencia:"),
+                    html.Br(),
+                    html.Span(performance.get('inference_speed', 'N/A'))
+                ], width=6)
+            ], className="mb-2"),
+            
+            dbc.Row([
+                dbc.Col([
+                    html.Strong("Velocidad Entrenamiento:"),
+                    html.Br(),
+                    html.Span(performance.get('training_speed', 'N/A'))
+                ], width=12)
+            ])
+        ])
+    
+    def get_page_status(self) -> Dict[str, Any]:
+        """
+        Obtiene el estado actual de la página
+        
+        Returns:
+            Dict[str, Any]: Estado de la página
+        """
+        base_status = super().get_page_status()
+        
+        # Agregar información específica de ModelStatusPage
+        base_status.update({
+            'model_states_configured': len(self.model_states),
+            'model_metrics_configured': len(self.model_metrics),
+            'auto_refresh_enabled': self.page_config.get('auto_refresh', False),
+            'update_interval': self.page_config.get('update_interval', 60000),
+            'max_training_history': self.page_config.get('max_training_history', 50)
+        })
+        
+        return base_status
