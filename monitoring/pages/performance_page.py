@@ -703,86 +703,7 @@ class RiskAnalysisPage(BasePage):
         
         logger.info("Callbacks de RiskAnalysisPage registrados")
     
-    def _calculate_risk_metrics(self, config: Dict[str, Any]) -> Dict[str, Any]:
-        """Calcula métricas de riesgo según configuración"""
-        try:
-            confidence_level = config.get('confidence_level', 0.95)
-            time_horizon = config.get('time_horizon', 1)
-            
-            # Obtener datos de portfolio si disponible
-            if self.data_provider:
-                symbols = self.data_provider.get_configured_symbols()
-                portfolio_data = {}
-                
-                for symbol in symbols:
-                    metrics = self.data_provider.get_symbol_metrics(symbol)
-                    if metrics:
-                        portfolio_data[symbol] = metrics
-            else:
-                # Datos simulados
-                symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'BNBUSDT']
-                portfolio_data = self._generate_sample_portfolio_data(symbols)
-        
-        running_max = np.maximum.accumulate(cumulative_returns + 1)
-        drawdowns = (running_max - (cumulative_returns + 1)) / running_max
-        
-        # Calcular métricas
-        total_return = cumulative_returns[-1]
-        annualized_return = (1 + total_return) ** (365 / days) - 1
-        volatility = np.std(daily_returns) * np.sqrt(252)  # Anualizada
-        max_drawdown = np.max(drawdowns)
-        
-        # Sharpe Ratio
-        risk_free_rate = config.get('risk_free_rate', 0.02)
-        excess_return = annualized_return - risk_free_rate
-        sharpe_ratio = excess_return / volatility if volatility > 0 else 0
-        
-        # Sortino Ratio
-        negative_returns = daily_returns[daily_returns < 0]
-        downside_deviation = np.std(negative_returns) * np.sqrt(252) if len(negative_returns) > 0 else 0
-        sortino_ratio = excess_return / downside_deviation if downside_deviation > 0 else 0
-        
-        # Calmar Ratio
-        calmar_ratio = annualized_return / max_drawdown if max_drawdown > 0 else 0
-        
-        # VaR y CVaR
-        var_95 = np.percentile(daily_returns, 5)
-        cvar_95 = np.mean(daily_returns[daily_returns <= var_95]) if np.any(daily_returns <= var_95) else 0
-        
-        # Métricas de trading simuladas
-        total_trades = np.random.randint(50, 200)
-        win_rate = np.random.uniform(55, 75)
-        winning_trades = int(total_trades * win_rate / 100)
-        avg_win = np.random.uniform(0.02, 0.05)  # 2-5%
-        avg_loss = np.random.uniform(-0.015, -0.03)  # 1.5-3%
-        profit_factor = (winning_trades * avg_win) / ((total_trades - winning_trades) * abs(avg_loss))
-        expectancy = (win_rate / 100 * avg_win) + ((100 - win_rate) / 100 * avg_loss)
-        
-        return {
-            'dates': dates.tolist(),
-            'daily_returns': daily_returns.tolist(),
-            'cumulative_returns': cumulative_returns.tolist(),
-            'drawdowns': drawdowns.tolist(),
-            'metrics': {
-                'total_return': total_return,
-                'annualized_return': annualized_return,
-                'volatility': volatility,
-                'max_drawdown': max_drawdown,
-                'sharpe_ratio': sharpe_ratio,
-                'sortino_ratio': sortino_ratio,
-                'calmar_ratio': calmar_ratio,
-                'var_95': var_95,
-                'cvar_95': cvar_95,
-                'total_trades': total_trades,
-                'win_rate': win_rate,
-                'avg_win': avg_win,
-                'avg_loss': avg_loss,
-                'profit_factor': profit_factor,
-                'expectancy': expectancy,
-                'winning_trades': winning_trades,
-                'losing_trades': total_trades - winning_trades
-            }
-        }
+    # (eliminado bloque de riesgo pegado por error)
     
     def _get_benchmark_data(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """Obtiene datos del benchmark"""
@@ -1427,18 +1348,6 @@ class RiskAnalysisPage(BasePage):
         )
         
         return fig
-"""
-monitoring/pages/performance_page.py
-Página de Análisis de Rendimiento - Trading Bot v10
-
-Esta página proporciona análisis avanzado de rendimiento:
-- Métricas financieras detalladas (Sharpe, Sortino, Calmar, etc.)
-- Análisis de drawdown y volatilidad
-- Comparación con benchmarks
-- Análisis de atribución de rendimiento
-- Optimización de tamaño de posiciones
-- Reportes de rendimiento exportables
-"""
 
 import logging
 from datetime import datetime, timedelta
