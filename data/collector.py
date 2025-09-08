@@ -1212,3 +1212,363 @@ async def verify_data_integrity(symbols: List[str] = None) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"❌ Error en verificación de integridad: {e}")
         return {'error': str(e)}
+
+# =============================================================================
+# FUNCIONALIDADES MULTI-TIMEFRAME
+# =============================================================================
+
+async def download_coordinated_multi_timeframe(
+    symbols: List[str], 
+    timeframes: List[str] = ['5m', '15m', '1h', '4h', '1d'],
+    days_back: int = 365
+) -> Dict[str, Any]:
+    """
+    Descarga coordinada de múltiples timeframes con alineación automática
+    
+    Args:
+        symbols: Lista de símbolos a descargar
+        timeframes: Lista de timeframes a procesar
+        days_back: Días hacia atrás para descargar
+    
+    Returns:
+        Dict[str, Any]: Resultados de la descarga coordinada
+    """
+    try:
+        logger.info(f"🚀 Iniciando descarga coordinada multi-timeframe para {symbols}")
+        start_time = datetime.now()
+        
+        # Configurar timeframes con prioridades
+        timeframe_priority = {
+            '5m': 1,   # Crítico - base para agregación
+            '15m': 2,  # Crítico - confirmación
+            '1h': 3,   # Alto - tendencia
+            '4h': 4,   # Medio - régimen
+            '1d': 5    # Bajo - contexto
+        }
+        
+        # Ordenar timeframes por prioridad
+        sorted_timeframes = sorted(timeframes, key=lambda x: timeframe_priority.get(x, 99))
+        
+        results = {
+            'success': True,
+            'timeframes_processed': [],
+            'symbols_processed': symbols,
+            'total_records': 0,
+            'processing_time': 0.0,
+            'errors': [],
+            'alignment_results': {},
+            'coherence_scores': {}
+        }
+        
+        # Procesar cada timeframe
+        for timeframe in sorted_timeframes:
+            try:
+                logger.info(f"📊 Procesando timeframe {timeframe}")
+                
+                # Calcular chunk size óptimo para este timeframe
+                chunk_days = calculate_optimal_chunk_size_by_timeframe(timeframe)
+                
+                # Descargar datos para este timeframe
+                tf_results = await download_extensive_historical_data_chunked(
+                    symbols=symbols,
+                    timeframe=timeframe,
+                    days_back=days_back,
+                    chunk_days=chunk_days
+                )
+                
+                if tf_results['success']:
+                    results['timeframes_processed'].append(timeframe)
+                    results['total_records'] += tf_results.get('total_records', 0)
+                    results['alignment_results'][timeframe] = tf_results
+                else:
+                    results['errors'].append(f"Error en {timeframe}: {tf_results.get('error', 'Unknown')}")
+                
+            except Exception as e:
+                error_msg = f"Error procesando {timeframe}: {e}"
+                logger.error(error_msg)
+                results['errors'].append(error_msg)
+        
+        # Validar y alinear datos descargados
+        if results['timeframes_processed']:
+            logger.info("🔄 Validando y alineando datos descargados")
+            alignment_results = await validate_and_align_downloaded_data(results['alignment_results'])
+            results['alignment_results'] = alignment_results
+        
+        # Calcular coherencia entre timeframes
+        if len(results['timeframes_processed']) > 1:
+            logger.info("📈 Calculando coherencia entre timeframes")
+            coherence_scores = calculate_timeframe_coherence(results['alignment_results'])
+            results['coherence_scores'] = coherence_scores
+        
+        results['processing_time'] = (datetime.now() - start_time).total_seconds()
+        results['success'] = len(results['errors']) == 0
+        
+        logger.info(f"✅ Descarga coordinada completada en {results['processing_time']:.2f}s")
+        return results
+        
+    except Exception as e:
+        logger.error(f"❌ Error en descarga coordinada multi-timeframe: {e}")
+        return {
+            'success': False,
+            'error': str(e),
+            'timeframes_processed': [],
+            'symbols_processed': symbols,
+            'total_records': 0,
+            'processing_time': 0.0,
+            'errors': [str(e)],
+            'alignment_results': {},
+            'coherence_scores': {}
+        }
+
+async def validate_and_align_downloaded_data(
+    raw_data: Dict[str, Dict[str, pd.DataFrame]]
+) -> Dict[str, Dict[str, pd.DataFrame]]:
+    """
+    Valida y alinea datos descargados antes de almacenar
+    
+    Args:
+        raw_data: Datos brutos organizados por timeframe y símbolo
+    
+    Returns:
+        Dict[str, Dict[str, pd.DataFrame]]: Datos validados y alineados
+    """
+    try:
+        logger.info("🔍 Validando y alineando datos descargados")
+        
+        from .temporal_alignment import TemporalAlignment, AlignmentConfig
+        
+        # Configurar sistema de alineación
+        config = AlignmentConfig(
+            timeframes=list(raw_data.keys()),
+            required_symbols=list(next(iter(raw_data.values())).keys()) if raw_data else []
+        )
+        aligner = TemporalAlignment(config)
+        
+        aligned_data = {}
+        
+        for timeframe, symbol_data in raw_data.items():
+            try:
+                logger.info(f"🔄 Alineando datos para {timeframe}")
+                
+                # Obtener rango de fechas común
+                all_timestamps = []
+                for df in symbol_data.values():
+                    if not df.empty:
+                        all_timestamps.extend(df.index.tolist())
+                
+                if not all_timestamps:
+                    continue
+                
+                start_date = min(all_timestamps)
+                end_date = max(all_timestamps)
+                
+                # Crear timeline maestra
+                master_timeline = aligner.create_master_timeline(timeframe, start_date, end_date)
+                
+                # Alinear datos
+                aligned_symbol_data = aligner.align_symbol_data(symbol_data, master_timeline, timeframe)
+                
+                # Validar alineación
+                validation = aligner.validate_alignment(aligned_symbol_data)
+                
+                if validation['overall_quality'] > 0.8:
+                    aligned_data[timeframe] = aligned_symbol_data
+                    logger.info(f"✅ {timeframe} alineado con calidad {validation['overall_quality']:.3f}")
+                else:
+                    logger.warning(f"⚠️ Calidad baja en {timeframe}: {validation['overall_quality']:.3f}")
+                    aligned_data[timeframe] = aligned_symbol_data  # Usar de todos modos
+                
+            except Exception as e:
+                logger.error(f"❌ Error alineando {timeframe}: {e}")
+                aligned_data[timeframe] = symbol_data  # Usar datos originales
+        
+        return aligned_data
+        
+    except Exception as e:
+        logger.error(f"❌ Error en validación y alineación: {e}")
+        return raw_data
+
+def calculate_optimal_chunk_size_by_timeframe(timeframe: str) -> int:
+    """
+    Calcula tamaño óptimo de chunk específico por timeframe
+    
+    Args:
+        timeframe: Timeframe objetivo
+    
+    Returns:
+        int: Días por chunk
+    """
+    chunk_sizes = {
+        '5m': 2,    # 2 días (576 registros) - Datos de alta frecuencia
+        '15m': 7,   # 7 días (672 registros) - Balance frecuencia/memoria
+        '1h': 30,   # 30 días (720 registros) - Datos horarios
+        '4h': 60,   # 60 días (360 registros) - Datos de 4 horas
+        '1d': 180   # 180 días (180 registros) - Datos diarios
+    }
+    
+    return chunk_sizes.get(timeframe, 30)
+
+def calculate_timeframe_coherence(
+    alignment_results: Dict[str, Dict[str, Any]]
+) -> Dict[str, float]:
+    """
+    Calcula coherencia entre diferentes timeframes
+    
+    Args:
+        alignment_results: Resultados de alineación por timeframe
+    
+    Returns:
+        Dict[str, float]: Scores de coherencia entre pares de timeframes
+    """
+    try:
+        coherence_scores = {}
+        
+        # Definir relaciones de agregación
+        aggregation_relations = {
+            '15m': '5m',
+            '1h': '15m',
+            '4h': '1h',
+            '1d': '4h'
+        }
+        
+        for target_tf, source_tf in aggregation_relations.items():
+            if target_tf in alignment_results and source_tf in alignment_results:
+                try:
+                    # Calcular coherencia simplificada
+                    target_quality = alignment_results[target_tf].get('validation', {}).get('overall_quality', 0)
+                    source_quality = alignment_results[source_tf].get('validation', {}).get('overall_quality', 0)
+                    
+                    # Coherencia basada en calidad promedio
+                    coherence = (target_quality + source_quality) / 2
+                    coherence_scores[f"{source_tf}_to_{target_tf}"] = coherence
+                    
+                except Exception as e:
+                    logger.warning(f"Error calculando coherencia {source_tf}->{target_tf}: {e}")
+                    coherence_scores[f"{source_tf}_to_{target_tf}"] = 0.0
+        
+        return coherence_scores
+        
+    except Exception as e:
+        logger.error(f"Error calculando coherencia entre timeframes: {e}")
+        return {}
+
+async def download_multi_timeframe_with_alignment(
+    symbols: List[str],
+    timeframes: List[str] = ['5m', '15m', '1h', '4h', '1d'],
+    days_back: int = 365,
+    use_aggregation: bool = True
+) -> Dict[str, Any]:
+    """
+    Función principal para descarga multi-timeframe con alineación automática
+    
+    Args:
+        symbols: Lista de símbolos
+        timeframes: Lista de timeframes
+        days_back: Días hacia atrás
+        use_aggregation: Si usar agregación automática
+    
+    Returns:
+        Dict[str, Any]: Resultados completos de la descarga
+    """
+    try:
+        logger.info(f"🚀 Iniciando descarga multi-timeframe con alineación")
+        
+        # Descargar datos coordinados
+        download_results = await download_coordinated_multi_timeframe(
+            symbols, timeframes, days_back
+        )
+        
+        if not download_results['success']:
+            return download_results
+        
+        # Si se solicita agregación, procesar timeframes agregados
+        if use_aggregation and '5m' in download_results['timeframes_processed']:
+            logger.info("🔄 Procesando agregación automática de timeframes")
+            
+            from .multi_timeframe_coordinator import MultiTimeframeCoordinator
+            coordinator = MultiTimeframeCoordinator()
+            
+            # Obtener datos base (5m)
+            base_data = download_results['alignment_results'].get('5m', {})
+            
+            if base_data:
+                # Agregar timeframes automáticamente
+                aggregated_data = coordinator.auto_aggregate_timeframes(base_data)
+                
+                # Agregar datos agregados a los resultados
+                for tf, data in aggregated_data.items():
+                    if tf not in download_results['alignment_results']:
+                        download_results['alignment_results'][tf] = data
+                        download_results['timeframes_processed'].append(tf)
+        
+        # Almacenar datos en base de datos
+        logger.info("💾 Almacenando datos alineados en base de datos")
+        
+        from .database import db_manager
+        
+        for timeframe, symbol_data in download_results['alignment_results'].items():
+            if symbol_data:
+                session_id = f"multi_tf_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                success = db_manager.store_aligned_data(symbol_data, timeframe, session_id)
+                
+                if success:
+                    logger.info(f"✅ Datos {timeframe} almacenados correctamente")
+                else:
+                    logger.warning(f"⚠️ Error almacenando datos {timeframe}")
+        
+        # Registrar operación
+        db_manager.log_operation(
+            operation_type="multi_timeframe_download",
+            status="completed" if download_results['success'] else "failed",
+            symbols=symbols,
+            timeframes=download_results['timeframes_processed'],
+            records_processed=download_results['total_records'],
+            processing_time=download_results['processing_time'],
+            metadata={
+                'days_back': days_back,
+                'use_aggregation': use_aggregation,
+                'coherence_scores': download_results['coherence_scores']
+            }
+        )
+        
+        logger.info(f"✅ Descarga multi-timeframe completada: {download_results['total_records']} registros")
+        return download_results
+        
+    except Exception as e:
+        logger.error(f"❌ Error en descarga multi-timeframe: {e}")
+        
+        # Registrar error
+        from .database import db_manager
+        db_manager.log_operation(
+            operation_type="multi_timeframe_download",
+            status="failed",
+            symbols=symbols,
+            timeframes=timeframes,
+            error_message=str(e)
+        )
+        
+        return {
+            'success': False,
+            'error': str(e),
+            'timeframes_processed': [],
+            'symbols_processed': symbols,
+            'total_records': 0,
+            'processing_time': 0.0,
+            'errors': [str(e)],
+            'alignment_results': {},
+            'coherence_scores': {}
+        }
+
+# Funciones de conveniencia
+async def quick_download_multi_timeframe(
+    symbols: List[str] = None,
+    timeframes: List[str] = None,
+    days_back: int = 365
+) -> Dict[str, Any]:
+    """Función de conveniencia para descarga multi-timeframe rápida"""
+    if symbols is None:
+        symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+    if timeframes is None:
+        timeframes = ['5m', '15m', '1h', '4h', '1d']
+    
+    return await download_multi_timeframe_with_alignment(symbols, timeframes, days_back)

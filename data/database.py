@@ -461,8 +461,100 @@ class DatabaseManager:
                 )
             """)
             
+            # =============================================================================
+            # NUEVAS TABLAS PARA SISTEMA MULTI-TIMEFRAME
+            # =============================================================================
+            
+            # Tabla de datos alineados multi-timeframe
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS aligned_market_data (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    symbol TEXT NOT NULL,
+                    timeframe TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    open REAL NOT NULL,
+                    high REAL NOT NULL,
+                    low REAL NOT NULL,
+                    close REAL NOT NULL,
+                    volume REAL NOT NULL,
+                    alignment_session_id TEXT,
+                    coherence_score REAL DEFAULT 1.0,
+                    data_quality_score REAL DEFAULT 1.0,
+                    gap_count INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(symbol, timeframe, timestamp) ON CONFLICT REPLACE
+                )
+            """)
+            
+            # Tabla de metadatos de alineación
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS alignment_metadata (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    session_id TEXT UNIQUE NOT NULL,
+                    symbols_processed TEXT NOT NULL,
+                    timeframes_processed TEXT NOT NULL,
+                    alignment_quality REAL NOT NULL,
+                    coherence_scores TEXT,
+                    total_periods INTEGER,
+                    processing_time_seconds REAL,
+                    master_timeline_start INTEGER,
+                    master_timeline_end INTEGER,
+                    gaps_detected TEXT,
+                    validation_results TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Tabla de cache de features
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS feature_cache (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    cache_key TEXT UNIQUE NOT NULL,
+                    symbol TEXT NOT NULL,
+                    timeframe TEXT NOT NULL,
+                    feature_type TEXT NOT NULL,
+                    feature_data BLOB NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    expires_at TIMESTAMP,
+                    access_count INTEGER DEFAULT 0,
+                    last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Tabla de coherencia entre timeframes
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS timeframe_coherence (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    source_timeframe TEXT NOT NULL,
+                    target_timeframe TEXT NOT NULL,
+                    symbol TEXT NOT NULL,
+                    coherence_score REAL NOT NULL,
+                    validation_timestamp INTEGER NOT NULL,
+                    period_start INTEGER NOT NULL,
+                    period_end INTEGER NOT NULL,
+                    issues_detected TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Tabla de logs de operaciones multi-timeframe
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS operation_logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    operation_type TEXT NOT NULL,
+                    operation_status TEXT NOT NULL,
+                    symbols TEXT,
+                    timeframes TEXT,
+                    records_processed INTEGER,
+                    processing_time_seconds REAL,
+                    error_message TEXT,
+                    metadata TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
             conn.commit()
-            logger.info("Esquema de base de datos inicializado con optimizaciones")
+            logger.info("Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe")
     
     def _create_optimized_indices(self):
         """Crea índices optimizados para consultas rápidas"""
@@ -499,6 +591,41 @@ class DatabaseManager:
                 # Índices para análisis de mercado
                 "CREATE INDEX IF NOT EXISTS idx_market_analysis_symbol_timestamp ON market_analysis(symbol, timestamp)",
                 "CREATE INDEX IF NOT EXISTS idx_market_analysis_timeframe ON market_analysis(timeframe)",
+                
+                # =============================================================================
+                # ÍNDICES PARA NUEVAS TABLAS MULTI-TIMEFRAME
+                # =============================================================================
+                
+                # Índices para aligned_market_data (críticos para performance)
+                "CREATE INDEX IF NOT EXISTS idx_aligned_symbol_tf_timestamp ON aligned_market_data(symbol, timeframe, timestamp)",
+                "CREATE INDEX IF NOT EXISTS idx_aligned_timestamp_tf ON aligned_market_data(timestamp, timeframe)",
+                "CREATE INDEX IF NOT EXISTS idx_aligned_session ON aligned_market_data(alignment_session_id)",
+                "CREATE INDEX IF NOT EXISTS idx_aligned_symbol ON aligned_market_data(symbol)",
+                "CREATE INDEX IF NOT EXISTS idx_aligned_timeframe ON aligned_market_data(timeframe)",
+                "CREATE INDEX IF NOT EXISTS idx_aligned_quality ON aligned_market_data(coherence_score, data_quality_score)",
+                
+                # Índices para alignment_metadata
+                "CREATE INDEX IF NOT EXISTS idx_alignment_session ON alignment_metadata(session_id)",
+                "CREATE INDEX IF NOT EXISTS idx_alignment_created_at ON alignment_metadata(created_at)",
+                "CREATE INDEX IF NOT EXISTS idx_alignment_quality ON alignment_metadata(alignment_quality)",
+                
+                # Índices para feature_cache
+                "CREATE INDEX IF NOT EXISTS idx_feature_cache_key ON feature_cache(cache_key)",
+                "CREATE INDEX IF NOT EXISTS idx_feature_cache_symbol_tf ON feature_cache(symbol, timeframe)",
+                "CREATE INDEX IF NOT EXISTS idx_feature_cache_expires ON feature_cache(expires_at)",
+                "CREATE INDEX IF NOT EXISTS idx_feature_cache_accessed ON feature_cache(last_accessed)",
+                
+                # Índices para timeframe_coherence
+                "CREATE INDEX IF NOT EXISTS idx_coherence_source_target ON timeframe_coherence(source_timeframe, target_timeframe)",
+                "CREATE INDEX IF NOT EXISTS idx_coherence_symbol ON timeframe_coherence(symbol)",
+                "CREATE INDEX IF NOT EXISTS idx_coherence_timestamp ON timeframe_coherence(validation_timestamp)",
+                "CREATE INDEX IF NOT EXISTS idx_coherence_score ON timeframe_coherence(coherence_score)",
+                
+                # Índices para operation_logs
+                "CREATE INDEX IF NOT EXISTS idx_operation_type ON operation_logs(operation_type)",
+                "CREATE INDEX IF NOT EXISTS idx_operation_status ON operation_logs(operation_status)",
+                "CREATE INDEX IF NOT EXISTS idx_operation_created_at ON operation_logs(created_at)",
+                "CREATE INDEX IF NOT EXISTS idx_operation_symbols ON operation_logs(symbols)",
             ]
             
             for index_sql in indices:
@@ -1149,6 +1276,419 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Error obteniendo estadísticas de performance: {e}")
             return {'error': str(e)}
+    
+    # =============================================================================
+    # MÉTODOS PARA SISTEMA MULTI-TIMEFRAME
+    # =============================================================================
+    
+    @timing_decorator
+    def store_aligned_data(self, aligned_data: Dict[str, pd.DataFrame], timeframe: str, session_id: str) -> bool:
+        """
+        Almacena datos alineados en la tabla aligned_market_data
+        
+        Args:
+            aligned_data: Datos alineados por símbolo
+            timeframe: Timeframe de los datos
+            session_id: ID de la sesión de alineación
+        
+        Returns:
+            bool: True si se almacenó correctamente
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                records_inserted = 0
+                for symbol, df in aligned_data.items():
+                    if df.empty:
+                        continue
+                    
+                    # Calcular métricas de calidad
+                    coherence_score = self._calculate_coherence_score(df)
+                    data_quality_score = self._calculate_data_quality_score(df)
+                    gap_count = self._count_gaps(df)
+                    
+                    # Insertar datos
+                    for timestamp, row in df.iterrows():
+                        cursor.execute("""
+                            INSERT OR REPLACE INTO aligned_market_data 
+                            (symbol, timeframe, timestamp, open, high, low, close, volume, 
+                             alignment_session_id, coherence_score, data_quality_score, gap_count)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            symbol, timeframe, int(timestamp.timestamp()),
+                            row['open'], row['high'], row['low'], row['close'], row['volume'],
+                            session_id, coherence_score, data_quality_score, gap_count
+                        ))
+                        records_inserted += 1
+                
+                conn.commit()
+                logger.info(f"Stored {records_inserted} aligned records for {timeframe}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Error storing aligned data: {e}")
+            return False
+    
+    @timing_decorator
+    def get_aligned_data(self, symbols: List[str], timeframe: str, start_date: datetime, end_date: datetime) -> Dict[str, pd.DataFrame]:
+        """
+        Obtiene datos alineados de la tabla aligned_market_data
+        
+        Args:
+            symbols: Lista de símbolos
+            timeframe: Timeframe de los datos
+            start_date: Fecha de inicio
+            end_date: Fecha de fin
+        
+        Returns:
+            Dict[str, pd.DataFrame]: Datos alineados por símbolo
+        """
+        try:
+            with self._get_connection() as conn:
+                aligned_data = {}
+                
+                for symbol in symbols:
+                    query = """
+                        SELECT timestamp, open, high, low, close, volume, coherence_score, data_quality_score
+                        FROM aligned_market_data
+                        WHERE symbol = ? AND timeframe = ? 
+                        AND timestamp >= ? AND timestamp <= ?
+                        ORDER BY timestamp
+                    """
+                    
+                    df = pd.read_sql_query(
+                        query, conn,
+                        params=(symbol, timeframe, int(start_date.timestamp()), int(end_date.timestamp())),
+                        parse_dates=['timestamp']
+                    )
+                    
+                    if not df.empty:
+                        df.set_index('timestamp', inplace=True)
+                        aligned_data[symbol] = df
+                    else:
+                        aligned_data[symbol] = pd.DataFrame()
+                
+                logger.info(f"Retrieved aligned data for {len(symbols)} symbols, {timeframe}")
+                return aligned_data
+                
+        except Exception as e:
+            logger.error(f"Error getting aligned data: {e}")
+            return {}
+    
+    def store_alignment_metadata(self, session_id: str, metadata: Dict[str, Any]) -> bool:
+        """
+        Almacena metadatos de una sesión de alineación
+        
+        Args:
+            session_id: ID de la sesión
+            metadata: Metadatos de la alineación
+        
+        Returns:
+            bool: True si se almacenó correctamente
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute("""
+                    INSERT OR REPLACE INTO alignment_metadata 
+                    (session_id, symbols_processed, timeframes_processed, alignment_quality,
+                     coherence_scores, total_periods, processing_time_seconds,
+                     master_timeline_start, master_timeline_end, gaps_detected, validation_results)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    session_id,
+                    json.dumps(metadata.get('symbols_processed', [])),
+                    json.dumps(metadata.get('timeframes_processed', [])),
+                    metadata.get('alignment_quality', 0.0),
+                    json.dumps(metadata.get('coherence_scores', {})),
+                    metadata.get('total_periods', 0),
+                    metadata.get('processing_time_seconds', 0.0),
+                    int(metadata.get('master_timeline_start', 0)),
+                    int(metadata.get('master_timeline_end', 0)),
+                    json.dumps(metadata.get('gaps_detected', {})),
+                    json.dumps(metadata.get('validation_results', {}))
+                ))
+                
+                conn.commit()
+                logger.info(f"Stored alignment metadata for session {session_id}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Error storing alignment metadata: {e}")
+            return False
+    
+    def get_alignment_metadata(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Obtiene metadatos de una sesión de alineación
+        
+        Args:
+            session_id: ID de la sesión
+        
+        Returns:
+            Optional[Dict[str, Any]]: Metadatos de la sesión
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute("""
+                    SELECT * FROM alignment_metadata WHERE session_id = ?
+                """, (session_id,))
+                
+                row = cursor.fetchone()
+                if row:
+                    return {
+                        'session_id': row[1],
+                        'symbols_processed': json.loads(row[2]),
+                        'timeframes_processed': json.loads(row[3]),
+                        'alignment_quality': row[4],
+                        'coherence_scores': json.loads(row[5]),
+                        'total_periods': row[6],
+                        'processing_time_seconds': row[7],
+                        'master_timeline_start': row[8],
+                        'master_timeline_end': row[9],
+                        'gaps_detected': json.loads(row[10]),
+                        'validation_results': json.loads(row[11]),
+                        'created_at': row[12]
+                    }
+                
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error getting alignment metadata: {e}")
+            return None
+    
+    def store_timeframe_coherence(self, source_tf: str, target_tf: str, symbol: str, 
+                                coherence_score: float, validation_timestamp: int,
+                                period_start: int, period_end: int, issues: List[str] = None) -> bool:
+        """
+        Almacena métricas de coherencia entre timeframes
+        
+        Args:
+            source_tf: Timeframe fuente
+            target_tf: Timeframe objetivo
+            symbol: Símbolo
+            coherence_score: Score de coherencia
+            validation_timestamp: Timestamp de validación
+            period_start: Inicio del período
+            period_end: Fin del período
+            issues: Lista de problemas detectados
+        
+        Returns:
+            bool: True si se almacenó correctamente
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute("""
+                    INSERT INTO timeframe_coherence 
+                    (source_timeframe, target_timeframe, symbol, coherence_score,
+                     validation_timestamp, period_start, period_end, issues_detected)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    source_tf, target_tf, symbol, coherence_score,
+                    validation_timestamp, period_start, period_end,
+                    json.dumps(issues or [])
+                ))
+                
+                conn.commit()
+                logger.debug(f"Stored coherence data: {source_tf}->{target_tf} for {symbol}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Error storing timeframe coherence: {e}")
+            return False
+    
+    def get_timeframe_coherence_stats(self, source_tf: str = None, target_tf: str = None) -> Dict[str, Any]:
+        """
+        Obtiene estadísticas de coherencia entre timeframes
+        
+        Args:
+            source_tf: Timeframe fuente (opcional)
+            target_tf: Timeframe objetivo (opcional)
+        
+        Returns:
+            Dict[str, Any]: Estadísticas de coherencia
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Construir query con filtros opcionales
+                where_conditions = []
+                params = []
+                
+                if source_tf:
+                    where_conditions.append("source_timeframe = ?")
+                    params.append(source_tf)
+                
+                if target_tf:
+                    where_conditions.append("target_timeframe = ?")
+                    params.append(target_tf)
+                
+                where_clause = "WHERE " + " AND ".join(where_conditions) if where_conditions else ""
+                
+                # Obtener estadísticas
+                query = f"""
+                    SELECT 
+                        source_timeframe,
+                        target_timeframe,
+                        COUNT(*) as validation_count,
+                        AVG(coherence_score) as avg_coherence,
+                        MIN(coherence_score) as min_coherence,
+                        MAX(coherence_score) as max_coherence,
+                        COUNT(CASE WHEN coherence_score < 0.95 THEN 1 END) as low_coherence_count
+                    FROM timeframe_coherence
+                    {where_clause}
+                    GROUP BY source_timeframe, target_timeframe
+                    ORDER BY avg_coherence DESC
+                """
+                
+                cursor.execute(query, params)
+                results = cursor.fetchall()
+                
+                stats = {
+                    'coherence_by_pair': [],
+                    'overall_stats': {
+                        'total_validations': 0,
+                        'avg_coherence': 0.0,
+                        'low_coherence_pairs': 0
+                    }
+                }
+                
+                total_coherence = 0
+                total_count = 0
+                
+                for row in results:
+                    pair_stats = {
+                        'source_timeframe': row[0],
+                        'target_timeframe': row[1],
+                        'validation_count': row[2],
+                        'avg_coherence': row[3],
+                        'min_coherence': row[4],
+                        'max_coherence': row[5],
+                        'low_coherence_count': row[6]
+                    }
+                    stats['coherence_by_pair'].append(pair_stats)
+                    
+                    total_coherence += row[3] * row[2]
+                    total_count += row[2]
+                
+                if total_count > 0:
+                    stats['overall_stats']['avg_coherence'] = total_coherence / total_count
+                    stats['overall_stats']['total_validations'] = total_count
+                    stats['overall_stats']['low_coherence_pairs'] = sum(
+                        pair['low_coherence_count'] for pair in stats['coherence_by_pair']
+                    )
+                
+                return stats
+                
+        except Exception as e:
+            logger.error(f"Error getting timeframe coherence stats: {e}")
+            return {'error': str(e)}
+    
+    def log_operation(self, operation_type: str, status: str, symbols: List[str] = None,
+                     timeframes: List[str] = None, records_processed: int = 0,
+                     processing_time: float = 0.0, error_message: str = None,
+                     metadata: Dict[str, Any] = None) -> bool:
+        """
+        Registra una operación en el log de operaciones
+        
+        Args:
+            operation_type: Tipo de operación
+            status: Estado de la operación
+            symbols: Símbolos procesados
+            timeframes: Timeframes procesados
+            records_processed: Número de registros procesados
+            processing_time: Tiempo de procesamiento en segundos
+            error_message: Mensaje de error si aplica
+            metadata: Metadatos adicionales
+        
+        Returns:
+            bool: True si se registró correctamente
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute("""
+                    INSERT INTO operation_logs 
+                    (operation_type, operation_status, symbols, timeframes, records_processed,
+                     processing_time_seconds, error_message, metadata)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    operation_type, status,
+                    json.dumps(symbols or []),
+                    json.dumps(timeframes or []),
+                    records_processed, processing_time,
+                    error_message,
+                    json.dumps(metadata or {})
+                ))
+                
+                conn.commit()
+                logger.debug(f"Logged operation: {operation_type} - {status}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Error logging operation: {e}")
+            return False
+    
+    def _calculate_coherence_score(self, df: pd.DataFrame) -> float:
+        """Calcula score de coherencia para un DataFrame"""
+        try:
+            if df.empty or not all(col in df.columns for col in ['open', 'high', 'low', 'close']):
+                return 0.0
+            
+            # Verificar consistencia OHLC
+            valid_ohlc = (
+                (df['high'] >= df[['open', 'close']].max(axis=1)) &
+                (df['low'] <= df[['open', 'close']].min(axis=1)) &
+                (df['high'] >= df['low'])
+            ).sum()
+            
+            return float(valid_ohlc / len(df)) if len(df) > 0 else 0.0
+            
+        except Exception as e:
+            logger.error(f"Error calculating coherence score: {e}")
+            return 0.0
+    
+    def _calculate_data_quality_score(self, df: pd.DataFrame) -> float:
+        """Calcula score de calidad de datos para un DataFrame"""
+        try:
+            if df.empty:
+                return 0.0
+            
+            # Factores de calidad
+            completeness = df.notna().sum().sum() / (len(df) * len(df.columns))
+            consistency = self._calculate_coherence_score(df)
+            
+            # Peso de cada factor
+            quality_score = completeness * 0.6 + consistency * 0.4
+            return float(quality_score)
+            
+        except Exception as e:
+            logger.error(f"Error calculating data quality score: {e}")
+            return 0.0
+    
+    def _count_gaps(self, df: pd.DataFrame) -> int:
+        """Cuenta gaps en los datos"""
+        try:
+            if df.empty or len(df) < 2:
+                return 0
+            
+            # Calcular diferencias entre timestamps consecutivos
+            time_diffs = df.index.to_series().diff()
+            
+            # Contar gaps significativos (más de 2 períodos)
+            gaps = (time_diffs > time_diffs.median() * 2).sum()
+            return int(gaps)
+            
+        except Exception as e:
+            logger.error(f"Error counting gaps: {e}")
+            return 0
     
     def get_data_date_range(self, symbol: str = None) -> Tuple[Optional[datetime], Optional[datetime]]:
         """Obtiene el rango de fechas de los datos"""
