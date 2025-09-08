@@ -702,3 +702,56 @@ class RealTimeManager:
                 'signals': sum(len(buffer) for buffer in self.signal_buffer.values())
             }
         }
+
+    def get_connection_status(self) -> Dict[str, Any]:
+        """Devuelve estado resumido de conexiones y colas"""
+        try:
+            with self._lock:
+                return {
+                    'running': self._running,
+                    'connected': self._connected,
+                    'last_error': self._last_error,
+                    'last_message_time': self.stats.get('last_message_time'),
+                    'messages_received': self.stats.get('messages_received', 0),
+                    'messages_processed': self.stats.get('messages_processed', 0),
+                    'errors': self.stats.get('errors', 0),
+                    'queue_sizes': {
+                        'prices': {s: len(b) for s, b in self.price_buffer.items()},
+                        'trades': {s: len(b) for s, b in self.trade_buffer.items()},
+                        'signals': {s: len(b) for s, b in self.signal_buffer.items()},
+                        'metrics': {s: len(b) for s, b in self.metrics_buffer.items()},
+                    },
+                    'subscribers': {
+                        'prices': len(self.price_subscribers),
+                        'trades': len(self.trade_subscribers),
+                        'signals': len(self.signal_subscribers),
+                        'metrics': len(self.metrics_subscribers),
+                    },
+                }
+        except Exception as e:
+            logger.error(f"Error obteniendo estado de conexión: {e}")
+            return {'running': self._running, 'connected': self._connected, 'error': str(e)}
+
+    def get_performance_stats(self) -> Dict[str, Any]:
+        """Devuelve estadísticas de rendimiento y uptime"""
+        try:
+            with self._lock:
+                uptime_seconds = 0.0
+                if self.stats.get('uptime_start'):
+                    uptime_seconds = (datetime.now() - self.stats['uptime_start']).total_seconds()
+                return {
+                    'uptime_seconds': uptime_seconds,
+                    'messages': {
+                        'received': self.stats.get('messages_received', 0),
+                        'processed': self.stats.get('messages_processed', 0),
+                        'errors': self.stats.get('errors', 0),
+                    },
+                    'buffers': {
+                        'symbols_tracked': list({*self.price_buffer.keys(), *self.trade_buffer.keys()}),
+                        'price_buffer_sizes': {s: len(b) for s, b in self.price_buffer.items()},
+                        'trade_buffer_sizes': {s: len(b) for s, b in self.trade_buffer.items()},
+                    },
+                }
+        except Exception as e:
+            logger.error(f"Error obteniendo estadísticas de rendimiento: {e}")
+            return {'error': str(e)}
