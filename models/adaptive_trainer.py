@@ -106,7 +106,7 @@ class AdaptiveTrainer:
             if not self.model:
                 raise Exception("Modelo no inicializado")
             
-            # Preparar datos de entrenamiento
+            # Preparar datos de entrenamiento (usará datos alineados automáticamente)
             X, y, df = data_preprocessor.prepare_training_data(
                 symbol=symbol,
                 days_back=days_back,
@@ -502,6 +502,108 @@ class AdaptiveTrainer:
             logger.error(f"Error obteniendo estado: {e}")
             return {'error': str(e)}
     
+    async def train_multi_symbol_models(self, symbols: List[str], days_back: int = 365) -> Dict[str, Any]:
+        """
+        Entrena modelos para múltiples símbolos usando datos alineados
+        
+        Args:
+            symbols: Lista de símbolos para entrenar
+            days_back: Días de datos históricos a usar
+            
+        Returns:
+            Dict con resultados del entrenamiento por símbolo
+        """
+        try:
+            logger.info(f"Iniciando entrenamiento multi-símbolo para {len(symbols)} símbolos")
+            
+            if not self.model:
+                raise Exception("Modelo no inicializado")
+            
+            # Preparar datos multi-símbolo usando datos alineados
+            from data.preprocessor import prepare_multi_symbol_training_data
+            
+            multi_symbol_data = prepare_multi_symbol_training_data(
+                symbols=symbols,
+                days_back=days_back,
+                target_method="classification"
+            )
+            
+            results = {}
+            successful_trains = 0
+            
+            for symbol in symbols:
+                try:
+                    logger.info(f"Entrenando modelo para {symbol}...")
+                    
+                    X, y, df = multi_symbol_data.get(symbol, (np.array([]), np.array([]), pd.DataFrame()))
+                    
+                    if X.shape[0] == 0:
+                        results[symbol] = {
+                            'status': 'error',
+                            'error': 'No hay datos suficientes',
+                            'timestamp': datetime.now().isoformat()
+                        }
+                        continue
+                    
+                    # Dividir datos
+                    split_idx = int(0.8 * len(X))
+                    X_train, X_val = X[:split_idx], X[split_idx:]
+                    y_train, y_val = y[:split_idx], y[split_idx:]
+                    
+                    # Entrenar modelo
+                    history = await self._train_model(
+                        X_train, y_train, X_val, y_val,
+                        epochs=self.initial_epochs,
+                        symbol=symbol
+                    )
+                    
+                    # Evaluar modelo
+                    val_accuracy = self._evaluate_model(X_val, y_val)
+                    
+                    # Guardar modelo
+                    model_path = self._save_model(symbol, "multi_symbol")
+                    
+                    results[symbol] = {
+                        'status': 'success',
+                        'final_loss': history.history['loss'][-1],
+                        'val_loss': history.history['val_loss'][-1],
+                        'val_accuracy': val_accuracy,
+                        'epochs_trained': len(history.history['loss']),
+                        'model_path': model_path,
+                        'samples_trained': X.shape[0],
+                        'features_count': X.shape[1],
+                        'timestamp': datetime.now().isoformat()
+                    }
+                    
+                    successful_trains += 1
+                    logger.info(f"✅ {symbol}: Entrenamiento completado (Accuracy: {val_accuracy:.4f})")
+                    
+                except Exception as e:
+                    logger.error(f"❌ Error entrenando {symbol}: {e}")
+                    results[symbol] = {
+                        'status': 'error',
+                        'error': str(e),
+                        'timestamp': datetime.now().isoformat()
+                    }
+            
+            logger.info(f"Entrenamiento multi-símbolo completado: {successful_trains}/{len(symbols)} exitosos")
+            
+            return {
+                'status': 'success',
+                'total_symbols': len(symbols),
+                'successful_trains': successful_trains,
+                'results': results,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Error en entrenamiento multi-símbolo: {e}")
+            return {
+                'status': 'error',
+                'error': str(e),
+                'timestamp': datetime.now().isoformat()
+            }
+    
     async def health_check(self) -> Dict[str, Any]:
         """Verifica salud del sistema de entrenamiento"""
         try:
@@ -537,6 +639,9 @@ class AdaptiveTrainer:
 adaptive_trainer = AdaptiveTrainer()
 
 # Funciones de conveniencia
+async def train_multi_symbol_models(symbols: List[str], days_back: int = 365) -> Dict[str, Any]:
+    """Función de conveniencia para entrenamiento multi-símbolo"""
+    return await adaptive_trainer.train_multi_symbol_models(symbols, days_back)
 async def train_initial_model(symbol: str, days_back: int = 365) -> Dict[str, Any]:
     """Función de conveniencia para entrenamiento inicial"""
     return await adaptive_trainer.train_initial_model(symbol, days_back)

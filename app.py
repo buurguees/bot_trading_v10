@@ -63,22 +63,24 @@ class TradingBotApp:
         print("1. 📥 Descargar datos históricos (2 años)")
         print("2. 🔍 Validar estado del agente IA")
         print("3. 📊 Validar histórico de símbolos")
-        print("4. 🚀 Empezar entrenamiento + Dashboard")
-        print("5. 📈 Análisis de performance")
-        print("6. ⚙️  Configurar sistema")
-        print("7. 🧪 Modo de pruebas rápidas")
-        print("8. 📱 Estado del sistema")
-        print("9. ❌ Salir")
+        print("4. 🔄 Alinear datos históricos (Multi-símbolo)")
+        print("5. 🚀 Empezar entrenamiento + Dashboard")
+        print("6. 🤖 Entrenamiento sin Dashboard (Background)")
+        print("7. 📈 Análisis de performance")
+        print("8. ⚙️  Configurar sistema")
+        print("9. 🧪 Modo de pruebas rápidas")
+        print("10. 📱 Estado del sistema")
+        print("11. ❌ Salir")
         print()
     
     def get_user_choice(self) -> str:
         """Obtiene la elección del usuario"""
         try:
-            choice = input("Selecciona una opción (1-9): ").strip()
+            choice = input("Selecciona una opción (1-11): ").strip()
             return choice
         except KeyboardInterrupt:
             print("\n👋 Saliendo...")
-            return "9"
+            return "10"
         except Exception:
             return ""
     
@@ -200,7 +202,7 @@ class TradingBotApp:
             
             for symbol in symbols:
                 try:
-                    count = db_manager.get_market_data_count(symbol)
+                    count = db_manager.get_market_data_count_fast(symbol)
                     date_range = db_manager.get_data_date_range(symbol)
                     
                     print(f"\n📈 {symbol}:")
@@ -232,6 +234,322 @@ class TradingBotApp:
         
         input("\nPresiona Enter para continuar...")
     
+    async def align_historical_data(self):
+        """Opción 4: Alinear datos históricos para análisis multi-símbolo"""
+        print("\n🔄 ALINEACIÓN DE DATOS HISTÓRICOS")
+        print("=" * 45)
+        print("Esta función sincroniza los datos de todos los símbolos")
+        print("para permitir análisis simultáneo y trading multi-símbolo.")
+        print()
+        
+        try:
+            from core.manage_data import DataManager
+            from data.database import db_manager
+            import pandas as pd
+            from datetime import datetime, timedelta
+            
+            # Obtener símbolos
+            symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+            timeframes = ['1h', '4h', '1d']
+            
+            print("🔍 Analizando datos existentes...")
+            
+            # Analizar cobertura de datos por símbolo y timeframe
+            coverage_analysis = {}
+            min_start_date = None
+            max_end_date = None
+            
+            for symbol in symbols:
+                coverage_analysis[symbol] = {}
+                try:
+                    # Obtener datos directamente con SQL
+                    with db_manager._get_connection() as conn:
+                        cursor = conn.cursor()
+                        
+                        # Obtener conteo y rango de fechas
+                        cursor.execute("""
+                            SELECT COUNT(*), MIN(timestamp), MAX(timestamp) 
+                            FROM market_data 
+                            WHERE symbol = ?
+                        """, (symbol,))
+                        
+                        count, min_ts, max_ts = cursor.fetchone()
+                        
+                        if count > 0 and min_ts and max_ts:
+                            # Convertir timestamps (verificar si son segundos o milisegundos)
+                            try:
+                                # Probar si es timestamp en segundos
+                                start_date = datetime.fromtimestamp(min_ts)
+                                end_date = datetime.fromtimestamp(max_ts)
+                            except (ValueError, OSError):
+                                try:
+                                    # Probar si es timestamp en milisegundos
+                                    start_date = datetime.fromtimestamp(min_ts / 1000)
+                                    end_date = datetime.fromtimestamp(max_ts / 1000)
+                                except (ValueError, OSError):
+                                    print(f"   ⚠️ Timestamps inválidos para {symbol}: {min_ts}, {max_ts}")
+                                    coverage_analysis[symbol] = None
+                                    continue
+                            
+                            coverage_analysis[symbol] = {
+                                'start': start_date,
+                                'end': end_date,
+                                'count': count
+                            }
+                            
+                            # Encontrar el símbolo con el historial más lejano (referencia)
+                            if min_start_date is None or start_date < min_start_date:
+                                min_start_date = start_date
+                                reference_symbol = symbol
+                            
+                            # Encontrar la fecha más reciente común
+                            if max_end_date is None or end_date < max_end_date:
+                                max_end_date = end_date
+                        else:
+                            coverage_analysis[symbol] = None
+                                
+                except Exception as e:
+                    print(f"   ⚠️ Error analizando {symbol}: {e}")
+                    coverage_analysis[symbol] = None
+            
+            print(f"\n📊 Análisis de cobertura:")
+            print(f"   Símbolo de referencia: {reference_symbol if 'reference_symbol' in locals() else 'N/A'}")
+            print(f"   Período de referencia: {min_start_date} a {max_end_date}")
+            
+            if min_start_date and max_end_date:
+                common_duration = (max_end_date - min_start_date).days
+                print(f"   Duración total: {common_duration} días")
+            
+            # Mostrar cobertura por símbolo
+            print(f"\n📈 Cobertura por símbolo:")
+            for symbol in symbols:
+                print(f"\n   {symbol}:")
+                if coverage_analysis[symbol]:
+                    data = coverage_analysis[symbol]
+                    print(f"     Registros: {data['count']:,}")
+                    print(f"     Desde: {data['start'].strftime('%Y-%m-%d %H:%M')}")
+                    print(f"     Hasta: {data['end'].strftime('%Y-%m-%d %H:%M')}")
+                    duration = (data['end'] - data['start']).days
+                    print(f"     Duración: {duration} días")
+                else:
+                    print(f"     ❌ Sin datos")
+            
+            # Crear datos alineados
+            print(f"\n🔄 Creando datos alineados...")
+            
+            if min_start_date and max_end_date and 'reference_symbol' in locals():
+                # Generar timestamps de referencia (cada hora desde el símbolo más antiguo)
+                reference_timestamps = pd.date_range(
+                    start=min_start_date,
+                    end=max_end_date,
+                    freq='H'  # Cada hora
+                )
+                
+                print(f"   Timestamps de referencia: {len(reference_timestamps):,}")
+                print(f"   Desde: {min_start_date.strftime('%Y-%m-%d %H:%M')}")
+                print(f"   Hasta: {max_end_date.strftime('%Y-%m-%d %H:%M')}")
+                
+                # Crear DataFrame alineado
+                aligned_data = {}
+                
+                for symbol in symbols:
+                    print(f"\n   Procesando {symbol}...")
+                    symbol_data = {}
+                    
+                    # Obtener datos del símbolo directamente con SQL
+                    try:
+                        with db_manager._get_connection() as conn:
+                            cursor = conn.cursor()
+                            
+                            # Obtener datos del símbolo
+                            cursor.execute("""
+                                SELECT timestamp, open, high, low, close, volume
+                                FROM market_data 
+                                WHERE symbol = ? 
+                                AND timestamp >= ? 
+                                AND timestamp <= ?
+                                ORDER BY timestamp
+                            """, (symbol, int(min_start_date.timestamp()), int(max_end_date.timestamp())))
+                            
+                            results = cursor.fetchall()
+                            
+                            if results:
+                                # Crear DataFrame
+                                df = pd.DataFrame(results, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+                                df['datetime'] = pd.to_datetime(df['timestamp'], unit='s')
+                                df.set_index('datetime', inplace=True)
+                                df.drop('timestamp', axis=1, inplace=True)
+                                
+                                # Obtener fechas de inicio y fin del símbolo
+                                symbol_start = df.index.min()
+                                symbol_end = df.index.max()
+                                
+                                print(f"     Datos disponibles: {symbol_start.strftime('%Y-%m-%d')} a {symbol_end.strftime('%Y-%m-%d')}")
+                                print(f"     Registros originales: {len(df):,}")
+                                
+                                # Crear timestamps alineados para este símbolo
+                                # Comenzar desde donde empieza este símbolo, no desde la referencia
+                                symbol_timestamps = pd.date_range(
+                                    start=symbol_start,
+                                    end=min(symbol_end, max_end_date),
+                                    freq='h'  # Usar 'h' en lugar de 'H' para evitar warning
+                                )
+                                
+                                print(f"     Timestamps del símbolo: {len(symbol_timestamps):,}")
+                                
+                                # Reindexar datos del símbolo a sus propios timestamps
+                                aligned_df = df.reindex(symbol_timestamps, method='ffill')
+                                
+                                # Guardar datos alineados (usar '1h' como timeframe base)
+                                symbol_data['1h'] = aligned_df
+                                
+                                print(f"     Registros alineados: {len(aligned_df):,}")
+                                
+                                # Crear timeframes adicionales por agregación
+                                for tf in ['4h', '1d']:
+                                    if tf == '4h':
+                                        # Agregar a 4 horas
+                                        tf_data = aligned_df.resample('4h').agg({
+                                            'open': 'first',
+                                            'high': 'max',
+                                            'low': 'min',
+                                            'close': 'last',
+                                            'volume': 'sum'
+                                        }).dropna()
+                                    elif tf == '1d':
+                                        # Agregar a 1 día
+                                        tf_data = aligned_df.resample('1d').agg({
+                                            'open': 'first',
+                                            'high': 'max',
+                                            'low': 'min',
+                                            'close': 'last',
+                                            'volume': 'sum'
+                                        }).dropna()
+                                    
+                                    symbol_data[tf] = tf_data
+                                    print(f"     {tf}: {len(tf_data):,} registros")
+                                
+                                aligned_data[symbol] = symbol_data
+                                
+                            else:
+                                print(f"     ❌ Sin datos para alinear")
+                                aligned_data[symbol] = {}
+                            
+                    except Exception as e:
+                        print(f"     ❌ Error procesando {symbol}: {e}")
+                        aligned_data[symbol] = {}
+                
+                # Guardar datos alineados
+                print(f"\n💾 Guardando datos alineados...")
+                
+                # Crear tabla para datos alineados
+                try:
+                    with db_manager._get_connection() as conn:
+                        cursor = conn.cursor()
+                        
+                        # Crear tabla si no existe
+                        cursor.execute("""
+                            CREATE TABLE IF NOT EXISTS aligned_market_data (
+                                id INTEGER PRIMARY KEY,
+                                symbol TEXT NOT NULL,
+                                timeframe TEXT NOT NULL,
+                                timestamp INTEGER NOT NULL,
+                                open REAL,
+                                high REAL,
+                                low REAL,
+                                close REAL,
+                                volume REAL,
+                                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                UNIQUE(symbol, timeframe, timestamp) ON CONFLICT REPLACE
+                            )
+                        """)
+                        
+                        # Crear índices
+                        cursor.execute("""
+                            CREATE INDEX IF NOT EXISTS idx_aligned_symbol_tf 
+                            ON aligned_market_data(symbol, timeframe)
+                        """)
+                        cursor.execute("""
+                            CREATE INDEX IF NOT EXISTS idx_aligned_timestamp 
+                            ON aligned_market_data(timestamp)
+                        """)
+                        
+                        conn.commit()
+                
+                except Exception as e:
+                    print(f"   ⚠️ Error creando tabla alineada: {e}")
+                    return
+                
+                # Insertar datos alineados
+                total_inserted = 0
+                
+                for symbol, timeframes_data in aligned_data.items():
+                    for tf, df in timeframes_data.items():
+                        if not df.empty:
+                            # Preparar datos para inserción
+                            records = []
+                            for timestamp, row in df.iterrows():
+                                if pd.notna(row['close']):  # Solo filas con datos válidos
+                                    records.append((
+                                        symbol,
+                                        tf,
+                                        int(timestamp.timestamp()),
+                                        float(row['open']) if pd.notna(row['open']) else None,
+                                        float(row['high']) if pd.notna(row['high']) else None,
+                                        float(row['low']) if pd.notna(row['low']) else None,
+                                        float(row['close']) if pd.notna(row['close']) else None,
+                                        float(row['volume']) if pd.notna(row['volume']) else None
+                                    ))
+                            
+                            # Insertar en lotes
+                            if records:
+                                with db_manager._get_connection() as conn:
+                                    cursor = conn.cursor()
+                                    cursor.executemany("""
+                                        INSERT OR REPLACE INTO aligned_market_data 
+                                        (symbol, timeframe, timestamp, open, high, low, close, volume)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                                    """, records)
+                                    conn.commit()
+                                
+                                total_inserted += len(records)
+                                print(f"     {symbol}-{tf}: {len(records):,} registros insertados")
+                
+                print(f"\n✅ Alineación completada:")
+                print(f"   Total registros alineados: {total_inserted:,}")
+                print(f"   Símbolos procesados: {len(symbols)}")
+                print(f"   Timeframes: {', '.join(timeframes)}")
+                print(f"   Período: {min_start_date.strftime('%Y-%m-%d')} a {max_end_date.strftime('%Y-%m-%d')}")
+                
+                # Verificar datos alineados
+                print(f"\n🔍 Verificando datos alineados...")
+                with db_manager._get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT COUNT(*) FROM aligned_market_data")
+                    total_aligned = cursor.fetchone()[0]
+                    print(f"   Total en tabla alineada: {total_aligned:,}")
+                    
+                    # Mostrar distribución por símbolo
+                    cursor.execute("""
+                        SELECT symbol, timeframe, COUNT(*) 
+                        FROM aligned_market_data 
+                        GROUP BY symbol, timeframe 
+                        ORDER BY symbol, timeframe
+                    """)
+                    
+                    print(f"\n📊 Distribución por símbolo:")
+                    for symbol, tf, count in cursor.fetchall():
+                        print(f"   {symbol}-{tf}: {count:,} registros")
+                
+            else:
+                print("❌ No se pudo determinar un período común para alinear")
+                
+        except Exception as e:
+            print(f"❌ Error alineando datos: {e}")
+            logger.error(f"Error en alineación de datos: {e}")
+        
+        input("\nPresiona Enter para continuar...")
+    
     async def start_training_and_dashboard(self):
         """Opción 4: Empezar entrenamiento + Dashboard"""
         print("\n🚀 INICIANDO ENTRENAMIENTO + DASHBOARD")
@@ -243,7 +561,7 @@ class TradingBotApp:
             
             # Verificar datos
             from data.database import db_manager
-            stats = db_manager.get_database_stats()
+            stats = db_manager.get_data_summary_optimized()
             total_records = stats.get('total_records', 0)
             
             if total_records < 1000:
@@ -295,6 +613,196 @@ class TradingBotApp:
             logger.error(f"Error en entrenamiento: {e}")
         
         input("\nPresiona Enter para continuar...")
+    
+    async def start_training_background(self):
+        """Opción 5: Entrenamiento sin Dashboard (Background)"""
+        print("\n🤖 ENTRENAMIENTO SIN DASHBOARD (BACKGROUND)")
+        print("=" * 50)
+        
+        try:
+            # Verificar prerequisitos
+            print("🔍 Verificando prerequisitos...")
+            
+            # Verificar datos
+            from data.database import db_manager
+            stats = db_manager.get_data_summary_optimized()
+            total_records = stats.get('total_records', 0)
+            
+            if total_records < 1000:
+                print(f"⚠️ Datos insuficientes: {total_records:,} registros")
+                download = input("¿Descargar datos históricos primero? (s/n): ").strip().lower()
+                if download == 's':
+                    await self.download_historical_data()
+                else:
+                    print("❌ Cancelando entrenamiento")
+                    return
+            else:
+                print(f"✅ Datos suficientes: {total_records:,} registros")
+            
+            # Configurar modo de entrenamiento
+            mode = self._select_background_training_mode()
+            
+            # Configurar duración del entrenamiento
+            duration = self._select_training_duration()
+            
+            print(f"\n🎯 Configuración del entrenamiento:")
+            print(f"   Modo: {mode}")
+            print(f"   Duración: {duration}")
+            print(f"   Dashboard: ❌ Deshabilitado")
+            print()
+            
+            # Confirmar inicio
+            confirm = input("¿Iniciar entrenamiento en background? (s/n): ").strip().lower()
+            if confirm != 's':
+                print("❌ Entrenamiento cancelado")
+                return
+            
+            print(f"\n🚀 Iniciando entrenamiento en background...")
+            print(f"⏳ El bot se ejecutará sin interfaz gráfica")
+            print(f"📊 Puedes monitorear el progreso en los logs")
+            print()
+            
+            # Iniciar entrenamiento en hilo separado
+            training_thread = threading.Thread(
+                target=self._start_background_training_thread,
+                args=(mode, duration),
+                daemon=True
+            )
+            training_thread.start()
+            
+            # Mostrar información de monitoreo
+            print("📋 INFORMACIÓN DE MONITOREO:")
+            print(f"   Logs del agente: logs/agent_training.log")
+            print(f"   Logs del sistema: logs/trading_bot.log")
+            print(f"   Base de datos: data/trading_bot.db")
+            print()
+            print("💡 Para detener el entrenamiento:")
+            print(f"   - Presiona Ctrl+C en esta ventana")
+            print(f"   - O cierra esta aplicación")
+            print()
+            
+            # Mantener la aplicación activa para monitoreo
+            print("🔄 Entrenamiento activo - Presiona Ctrl+C para detener")
+            
+            try:
+                while True:
+                    time.sleep(5)
+                    # Mostrar estado cada 30 segundos
+                    if int(time.time()) % 30 == 0:
+                        print(f"⏰ {datetime.now().strftime('%H:%M:%S')} - Entrenamiento en progreso...")
+            except KeyboardInterrupt:
+                print("\n⏹️ Deteniendo entrenamiento...")
+                print("🔄 El bot puede tardar unos segundos en detenerse completamente")
+                
+        except Exception as e:
+            print(f"❌ Error iniciando entrenamiento: {e}")
+            logger.error(f"Error en entrenamiento background: {e}")
+        
+        input("\nPresiona Enter para continuar...")
+    
+    def _select_background_training_mode(self) -> str:
+        """Selecciona modo de entrenamiento para background"""
+        print("\n🎯 SELECCIONAR MODO DE ENTRENAMIENTO:")
+        print("1. Paper Trading (Recomendado - Sin riesgo)")
+        print("2. Backtesting (Pruebas históricas)")
+        print("3. Development (Desarrollo y debugging)")
+        print("4. Continuous Learning (Aprendizaje continuo)")
+        
+        while True:
+            try:
+                choice = input("Selecciona modo (1-4): ").strip()
+                if choice == "1":
+                    return "paper_trading"
+                elif choice == "2":
+                    return "backtesting"
+                elif choice == "3":
+                    return "development"
+                elif choice == "4":
+                    return "continuous_learning"
+                else:
+                    print("⚠️ Por favor selecciona 1, 2, 3 o 4")
+            except KeyboardInterrupt:
+                return "paper_trading"
+    
+    def _select_training_duration(self) -> str:
+        """Selecciona duración del entrenamiento"""
+        print("\n⏰ DURACIÓN DEL ENTRENAMIENTO:")
+        print("1. 1 hora")
+        print("2. 4 horas")
+        print("3. 8 horas")
+        print("4. 12 horas")
+        print("5. 24 horas")
+        print("6. Indefinido (hasta detener manualmente)")
+        
+        while True:
+            try:
+                choice = input("Selecciona duración (1-6): ").strip()
+                duration_map = {
+                    "1": "1h",
+                    "2": "4h", 
+                    "3": "8h",
+                    "4": "12h",
+                    "5": "24h",
+                    "6": "indefinite"
+                }
+                if choice in duration_map:
+                    return duration_map[choice]
+                else:
+                    print("⚠️ Por favor selecciona 1, 2, 3, 4, 5 o 6")
+            except KeyboardInterrupt:
+                return "8h"
+    
+    def _start_background_training_thread(self, mode: str, duration: str):
+        """Inicia entrenamiento en hilo separado sin dashboard"""
+        try:
+            # Cambiar al directorio del proyecto
+            os.chdir(project_root)
+            
+            # Configurar variables de entorno
+            env = os.environ.copy()
+            env['TRADING_MODE'] = mode
+            env['TRAINING_DURATION'] = duration
+            env['BACKGROUND_MODE'] = 'true'
+            env['DASHBOARD_ENABLED'] = 'false'
+            
+            # Ejecutar main.py sin dashboard
+            cmd = [sys.executable, 'core/main_background.py', '--mode', mode, '--background', '--no-dashboard']
+            
+            print(f"🚀 Ejecutando comando: {' '.join(cmd)}")
+            print(f"📁 Directorio: {os.getcwd()}")
+            print(f"⏰ Duración: {duration}")
+            print()
+            
+            process = subprocess.Popen(
+                cmd,
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                universal_newlines=True
+            )
+            
+            self.dashboard_process = process
+            
+            # Monitorear output con timestamps
+            print("📊 Iniciando monitoreo del entrenamiento...")
+            start_time = time.time()
+            
+            for line in iter(process.stdout.readline, ''):
+                if line:
+                    timestamp = datetime.now().strftime('%H:%M:%S')
+                    print(f"[{timestamp}] {line.strip()}")
+                    
+                    # Mostrar progreso cada 5 minutos
+                    if int(time.time() - start_time) % 300 == 0:
+                        elapsed = int(time.time() - start_time) // 60
+                        print(f"⏰ Entrenamiento activo por {elapsed} minutos...")
+                    
+        except Exception as e:
+            print(f"❌ Error en entrenamiento background: {e}")
+            import traceback
+            traceback.print_exc()
     
     def _select_training_mode(self) -> str:
         """Selecciona modo de entrenamiento"""
@@ -366,14 +874,21 @@ class TradingBotApp:
             from data.database import db_manager
             
             # Obtener estadísticas básicas
-            stats = db_manager.get_database_stats()
+            stats = db_manager.get_data_summary_optimized()
             print("📊 Estadísticas del sistema:")
             for key, value in stats.items():
                 if isinstance(value, (int, float)):
-                    if 'count' in key.lower():
+                    if 'count' in key.lower() or 'total' in key.lower():
                         print(f"   {key}: {value:,}")
                     else:
                         print(f"   {key}: {value}")
+                elif isinstance(value, dict):
+                    print(f"   {key}:")
+                    for sub_key, sub_value in value.items():
+                        if isinstance(sub_value, (int, float)):
+                            print(f"     {sub_key}: {sub_value:,}")
+                        else:
+                            print(f"     {sub_key}: {sub_value}")
                 else:
                     print(f"   {key}: {value}")
             
@@ -387,7 +902,7 @@ class TradingBotApp:
                 print(f"\n📈 Símbolos disponibles: {len(symbols)}")
                 
                 for symbol in symbols[:4]:  # Mostrar primeros 4
-                    count = db_manager.get_market_data_count(symbol)
+                    count = db_manager.get_market_data_count_fast(symbol)
                     date_range = db_manager.get_data_date_range(symbol)
                     
                     if date_range[0] and date_range[1]:
@@ -499,7 +1014,7 @@ class TradingBotApp:
         """Prueba conexión a base de datos"""
         try:
             from data.database import db_manager
-            stats = db_manager.get_database_stats()
+            stats = db_manager.get_data_summary_optimized()
             return isinstance(stats, dict)
         except Exception:
             return False
@@ -551,7 +1066,7 @@ class TradingBotApp:
             # Estado de base de datos
             try:
                 from data.database import db_manager
-                stats = db_manager.get_database_stats()
+                stats = db_manager.get_data_summary_optimized()
                 print(f"\n💾 Base de datos:")
                 print(f"   Total registros: {stats.get('total_records', 0):,}")
                 print(f"   Estado: ✅ Conectada")
@@ -586,20 +1101,24 @@ class TradingBotApp:
                 elif choice == "3":
                     await self.validate_symbols_history()
                 elif choice == "4":
-                    await self.start_training_and_dashboard()
+                    await self.align_historical_data()
                 elif choice == "5":
-                    await self.performance_analysis()
+                    await self.start_training_and_dashboard()
                 elif choice == "6":
-                    await self.system_configuration()
+                    await self.start_training_background()
                 elif choice == "7":
-                    await self.quick_tests()
+                    await self.performance_analysis()
                 elif choice == "8":
-                    await self.system_status()
+                    await self.system_configuration()
                 elif choice == "9":
+                    await self.quick_tests()
+                elif choice == "10":
+                    await self.system_status()
+                elif choice == "11":
                     self.running = False
                     print("\n👋 ¡Hasta luego!")
                 else:
-                    print("\n⚠️ Opción no válida. Por favor selecciona 1-9.")
+                    print("\n⚠️ Opción no válida. Por favor selecciona 1-11.")
                     time.sleep(1)
                     
             except KeyboardInterrupt:
@@ -628,3 +1147,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    

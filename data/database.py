@@ -1,20 +1,24 @@
 """
-data/database.py
+data/database.py - VERSIÓN PROFESIONAL MEJORADA
 Gestor de base de datos para el sistema de trading
-Ubicación: C:\\TradingBot_v10\\data\\database.py
+Ubicación: C:\TradingBot_v10\data\database.py
 
-Maneja todas las operaciones de base de datos incluyendo:
-- Datos de mercado históricos y en tiempo real
-- Trades ejecutados y su performance
-- Métricas del modelo de ML
-- Configuraciones y logs del sistema
+MEJORAS PRINCIPALES:
+- Gestión robusta de timestamps con normalización automática
+- Optimizaciones para manejar millones de registros
+- Índices optimizados para consultas rápidas
+- Validación automática de integridad de datos
+- Backup automático y recuperación de errores
+- Transacciones atómicas para operaciones críticas
+- Pool de conexiones para concurrencia
+- Compresión automática de datos antiguos
 """
 
 import sqlite3
 import pandas as pd
 import numpy as np
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Any
+from datetime import datetime, timedelta, timezone
+from typing import Dict, List, Tuple, Optional, Any, Union
 import logging
 import json
 from pathlib import Path
@@ -23,14 +27,31 @@ from contextlib import contextmanager
 from dataclasses import dataclass, asdict
 import asyncio
 import aiosqlite
+import gzip
+import pickle
+from concurrent.futures import ThreadPoolExecutor
+import time
+from functools import wraps
 
 logger = logging.getLogger(__name__)
 
+def timing_decorator(func):
+    """Decorator para medir tiempo de ejecución de funciones críticas"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        if end_time - start_time > 1.0:  # Solo log si toma más de 1 segundo
+            logger.debug(f"{func.__name__} ejecutado en {end_time - start_time:.2f}s")
+        return result
+    return wrapper
+
 @dataclass
 class MarketData:
-    """Estructura de datos de mercado"""
+    """Estructura optimizada de datos de mercado"""
     symbol: str
-    timestamp: int
+    timestamp: int  # Siempre en segundos Unix
     open: float
     high: float
     low: float
@@ -41,10 +62,51 @@ class MarketData:
     def __post_init__(self):
         if self.created_at is None:
             self.created_at = datetime.now()
+        
+        # Normalizar timestamp automáticamente
+        self.timestamp = self._normalize_timestamp(self.timestamp)
+        
+        # Validar datos OHLCV
+        self._validate_ohlcv()
+    
+    def _normalize_timestamp(self, ts: Union[int, float]) -> int:
+        """Normaliza timestamp a segundos Unix"""
+        if ts > 10000000000:  # Está en milisegundos
+            return int(ts / 1000)
+        return int(ts)
+    
+    def _validate_ohlcv(self):
+        """Valida la integridad de los datos OHLCV"""
+        # Validar que todos los precios son positivos
+        if any(price <= 0 for price in [self.open, self.high, self.low, self.close]):
+            raise ValueError(f"Precios inválidos en {self.symbol}: OHLC debe ser > 0")
+        
+        # Validar relación High >= Low
+        if self.high < self.low:
+            raise ValueError(f"High < Low en {self.symbol}: {self.high} < {self.low}")
+        
+        # Validar que Open y Close están en el rango
+        if not (self.low <= self.open <= self.high):
+            raise ValueError(f"Open fuera de rango en {self.symbol}")
+        
+        if not (self.low <= self.close <= self.high):
+            raise ValueError(f"Close fuera de rango en {self.symbol}")
+        
+        # Validar volumen no negativo
+        if self.volume < 0:
+            raise ValueError(f"Volumen negativo en {self.symbol}: {self.volume}")
+        
+        # Validar timestamp razonable (después de 2010, antes del futuro)
+        try:
+            dt = datetime.fromtimestamp(self.timestamp)
+            if dt.year < 2010 or dt.year > datetime.now().year + 1:
+                raise ValueError(f"Timestamp fuera de rango: {dt}")
+        except (ValueError, OSError):
+            raise ValueError(f"Timestamp inválido: {self.timestamp}")
 
 @dataclass
 class TradeRecord:
-    """Estructura de registro de trade"""
+    """Estructura mejorada de registro de trade"""
     symbol: str
     side: str  # 'buy' or 'sell'
     entry_price: float
@@ -65,15 +127,47 @@ class TradeRecord:
     exit_reason: Optional[str] = None
     created_at: datetime = None
     
+    # Campos adicionales para análisis
+    timeframe: str = "1h"
+    strategy_name: str = "default"
+    market_conditions: Optional[str] = None
+    risk_reward_ratio: Optional[float] = None
+    
     def __post_init__(self):
         if self.entry_time is None:
             self.entry_time = datetime.now()
         if self.created_at is None:
             self.created_at = datetime.now()
+        
+        # Validar side
+        if self.side not in ['buy', 'sell']:
+            raise ValueError(f"Side inválido: {self.side}")
+        
+        # Validar status
+        if self.status not in ['open', 'closed', 'cancelled']:
+            raise ValueError(f"Status inválido: {self.status}")
+        
+        # Calcular risk-reward ratio si es posible
+        if self.stop_loss and self.take_profit:
+            self._calculate_risk_reward_ratio()
+    
+    def _calculate_risk_reward_ratio(self):
+        """Calcula la relación riesgo-recompensa"""
+        try:
+            if self.side == 'buy':
+                risk = abs(self.entry_price - self.stop_loss)
+                reward = abs(self.take_profit - self.entry_price)
+            else:  # sell
+                risk = abs(self.stop_loss - self.entry_price)
+                reward = abs(self.entry_price - self.take_profit)
+            
+            self.risk_reward_ratio = reward / risk if risk > 0 else None
+        except:
+            self.risk_reward_ratio = None
 
 @dataclass
 class ModelMetrics:
-    """Métricas del modelo de ML"""
+    """Métricas optimizadas del modelo de ML"""
     model_version: str
     accuracy: float
     precision: float
@@ -86,12 +180,71 @@ class ModelMetrics:
     hyperparameters: Dict[str, Any]
     created_at: datetime = None
     
+    # Métricas adicionales
+    training_data_size: int = 0
+    validation_accuracy: float = 0.0
+    test_accuracy: float = 0.0
+    feature_importance: Optional[Dict[str, float]] = None
+    model_size_mb: float = 0.0
+    inference_time_ms: float = 0.0
+    
     def __post_init__(self):
         if self.created_at is None:
             self.created_at = datetime.now()
 
+class ConnectionPool:
+    """Pool de conexiones para mejorar concurrencia"""
+    
+    def __init__(self, db_path: str, max_connections: int = 10):
+        self.db_path = db_path
+        self.max_connections = max_connections
+        self._pool = []
+        self._lock = threading.Lock()
+        self._used_connections = set()
+    
+    def get_connection(self):
+        """Obtiene una conexión del pool"""
+        with self._lock:
+            if self._pool:
+                conn = self._pool.pop()
+            else:
+                conn = sqlite3.connect(
+                    self.db_path,
+                    timeout=30.0,
+                    check_same_thread=False
+                )
+                conn.row_factory = sqlite3.Row
+                # Optimizaciones de SQLite
+                conn.execute("PRAGMA journal_mode=WAL")
+                conn.execute("PRAGMA synchronous=NORMAL")
+                conn.execute("PRAGMA cache_size=10000")
+                conn.execute("PRAGMA temp_store=MEMORY")
+            
+            self._used_connections.add(conn)
+            return conn
+    
+    def return_connection(self, conn):
+        """Devuelve una conexión al pool"""
+        with self._lock:
+            if conn in self._used_connections:
+                self._used_connections.remove(conn)
+                if len(self._pool) < self.max_connections:
+                    self._pool.append(conn)
+                else:
+                    conn.close()
+    
+    def close_all(self):
+        """Cierra todas las conexiones"""
+        with self._lock:
+            for conn in self._pool:
+                conn.close()
+            for conn in self._used_connections:
+                conn.close()
+            self._pool.clear()
+            self._used_connections.clear()
+
 class DatabaseManager:
-    """Gestor principal de base de datos"""
+    """Gestor profesional de base de datos con optimizaciones"""
     
     def __init__(self, db_path: str = None):
         if db_path is None:
@@ -101,20 +254,56 @@ class DatabaseManager:
             self.db_path = Path(db_path)
         
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._lock = threading.Lock()
-        self._init_database()
         
-        logger.info(f"Base de datos inicializada: {self.db_path}")
+        # Pool de conexiones
+        self.connection_pool = ConnectionPool(str(self.db_path))
+        
+        # Cache para consultas frecuentes
+        self._cache = {}
+        self._cache_timeout = 300  # 5 minutos
+        self._last_cache_clear = time.time()
+        
+        # Thread pool para operaciones pesadas
+        self._thread_pool = ThreadPoolExecutor(max_workers=4)
+        
+        self._init_database()
+        self._create_optimized_indices()
+        
+        logger.info(f"DatabaseManager inicializado: {self.db_path}")
+        logger.info(f"Tamaño de BD: {self.db_path.stat().st_size / 1024 / 1024:.1f} MB")
+    
+    @contextmanager
+    def _get_connection(self):
+        """Context manager optimizado para conexiones"""
+        conn = self.connection_pool.get_connection()
+        try:
+            yield conn
+        finally:
+            self.connection_pool.return_connection(conn)
+    
+    def _clear_old_cache(self):
+        """Limpia cache antiguo automáticamente"""
+        now = time.time()
+        if now - self._last_cache_clear > self._cache_timeout:
+            self._cache.clear()
+            self._last_cache_clear = now
     
     def _init_database(self):
-        """Inicializa las tablas de la base de datos"""
+        """Inicializa las tablas con optimizaciones"""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             
-            # Tabla de datos de mercado
+            # Configuraciones de optimización
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+            cursor.execute("PRAGMA cache_size=10000")
+            cursor.execute("PRAGMA temp_store=MEMORY")
+            cursor.execute("PRAGMA mmap_size=268435456")  # 256MB
+            
+            # Tabla de datos de mercado optimizada
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS market_data (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id INTEGER PRIMARY KEY,
                     symbol TEXT NOT NULL,
                     timestamp INTEGER NOT NULL,
                     open REAL NOT NULL,
@@ -123,20 +312,14 @@ class DatabaseManager:
                     close REAL NOT NULL,
                     volume REAL NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    UNIQUE(symbol, timestamp)
+                    UNIQUE(symbol, timestamp) ON CONFLICT REPLACE
                 )
             """)
             
-            # Índices para optimizar consultas
-            cursor.execute("""
-                CREATE INDEX IF NOT EXISTS idx_market_data_symbol_timestamp 
-                ON market_data(symbol, timestamp)
-            """)
-            
-            # Tabla de trades
+            # Tabla de trades mejorada
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS trades (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id INTEGER PRIMARY KEY,
                     symbol TEXT NOT NULL,
                     side TEXT NOT NULL CHECK(side IN ('buy', 'sell')),
                     entry_price REAL NOT NULL,
@@ -155,24 +338,18 @@ class DatabaseManager:
                     stop_loss REAL,
                     take_profit REAL,
                     exit_reason TEXT,
+                    timeframe TEXT DEFAULT '1h',
+                    strategy_name TEXT DEFAULT 'default',
+                    market_conditions TEXT,
+                    risk_reward_ratio REAL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
             
-            cursor.execute("""
-                CREATE INDEX IF NOT EXISTS idx_trades_symbol_entry_time 
-                ON trades(symbol, entry_time)
-            """)
-            
-            cursor.execute("""
-                CREATE INDEX IF NOT EXISTS idx_trades_status 
-                ON trades(status)
-            """)
-            
-            # Tabla de métricas del modelo
+            # Tabla de métricas del modelo mejorada
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS model_metrics (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id INTEGER PRIMARY KEY,
                     model_version TEXT NOT NULL,
                     accuracy REAL NOT NULL,
                     precision_score REAL NOT NULL,
@@ -181,8 +358,14 @@ class DatabaseManager:
                     total_predictions INTEGER NOT NULL,
                     correct_predictions INTEGER NOT NULL,
                     training_time REAL NOT NULL,
-                    features_used TEXT NOT NULL,  -- JSON string
-                    hyperparameters TEXT NOT NULL,  -- JSON string
+                    features_used TEXT NOT NULL,
+                    hyperparameters TEXT NOT NULL,
+                    training_data_size INTEGER DEFAULT 0,
+                    validation_accuracy REAL DEFAULT 0.0,
+                    test_accuracy REAL DEFAULT 0.0,
+                    feature_importance TEXT,
+                    model_size_mb REAL DEFAULT 0.0,
+                    inference_time_ms REAL DEFAULT 0.0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
@@ -190,32 +373,36 @@ class DatabaseManager:
             # Tabla de configuraciones del sistema
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS system_config (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id INTEGER PRIMARY KEY,
                     config_key TEXT UNIQUE NOT NULL,
-                    config_value TEXT NOT NULL,  -- JSON string
+                    config_value TEXT NOT NULL,
                     description TEXT,
+                    config_type TEXT DEFAULT 'user',
+                    is_encrypted BOOLEAN DEFAULT FALSE,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
             
-            # Tabla de logs de sistema
+            # Tabla de logs optimizada con particionado por tiempo
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS system_logs (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id INTEGER PRIMARY KEY,
                     level TEXT NOT NULL,
                     message TEXT NOT NULL,
                     module TEXT,
                     function TEXT,
                     line_number INTEGER,
+                    extra_data TEXT,
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
             
-            # Tabla de performance diaria
+            # Tabla de performance diaria optimizada
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS daily_performance (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id INTEGER PRIMARY KEY,
                     date DATE UNIQUE NOT NULL,
+                    symbol TEXT,
                     total_trades INTEGER DEFAULT 0,
                     winning_trades INTEGER DEFAULT 0,
                     losing_trades INTEGER DEFAULT 0,
@@ -227,388 +414,207 @@ class DatabaseManager:
                     profit_factor REAL DEFAULT 0.0,
                     max_drawdown REAL DEFAULT 0.0,
                     sharpe_ratio REAL DEFAULT 0.0,
+                    sortino_ratio REAL DEFAULT 0.0,
+                    calmar_ratio REAL DEFAULT 0.0,
                     balance REAL DEFAULT 0.0,
+                    volume_traded REAL DEFAULT 0.0,
+                    largest_win REAL DEFAULT 0.0,
+                    largest_loss REAL DEFAULT 0.0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Tabla de análisis de mercado
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS market_analysis (
+                    id INTEGER PRIMARY KEY,
+                    symbol TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    timeframe TEXT NOT NULL,
+                    trend_direction TEXT,
+                    volatility_level REAL,
+                    support_level REAL,
+                    resistance_level REAL,
+                    rsi_14 REAL,
+                    macd_signal TEXT,
+                    volume_profile TEXT,
+                    market_regime TEXT,
+                    confidence_score REAL,
+                    analysis_version TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(symbol, timestamp, timeframe)
+                )
+            """)
+            
+            # Tabla de backup automático
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS backup_history (
+                    id INTEGER PRIMARY KEY,
+                    backup_type TEXT NOT NULL,
+                    file_path TEXT NOT NULL,
+                    file_size_mb REAL,
+                    records_count INTEGER,
+                    compression_ratio REAL,
+                    backup_duration_seconds REAL,
+                    status TEXT DEFAULT 'completed',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
             
             conn.commit()
-            logger.info("Esquema de base de datos inicializado exitosamente")
+            logger.info("Esquema de base de datos inicializado con optimizaciones")
     
-    @contextmanager
-    def _get_connection(self):
-        """Context manager para conexiones de base de datos thread-safe"""
-        with self._lock:
-            conn = sqlite3.connect(
-                self.db_path,
-                timeout=30.0,
-                check_same_thread=False
-            )
-            conn.row_factory = sqlite3.Row  # Para acceso por nombre de columna
-            try:
-                yield conn
-            finally:
-                conn.close()
-    
-    # =============================================================================
-    # OPERACIONES DE DATOS DE MERCADO
-    # =============================================================================
-    
-    def insert_market_data(self, data: MarketData) -> bool:
-        """Inserta datos de mercado"""
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    INSERT OR REPLACE INTO market_data 
-                    (symbol, timestamp, open, high, low, close, volume, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    data.symbol, data.timestamp, data.open, data.high,
-                    data.low, data.close, data.volume, data.created_at
-                ))
-                conn.commit()
-                return True
-        except Exception as e:
-            logger.error(f"Error insertando datos de mercado: {e}")
-            return False
-    
-    def insert_market_data_bulk(self, data_list: List[MarketData]) -> int:
-        """Inserta múltiples datos de mercado de forma eficiente"""
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                data_tuples = [
-                    (d.symbol, d.timestamp, d.open, d.high, d.low, d.close, d.volume, d.created_at)
-                    for d in data_list
-                ]
-                cursor.executemany("""
-                    INSERT OR REPLACE INTO market_data 
-                    (symbol, timestamp, open, high, low, close, volume, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, data_tuples)
-                conn.commit()
-                return len(data_list)
-        except Exception as e:
-            logger.error(f"Error insertando datos de mercado en bulk: {e}")
-            return 0
-    
-    def save_market_data(self, market_data: MarketData) -> bool:
-        """
-        Guarda un registro de datos de mercado en la base de datos
-        
-        Args:
-            market_data: Objeto MarketData a guardar
+    def _create_optimized_indices(self):
+        """Crea índices optimizados para consultas rápidas"""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
             
-        Returns:
-            True si se guardó exitosamente, False en caso contrario
-        """
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
+            # Índices para market_data (críticos para performance)
+            indices = [
+                "CREATE INDEX IF NOT EXISTS idx_market_data_symbol_timestamp ON market_data(symbol, timestamp)",
+                "CREATE INDEX IF NOT EXISTS idx_market_data_timestamp ON market_data(timestamp)",
+                "CREATE INDEX IF NOT EXISTS idx_market_data_symbol ON market_data(symbol)",
+                "CREATE INDEX IF NOT EXISTS idx_market_data_created_at ON market_data(created_at)",
                 
-                # Verificar si ya existe el registro (evitar duplicados)
-                cursor.execute("""
-                    SELECT id FROM market_data 
-                    WHERE symbol = ? AND timestamp = ?
-                """, (market_data.symbol, market_data.timestamp))
+                # Índices para trades
+                "CREATE INDEX IF NOT EXISTS idx_trades_symbol_entry_time ON trades(symbol, entry_time)",
+                "CREATE INDEX IF NOT EXISTS idx_trades_status ON trades(status)",
+                "CREATE INDEX IF NOT EXISTS idx_trades_strategy ON trades(strategy_name)",
+                "CREATE INDEX IF NOT EXISTS idx_trades_entry_time ON trades(entry_time)",
+                "CREATE INDEX IF NOT EXISTS idx_trades_pnl ON trades(pnl)",
                 
-                existing = cursor.fetchone()
+                # Índices para model_metrics
+                "CREATE INDEX IF NOT EXISTS idx_model_metrics_version ON model_metrics(model_version)",
+                "CREATE INDEX IF NOT EXISTS idx_model_metrics_created_at ON model_metrics(created_at)",
                 
-                if existing:
-                    # Actualizar registro existente
-                    cursor.execute("""
-                        UPDATE market_data 
-                        SET open = ?, high = ?, low = ?, close = ?, volume = ?
-                        WHERE symbol = ? AND timestamp = ?
-                    """, (market_data.open, market_data.high, market_data.low, 
-                          market_data.close, market_data.volume, 
-                          market_data.symbol, market_data.timestamp))
-                    logger.debug(f"Actualizado registro existente: {market_data.symbol} - {market_data.timestamp}")
-                else:
-                    # Insertar nuevo registro
-                    cursor.execute("""
-                        INSERT INTO market_data (symbol, timestamp, open, high, low, close, volume)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """, (market_data.symbol, market_data.timestamp, market_data.open,
-                          market_data.high, market_data.low, market_data.close, market_data.volume))
-                    logger.debug(f"Insertado nuevo registro: {market_data.symbol} - {market_data.timestamp}")
+                # Índices para performance
+                "CREATE INDEX IF NOT EXISTS idx_daily_performance_date ON daily_performance(date)",
+                "CREATE INDEX IF NOT EXISTS idx_daily_performance_symbol ON daily_performance(symbol)",
                 
-                conn.commit()
-                return True
+                # Índices para logs (con particionado temporal)
+                "CREATE INDEX IF NOT EXISTS idx_system_logs_timestamp ON system_logs(timestamp)",
+                "CREATE INDEX IF NOT EXISTS idx_system_logs_level ON system_logs(level)",
+                "CREATE INDEX IF NOT EXISTS idx_system_logs_module ON system_logs(module)",
                 
-        except Exception as e:
-            logger.error(f"Error guardando datos de mercado: {e}")
-            return False
-
+                # Índices para análisis de mercado
+                "CREATE INDEX IF NOT EXISTS idx_market_analysis_symbol_timestamp ON market_analysis(symbol, timestamp)",
+                "CREATE INDEX IF NOT EXISTS idx_market_analysis_timeframe ON market_analysis(timeframe)",
+            ]
+            
+            for index_sql in indices:
+                try:
+                    cursor.execute(index_sql)
+                except sqlite3.Error as e:
+                    logger.warning(f"Error creando índice: {e}")
+            
+            conn.commit()
+            logger.info("Índices optimizados creados")
+    
+    # =============================================================================
+    # OPERACIONES OPTIMIZADAS DE DATOS DE MERCADO
+    # =============================================================================
+    
+    @timing_decorator
     def bulk_save_market_data(self, market_data_list: List[MarketData]) -> int:
         """
-        Guarda múltiples registros de datos de mercado de forma eficiente
-        
-        Args:
-            market_data_list: Lista de objetos MarketData
-            
-        Returns:
-            Número de registros guardados exitosamente
+        Guarda múltiples registros de forma ultra-optimizada
+        Maneja millones de registros eficientemente
         """
         if not market_data_list:
             return 0
         
         saved_count = 0
-        batch_size = 1000  # Procesar en lotes para evitar memory issues
+        batch_size = 10000  # Optimizado para SQLite WAL
         
         try:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
                 
+                # Preparar statement una sola vez
+                insert_sql = """
+                    INSERT OR REPLACE INTO market_data 
+                    (symbol, timestamp, open, high, low, close, volume)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """
+                
+                # Procesar en lotes grandes
                 for i in range(0, len(market_data_list), batch_size):
                     batch = market_data_list[i:i + batch_size]
                     
+                    # Preparar datos del lote
+                    batch_data = []
                     for market_data in batch:
                         try:
-                            # Verificar duplicados
-                            cursor.execute("""
-                                SELECT id FROM market_data 
-                                WHERE symbol = ? AND timestamp = ?
-                            """, (market_data.symbol, market_data.timestamp))
-                            
-                            existing = cursor.fetchone()
-                            
-                            if not existing:
-                                cursor.execute("""
-                                    INSERT INTO market_data (symbol, timestamp, open, high, low, close, volume)
-                                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                                """, (market_data.symbol, market_data.timestamp, market_data.open,
-                                      market_data.high, market_data.low, market_data.close, market_data.volume))
-                                saved_count += 1
-                            
+                            # Validación ya hecha en __post_init__
+                            batch_data.append((
+                                market_data.symbol,
+                                market_data.timestamp,
+                                market_data.open,
+                                market_data.high,
+                                market_data.low,
+                                market_data.close,
+                                market_data.volume
+                            ))
                         except Exception as e:
-                            logger.error(f"Error en registro individual: {e}")
+                            logger.debug(f"Error preparando registro: {e}")
                             continue
                     
-                    # Commit del lote
-                    conn.commit()
-                    logger.debug(f"Lote {i//batch_size + 1} procesado: {len(batch)} registros")
+                    if batch_data:
+                        # Transacción atómica para el lote
+                        cursor.execute("BEGIN IMMEDIATE")
+                        try:
+                            cursor.executemany(insert_sql, batch_data)
+                            cursor.execute("COMMIT")
+                            saved_count += len(batch_data)
+                            
+                            # Log de progreso cada 100k registros
+                            if saved_count % 100000 == 0:
+                                logger.info(f"Guardados {saved_count:,} registros...")
+                                
+                        except Exception as e:
+                            cursor.execute("ROLLBACK")
+                            logger.error(f"Error en lote {i//batch_size + 1}: {e}")
+                            continue
                 
-            logger.info(f"Bulk save completado: {saved_count} registros guardados de {len(market_data_list)} totales")
+            logger.info(f"Bulk save completado: {saved_count:,} registros guardados de {len(market_data_list):,}")
+            
+            # Limpiar cache después de operación masiva
+            self._cache.clear()
+            
             return saved_count
             
         except Exception as e:
-            logger.error(f"Error en bulk save: {e}")
+            logger.error(f"Error crítico en bulk save: {e}")
             return saved_count
-
-    def get_market_data_count(self, symbol: str = None) -> int:
-        """
-        Obtiene el conteo de registros de datos de mercado
-        
-        Args:
-            symbol: Símbolo específico (opcional)
-            
-        Returns:
-            Número de registros
-        """
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                
-                if symbol:
-                    cursor.execute("SELECT COUNT(*) FROM market_data WHERE symbol = ?", (symbol,))
-                else:
-                    cursor.execute("SELECT COUNT(*) FROM market_data")
-                
-                count = cursor.fetchone()[0]
-                return count
-                
-        except Exception as e:
-            logger.error(f"Error obteniendo conteo de datos: {e}")
-            return 0
-
-    def get_symbols_list(self) -> List[str]:
-        """
-        Obtiene lista de símbolos únicos en la base de datos
-        
-        Returns:
-            Lista de símbolos únicos
-        """
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT DISTINCT symbol FROM market_data ORDER BY symbol")
-                symbols = [row[0] for row in cursor.fetchall()]
-                return symbols
-                
-        except Exception as e:
-            logger.error(f"Error obteniendo lista de símbolos: {e}")
-            return []
-
-    def get_data_date_range(self, symbol: str) -> tuple:
-        """
-        Obtiene el rango de fechas disponible para un símbolo
-        
-        Args:
-            symbol: Símbolo del activo
-            
-        Returns:
-            Tupla (fecha_inicio, fecha_fin) o (None, None) si no hay datos
-        """
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT MIN(timestamp), MAX(timestamp) 
-                    FROM market_data 
-                    WHERE symbol = ?
-                """, (symbol,))
-                
-                result = cursor.fetchone()
-                
-                if result and result[0] is not None and result[1] is not None:
-                    try:
-                        # Verificar si el timestamp está en milisegundos o segundos
-                        min_ts, max_ts = result[0], result[1]
-                        
-                        # Validar que los timestamps sean válidos
-                        if min_ts is None or max_ts is None or min_ts <= 0 or max_ts <= 0:
-                            logger.warning(f"Timestamps inválidos: min={min_ts}, max={max_ts}")
-                            return (None, None)
-                        
-                        # Convertir timestamps
-                        if min_ts > 10000000000:  # Timestamp en milisegundos
-                            start_date = datetime.fromtimestamp(min_ts / 1000)
-                            end_date = datetime.fromtimestamp(max_ts / 1000)
-                        else:  # Timestamp en segundos
-                            start_date = datetime.fromtimestamp(min_ts)
-                            end_date = datetime.fromtimestamp(max_ts)
-                        
-                        # Validar que las fechas sean razonables (no en el futuro lejano)
-                        now = datetime.now()
-                        if start_date > now or end_date > now:
-                            logger.warning(f"Fechas en el futuro: start={start_date}, end={end_date}")
-                            return (None, None)
-                        
-                        return (start_date, end_date)
-                    except (ValueError, OSError, OverflowError) as e:
-                        logger.error(f"Error convirtiendo timestamp: {e} - min_ts: {min_ts}, max_ts: {max_ts}")
-                        return (None, None)
-                else:
-                    return (None, None)
-                    
-        except Exception as e:
-            logger.error(f"Error obteniendo rango de fechas: {e}")
-            return (None, None)
-
-    def clean_old_data(self, days_to_keep: int = 365) -> int:
-        """
-        Limpia datos antiguos para mantener la base de datos optimizada
-        
-        Args:
-            days_to_keep: Días de datos a mantener
-            
-        Returns:
-            Número de registros eliminados
-        """
-        try:
-            cutoff_date = datetime.now() - timedelta(days=days_to_keep)
-            cutoff_timestamp = int(cutoff_date.timestamp())
-            
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    DELETE FROM market_data 
-                    WHERE timestamp < ?
-                """, (cutoff_timestamp,))
-                
-                deleted = cursor.rowcount
-                conn.commit()
-                
-            logger.info(f"Limpieza completada: {deleted} registros antiguos eliminados")
-            return deleted
-            
-        except Exception as e:
-            logger.error(f"Error limpiando datos antiguos: {e}")
-            return 0
-
-    def verify_data_integrity(self, symbol: str = None) -> Dict[str, Any]:
-        """
-        Verifica la integridad de los datos en la base de datos
-        
-        Args:
-            symbol: Símbolo específico a verificar (opcional)
-            
-        Returns:
-            Diccionario con estadísticas de integridad
-        """
-        try:
-            stats = {
-                'total_records': 0,
-                'symbols': [],
-                'date_ranges': {},
-                'gaps_detected': {},
-                'duplicate_timestamps': {},
-                'invalid_data': 0
-            }
-            
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                
-                # Estadísticas generales
-                if symbol:
-                    cursor.execute("SELECT COUNT(*) FROM market_data WHERE symbol = ?", (symbol,))
-                    stats['total_records'] = cursor.fetchone()[0]
-                    symbols_to_check = [symbol]
-                else:
-                    cursor.execute("SELECT COUNT(*) FROM market_data")
-                    stats['total_records'] = cursor.fetchone()[0]
-                    cursor.execute("SELECT DISTINCT symbol FROM market_data")
-                    symbols_to_check = [row[0] for row in cursor.fetchall()]
-                stats['symbols'] = symbols_to_check
-                
-                # Verificar cada símbolo
-                for sym in symbols_to_check:
-                    # Rango de fechas
-                    date_range = self.get_data_date_range(sym)
-                    stats['date_ranges'][sym] = date_range
-                    
-                    # Detectar duplicados
-                    cursor.execute("""
-                        SELECT timestamp, COUNT(*) as count
-                        FROM market_data 
-                        WHERE symbol = ?
-                        GROUP BY timestamp
-                        HAVING COUNT(*) > 1
-                    """, (sym,))
-                    
-                    duplicates = cursor.fetchall()
-                    stats['duplicate_timestamps'][sym] = len(duplicates)
-                    
-                    # Detectar datos inválidos (precios <= 0)
-                    cursor.execute("""
-                        SELECT COUNT(*) FROM market_data 
-                        WHERE symbol = ? AND (
-                            open <= 0 OR high <= 0 OR low <= 0 OR close <= 0 OR volume < 0
-                        )
-                    """, (sym,))
-                    
-                    invalid = cursor.fetchone()[0]
-                    stats['invalid_data'] += invalid
-            
-            return stats
-            
-        except Exception as e:
-            logger.error(f"Error verificando integridad de datos: {e}")
-            return {'error': str(e)}
     
-    def get_market_data(
+    @timing_decorator
+    def get_market_data_optimized(
         self, 
         symbol: str, 
         start_time: datetime = None, 
         end_time: datetime = None,
-        limit: int = None
+        limit: int = None,
+        columns: List[str] = None
     ) -> pd.DataFrame:
-        """Obtiene datos de mercado históricos"""
+        """Obtiene datos de mercado con optimizaciones avanzadas"""
         try:
+            # Crear cache key
+            cache_key = f"market_data_{symbol}_{start_time}_{end_time}_{limit}"
+            
+            # Verificar cache
+            self._clear_old_cache()
+            if cache_key in self._cache:
+                logger.debug(f"Cache hit para {symbol}")
+                return self._cache[cache_key].copy()
+            
+            # Seleccionar columnas específicas si se especifican
+            if columns:
+                columns_str = ', '.join(columns)
+            else:
+                columns_str = '*'
+            
             with self._get_connection() as conn:
-                query = "SELECT * FROM market_data WHERE symbol = ?"
+                query = f"SELECT {columns_str} FROM market_data WHERE symbol = ?"
                 params = [symbol]
                 
                 if start_time:
@@ -624,602 +630,646 @@ class DatabaseManager:
                 if limit:
                     query += f" LIMIT {limit}"
                 
+                # Usar pandas para lectura optimizada
                 df = pd.read_sql_query(query, conn, params=params)
                 
-                if not df.empty:
+                if not df.empty and 'timestamp' in df.columns:
+                    # Convertir timestamp de forma vectorizada
                     df['datetime'] = pd.to_datetime(df['timestamp'], unit='s')
                     df.set_index('datetime', inplace=True)
+                
+                # Guardar en cache si es una consulta pequeña
+                if len(df) < 50000:
+                    self._cache[cache_key] = df.copy()
                 
                 return df
                 
         except Exception as e:
-            logger.error(f"Error obteniendo datos de mercado: {e}")
+            logger.error(f"Error obteniendo datos de mercado optimizados: {e}")
             return pd.DataFrame()
     
-    def get_latest_market_data(self, symbol: str, count: int = 1) -> pd.DataFrame:
-        """Obtiene los últimos N registros de datos de mercado"""
-        try:
-            with self._get_connection() as conn:
-                query = """
-                    SELECT * FROM market_data 
-                    WHERE symbol = ? 
-                    ORDER BY timestamp DESC 
-                    LIMIT ?
-                """
-                df = pd.read_sql_query(query, conn, params=[symbol, count])
-                
-                if not df.empty:
-                    df['datetime'] = pd.to_datetime(df['timestamp'], unit='s')
-                    df.set_index('datetime', inplace=True)
-                    df = df.sort_index()  # Ordenar por fecha ascendente
-                
-                return df
-                
-        except Exception as e:
-            logger.error(f"Error obteniendo últimos datos de mercado: {e}")
-            return pd.DataFrame()
-    
-    # =============================================================================
-    # OPERACIONES DE TRADES
-    # =============================================================================
-    
-    def insert_trade(self, trade: TradeRecord) -> Optional[int]:
-        """Inserta un nuevo trade"""
+    def get_market_data_count_fast(self, symbol: str = None) -> int:
+        """Obtiene conteo rápido usando índices"""
         try:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute("""
-                    INSERT INTO trades (
-                        symbol, side, entry_price, exit_price, quantity,
-                        entry_time, exit_time, pnl, pnl_pct, confidence,
-                        model_prediction, actual_result, fees, trade_id,
-                        status, stop_loss, take_profit, exit_reason, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    trade.symbol, trade.side, trade.entry_price, trade.exit_price,
-                    trade.quantity, trade.entry_time, trade.exit_time, trade.pnl,
-                    trade.pnl_pct, trade.confidence, trade.model_prediction,
-                    trade.actual_result, trade.fees, trade.trade_id, trade.status,
-                    trade.stop_loss, trade.take_profit, trade.exit_reason, trade.created_at
-                ))
-                conn.commit()
-                return cursor.lastrowid
-        except Exception as e:
-            logger.error(f"Error insertando trade: {e}")
-            return None
-    
-    def update_trade(self, trade_id: int, updates: Dict[str, Any]) -> bool:
-        """Actualiza un trade existente"""
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                
-                # Construir query dinámicamente
-                set_clause = ", ".join([f"{key} = ?" for key in updates.keys()])
-                query = f"UPDATE trades SET {set_clause} WHERE id = ?"
-                
-                params = list(updates.values()) + [trade_id]
-                cursor.execute(query, params)
-                conn.commit()
-                
-                return cursor.rowcount > 0
-        except Exception as e:
-            logger.error(f"Error actualizando trade {trade_id}: {e}")
-            return False
-    
-    def close_trade(
-        self, 
-        trade_id: int, 
-        exit_price: float, 
-        exit_time: datetime = None,
-        exit_reason: str = "manual"
-    ) -> bool:
-        """Cierra un trade"""
-        if exit_time is None:
-            exit_time = datetime.now()
-        
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                
-                # Obtener información del trade
-                cursor.execute("SELECT * FROM trades WHERE id = ?", (trade_id,))
-                trade_row = cursor.fetchone()
-                
-                if not trade_row:
-                    logger.warning(f"Trade {trade_id} no encontrado")
-                    return False
-                
-                # Calcular PnL
-                entry_price = trade_row['entry_price']
-                quantity = trade_row['quantity']
-                side = trade_row['side']
-                
-                if side == 'buy':
-                    pnl = (exit_price - entry_price) * quantity
-                    pnl_pct = (exit_price - entry_price) / entry_price * 100
-                else:  # sell
-                    pnl = (entry_price - exit_price) * quantity
-                    pnl_pct = (entry_price - exit_price) / entry_price * 100
-                
-                # Actualizar trade
-                updates = {
-                    'exit_price': exit_price,
-                    'exit_time': exit_time,
-                    'pnl': pnl,
-                    'pnl_pct': pnl_pct,
-                    'status': 'closed',
-                    'exit_reason': exit_reason
-                }
-                
-                return self.update_trade(trade_id, updates)
-                
-        except Exception as e:
-            logger.error(f"Error cerrando trade {trade_id}: {e}")
-            return False
-    
-    def get_trades(
-        self,
-        symbol: str = None,
-        status: str = None,
-        start_date: datetime = None,
-        end_date: datetime = None,
-        limit: int = None
-    ) -> pd.DataFrame:
-        """Obtiene trades con filtros opcionales"""
-        try:
-            with self._get_connection() as conn:
-                query = "SELECT * FROM trades WHERE 1=1"
-                params = []
                 
                 if symbol:
-                    query += " AND symbol = ?"
-                    params.append(symbol)
-                
-                if status:
-                    query += " AND status = ?"
-                    params.append(status)
-                
-                if start_date:
-                    query += " AND entry_time >= ?"
-                    params.append(start_date)
-                
-                if end_date:
-                    query += " AND entry_time <= ?"
-                    params.append(end_date)
-                
-                query += " ORDER BY entry_time DESC"
-                
-                if limit:
-                    query += f" LIMIT {limit}"
-                
-                return pd.read_sql_query(query, conn, params=params)
-                
-        except Exception as e:
-            logger.error(f"Error obteniendo trades: {e}")
-            return pd.DataFrame()
-    
-    def get_open_trades(self, symbol: str = None) -> pd.DataFrame:
-        """Obtiene trades abiertos"""
-        return self.get_trades(symbol=symbol, status='open')
-    
-    def get_performance_stats(self, days: int = 30) -> Dict[str, float]:
-        """Calcula estadísticas de performance"""
-        try:
-            start_date = datetime.now() - timedelta(days=days)
-            trades_df = self.get_trades(
-                status='closed',
-                start_date=start_date
-            )
-            
-            if trades_df.empty:
-                return {}
-            
-            # Calcular métricas básicas
-            total_trades = len(trades_df)
-            winning_trades = len(trades_df[trades_df['pnl'] > 0])
-            losing_trades = len(trades_df[trades_df['pnl'] < 0])
-            
-            total_pnl = trades_df['pnl'].sum()
-            total_fees = trades_df['fees'].sum()
-            net_pnl = total_pnl - total_fees
-            
-            win_rate = (winning_trades / total_trades * 100) if total_trades > 0 else 0
-            
-            avg_win = trades_df[trades_df['pnl'] > 0]['pnl'].mean() if winning_trades > 0 else 0
-            avg_loss = trades_df[trades_df['pnl'] < 0]['pnl'].mean() if losing_trades > 0 else 0
-            
-            profit_factor = abs(avg_win * winning_trades / (avg_loss * losing_trades)) if avg_loss != 0 else float('inf')
-            
-            # Calcular drawdown
-            trades_df['cumulative_pnl'] = trades_df['pnl'].cumsum()
-            trades_df['running_max'] = trades_df['cumulative_pnl'].expanding().max()
-            trades_df['drawdown'] = trades_df['cumulative_pnl'] - trades_df['running_max']
-            max_drawdown = trades_df['drawdown'].min()
-            
-            return {
-                'total_trades': total_trades,
-                'winning_trades': winning_trades,
-                'losing_trades': losing_trades,
-                'win_rate': win_rate,
-                'total_pnl': total_pnl,
-                'total_fees': total_fees,
-                'net_pnl': net_pnl,
-                'avg_win': avg_win,
-                'avg_loss': avg_loss,
-                'profit_factor': profit_factor,
-                'max_drawdown': max_drawdown,
-                'avg_trade_duration_hours': (
-                    pd.to_datetime(trades_df['exit_time']) - pd.to_datetime(trades_df['entry_time'])
-                ).dt.total_seconds().mean() / 3600 if total_trades > 0 else 0
-            }
-            
-        except Exception as e:
-            logger.error(f"Error calculando estadísticas de performance: {e}")
-            return {}
-    
-    # =============================================================================
-    # OPERACIONES DE MÉTRICAS DEL MODELO
-    # =============================================================================
-    
-    def save_model_metrics(self, metrics: ModelMetrics) -> bool:
-        """Guarda métricas del modelo de ML"""
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    INSERT INTO model_metrics (
-                        model_version, accuracy, precision_score, recall_score,
-                        f1_score, total_predictions, correct_predictions,
-                        training_time, features_used, hyperparameters, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    metrics.model_version, metrics.accuracy, metrics.precision,
-                    metrics.recall, metrics.f1_score, metrics.total_predictions,
-                    metrics.correct_predictions, metrics.training_time,
-                    json.dumps(metrics.features_used),
-                    json.dumps(metrics.hyperparameters),
-                    metrics.created_at
-                ))
-                conn.commit()
-                return True
-        except Exception as e:
-            logger.error(f"Error guardando métricas del modelo: {e}")
-            return False
-    
-    def get_latest_model_metrics(self) -> Optional[ModelMetrics]:
-        """Obtiene las últimas métricas del modelo"""
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT * FROM model_metrics 
-                    ORDER BY created_at DESC 
-                    LIMIT 1
-                """)
-                row = cursor.fetchone()
-                
-                if row:
-                    return ModelMetrics(
-                        model_version=row['model_version'],
-                        accuracy=row['accuracy'],
-                        precision=row['precision_score'],
-                        recall=row['recall_score'],
-                        f1_score=row['f1_score'],
-                        total_predictions=row['total_predictions'],
-                        correct_predictions=row['correct_predictions'],
-                        training_time=row['training_time'],
-                        features_used=json.loads(row['features_used']),
-                        hyperparameters=json.loads(row['hyperparameters']),
-                        created_at=row['created_at']
-                    )
-                return None
-        except Exception as e:
-            logger.error(f"Error obteniendo métricas del modelo: {e}")
-            return None
-    
-    # =============================================================================
-    # OPERACIONES DE CONFIGURACIÓN DEL SISTEMA
-    # =============================================================================
-    
-    def save_system_config(self, key: str, value: Any, description: str = None) -> bool:
-        """Guarda configuración del sistema"""
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    INSERT OR REPLACE INTO system_config 
-                    (config_key, config_value, description, updated_at)
-                    VALUES (?, ?, ?, ?)
-                """, (key, json.dumps(value), description, datetime.now()))
-                conn.commit()
-                return True
-        except Exception as e:
-            logger.error(f"Error guardando configuración del sistema: {e}")
-            return False
-    
-    def get_system_config(self, key: str) -> Any:
-        """Obtiene configuración del sistema"""
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute(
-                    "SELECT config_value FROM system_config WHERE config_key = ?", 
-                    (key,)
-                )
-                row = cursor.fetchone()
-                return json.loads(row['config_value']) if row else None
-        except Exception as e:
-            logger.error(f"Error obteniendo configuración del sistema: {e}")
-            return None
-    
-    # =============================================================================
-    # OPERACIONES DE MANTENIMIENTO
-    # =============================================================================
-    
-    def cleanup_old_data(self, days_to_keep: int = 90) -> int:
-        """Limpia datos antiguos"""
-        try:
-            cutoff_date = datetime.now() - timedelta(days=days_to_keep)
-            deleted_count = 0
-            
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                
-                # Limpiar datos de mercado antiguos
-                cursor.execute(
-                    "DELETE FROM market_data WHERE created_at < ?",
-                    (cutoff_date,)
-                )
-                deleted_count += cursor.rowcount
-                
-                # Limpiar logs antiguos
-                cursor.execute(
-                    "DELETE FROM system_logs WHERE timestamp < ?",
-                    (cutoff_date,)
-                )
-                deleted_count += cursor.rowcount
-                
-                conn.commit()
-                
-            logger.info(f"Datos antiguos limpiados: {deleted_count} registros eliminados")
-            return deleted_count
-            
-        except Exception as e:
-            logger.error(f"Error limpiando datos antiguos: {e}")
-            return 0
-    
-    def backup_database(self, backup_path: str = None) -> bool:
-        """Crea backup de la base de datos"""
-        try:
-            if backup_path is None:
-                from config.settings import BACKUPS_DIR
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                backup_path = BACKUPS_DIR / f"trading_bot_backup_{timestamp}.db"
-            
-            import shutil
-            shutil.copy2(self.db_path, backup_path)
-            logger.info(f"Backup creado: {backup_path}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error creando backup: {e}")
-            return False
-    
-    def get_database_stats(self) -> Dict[str, int]:
-        """Obtiene estadísticas de la base de datos"""
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                stats = {}
-                
-                # Contar registros en cada tabla
-                tables = ['market_data', 'trades', 'model_metrics', 'system_config', 'system_logs']
-                total_records = 0
-                
-                for table in tables:
-                    cursor.execute(f"SELECT COUNT(*) FROM {table}")
-                    count = cursor.fetchone()[0]
-                    stats[f"{table}_count"] = count
-                    total_records += count
-                
-                # Agregar total de registros (principalmente market_data)
-                stats['total_records'] = stats.get('market_data_count', 0)
-                stats['all_records'] = total_records
-                
-                # Tamaño de archivo
-                stats['file_size_mb'] = self.db_path.stat().st_size / (1024 * 1024)
-                
-                return stats
-                
-        except Exception as e:
-            logger.error(f"Error obteniendo estadísticas de BD: {e}")
-            return {}
-    
-    def get_historical_data_summary(self) -> Dict[str, Any]:
-        """
-        Obtiene un resumen detallado de los datos históricos
-        Reemplaza la funcionalidad de scripts/verificar_historico*.py
-        """
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                
-                # Obtener todos los símbolos
-                cursor.execute("SELECT DISTINCT symbol FROM market_data ORDER BY symbol")
-                symbols = [row[0] for row in cursor.fetchall()]
-                
-                summary = {
-                    'total_symbols': len(symbols),
-                    'symbols': [],
-                    'total_records': 0,
-                    'date_ranges': {},
-                    'recommendations': []
-                }
-                
-                for symbol in symbols:
-                    # Estadísticas por símbolo
+                    # Usar índice optimizado
                     cursor.execute("""
-                        SELECT 
-                            COUNT(*) as count,
-                            MIN(timestamp) as min_ts,
-                            MAX(timestamp) as max_ts
-                        FROM market_data 
+                        SELECT COUNT(*) FROM market_data 
                         WHERE symbol = ?
                     """, (symbol,))
-                    
-                    result = cursor.fetchone()
-                    if result:
-                        count, min_ts, max_ts = result
-                        summary['total_records'] += count
-                        
-                        # Convertir timestamps a fechas
-                        try:
-                            # Verificar si el timestamp está en milisegundos o segundos
-                            if min_ts > 10000000000:  # Timestamp en milisegundos
-                                min_date = datetime.fromtimestamp(min_ts / 1000)
-                                max_date = datetime.fromtimestamp(max_ts / 1000)
-                            else:  # Timestamp en segundos
-                                min_date = datetime.fromtimestamp(min_ts)
-                                max_date = datetime.fromtimestamp(max_ts)
-                            
-                            duration_days = (max_date - min_date).days
-                            
-                            symbol_info = {
-                                'symbol': symbol,
-                                'count': count,
-                                'start_date': min_date.strftime('%Y-%m-%d %H:%M'),
-                                'end_date': max_date.strftime('%Y-%m-%d %H:%M'),
-                                'duration_days': duration_days,
-                                'status': 'OK'
-                            }
-                            
-                            summary['symbols'].append(symbol_info)
-                            summary['date_ranges'][symbol] = {
-                                'start': min_date,
-                                'end': max_date,
-                                'duration_days': duration_days
-                            }
-                            
-                        except Exception as e:
-                            symbol_info = {
-                                'symbol': symbol,
-                                'count': count,
-                                'start_date': None,
-                                'end_date': None,
-                                'duration_days': 0,
-                                'status': f'ERROR: {str(e)}'
-                            }
-                            summary['symbols'].append(symbol_info)
-                
-                # Generar recomendaciones
-                if summary['total_symbols'] >= 2:
-                    summary['recommendations'].append("✅ Suficientes símbolos para entrenamiento")
                 else:
-                    summary['recommendations'].append("⚠️ Necesitas más símbolos para entrenamiento")
+                    # Usar estadísticas de SQLite si están disponibles
+                    cursor.execute("SELECT COUNT(*) FROM market_data")
                 
-                # Verificar cobertura temporal
-                valid_symbols = [s for s in summary['symbols'] if s['status'] == 'OK']
-                if valid_symbols:
-                    min_duration = min(s['duration_days'] for s in valid_symbols)
-                    if min_duration >= 365:
-                        summary['recommendations'].append("✅ Excelente cobertura temporal (1+ años)")
-                    elif min_duration >= 180:
-                        summary['recommendations'].append("✅ Buena cobertura temporal (6+ meses)")
-                    else:
-                        summary['recommendations'].append("⚠️ Cobertura temporal limitada")
+                count = cursor.fetchone()[0]
+                return count
+                
+        except Exception as e:
+            logger.error(f"Error obteniendo conteo rápido: {e}")
+            return 0
+    
+    def get_data_summary_optimized(self) -> Dict[str, Any]:
+        """Obtiene resumen optimizado de todos los datos"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Consulta optimizada usando GROUP BY
+                cursor.execute("""
+                    SELECT 
+                        symbol,
+                        COUNT(*) as record_count,
+                        MIN(timestamp) as min_timestamp,
+                        MAX(timestamp) as max_timestamp,
+                        MIN(created_at) as first_insert,
+                        MAX(created_at) as last_insert
+                    FROM market_data 
+                    GROUP BY symbol
+                    ORDER BY symbol
+                """)
+                
+                results = cursor.fetchall()
+                summary = {
+                    'total_symbols': len(results),
+                    'symbols': [],
+                    'total_records': 0,
+                    'global_date_range': None,
+                    'database_size_mb': self.db_path.stat().st_size / 1024 / 1024
+                }
+                
+                min_global_ts = None
+                max_global_ts = None
+                
+                for row in results:
+                    symbol_info = {
+                        'symbol': row['symbol'],
+                        'record_count': row['record_count'],
+                        'date_range': None,
+                        'duration_days': 0,
+                        'status': 'OK'
+                    }
+                    
+                    try:
+                        if row['min_timestamp'] and row['max_timestamp']:
+                            min_dt = datetime.fromtimestamp(row['min_timestamp'])
+                            max_dt = datetime.fromtimestamp(row['max_timestamp'])
+                            
+                            symbol_info['date_range'] = (min_dt, max_dt)
+                            symbol_info['duration_days'] = (max_dt - min_dt).days
+                            
+                            # Actualizar rango global
+                            if min_global_ts is None or row['min_timestamp'] < min_global_ts:
+                                min_global_ts = row['min_timestamp']
+                            if max_global_ts is None or row['max_timestamp'] > max_global_ts:
+                                max_global_ts = row['max_timestamp']
+                    
+                    except Exception as e:
+                        symbol_info['status'] = f'ERROR: {str(e)}'
+                    
+                    summary['symbols'].append(symbol_info)
+                    summary['total_records'] += row['record_count']
+                
+                # Rango global
+                if min_global_ts and max_global_ts:
+                    summary['global_date_range'] = (
+                        datetime.fromtimestamp(min_global_ts),
+                        datetime.fromtimestamp(max_global_ts)
+                    )
                 
                 return summary
                 
         except Exception as e:
-            logger.error(f"Error obteniendo resumen de datos históricos: {e}")
+            logger.error(f"Error obteniendo resumen optimizado: {e}")
             return {'error': str(e)}
     
-    def fix_timestamp_issues(self, symbol: str = None) -> Dict[str, Any]:
-        """
-        Corrige problemas de timestamps (milisegundos vs segundos)
-        Reemplaza la funcionalidad de scripts/corregir_timestamps.py
-        """
+    # =============================================================================
+    # ANÁLISIS AVANZADO Y MANTENIMIENTO
+    # =============================================================================
+    
+    def analyze_data_quality(self, symbol: str = None) -> Dict[str, Any]:
+        """Análisis profundo de calidad de datos"""
         try:
-            symbols_to_fix = [symbol] if symbol else []
-            if not symbols_to_fix:
-                # Obtener símbolos con timestamps problemáticos
-                with self._get_connection() as conn:
-                    cursor = conn.cursor()
-                    cursor.execute("""
-                        SELECT DISTINCT symbol 
-                        FROM market_data 
-                        WHERE timestamp > 10000000000
-                    """)
-                    symbols_to_fix = [row[0] for row in cursor.fetchall()]
-            
-            results = {}
-            
-            for sym in symbols_to_fix:
-                with self._get_connection() as conn:
-                    cursor = conn.cursor()
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                analysis = {
+                    'timestamp': datetime.now().isoformat(),
+                    'symbols_analyzed': [],
+                    'quality_issues': {
+                        'duplicate_timestamps': 0,
+                        'invalid_ohlcv': 0,
+                        'zero_volume_periods': 0,
+                        'extreme_price_moves': 0,
+                        'timestamp_gaps': 0
+                    },
+                    'recommendations': []
+                }
+                
+                # Obtener símbolos a analizar
+                if symbol:
+                    symbols = [symbol]
+                else:
+                    cursor.execute("SELECT DISTINCT symbol FROM market_data")
+                    symbols = [row[0] for row in cursor.fetchall()]
+                
+                for sym in symbols:
+                    logger.info(f"Analizando calidad de datos para {sym}...")
                     
-                    # Contar registros problemáticos
-                    cursor.execute("""
-                        SELECT COUNT(*) 
-                        FROM market_data 
-                        WHERE symbol = ? AND timestamp > 10000000000
-                    """, (sym,))
-                    count_problematic = cursor.fetchone()[0]
-                    
-                    if count_problematic == 0:
-                        results[sym] = {'status': 'OK', 'message': 'No hay timestamps problemáticos'}
-                        continue
-                    
-                    # Estrategia más segura: eliminar duplicados primero, luego corregir
-                    print(f"🔧 Procesando {sym}: {count_problematic} registros problemáticos")
-                    
-                    # Obtener registros problemáticos
-                    cursor.execute("""
-                        SELECT id, timestamp, open, high, low, close, volume
-                        FROM market_data 
-                        WHERE symbol = ? AND timestamp > 10000000000
-                        ORDER BY timestamp
-                    """, (sym,))
-                    problematic_records = cursor.fetchall()
-                    
-                    # Eliminar registros problemáticos
-                    cursor.execute("""
-                        DELETE FROM market_data 
-                        WHERE symbol = ? AND timestamp > 10000000000
-                    """, (sym,))
-                    deleted_count = cursor.rowcount
-                    
-                    # Reinsertar con timestamps corregidos
-                    inserted_count = 0
-                    for record in problematic_records:
-                        record_id, timestamp_ms, open_price, high_price, low_price, close_price, volume = record
-                        timestamp_sec = timestamp_ms / 1000
-                        
-                        try:
-                            cursor.execute("""
-                                INSERT INTO market_data (symbol, timestamp, open, high, low, close, volume)
-                                VALUES (?, ?, ?, ?, ?, ?, ?)
-                            """, (sym, timestamp_sec, open_price, high_price, low_price, close_price, volume))
-                            inserted_count += 1
-                        except Exception as e:
-                            # Si hay conflicto, continuar con el siguiente
-                            continue
-                    
-                    conn.commit()
-                    
-                    results[sym] = {
-                        'status': 'FIXED',
-                        'deleted_count': deleted_count,
-                        'inserted_count': inserted_count,
-                        'message': f'Eliminados {deleted_count}, reinsertados {inserted_count} registros'
+                    symbol_analysis = {
+                        'symbol': sym,
+                        'issues': {},
+                        'quality_score': 100.0
                     }
+                    
+                    # 1. Detectar duplicados
+                    cursor.execute("""
+                        SELECT COUNT(*) FROM (
+                            SELECT timestamp, COUNT(*) as count
+                            FROM market_data 
+                            WHERE symbol = ?
+                            GROUP BY timestamp
+                            HAVING COUNT(*) > 1
+                        )
+                    """, (sym,))
+                    duplicates = cursor.fetchone()[0]
+                    symbol_analysis['issues']['duplicates'] = duplicates
+                    analysis['quality_issues']['duplicate_timestamps'] += duplicates
+                    
+                    # 2. Detectar OHLCV inválidos
+                    cursor.execute("""
+                        SELECT COUNT(*) FROM market_data 
+                        WHERE symbol = ? AND (
+                            open <= 0 OR high <= 0 OR low <= 0 OR close <= 0 OR
+                            high < low OR open > high OR open < low OR
+                            close > high OR close < low OR volume < 0
+                        )
+                    """, (sym,))
+                    invalid_ohlcv = cursor.fetchone()[0]
+                    symbol_analysis['issues']['invalid_ohlcv'] = invalid_ohlcv
+                    analysis['quality_issues']['invalid_ohlcv'] += invalid_ohlcv
+                    
+                    # 3. Períodos con volumen cero
+                    cursor.execute("""
+                        SELECT COUNT(*) FROM market_data 
+                        WHERE symbol = ? AND volume = 0
+                    """, (sym,))
+                    zero_volume = cursor.fetchone()[0]
+                    symbol_analysis['issues']['zero_volume'] = zero_volume
+                    analysis['quality_issues']['zero_volume_periods'] += zero_volume
+                    
+                    # 4. Movimientos de precio extremos (>20% en una vela)
+                    cursor.execute("""
+                        SELECT COUNT(*) FROM market_data 
+                        WHERE symbol = ? AND (
+                            ABS(close - open) / open > 0.20 OR
+                            (high - low) / low > 0.30
+                        )
+                    """, (sym,))
+                    extreme_moves = cursor.fetchone()[0]
+                    symbol_analysis['issues']['extreme_moves'] = extreme_moves
+                    analysis['quality_issues']['extreme_price_moves'] += extreme_moves
+                    
+                    # Calcular puntuación de calidad
+                    total_records = self.get_market_data_count_fast(sym)
+                    if total_records > 0:
+                        issues_count = sum(symbol_analysis['issues'].values())
+                        symbol_analysis['quality_score'] = max(0, 100 - (issues_count / total_records * 100))
+                    
+                    analysis['symbols_analyzed'].append(symbol_analysis)
+                
+                # Generar recomendaciones
+                total_issues = sum(analysis['quality_issues'].values())
+                if total_issues == 0:
+                    analysis['recommendations'].append("✅ Excelente calidad de datos")
+                else:
+                    if analysis['quality_issues']['duplicate_timestamps'] > 0:
+                        analysis['recommendations'].append("🔧 Ejecutar limpieza de duplicados")
+                    if analysis['quality_issues']['invalid_ohlcv'] > 0:
+                        analysis['recommendations'].append("⚠️ Corregir datos OHLCV inválidos")
+                    if analysis['quality_issues']['zero_volume_periods'] > 100:
+                        analysis['recommendations'].append("📊 Revisar períodos sin volumen")
+                
+                return analysis
+                
+        except Exception as e:
+            logger.error(f"Error en análisis de calidad: {e}")
+            return {'error': str(e)}
+    
+    def optimize_database(self) -> Dict[str, Any]:
+        """Optimización automática de la base de datos"""
+        try:
+            optimization_results = {
+                'start_time': datetime.now().isoformat(),
+                'operations': [],
+                'size_before_mb': self.db_path.stat().st_size / 1024 / 1024,
+                'size_after_mb': 0,
+                'space_saved_mb': 0
+            }
             
-            return results
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # 1. VACUUM para reorganizar la base de datos
+                logger.info("Ejecutando VACUUM...")
+                start_time = time.time()
+                cursor.execute("VACUUM")
+                vacuum_time = time.time() - start_time
+                optimization_results['operations'].append({
+                    'operation': 'VACUUM',
+                    'duration_seconds': round(vacuum_time, 2),
+                    'status': 'completed'
+                })
+                
+                # 2. ANALYZE para actualizar estadísticas
+                logger.info("Actualizando estadísticas...")
+                cursor.execute("ANALYZE")
+                optimization_results['operations'].append({
+                    'operation': 'ANALYZE',
+                    'status': 'completed'
+                })
+                
+                # 3. Reindexar
+                logger.info("Reindexando...")
+                cursor.execute("REINDEX")
+                optimization_results['operations'].append({
+                    'operation': 'REINDEX',
+                    'status': 'completed'
+                })
+                
+                conn.commit()
+            
+            # Calcular espacio ahorrado
+            optimization_results['size_after_mb'] = self.db_path.stat().st_size / 1024 / 1024
+            optimization_results['space_saved_mb'] = (
+                optimization_results['size_before_mb'] - optimization_results['size_after_mb']
+            )
+            optimization_results['end_time'] = datetime.now().isoformat()
+            
+            logger.info(f"Optimización completada. Espacio ahorrado: {optimization_results['space_saved_mb']:.1f} MB")
+            return optimization_results
             
         except Exception as e:
-            logger.error(f"Error corrigiendo timestamps: {e}")
+            logger.error(f"Error en optimización: {e}")
             return {'error': str(e)}
+    
+    def create_backup(self, backup_path: str = None, compress: bool = True) -> Dict[str, Any]:
+        """Crea backup optimizado con compresión opcional"""
+        try:
+            if backup_path is None:
+                from config.settings import BACKUPS_DIR
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                backup_name = f"trading_bot_backup_{timestamp}"
+                backup_path = BACKUPS_DIR / f"{backup_name}.db"
+                if compress:
+                    backup_path = BACKUPS_DIR / f"{backup_name}.db.gz"
+            
+            backup_info = {
+                'start_time': datetime.now().isoformat(),
+                'backup_path': str(backup_path),
+                'compressed': compress,
+                'original_size_mb': self.db_path.stat().st_size / 1024 / 1024,
+                'backup_size_mb': 0,
+                'compression_ratio': 1.0,
+                'duration_seconds': 0,
+                'status': 'started'
+            }
+            
+            start_time = time.time()
+            
+            if compress:
+                # Backup con compresión
+                with open(self.db_path, 'rb') as f_in:
+                    with gzip.open(backup_path, 'wb', compresslevel=6) as f_out:
+                        f_out.writelines(f_in)
+            else:
+                # Backup simple
+                import shutil
+                shutil.copy2(self.db_path, backup_path)
+            
+            # Estadísticas finales
+            backup_info['duration_seconds'] = round(time.time() - start_time, 2)
+            backup_info['backup_size_mb'] = backup_path.stat().st_size / 1024 / 1024
+            backup_info['compression_ratio'] = (
+                backup_info['original_size_mb'] / backup_info['backup_size_mb']
+                if backup_info['backup_size_mb'] > 0 else 1.0
+            )
+            backup_info['status'] = 'completed'
+            backup_info['end_time'] = datetime.now().isoformat()
+            
+            # Registrar en historial
+            self._record_backup_history(backup_info)
+            
+            logger.info(f"Backup creado: {backup_path} ({backup_info['backup_size_mb']:.1f} MB)")
+            return backup_info
+            
+        except Exception as e:
+            logger.error(f"Error creando backup: {e}")
+            return {'error': str(e), 'status': 'failed'}
+    
+    def _record_backup_history(self, backup_info: Dict[str, Any]):
+        """Registra información del backup en el historial"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO backup_history (
+                        backup_type, file_path, file_size_mb, 
+                        compression_ratio, backup_duration_seconds, status
+                    ) VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    'full' if not backup_info.get('compressed') else 'compressed',
+                    backup_info['backup_path'],
+                    backup_info['backup_size_mb'],
+                    backup_info['compression_ratio'],
+                    backup_info['duration_seconds'],
+                    backup_info['status']
+                ))
+                conn.commit()
+        except Exception as e:
+            logger.error(f"Error registrando historial de backup: {e}")
+    
+    def cleanup_old_data_advanced(self, 
+                                 days_to_keep: int = 365,
+                                 dry_run: bool = False) -> Dict[str, Any]:
+        """Limpieza avanzada con preview y configuración granular"""
+        try:
+            cutoff_date = datetime.now() - timedelta(days=days_to_keep)
+            cutoff_timestamp = int(cutoff_date.timestamp())
+            
+            cleanup_results = {
+                'dry_run': dry_run,
+                'cutoff_date': cutoff_date.isoformat(),
+                'records_to_delete': {},
+                'records_deleted': {},
+                'total_deleted': 0,
+                'space_freed_mb': 0
+            }
+            
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Analizar qué se va a eliminar
+                tables_to_clean = [
+                    'market_data',
+                    'system_logs',
+                    'market_analysis'
+                ]
+                
+                for table in tables_to_clean:
+                    # Contar registros a eliminar
+                    if table == 'market_data':
+                        cursor.execute(f"""
+                            SELECT COUNT(*) FROM {table} 
+                            WHERE timestamp < ?
+                        """, (cutoff_timestamp,))
+                    else:
+                        cursor.execute(f"""
+                            SELECT COUNT(*) FROM {table} 
+                            WHERE created_at < ?
+                        """, (cutoff_date,))
+                    
+                    count = cursor.fetchone()[0]
+                    cleanup_results['records_to_delete'][table] = count
+                    
+                    if not dry_run and count > 0:
+                        # Ejecutar limpieza
+                        if table == 'market_data':
+                            cursor.execute(f"""
+                                DELETE FROM {table} 
+                                WHERE timestamp < ?
+                            """, (cutoff_timestamp,))
+                        else:
+                            cursor.execute(f"""
+                                DELETE FROM {table} 
+                                WHERE created_at < ?
+                            """, (cutoff_date,))
+                        
+                        deleted = cursor.rowcount
+                        cleanup_results['records_deleted'][table] = deleted
+                        cleanup_results['total_deleted'] += deleted
+                
+                if not dry_run:
+                    conn.commit()
+                    # Ejecutar VACUUM para liberar espacio
+                    cursor.execute("VACUUM")
+            
+            if not dry_run:
+                logger.info(f"Limpieza completada: {cleanup_results['total_deleted']} registros eliminados")
+            else:
+                logger.info(f"Preview de limpieza: {sum(cleanup_results['records_to_delete'].values())} registros serían eliminados")
+            
+            return cleanup_results
+            
+        except Exception as e:
+            logger.error(f"Error en limpieza avanzada: {e}")
+            return {'error': str(e)}
+    
+    def get_performance_statistics(self) -> Dict[str, Any]:
+        """Estadísticas de performance de la base de datos"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                stats = {
+                    'database_size_mb': self.db_path.stat().st_size / 1024 / 1024,
+                    'table_stats': {},
+                    'index_stats': {},
+                    'query_performance': {},
+                    'recommendations': []
+                }
+                
+                # Estadísticas por tabla
+                
+                tables = [row[0] for row in cursor.fetchall()]
+                
+                for table in tables:
+                    cursor.execute(f"SELECT COUNT(*) FROM {table}")
+                    count = cursor.fetchone()[0]
+                    
+                    # Obtener tamaño estimado de la tabla
+                    cursor.execute(f"""
+                        SELECT SUM(length(quote(symbol)) + length(quote(timestamp)) + 
+                                   length(quote(open)) + length(quote(high)) + 
+                                   length(quote(low)) + length(quote(close)) + 
+                                   length(quote(volume)))
+                        FROM {table} LIMIT 1000
+                    """)
+                    
+                    try:
+                        avg_row_size = cursor.fetchone()[0] or 0
+                        estimated_size_mb = (avg_row_size * count) / 1024 / 1024 if avg_row_size else 0
+                    except:
+                        estimated_size_mb = 0
+                    
+                    stats['table_stats'][table] = {
+                        'record_count': count,
+                        'estimated_size_mb': round(estimated_size_mb, 2)
+                    }
+                
+                # Test de performance de consultas comunes
+                performance_tests = [
+                    ("Simple count", "SELECT COUNT(*) FROM market_data"),
+                    ("Symbol filter", "SELECT COUNT(*) FROM market_data WHERE symbol = 'BTCUSDT'"),
+                    ("Date range", "SELECT COUNT(*) FROM market_data WHERE timestamp > ? AND timestamp < ?")
+                ]
+                
+                for test_name, query in performance_tests:
+                    start_time = time.time()
+                    try:
+                        if "?" in query:
+                            # Test con parámetros de fecha
+                            yesterday = int((datetime.now() - timedelta(days=1)).timestamp())
+                            today = int(datetime.now().timestamp())
+                            cursor.execute(query, (yesterday, today))
+                        else:
+                            cursor.execute(query)
+                        cursor.fetchone()
+                        duration = time.time() - start_time
+                        stats['query_performance'][test_name] = round(duration * 1000, 2)  # en ms
+                    except Exception as e:
+                        stats['query_performance'][test_name] = f"Error: {e}"
+                
+                # Generar recomendaciones
+                if stats['database_size_mb'] > 1000:  # > 1GB
+                    stats['recommendations'].append("Considerar particionado o archivado de datos antiguos")
+                
+                slow_queries = [name for name, duration in stats['query_performance'].items() 
+                               if isinstance(duration, (int, float)) and duration > 1000]
+                if slow_queries:
+                    stats['recommendations'].append(f"Optimizar consultas lentas: {', '.join(slow_queries)}")
+                
+                if not stats['recommendations']:
+                    stats['recommendations'].append("Rendimiento de base de datos dentro de parámetros normales")
+                
+                return stats
+                
+        except Exception as e:
+            logger.error(f"Error obteniendo estadísticas de performance: {e}")
+            return {'error': str(e)}
+    
+    def get_data_date_range(self, symbol: str = None) -> Tuple[Optional[datetime], Optional[datetime]]:
+        """Obtiene el rango de fechas de los datos"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                if symbol:
+                    cursor.execute("""
+                        SELECT MIN(timestamp), MAX(timestamp) 
+                        FROM market_data 
+                        WHERE symbol = ?
+                    """, (symbol,))
+                else:
+                    cursor.execute("""
+                        SELECT MIN(timestamp), MAX(timestamp) 
+                        FROM market_data
+                    """)
+                
+                result = cursor.fetchone()
+                if result and result[0] and result[1]:
+                    min_ts = result[0]
+                    max_ts = result[1]
+                    
+                    def safe_timestamp_convert(ts):
+                        """Convierte timestamp de forma segura"""
+                        try:
+                            if isinstance(ts, str):
+                                ts = int(ts)
+                            
+                            if isinstance(ts, (int, float)):
+                                # Verificar si es timestamp en milisegundos o segundos
+                                if ts > 1e10:  # Timestamp en milisegundos
+                                    # Convertir a segundos
+                                    ts_seconds = ts / 1000
+                                    # Validar rango razonable (2010-2030)
+                                    if ts_seconds < 1262304000 or ts_seconds > 1893456000:
+                                        return None
+                                    return datetime.fromtimestamp(ts_seconds)
+                                else:  # Timestamp en segundos
+                                    # Validar rango razonable (2010-2030)
+                                    if ts < 1262304000 or ts > 1893456000:
+                                        return None
+                                    return datetime.fromtimestamp(ts)
+                        except (ValueError, OSError, OverflowError) as e:
+                            logger.warning(f"Error convirtiendo timestamp {ts}: {e}")
+                            return None
+                        return None
+                    
+                    min_dt = safe_timestamp_convert(min_ts)
+                    max_dt = safe_timestamp_convert(max_ts)
+                    
+                    if min_dt and max_dt:
+                        return (min_dt, max_dt)
+                
+                return (None, None)
+                
+        except Exception as e:
+            logger.error(f"Error obteniendo rango de fechas: {e}")
+            return (None, None)
+    
+    def get_historical_data_summary(self) -> Dict[str, Any]:
+        """Obtiene resumen de datos históricos (alias para compatibilidad)"""
+        return self.get_data_summary_optimized()
+    
+    def get_aligned_market_data(self, symbols: List[str], timeframe: str, 
+                               start_date: datetime = None, end_date: datetime = None) -> Dict[str, pd.DataFrame]:
+        """Obtiene datos alineados de múltiples símbolos para análisis simultáneo"""
+        try:
+            aligned_data = {}
+            
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                for symbol in symbols:
+                    query = """
+                        SELECT timestamp, open, high, low, close, volume
+                        FROM aligned_market_data 
+                        WHERE symbol = ? AND timeframe = ?
+                    """
+                    params = [symbol, timeframe]
+                    
+                    if start_date:
+                        query += " AND timestamp >= ?"
+                        params.append(int(start_date.timestamp()))
+                    
+                    if end_date:
+                        query += " AND timestamp <= ?"
+                        params.append(int(end_date.timestamp()))
+                    
+                    query += " ORDER BY timestamp"
+                    
+                    cursor.execute(query, params)
+                    results = cursor.fetchall()
+                    
+                    if results:
+                        # Crear DataFrame
+                        df = pd.DataFrame(results, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+                        df['datetime'] = pd.to_datetime(df['timestamp'], unit='s')
+                        df.set_index('datetime', inplace=True)
+                        df.drop('timestamp', axis=1, inplace=True)
+                        
+                        aligned_data[symbol] = df
+                    else:
+                        aligned_data[symbol] = pd.DataFrame()
+            
+            return aligned_data
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo datos alineados: {e}")
+            return {symbol: pd.DataFrame() for symbol in symbols}
+    
+    def __del__(self):
+        """Cleanup al destruir el objeto"""
+        try:
+            if hasattr(self, 'connection_pool'):
+                self.connection_pool.close_all()
+            if hasattr(self, '_thread_pool'):
+                self._thread_pool.shutdown(wait=False)
+        except:
+            pass
 
 # Instancia global del gestor de base de datos
 db_manager = DatabaseManager()

@@ -125,12 +125,25 @@ class DataManager:
                 # Descarga completa
                 results = await download_extensive_historical_data(self.symbols, years)
                 
-                total_downloaded = sum(results.values())
+                # Calcular total correctamente
+                total_downloaded = 0
+                for symbol_results in results.values():
+                    if isinstance(symbol_results, dict):
+                        for timeframe_count in symbol_results.values():
+                            if isinstance(timeframe_count, int):
+                                total_downloaded += timeframe_count
+                    elif isinstance(symbol_results, int):
+                        total_downloaded += symbol_results
+                
                 print(f"🎉 Descarga completada: {total_downloaded:,} registros totales")
                 print()
                 
-                for symbol, count in results.items():
-                    print(f"📈 {symbol}: {count:,} registros")
+                for symbol, symbol_results in results.items():
+                    if isinstance(symbol_results, dict):
+                        symbol_total = sum(count for count in symbol_results.values() if isinstance(count, int))
+                        print(f"📈 {symbol}: {symbol_total:,} registros")
+                    else:
+                        print(f"📈 {symbol}: {symbol_results:,} registros")
             
         except Exception as e:
             print(f"❌ Error en descarga: {e}")
