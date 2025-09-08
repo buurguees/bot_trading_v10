@@ -2,34 +2,62 @@
 """
 Bot de Trading v10 - Modo Background (Sin Dashboard)
 Solo entrenamiento, registro de datos y actualización de modelos
+Sistema robusto con manejo de errores y health checks
 """
 
 import sys
 import os
 import asyncio
-import threading
-import time
 import argparse
 import logging
 from datetime import datetime, timedelta
+from typing import Dict, Any, Optional
 
 # Agregar el directorio raíz al path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
+# Importar sistemas robustos
+from core.health_checker import health_checker, validate_system_state
+from core.config_manager import get_config, get_training_config
+from core.error_handler import handle_async_errors, log_error, get_error_stats, ErrorCategory, ErrorSeverity
+from core.thread_manager import start_thread_manager, shutdown_thread_manager, submit_async_task
+
 from data.database import db_manager
 from data.collector import download_missing_data
 
-# Configurar logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/background_training.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+# Configurar logging robusto
+def setup_logging():
+    """Configura logging estructurado"""
+    config = get_config()
+    
+    # Crear directorio de logs si no existe
+    os.makedirs('logs', exist_ok=True)
+    
+    # Configurar formato estructurado
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    )
+    
+    # Handler para archivo
+    file_handler = logging.FileHandler('logs/background_training.log')
+    file_handler.setFormatter(formatter)
+    file_handler.setLevel(getattr(logging, config.log_level))
+    
+    # Handler para consola
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    console_handler.setLevel(logging.INFO)
+    
+    # Configurar logger principal
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+    
+    return logger
+
+logger = setup_logging()
 
 class TradingBotBackground:
     """Clase principal del bot de trading en modo background"""
@@ -40,17 +68,36 @@ class TradingBotBackground:
         self.start_time = datetime.now()
         self.training_active = True
         
+        # Configuración robusta
+        self.config = get_config()
+        self.training_config = get_training_config()
+        
+        # Estado del sistema
+        self.system_healthy = False
+        self.last_health_check = None
+        self.error_count = 0
+        self.max_errors = 10
+        
+        logger.info(f"TradingBotBackground initialized - Mode: {mode}, Duration: {duration_hours}h")
+        
+    @handle_async_errors(category=ErrorCategory.DATABASE, severity=ErrorSeverity.HIGH)
     async def verificar_y_preparar_datos(self):
         """Verifica el histórico y descarga datos si es necesario"""
         print("VERIFICANDO DATOS HISTORICOS...")
         print("=" * 50)
         
         try:
+            # Health check del sistema
+            if not await self._check_system_health():
+                return False
+            
             # Verificar datos existentes
             summary = db_manager.get_data_summary_optimized()
             
             if 'error' in summary:
-                print(f"Error verificando datos: {summary['error']}")
+                error_msg = f"Error verificando datos: {summary['error']}"
+                print(error_msg)
+                log_error(Exception(error_msg), {"context": "data_verification"})
                 return False
             
             print(f"Símbolos disponibles: {summary['total_symbols']}")
@@ -65,7 +112,9 @@ class TradingBotBackground:
                 results = await download_missing_data(target_days=365)
                 
                 if 'error' in results:
-                    print(f"Error descargando datos: {results['error']}")
+                    error_msg = f"Error descargando datos: {results['error']}"
+                    print(error_msg)
+                    log_error(Exception(error_msg), {"context": "data_download"})
                     return False
                 
                 print(f"Descarga completada: {results['total_downloaded']:,} registros")
@@ -75,8 +124,38 @@ class TradingBotBackground:
             return True
             
         except Exception as e:
-            print(f"Error en verificación: {e}")
-            logger.error(f"Error verificando datos: {e}")
+            error_msg = f"Error en verificación: {e}"
+            print(error_msg)
+            log_error(e, {"context": "data_verification"})
+            self.error_count += 1
+            return False
+    
+    async def _check_system_health(self) -> bool:
+        """Verifica la salud del sistema"""
+        try:
+            # Verificar si necesitamos hacer health check
+            if (self.last_health_check is None or 
+                (datetime.now() - self.last_health_check).total_seconds() > 300):  # 5 minutos
+                
+                logger.info("Running system health check...")
+                health_results = await health_checker.run_all_checks()
+                system_status = health_checker.get_system_status(health_results)
+                
+                self.last_health_check = datetime.now()
+                self.system_healthy = system_status["system_ready"]
+                
+                if not self.system_healthy:
+                    logger.error(f"System health check failed: {system_status}")
+                    print("SISTEMA NO SALUDABLE - Verificar logs para detalles")
+                    return False
+                else:
+                    logger.info("System health check passed")
+            
+            return self.system_healthy
+            
+        except Exception as e:
+            logger.error(f"Error in health check: {e}")
+            log_error(e, {"context": "health_check"})
             return False
     
     def verificar_modelo_existente(self):

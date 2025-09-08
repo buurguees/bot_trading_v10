@@ -1,0 +1,76 @@
+# Configuración Central del Trading Bot v10
+# Sistema robusto de configuración por entorno
+
+# Entorno del sistema
+environment: development
+debug: true
+log_level: INFO
+
+# Base de datos
+database_path: "data/trading_bot.db"
+database_backup_path: "data/backups"
+max_connections: 10
+
+# Modelos de ML
+model_path: "models/saved_models"
+model_backup_path: "models/backups"
+default_model: "best_lstm_attention"
+
+# Trading
+symbols:
+  - BTCUSDT
+  - ETHUSDT
+  - ADAUSDT
+  - SOLUSDT
+
+timeframes:
+  - "1h"
+  - "4h"
+  - "1d"
+
+paper_trading: true
+
+# Dashboard
+dashboard_host: "127.0.0.1"
+dashboard_port: 8050
+dashboard_debug: false
+
+# Entrenamiento
+training_epochs: 50
+training_batch_size: 32
+training_validation_split: 0.2
+training_patience: 10
+training_min_delta: 0.001
+
+# Límites de recursos
+max_memory_gb: 8.0
+max_cpu_percent: 80.0
+max_disk_gb: 10.0
+
+# APIs (configurar en .env para seguridad)
+bitget_api_key: null
+bitget_secret_key: null
+bitget_passphrase: null
+bitget_sandbox: true
+
+# Logging
+log_file: "logs/trading_bot.log"
+log_max_size_mb: 100
+log_backup_count: 5
+
+# Health Checks
+health_check_interval: 300  # segundos
+health_check_timeout: 30
+
+# Alineación de datos
+alignment_enabled: true
+alignment_symbols:
+  - BTCUSDT
+  - ETHUSDT
+  - ADAUSDT
+  - SOLUSDT
+
+alignment_timeframes:
+  - "1h"
+  - "4h"
+  - "1d"
