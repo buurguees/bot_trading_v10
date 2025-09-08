@@ -12,12 +12,15 @@ import sqlite3
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any, Tuple, Union
 import json
 import threading
 import time
 from dataclasses import dataclass, asdict
 from pathlib import Path
+import asyncio
+from contextlib import contextmanager
+import traceback
 
 # Importaciones del proyecto
 try:
@@ -53,6 +56,9 @@ class SymbolMetrics:
     total_trades: int
     winning_trades: int
     losing_trades: int
+    current_position: Optional[str] = None  # 'long', 'short', None
+    unrealized_pnl: float = 0.0
+    realized_pnl: float = 0.0
 
 @dataclass
 class CycleData:
@@ -72,7 +78,9 @@ class CycleData:
     sharpe_ratio: float
     duration_days: int
     status: str  # 'active', 'completed', 'stopped'
-
+    roi: float = 0.0
+    profit_factor: float = 0.0
+    
 @dataclass
 class TradeData:
     """Datos de un trade individual"""
@@ -90,6 +98,35 @@ class TradeData:
     status: str  # 'open', 'closed', 'cancelled'
     stop_loss: Optional[float]
     take_profit: Optional[float]
+    fees: float = 0.0
+    slippage: float = 0.0
+
+@dataclass
+class MarketData:
+    """Datos de mercado para gráficos"""
+    symbol: str
+    timestamp: datetime
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
+    timeframe: str = '1m'
+
+@dataclass
+class ModelMetrics:
+    """Métricas del modelo de IA"""
+    accuracy: float
+    precision: float
+    recall: float
+    f1_score: float
+    auc_roc: float
+    loss: float
+    predictions_today: int
+    avg_confidence: float
+    last_retrain: datetime
+    drift_score: float
+    model_version: str
 
 class DataProvider:
     """
@@ -99,599 +136,991 @@ class DataProvider:
     una interfaz unificada para el dashboard.
     """
     
-    def __init__(self, config_path: Optional[str] = None):
-        """
-        Inicializa el proveedor de datos
-        
-        Args:
-            config_path (str, optional): Ruta al archivo de configuración
-        """
-        self.config_path = config_path
-        self.db_manager = None
-        self.position_manager = None
-        self.prediction_engine = None
-        self.user_config = None
-        
-        # Cache de datos
-        self._cache = {}
-        self._cache_timestamps = {}
-        self._cache_ttl = 60  # TTL en segundos
-        
-        # Estado de conexión
+    def __init__(self):
+        """Inicializa el proveedor de datos"""
+        self.db_path = "data/trading_bot.db"
+        self.cache = {}
+        self.cache_timestamps = {}
+        self.cache_ttl = 300  # 5 minutos
+        self.lock = threading.RLock()
         self._connected = False
-        self._last_error = None
+        self._database_manager = None
         
-        # Lock para thread safety
-        self._lock = threading.RLock()
+        # Configuración
+        self.config = {
+            'symbols': ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'ADAUSDT', 'SOLUSDT'],
+            'timeframes': ['1m', '5m', '15m', '1h', '4h'],
+            'default_lookback_days': 30,
+            'max_trades_query': 1000,
+            'performance_calculation_period': 24  # horas
+        }
         
-        # Inicializar conexiones
-        self._initialize_connections()
+        # Inicializar conexión
+        self._initialize_connection()
         
-        logger.info("DataProvider inicializado")
+        logger.info("DataProvider inicializado correctamente")
     
-    def _initialize_connections(self):
-        """Inicializa todas las conexiones a fuentes de datos"""
+    def _initialize_connection(self):
+        """Inicializa la conexión a la base de datos"""
         try:
-            # Inicializar configuración de usuario
-            if UserConfig:
-                self.user_config = UserConfig()
+            # Crear directorio si no existe
+            Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
             
-            # Inicializar base de datos
+            # Intentar usar DatabaseManager del proyecto si está disponible
             if DatabaseManager:
-                self.db_manager = DatabaseManager()
-                self.db_manager.initialize()
+                self._database_manager = DatabaseManager()
+                self._connected = self._database_manager.is_connected()
+            else:
+                # Fallback a conexión SQLite directa
+                test_conn = sqlite3.connect(self.db_path)
+                test_conn.close()
+                self._connected = True
             
-            # Inicializar gestor de posiciones
-            if PositionManager:
-                self.position_manager = PositionManager()
-            
-            # Inicializar motor de predicción
-            if PredictionEngine:
-                self.prediction_engine = PredictionEngine()
-            
-            self._connected = True
-            logger.info("Conexiones del DataProvider inicializadas correctamente")
+            logger.info("Conexión a base de datos establecida")
             
         except Exception as e:
+            logger.error(f"Error al conectar con base de datos: {e}")
             self._connected = False
-            self._last_error = str(e)
-            logger.error(f"Error al inicializar conexiones: {e}")
+    
+    @contextmanager
+    def _get_connection(self):
+        """Context manager para conexiones a la base de datos"""
+        if self._database_manager:
+            with self._database_manager._get_connection() as conn:
+                yield conn
+        else:
+            conn = sqlite3.connect(self.db_path)
+            try:
+                yield conn
+            finally:
+                conn.close()
     
     def is_connected(self) -> bool:
-        """Verifica si el proveedor está conectado a las fuentes de datos"""
+        """Verifica si está conectado a la base de datos"""
         return self._connected
     
-    def get_last_error(self) -> Optional[str]:
-        """Obtiene el último error ocurrido"""
-        return self._last_error
-    
-    def _get_from_cache(self, key: str) -> Optional[Any]:
-        """Obtiene datos del cache si están vigentes"""
-        with self._lock:
-            if key in self._cache:
-                timestamp = self._cache_timestamps.get(key, 0)
-                if time.time() - timestamp < self._cache_ttl:
-                    return self._cache[key]
+    def _get_cached_data(self, cache_key: str) -> Optional[Any]:
+        """Obtiene datos del cache si están válidos"""
+        with self.lock:
+            if cache_key in self.cache:
+                timestamp = self.cache_timestamps.get(cache_key, 0)
+                if time.time() - timestamp < self.cache_ttl:
+                    return self.cache[cache_key]
                 else:
-                    # Cache expirado
-                    del self._cache[key]
-                    del self._cache_timestamps[key]
+                    # Cache expirado, eliminar
+                    del self.cache[cache_key]
+                    del self.cache_timestamps[cache_key]
             return None
     
-    def _set_cache(self, key: str, data: Any):
+    def _set_cached_data(self, cache_key: str, data: Any):
         """Guarda datos en el cache"""
-        with self._lock:
-            self._cache[key] = data
-            self._cache_timestamps[key] = time.time()
+        with self.lock:
+            self.cache[cache_key] = data
+            self.cache_timestamps[cache_key] = time.time()
     
-    def get_configured_symbols(self) -> List[str]:
+    def get_symbol_metrics(self, symbol: Optional[str] = None) -> Union[List[SymbolMetrics], SymbolMetrics]:
         """
-        Obtiene la lista de símbolos configurados
-        
-        Returns:
-            List[str]: Lista de símbolos configurados
-        """
-        cache_key = "configured_symbols"
-        cached_data = self._get_from_cache(cache_key)
-        if cached_data is not None:
-            return cached_data
-        
-        try:
-            if self.user_config:
-                symbols = self.user_config.get_trading_symbols()
-            else:
-                # Fallback: símbolos por defecto
-                symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT']
-            
-            self._set_cache(cache_key, symbols)
-            return symbols
-            
-        except Exception as e:
-            logger.error(f"Error al obtener símbolos configurados: {e}")
-            return ['BTCUSDT', 'ETHUSDT']  # Fallback mínimo
-    
-    def get_symbol_metrics(self, symbol: str) -> SymbolMetrics:
-        """
-        Obtiene métricas completas para un símbolo específico
+        Obtiene métricas por símbolo
         
         Args:
-            symbol (str): Símbolo a consultar
+            symbol: Símbolo específico o None para todos
             
         Returns:
-            SymbolMetrics: Métricas del símbolo
+            Lista de métricas por símbolo o métricas de un símbolo específico
         """
-        cache_key = f"symbol_metrics_{symbol}"
-        cached_data = self._get_from_cache(cache_key)
-        if cached_data is not None:
-            return cached_data
-        
         try:
-            # Obtener datos básicos
-            trades_data = self._get_symbol_trades(symbol)
-            balance_data = self._get_symbol_balance(symbol)
+            cache_key = f"symbol_metrics_{symbol or 'all'}"
+            cached_data = self._get_cached_data(cache_key)
+            if cached_data:
+                return cached_data
             
-            # Calcular métricas
-            total_trades = len(trades_data)
-            if total_trades > 0:
-                winning_trades = len([t for t in trades_data if t.get('pnl', 0) > 0])
-                losing_trades = total_trades - winning_trades
-                win_rate = (winning_trades / total_trades) * 100
-                avg_pnl = np.mean([t.get('pnl', 0) for t in trades_data])
+            symbols_to_query = [symbol] if symbol else self.config['symbols']
+            metrics_list = []
+            
+            for sym in symbols_to_query:
+                try:
+                    metrics = self._calculate_symbol_metrics(sym)
+                    metrics_list.append(metrics)
+                except Exception as e:
+                    logger.error(f"Error calculando métricas para {sym}: {e}")
+                    # Crear métricas por defecto en caso de error
+                    metrics_list.append(self._create_default_metrics(sym))
+            
+            # Cachear resultados
+            result = metrics_list[0] if symbol else metrics_list
+            self._set_cached_data(cache_key, result)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error al obtener métricas de símbolos: {e}")
+            if symbol:
+                return self._create_default_metrics(symbol)
+            else:
+                return [self._create_default_metrics(sym) for sym in self.config['symbols']]
+    
+    def _calculate_symbol_metrics(self, symbol: str) -> SymbolMetrics:
+        """Calcula métricas para un símbolo específico"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
                 
-                # Calcular Sharpe Ratio simplificado
-                pnl_list = [t.get('pnl', 0) for t in trades_data]
-                if len(pnl_list) > 1:
-                    sharpe_ratio = np.mean(pnl_list) / np.std(pnl_list) if np.std(pnl_list) != 0 else 0
-                else:
-                    sharpe_ratio = 0
+                # Obtener trades del símbolo
+                cursor.execute("""
+                    SELECT * FROM trades 
+                    WHERE symbol = ? AND entry_time >= date('now', '-30 days')
+                    ORDER BY entry_time DESC
+                """, (symbol,))
                 
-                # Calcular Max Drawdown
-                balance_series = self._calculate_cumulative_balance(trades_data, balance_data.get('initial_balance', 1000))
-                max_drawdown = self._calculate_max_drawdown(balance_series)
-            else:
-                winning_trades = losing_trades = 0
-                win_rate = avg_pnl = sharpe_ratio = max_drawdown = 0
-            
-            # Obtener estado actual
-            current_status = self._get_symbol_status(symbol)
-            last_signal_data = self._get_last_signal(symbol)
-            
-            # Calcular progreso hacia objetivo
-            current_balance = balance_data.get('current_balance', 1000)
-            target_balance = balance_data.get('target_balance', 2000)
-            balance_progress = ((current_balance - balance_data.get('initial_balance', 1000)) / 
-                              (target_balance - balance_data.get('initial_balance', 1000))) * 100
-            balance_progress = max(0, min(100, balance_progress))  # Limitar entre 0-100%
-            
-            metrics = SymbolMetrics(
-                symbol=symbol,
-                win_rate=win_rate,
-                total_runs=self._get_total_runs(symbol),
-                avg_pnl=avg_pnl,
-                balance_progress=balance_progress,
-                sharpe_ratio=sharpe_ratio,
-                max_drawdown=max_drawdown,
-                current_status=current_status,
-                last_signal=last_signal_data.get('signal', 'hold'),
-                last_signal_time=last_signal_data.get('timestamp', datetime.now()),
-                current_balance=current_balance,
-                target_balance=target_balance,
-                total_trades=total_trades,
-                winning_trades=winning_trades,
-                losing_trades=losing_trades
-            )
-            
-            self._set_cache(cache_key, metrics)
-            return metrics
-            
-        except Exception as e:
-            logger.error(f"Error al obtener métricas para {symbol}: {e}")
-            # Retornar métricas por defecto en caso de error
-            return SymbolMetrics(
-                symbol=symbol,
-                win_rate=0,
-                total_runs=0,
-                avg_pnl=0,
-                balance_progress=0,
-                sharpe_ratio=0,
-                max_drawdown=0,
-                current_status='error',
-                last_signal='hold',
-                last_signal_time=datetime.now(),
-                current_balance=1000,
-                target_balance=2000,
-                total_trades=0,
-                winning_trades=0,
-                losing_trades=0
-            )
-    
-    def get_all_symbols_metrics(self) -> Dict[str, SymbolMetrics]:
-        """
-        Obtiene métricas para todos los símbolos configurados
-        
-        Returns:
-            Dict[str, SymbolMetrics]: Diccionario con métricas por símbolo
-        """
-        symbols = self.get_configured_symbols()
-        metrics = {}
-        
-        for symbol in symbols:
-            metrics[symbol] = self.get_symbol_metrics(symbol)
-        
-        return metrics
-    
-    def get_historical_data(self, symbol: str, timeframe: str = '1h', limit: int = 1000) -> pd.DataFrame:
-        """
-        Obtiene datos históricos de precios para un símbolo
-        
-        Args:
-            symbol (str): Símbolo a consultar
-            timeframe (str): Timeframe ('1m', '5m', '15m', '1h', '4h', '1d')
-            limit (int): Número máximo de velas
-            
-        Returns:
-            pd.DataFrame: DataFrame con datos OHLCV
-        """
-        cache_key = f"historical_data_{symbol}_{timeframe}_{limit}"
-        cached_data = self._get_from_cache(cache_key)
-        if cached_data is not None:
-            return cached_data
-        
-        try:
-            if self.db_manager:
-                # Obtener desde base de datos
-                data = self.db_manager.get_price_data(symbol, timeframe, limit)
-            else:
-                # Generar datos de ejemplo para desarrollo
-                data = self._generate_sample_ohlcv(symbol, limit)
-            
-            df = pd.DataFrame(data)
-            if not df.empty:
-                df['timestamp'] = pd.to_datetime(df['timestamp'])
-                df = df.set_index('timestamp')
-            
-            self._set_cache(cache_key, df)
-            return df
-            
-        except Exception as e:
-            logger.error(f"Error al obtener datos históricos para {symbol}: {e}")
-            return pd.DataFrame()
-    
-    def get_top_cycles(self, limit: int = 20) -> List[CycleData]:
-        """
-        Obtiene los mejores ciclos de trading ordenados por rendimiento
-        
-        Args:
-            limit (int): Número máximo de ciclos a retornar
-            
-        Returns:
-            List[CycleData]: Lista de ciclos ordenados por rendimiento
-        """
-        cache_key = f"top_cycles_{limit}"
-        cached_data = self._get_from_cache(cache_key)
-        if cached_data is not None:
-            return cached_data
-        
-        try:
-            if self.db_manager:
-                cycles_data = self.db_manager.get_top_cycles(limit)
-            else:
-                # Generar datos de ejemplo
-                cycles_data = self._generate_sample_cycles(limit)
-            
-            cycles = []
-            for cycle_raw in cycles_data:
-                cycle = CycleData(
-                    cycle_id=cycle_raw.get('cycle_id', f"cycle_{len(cycles)}"),
-                    symbol=cycle_raw.get('symbol', 'BTCUSDT'),
-                    start_date=cycle_raw.get('start_date', datetime.now() - timedelta(days=30)),
-                    end_date=cycle_raw.get('end_date'),
-                    start_balance=cycle_raw.get('start_balance', 1000),
-                    end_balance=cycle_raw.get('end_balance', 1200),
-                    pnl=cycle_raw.get('pnl', 200),
-                    pnl_percentage=cycle_raw.get('pnl_percentage', 20),
-                    total_trades=cycle_raw.get('total_trades', 15),
-                    win_rate=cycle_raw.get('win_rate', 65),
-                    avg_daily_pnl=cycle_raw.get('avg_daily_pnl', 6.67),
-                    max_drawdown=cycle_raw.get('max_drawdown', 5),
-                    sharpe_ratio=cycle_raw.get('sharpe_ratio', 1.8),
-                    duration_days=cycle_raw.get('duration_days', 30),
-                    status=cycle_raw.get('status', 'completed')
+                trades = cursor.fetchall()
+                if not trades:
+                    return self._create_default_metrics(symbol)
+                
+                # Convertir a DataFrame para cálculos
+                columns = [desc[0] for desc in cursor.description]
+                df = pd.DataFrame(trades, columns=columns)
+                
+                # Calcular métricas básicas
+                total_trades = len(df)
+                closed_trades = df[df['status'] == 'closed']
+                
+                if len(closed_trades) == 0:
+                    return self._create_default_metrics(symbol)
+                
+                winning_trades = len(closed_trades[closed_trades['pnl'] > 0])
+                losing_trades = len(closed_trades[closed_trades['pnl'] <= 0])
+                win_rate = (winning_trades / len(closed_trades)) * 100 if len(closed_trades) > 0 else 0
+                
+                # PnL promedio
+                avg_pnl = closed_trades['pnl'].mean() if len(closed_trades) > 0 else 0
+                total_pnl = closed_trades['pnl'].sum() if len(closed_trades) > 0 else 0
+                
+                # Balance actual y progreso
+                current_balance = self._get_current_balance(symbol)
+                target_balance = self._get_target_balance(symbol)
+                balance_progress = ((current_balance - 1000) / (target_balance - 1000)) * 100 if target_balance > 1000 else 0
+                
+                # Sharpe ratio y max drawdown
+                returns = closed_trades['pnl_percentage'] / 100 if len(closed_trades) > 0 else pd.Series([0])
+                sharpe_ratio = self._calculate_sharpe_ratio(returns)
+                max_drawdown = self._calculate_max_drawdown(symbol)
+                
+                # Estado actual y última señal
+                current_status = self._get_current_status(symbol)
+                last_signal, last_signal_time = self._get_last_signal(symbol)
+                
+                # Posición actual
+                current_position = self._get_current_position(symbol)
+                unrealized_pnl = self._get_unrealized_pnl(symbol)
+                
+                return SymbolMetrics(
+                    symbol=symbol,
+                    win_rate=win_rate,
+                    total_runs=self._get_total_runs(symbol),
+                    avg_pnl=avg_pnl,
+                    balance_progress=balance_progress,
+                    sharpe_ratio=sharpe_ratio,
+                    max_drawdown=max_drawdown,
+                    current_status=current_status,
+                    last_signal=last_signal,
+                    last_signal_time=last_signal_time,
+                    current_balance=current_balance,
+                    target_balance=target_balance,
+                    total_trades=total_trades,
+                    winning_trades=winning_trades,
+                    losing_trades=losing_trades,
+                    current_position=current_position,
+                    unrealized_pnl=unrealized_pnl,
+                    realized_pnl=total_pnl
                 )
-                cycles.append(cycle)
-            
-            # Ordenar por PnL porcentual descendente
-            cycles.sort(key=lambda x: x.pnl_percentage, reverse=True)
-            
-            self._set_cache(cache_key, cycles)
-            return cycles
-            
+                
         except Exception as e:
-            logger.error(f"Error al obtener top cycles: {e}")
+            logger.error(f"Error calculando métricas para {symbol}: {e}")
+            return self._create_default_metrics(symbol)
+    
+    def _create_default_metrics(self, symbol: str) -> SymbolMetrics:
+        """Crea métricas por defecto para un símbolo"""
+        return SymbolMetrics(
+            symbol=symbol,
+            win_rate=0.0,
+            total_runs=0,
+            avg_pnl=0.0,
+            balance_progress=0.0,
+            sharpe_ratio=0.0,
+            max_drawdown=0.0,
+            current_status='paused',
+            last_signal='hold',
+            last_signal_time=datetime.now(),
+            current_balance=1000.0,
+            target_balance=2000.0,
+            total_trades=0,
+            winning_trades=0,
+            losing_trades=0,
+            current_position=None,
+            unrealized_pnl=0.0,
+            realized_pnl=0.0
+        )
+    
+    def get_market_data(self, symbol: str, timeframe: str = '1m', 
+                       limit: int = 500) -> List[MarketData]:
+        """
+        Obtiene datos de mercado para gráficos
+        
+        Args:
+            symbol: Símbolo a consultar
+            timeframe: Marco temporal
+            limit: Número máximo de registros
+            
+        Returns:
+            Lista de datos de mercado
+        """
+        try:
+            cache_key = f"market_data_{symbol}_{timeframe}_{limit}"
+            cached_data = self._get_cached_data(cache_key)
+            if cached_data:
+                return cached_data
+            
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute("""
+                    SELECT timestamp, open, high, low, close, volume
+                    FROM market_data 
+                    WHERE symbol = ? AND timeframe = ?
+                    ORDER BY timestamp DESC
+                    LIMIT ?
+                """, (symbol, timeframe, limit))
+                
+                rows = cursor.fetchall()
+                
+                market_data = []
+                for row in rows:
+                    timestamp = datetime.fromtimestamp(row[0]) if isinstance(row[0], (int, float)) else datetime.fromisoformat(row[0])
+                    
+                    market_data.append(MarketData(
+                        symbol=symbol,
+                        timestamp=timestamp,
+                        open=float(row[1]),
+                        high=float(row[2]),
+                        low=float(row[3]),
+                        close=float(row[4]),
+                        volume=float(row[5]),
+                        timeframe=timeframe
+                    ))
+                
+                # Ordenar por timestamp ascendente para gráficos
+                market_data.reverse()
+                
+                self._set_cached_data(cache_key, market_data)
+                return market_data
+                
+        except Exception as e:
+            logger.error(f"Error al obtener datos de mercado para {symbol}: {e}")
+            return self._generate_mock_market_data(symbol, timeframe, limit)
+    
+    def get_cycles_data(self, symbol: Optional[str] = None, 
+                       limit: int = 20) -> List[CycleData]:
+        """
+        Obtiene datos de ciclos de trading
+        
+        Args:
+            symbol: Símbolo específico o None para todos
+            limit: Número máximo de ciclos
+            
+        Returns:
+            Lista de datos de ciclos
+        """
+        try:
+            cache_key = f"cycles_data_{symbol or 'all'}_{limit}"
+            cached_data = self._get_cached_data(cache_key)
+            if cached_data:
+                return cached_data
+            
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                query = """
+                    SELECT cycle_id, symbol, start_date, end_date, start_balance, 
+                           end_balance, total_trades, status
+                    FROM trading_cycles 
+                """
+                params = []
+                
+                if symbol:
+                    query += " WHERE symbol = ?"
+                    params.append(symbol)
+                
+                query += " ORDER BY start_date DESC LIMIT ?"
+                params.append(limit)
+                
+                cursor.execute(query, params)
+                rows = cursor.fetchall()
+                
+                cycles = []
+                for row in rows:
+                    cycle_data = self._build_cycle_data_from_row(row)
+                    cycles.append(cycle_data)
+                
+                self._set_cached_data(cache_key, cycles)
+                return cycles
+                
+        except Exception as e:
+            logger.error(f"Error al obtener datos de ciclos: {e}")
+            return self._generate_mock_cycles_data(symbol, limit)
+    
+    def get_active_trades(self, symbol: Optional[str] = None) -> List[TradeData]:
+        """
+        Obtiene trades activos
+        
+        Args:
+            symbol: Símbolo específico o None para todos
+            
+        Returns:
+            Lista de trades activos
+        """
+        try:
+            cache_key = f"active_trades_{symbol or 'all'}"
+            cached_data = self._get_cached_data(cache_key)
+            if cached_data:
+                return cached_data
+            
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                query = """
+                    SELECT trade_id, symbol, side, entry_time, entry_price, 
+                           quantity, stop_loss, take_profit, status
+                    FROM trades 
+                    WHERE status = 'open'
+                """
+                params = []
+                
+                if symbol:
+                    query += " AND symbol = ?"
+                    params.append(symbol)
+                
+                query += " ORDER BY entry_time DESC"
+                
+                cursor.execute(query, params)
+                rows = cursor.fetchall()
+                
+                trades = []
+                for row in rows:
+                    trade_data = self._build_trade_data_from_row(row)
+                    trades.append(trade_data)
+                
+                self._set_cached_data(cache_key, trades)
+                return trades
+                
+        except Exception as e:
+            logger.error(f"Error al obtener trades activos: {e}")
             return []
     
-    def get_recent_trades(self, symbol: Optional[str] = None, limit: int = 50) -> List[TradeData]:
+    def get_recent_trades(self, symbol: Optional[str] = None, 
+                         limit: int = 50) -> List[TradeData]:
         """
-        Obtiene los trades más recientes
+        Obtiene trades recientes
         
         Args:
-            symbol (str, optional): Símbolo específico o None para todos
-            limit (int): Número máximo de trades
+            symbol: Símbolo específico o None para todos
+            limit: Número máximo de trades
             
         Returns:
-            List[TradeData]: Lista de trades recientes
+            Lista de trades recientes
         """
-        cache_key = f"recent_trades_{symbol}_{limit}"
-        cached_data = self._get_from_cache(cache_key)
-        if cached_data is not None:
-            return cached_data
-        
         try:
-            if self.db_manager:
-                trades_data = self.db_manager.get_recent_trades(symbol, limit)
-            else:
-                trades_data = self._generate_sample_trades(symbol, limit)
+            cache_key = f"recent_trades_{symbol or 'all'}_{limit}"
+            cached_data = self._get_cached_data(cache_key)
+            if cached_data:
+                return cached_data
             
-            trades = []
-            for trade_raw in trades_data:
-                trade = TradeData(
-                    trade_id=trade_raw.get('trade_id', f"trade_{len(trades)}"),
-                    symbol=trade_raw.get('symbol', 'BTCUSDT'),
-                    side=trade_raw.get('side', 'buy'),
-                    entry_time=trade_raw.get('entry_time', datetime.now()),
-                    exit_time=trade_raw.get('exit_time'),
-                    entry_price=trade_raw.get('entry_price', 50000),
-                    exit_price=trade_raw.get('exit_price'),
-                    quantity=trade_raw.get('quantity', 0.01),
-                    pnl=trade_raw.get('pnl'),
-                    pnl_percentage=trade_raw.get('pnl_percentage'),
-                    duration_minutes=trade_raw.get('duration_minutes'),
-                    status=trade_raw.get('status', 'open'),
-                    stop_loss=trade_raw.get('stop_loss'),
-                    take_profit=trade_raw.get('take_profit')
-                )
-                trades.append(trade)
-            
-            self._set_cache(cache_key, trades)
-            return trades
-            
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                query = """
+                    SELECT trade_id, symbol, side, entry_time, exit_time, 
+                           entry_price, exit_price, quantity, pnl, pnl_percentage,
+                           status, stop_loss, take_profit
+                    FROM trades 
+                """
+                params = []
+                
+                if symbol:
+                    query += " WHERE symbol = ?"
+                    params.append(symbol)
+                
+                query += " ORDER BY entry_time DESC LIMIT ?"
+                params.append(limit)
+                
+                cursor.execute(query, params)
+                rows = cursor.fetchall()
+                
+                trades = []
+                for row in rows:
+                    trade_data = self._build_trade_data_from_row(row, include_exit=True)
+                    trades.append(trade_data)
+                
+                self._set_cached_data(cache_key, trades)
+                return trades
+                
         except Exception as e:
             logger.error(f"Error al obtener trades recientes: {e}")
             return []
     
+    def get_performance_metrics(self, period_hours: int = 24) -> Dict[str, Any]:
+        """
+        Obtiene métricas de rendimiento general
+        
+        Args:
+            period_hours: Período en horas para el cálculo
+            
+        Returns:
+            Diccionario con métricas de rendimiento
+        """
+        try:
+            cache_key = f"performance_metrics_{period_hours}"
+            cached_data = self._get_cached_data(cache_key)
+            if cached_data:
+                return cached_data
+            
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Obtener trades del período
+                cursor.execute("""
+                    SELECT symbol, pnl, pnl_percentage, entry_time, exit_time
+                    FROM trades 
+                    WHERE entry_time >= datetime('now', '-{} hours')
+                    AND status = 'closed'
+                """.format(period_hours))
+                
+                trades = cursor.fetchall()
+                
+                if not trades:
+                    return self._get_default_performance_metrics()
+                
+                df = pd.DataFrame(trades, columns=['symbol', 'pnl', 'pnl_percentage', 'entry_time', 'exit_time'])
+                
+                # Calcular métricas
+                total_pnl = df['pnl'].sum()
+                total_trades = len(df)
+                winning_trades = len(df[df['pnl'] > 0])
+                losing_trades = len(df[df['pnl'] <= 0])
+                win_rate = (winning_trades / total_trades) * 100 if total_trades > 0 else 0
+                
+                avg_win = df[df['pnl'] > 0]['pnl'].mean() if winning_trades > 0 else 0
+                avg_loss = df[df['pnl'] <= 0]['pnl'].mean() if losing_trades > 0 else 0
+                profit_factor = abs(avg_win * winning_trades / (avg_loss * losing_trades)) if avg_loss != 0 and losing_trades > 0 else 0
+                
+                # Sharpe ratio
+                returns = df['pnl_percentage'] / 100
+                sharpe_ratio = self._calculate_sharpe_ratio(returns)
+                
+                # Drawdown máximo
+                cumulative_returns = (1 + returns).cumprod()
+                running_max = cumulative_returns.expanding().max()
+                drawdown = (cumulative_returns - running_max) / running_max
+                max_drawdown = drawdown.min() * 100
+                
+                metrics = {
+                    'total_pnl': total_pnl,
+                    'total_trades': total_trades,
+                    'winning_trades': winning_trades,
+                    'losing_trades': losing_trades,
+                    'win_rate': win_rate,
+                    'avg_win': avg_win,
+                    'avg_loss': avg_loss,
+                    'profit_factor': profit_factor,
+                    'sharpe_ratio': sharpe_ratio,
+                    'max_drawdown': max_drawdown,
+                    'period_hours': period_hours,
+                    'symbols_active': df['symbol'].nunique(),
+                    'avg_trade_duration': self._calculate_avg_trade_duration(df),
+                    'best_symbol': self._get_best_performing_symbol(df),
+                    'worst_symbol': self._get_worst_performing_symbol(df)
+                }
+                
+                self._set_cached_data(cache_key, metrics)
+                return metrics
+                
+        except Exception as e:
+            logger.error(f"Error al obtener métricas de rendimiento: {e}")
+            return self._get_default_performance_metrics()
+    
     def get_model_status(self) -> Dict[str, Any]:
         """
-        Obtiene el estado actual del modelo de IA
+        Obtiene estado y métricas del modelo de IA
         
         Returns:
-            Dict[str, Any]: Estado del modelo
+            Diccionario con estado del modelo
         """
-        cache_key = "model_status"
-        cached_data = self._get_from_cache(cache_key)
-        if cached_data is not None:
-            return cached_data
-        
         try:
-            if self.prediction_engine:
-                status = self.prediction_engine.get_model_status()
-            else:
-                # Estado de ejemplo para desarrollo
-                status = {
-                    'model_loaded': True,
-                    'last_training': datetime.now() - timedelta(hours=2),
-                    'accuracy': 68.5,
-                    'total_predictions': 1247,
-                    'successful_predictions': 854,
-                    'model_version': '10.2.1',
-                    'training_status': 'completed',
-                    'next_training': datetime.now() + timedelta(hours=22),
-                    'features_count': 47,
-                    'model_size_mb': 12.5
-                }
+            cache_key = "model_status"
+            cached_data = self._get_cached_data(cache_key)
+            if cached_data:
+                return cached_data
             
-            self._set_cache(cache_key, status)
-            return status
+            # Si hay PredictionEngine disponible, usar datos reales
+            if PredictionEngine:
+                try:
+                    # Aquí se integraría con el sistema real de ML
+                    model_data = self._get_real_model_data()
+                except Exception as e:
+                    logger.warning(f"Error obteniendo datos reales del modelo: {e}")
+                    model_data = self._generate_mock_model_data()
+            else:
+                model_data = self._generate_mock_model_data()
+            
+            self._set_cached_data(cache_key, model_data)
+            return model_data
             
         except Exception as e:
             logger.error(f"Error al obtener estado del modelo: {e}")
-            return {'error': str(e)}
+            return self._generate_mock_model_data()
     
-    def _get_symbol_trades(self, symbol: str) -> List[Dict]:
-        """Obtiene trades para un símbolo específico"""
-        if self.db_manager:
-            return self.db_manager.get_symbol_trades(symbol)
-        else:
-            # Datos de ejemplo
-            return [
-                {'trade_id': f'{symbol}_1', 'pnl': 15.5, 'timestamp': datetime.now()},
-                {'trade_id': f'{symbol}_2', 'pnl': -8.2, 'timestamp': datetime.now()},
-                {'trade_id': f'{symbol}_3', 'pnl': 22.1, 'timestamp': datetime.now()}
-            ]
-    
-    def _get_symbol_balance(self, symbol: str) -> Dict:
-        """Obtiene información de balance para un símbolo"""
-        if self.position_manager:
-            return self.position_manager.get_symbol_balance(symbol)
-        else:
-            return {
-                'current_balance': 1150.0,
-                'initial_balance': 1000.0,
-                'target_balance': 2000.0
-            }
-    
-    def _get_symbol_status(self, symbol: str) -> str:
-        """Obtiene el estado actual de un símbolo"""
-        if self.position_manager:
-            return self.position_manager.get_symbol_status(symbol)
-        else:
-            return 'active'  # Estado por defecto
-    
-    def _get_last_signal(self, symbol: str) -> Dict:
-        """Obtiene la última señal generada para un símbolo"""
-        if self.prediction_engine:
-            return self.prediction_engine.get_last_signal(symbol)
-        else:
-            return {
-                'signal': 'buy',
-                'timestamp': datetime.now() - timedelta(minutes=15),
-                'confidence': 0.75
-            }
-    
-    def _get_total_runs(self, symbol: str) -> int:
-        """Obtiene el total de runs ejecutados para un símbolo"""
-        if self.db_manager:
-            return self.db_manager.get_total_runs(symbol)
-        else:
-            return np.random.randint(5, 50)  # Valor de ejemplo
-    
-    def _calculate_cumulative_balance(self, trades: List[Dict], initial_balance: float) -> List[float]:
-        """Calcula el balance cumulativo a partir de una lista de trades"""
-        balances = [initial_balance]
-        current_balance = initial_balance
+    def get_system_settings(self) -> Dict[str, Any]:
+        """
+        Obtiene configuraciones del sistema
         
-        for trade in trades:
-            current_balance += trade.get('pnl', 0)
-            balances.append(current_balance)
-        
-        return balances
-    
-    def _calculate_max_drawdown(self, balance_series: List[float]) -> float:
-        """Calcula el máximo drawdown de una serie de balances"""
-        if len(balance_series) < 2:
-            return 0
-        
-        peak = balance_series[0]
-        max_dd = 0
-        
-        for balance in balance_series[1:]:
-            if balance > peak:
-                peak = balance
+        Returns:
+            Diccionario con configuraciones
+        """
+        try:
+            # Intentar cargar desde archivo de configuración
+            config_file = Path("config/user_settings.yaml")
+            if config_file.exists():
+                import yaml
+                with open(config_file, 'r') as f:
+                    settings = yaml.safe_load(f)
+                return settings
             else:
-                drawdown = ((peak - balance) / peak) * 100
-                max_dd = max(max_dd, drawdown)
-        
-        return max_dd
+                return self._get_default_system_settings()
+                
+        except Exception as e:
+            logger.error(f"Error al obtener configuraciones del sistema: {e}")
+            return self._get_default_system_settings()
     
-    def _generate_sample_ohlcv(self, symbol: str, limit: int) -> List[Dict]:
-        """Genera datos OHLCV de ejemplo para desarrollo"""
-        data = []
-        base_price = 50000 if 'BTC' in symbol else 3000 if 'ETH' in symbol else 1.5
-        current_time = datetime.now() - timedelta(hours=limit)
+    def save_system_settings(self, settings: Dict[str, Any]) -> bool:
+        """
+        Guarda configuraciones del sistema
         
-        for i in range(limit):
-            # Generar precio con movimiento aleatorio
-            price_change = np.random.normal(0, base_price * 0.002)
-            base_price += price_change
-            base_price = max(base_price * 0.5, base_price)  # Evitar precios negativos
+        Args:
+            settings: Configuraciones a guardar
             
-            high = base_price * (1 + abs(np.random.normal(0, 0.005)))
-            low = base_price * (1 - abs(np.random.normal(0, 0.005)))
-            open_price = base_price + np.random.normal(0, base_price * 0.001)
-            close_price = base_price + np.random.normal(0, base_price * 0.001)
-            volume = np.random.uniform(100, 1000)
+        Returns:
+            True si se guardó correctamente
+        """
+        try:
+            config_file = Path("config/user_settings.yaml")
+            config_file.parent.mkdir(exist_ok=True)
             
-            data.append({
-                'timestamp': current_time + timedelta(hours=i),
-                'open': round(open_price, 2),
-                'high': round(high, 2),
-                'low': round(low, 2),
-                'close': round(close_price, 2),
-                'volume': round(volume, 2)
-            })
-        
-        return data
-    
-    def _generate_sample_cycles(self, limit: int) -> List[Dict]:
-        """Genera datos de ciclos de ejemplo"""
-        cycles = []
-        symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'BNBUSDT']
-        
-        for i in range(limit):
-            start_date = datetime.now() - timedelta(days=np.random.randint(1, 365))
-            duration = np.random.randint(7, 90)
-            end_date = start_date + timedelta(days=duration)
+            import yaml
+            with open(config_file, 'w') as f:
+                yaml.dump(settings, f, default_flow_style=False)
             
-            start_balance = 1000
-            pnl_percentage = np.random.normal(15, 25)  # Media 15%, desviación 25%
-            pnl = start_balance * (pnl_percentage / 100)
-            end_balance = start_balance + pnl
+            # Invalidar cache de configuraciones
+            self._invalidate_cache("system_settings")
             
-            cycles.append({
-                'cycle_id': f'cycle_{i+1:03d}',
-                'symbol': np.random.choice(symbols),
-                'start_date': start_date,
-                'end_date': end_date,
-                'start_balance': start_balance,
-                'end_balance': end_balance,
-                'pnl': pnl,
-                'pnl_percentage': pnl_percentage,
-                'total_trades': np.random.randint(10, 50),
-                'win_rate': np.random.uniform(45, 85),
-                'avg_daily_pnl': pnl / duration,
-                'max_drawdown': np.random.uniform(2, 15),
-                'sharpe_ratio': np.random.uniform(0.5, 3.0),
-                'duration_days': duration,
-                'status': 'completed'
-            })
-        
-        return cycles
-    
-    def _generate_sample_trades(self, symbol: Optional[str], limit: int) -> List[Dict]:
-        """Genera datos de trades de ejemplo"""
-        trades = []
-        symbols = [symbol] if symbol else ['BTCUSDT', 'ETHUSDT', 'ADAUSDT']
-        
-        for i in range(limit):
-            trade_symbol = np.random.choice(symbols)
-            side = np.random.choice(['buy', 'sell'])
-            entry_time = datetime.now() - timedelta(minutes=np.random.randint(0, 10080))  # Última semana
+            return True
             
-            # Determinar si el trade está cerrado
-            is_closed = np.random.choice([True, False], p=[0.8, 0.2])
-            
-            if is_closed:
-                duration = np.random.randint(5, 1440)  # 5 min a 24 horas
-                exit_time = entry_time + timedelta(minutes=duration)
-                pnl = np.random.normal(5, 15)  # PnL normal con media 5
-                status = 'closed'
-            else:
-                exit_time = None
-                pnl = None
-                duration = None
-                status = 'open'
-            
-            trades.append({
-                'trade_id': f'trade_{i+1:05d}',
-                'symbol': trade_symbol,
-                'side': side,
-                'entry_time': entry_time,
-                'exit_time': exit_time,
-                'entry_price': np.random.uniform(30000, 70000) if 'BTC' in trade_symbol else np.random.uniform(2000, 4000),
-                'exit_price': None if not is_closed else np.random.uniform(30000, 70000),
-                'quantity': round(np.random.uniform(0.001, 0.1), 6),
-                'pnl': pnl,
-                'pnl_percentage': (pnl / 1000) * 100 if pnl else None,
-                'duration_minutes': duration,
-                'status': status,
-                'stop_loss': np.random.uniform(29000, 31000) if 'BTC' in trade_symbol else np.random.uniform(1900, 2100),
-                'take_profit': np.random.uniform(69000, 71000) if 'BTC' in trade_symbol else np.random.uniform(3900, 4100)
-            })
-        
-        return trades
+        except Exception as e:
+            logger.error(f"Error al guardar configuraciones: {e}")
+            return False
     
     def clear_cache(self):
-        """Limpia todo el cache de datos"""
-        with self._lock:
-            self._cache.clear()
-            self._cache_timestamps.clear()
-            logger.info("Cache de datos limpiado")
+        """Limpia todo el cache"""
+        with self.lock:
+            self.cache.clear()
+            self.cache_timestamps.clear()
+            logger.info("Cache limpiado")
     
-    def get_cache_info(self) -> Dict[str, Any]:
-        """Obtiene información del estado del cache"""
-        with self._lock:
-            return {
-                'cache_size': len(self._cache),
-                'cache_keys': list(self._cache.keys()),
-                'oldest_entry': min(self._cache_timestamps.values()) if self._cache_timestamps else None,
-                'newest_entry': max(self._cache_timestamps.values()) if self._cache_timestamps else None
+    def _invalidate_cache(self, pattern: str):
+        """Invalida entradas del cache que coincidan con el patrón"""
+        with self.lock:
+            keys_to_remove = [key for key in self.cache.keys() if pattern in key]
+            for key in keys_to_remove:
+                del self.cache[key]
+                del self.cache_timestamps[key]
+    
+    # Métodos auxiliares para cálculos
+    
+    def _calculate_sharpe_ratio(self, returns: pd.Series, risk_free_rate: float = 0.02) -> float:
+        """Calcula el ratio de Sharpe"""
+        try:
+            if len(returns) == 0 or returns.std() == 0:
+                return 0.0
+            
+            excess_returns = returns - (risk_free_rate / 252)  # Tasa libre de riesgo diaria
+            return (excess_returns.mean() / returns.std()) * np.sqrt(252)  # Anualizado
+            
+        except Exception:
+            return 0.0
+    
+    def _calculate_max_drawdown(self, symbol: str) -> float:
+        """Calcula el drawdown máximo para un símbolo"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT pnl_percentage FROM trades 
+                    WHERE symbol = ? AND status = 'closed'
+                    ORDER BY exit_time
+                """, (symbol,))
+                
+                returns = [row[0] / 100 for row in cursor.fetchall()]
+                
+                if not returns:
+                    return 0.0
+                
+                cumulative = np.cumprod([1 + r for r in returns])
+                running_max = np.maximum.accumulate(cumulative)
+                drawdown = (cumulative - running_max) / running_max
+                
+                return min(drawdown) * 100 if len(drawdown) > 0 else 0.0
+                
+        except Exception:
+            return 0.0
+    
+    def _get_current_balance(self, symbol: str) -> float:
+        """Obtiene el balance actual para un símbolo"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT balance FROM symbol_balances 
+                    WHERE symbol = ? 
+                    ORDER BY timestamp DESC 
+                    LIMIT 1
+                """, (symbol,))
+                
+                result = cursor.fetchone()
+                return result[0] if result else 1000.0
+                
+        except Exception:
+            return 1000.0
+    
+    def _get_target_balance(self, symbol: str) -> float:
+        """Obtiene el balance objetivo para un símbolo"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT target_balance FROM symbol_config 
+                    WHERE symbol = ?
+                """, (symbol,))
+                
+                result = cursor.fetchone()
+                return result[0] if result else 2000.0
+                
+        except Exception:
+            return 2000.0
+    
+    def _get_current_status(self, symbol: str) -> str:
+        """Obtiene el estado actual de un símbolo"""
+        try:
+            # Verificar si hay trades activos
+            active_trades = self.get_active_trades(symbol)
+            if active_trades:
+                return 'active'
+            # Si no hay trades, y no hay engine de predicción, pausado por defecto
+            if PredictionEngine is None:
+                return 'paused'
+            return 'active'
+        except Exception:
+            return 'paused'
+
+    def _get_last_signal(self, symbol: str) -> Tuple[str, datetime]:
+        """Obtiene la última señal para un símbolo"""
+        try:
+            if PredictionEngine:
+                # Integración real futura: PredictionEngine.get_last_signal(symbol)
+                return ('hold', datetime.now())
+            # Fallback a DB si existe tabla de señales
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    SELECT signal, timestamp FROM signals
+                    WHERE symbol = ?
+                    ORDER BY timestamp DESC LIMIT 1
+                    """,
+                    (symbol,)
+                )
+                row = cursor.fetchone()
+                if row:
+                    ts = datetime.fromtimestamp(row[1]) if isinstance(row[1], (int, float)) else datetime.fromisoformat(str(row[1]))
+                    return (str(row[0]), ts)
+            return ('hold', datetime.now())
+        except Exception:
+            return ('hold', datetime.now())
+
+    def _get_current_position(self, symbol: str) -> Optional[str]:
+        """Devuelve la posición actual ('long'/'short'/None)"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    SELECT side FROM trades
+                    WHERE symbol = ? AND status = 'open'
+                    ORDER BY entry_time DESC LIMIT 1
+                    """,
+                    (symbol,)
+                )
+                row = cursor.fetchone()
+                if row:
+                    return 'long' if str(row[0]).lower() == 'buy' else 'short'
+            return None
+        except Exception:
+            return None
+
+    def _get_unrealized_pnl(self, symbol: str) -> float:
+        """Calcula PnL no realizado de la posición abierta"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    SELECT entry_price, quantity, side
+                    FROM trades
+                    WHERE symbol = ? AND status = 'open'
+                    ORDER BY entry_time DESC LIMIT 1
+                    """,
+                    (symbol,)
+                )
+                row = cursor.fetchone()
+                if not row:
+                    return 0.0
+                entry_price, qty, side = float(row[0]), float(row[1]), str(row[2]).lower()
+                cursor.execute(
+                    """
+                    SELECT close FROM market_data
+                    WHERE symbol = ?
+                    ORDER BY timestamp DESC LIMIT 1
+                    """,
+                    (symbol,)
+                )
+                md = cursor.fetchone()
+                if not md:
+                    return 0.0
+                last_price = float(md[0])
+                diff = (last_price - entry_price) if side == 'buy' else (entry_price - last_price)
+                return diff * qty
+        except Exception:
+            return 0.0
+
+    def _get_total_runs(self, symbol: str) -> int:
+        """Obtiene el total de ciclos/runs del símbolo"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    SELECT COUNT(1) FROM trading_cycles WHERE symbol = ?
+                    """,
+                    (symbol,)
+                )
+                row = cursor.fetchone()
+                return int(row[0]) if row and row[0] is not None else 0
+        except Exception:
+            return 0
+
+    # --------- Builders ---------
+    def _build_cycle_data_from_row(self, row: Tuple[Any, ...]) -> CycleData:
+        cycle_id, symbol, start_date, end_date, start_balance, end_balance, total_trades, status = row
+        start_dt = datetime.fromtimestamp(start_date) if isinstance(start_date, (int, float)) else datetime.fromisoformat(str(start_date))
+        end_dt = None
+        if end_date:
+            end_dt = datetime.fromtimestamp(end_date) if isinstance(end_date, (int, float)) else datetime.fromisoformat(str(end_date))
+        pnl = (float(end_balance) - float(start_balance)) if end_dt else 0.0
+        duration_days = (end_dt - start_dt).days if end_dt else 0
+        pnl_pct = (pnl / float(start_balance) * 100) if float(start_balance) != 0 else 0.0
+        return CycleData(
+            cycle_id=str(cycle_id),
+            symbol=str(symbol),
+            start_date=start_dt,
+            end_date=end_dt,
+            start_balance=float(start_balance),
+            end_balance=float(end_balance) if end_dt else float(start_balance),
+            pnl=float(pnl),
+            pnl_percentage=float(pnl_pct),
+            total_trades=int(total_trades or 0),
+            win_rate=0.0,
+            avg_daily_pnl=(pnl / max(1, duration_days)) if duration_days else 0.0,
+            max_drawdown=0.0,
+            sharpe_ratio=0.0,
+            duration_days=int(duration_days),
+            status=str(status),
+            roi=float(pnl_pct),
+            profit_factor=0.0,
+        )
+
+    def _build_trade_data_from_row(self, row: Tuple[Any, ...], include_exit: bool = False) -> TradeData:
+        if include_exit:
+            trade_id, symbol, side, entry_time, exit_time, entry_price, exit_price, quantity, pnl, pnl_percentage, status, stop_loss, take_profit = row
+        else:
+            trade_id, symbol, side, entry_time, entry_price, quantity, stop_loss, take_profit, status = row
+            exit_time = None
+            exit_price = None
+            pnl = None
+            pnl_percentage = None
+        entry_dt = datetime.fromtimestamp(entry_time) if isinstance(entry_time, (int, float)) else datetime.fromisoformat(str(entry_time))
+        exit_dt = None
+        if exit_time:
+            exit_dt = datetime.fromtimestamp(exit_time) if isinstance(exit_time, (int, float)) else datetime.fromisoformat(str(exit_time))
+        duration = None
+        if exit_dt:
+            duration = int((exit_dt - entry_dt).total_seconds() // 60)
+        return TradeData(
+            trade_id=str(trade_id),
+            symbol=str(symbol),
+            side=str(side),
+            entry_time=entry_dt,
+            exit_time=exit_dt,
+            entry_price=float(entry_price),
+            exit_price=float(exit_price) if exit_price is not None else None,
+            quantity=float(quantity),
+            pnl=float(pnl) if pnl is not None else None,
+            pnl_percentage=float(pnl_percentage) if pnl_percentage is not None else None,
+            duration_minutes=duration,
+            status=str(status),
+            stop_loss=float(stop_loss) if stop_loss is not None else None,
+            take_profit=float(take_profit) if take_profit is not None else None,
+        )
+
+    # --------- Mock generators / fallbacks ---------
+    def _generate_mock_market_data(self, symbol: str, timeframe: str, limit: int) -> List[MarketData]:
+        now = datetime.now()
+        step = {'1m': 1, '5m': 5, '15m': 15, '1h': 60, '4h': 240}.get(timeframe, 1)
+        data: List[MarketData] = []
+        price = 40000.0 if 'BTC' in symbol else 2000.0
+        for i in range(limit):
+            ts = now - timedelta(minutes=step * (limit - 1 - i))
+            change = np.random.normal(0, price * 0.001)
+            open_p = price
+            close_p = max(1.0, price + change)
+            high_p = max(open_p, close_p) + abs(np.random.normal(0, price * 0.0005))
+            low_p = min(open_p, close_p) - abs(np.random.normal(0, price * 0.0005))
+            vol = abs(np.random.normal(0, 1000))
+            data.append(MarketData(symbol=symbol, timestamp=ts, open=open_p, high=high_p, low=low_p, close=close_p, volume=vol, timeframe=timeframe))
+            price = close_p
+        return data
+
+    def _generate_mock_cycles_data(self, symbol: Optional[str], limit: int) -> List[CycleData]:
+        symbols = [symbol] if symbol else self.config['symbols'][:3]
+        cycles: List[CycleData] = []
+        for s in symbols:
+            for i in range(max(1, limit // max(1, len(symbols)))):
+                start = datetime.now() - timedelta(days=np.random.randint(10, 120))
+                duration = np.random.randint(5, 60)
+                end = start + timedelta(days=duration)
+                start_bal = np.random.uniform(800, 1200)
+                end_bal = start_bal * np.random.uniform(0.9, 1.2)
+                pnl = end_bal - start_bal
+                pnl_pct = pnl / start_bal * 100
+                cycles.append(CycleData(
+                    cycle_id=f"{s}_{i}",
+                    symbol=s,
+                    start_date=start,
+                    end_date=end,
+                    start_balance=start_bal,
+                    end_balance=end_bal,
+                    pnl=pnl,
+                    pnl_percentage=pnl_pct,
+                    total_trades=np.random.randint(5, 60),
+                    win_rate=np.random.uniform(40, 70),
+                    avg_daily_pnl=pnl / max(1, duration),
+                    max_drawdown=np.random.uniform(3, 20),
+                    sharpe_ratio=np.random.uniform(0.2, 2.0),
+                    duration_days=duration,
+                    status='completed'
+                ))
+        return cycles[:limit]
+
+    def _get_default_performance_metrics(self) -> Dict[str, Any]:
+        return {
+            'total_pnl': 0.0,
+            'total_trades': 0,
+            'winning_trades': 0,
+            'losing_trades': 0,
+            'win_rate': 0.0,
+            'avg_win': 0.0,
+            'avg_loss': 0.0,
+            'profit_factor': 0.0,
+            'sharpe_ratio': 0.0,
+            'max_drawdown': 0.0,
+            'period_hours': 24,
+            'symbols_active': 0,
+            'avg_trade_duration': 0.0,
+            'best_symbol': None,
+            'worst_symbol': None,
+        }
+
+    def _calculate_avg_trade_duration(self, df: pd.DataFrame) -> float:
+        try:
+            entry = pd.to_datetime(df['entry_time'])
+            exit_ = pd.to_datetime(df['exit_time'])
+            durations = (exit_ - entry).dt.total_seconds() / 60.0
+            return float(durations.mean()) if len(durations) else 0.0
+        except Exception:
+            return 0.0
+
+    def _get_best_performing_symbol(self, df: pd.DataFrame) -> Optional[str]:
+        try:
+            return df.groupby('symbol')['pnl'].sum().idxmax()
+        except Exception:
+            return None
+
+    def _get_worst_performing_symbol(self, df: pd.DataFrame) -> Optional[str]:
+        try:
+            return df.groupby('symbol')['pnl'].sum().idxmin()
+        except Exception:
+            return None
+
+    def _get_real_model_data(self) -> Dict[str, Any]:
+        # Placeholder de integración real
+        return self._generate_mock_model_data()
+
+    def _generate_mock_model_data(self) -> Dict[str, Any]:
+        return {
+            'status': 'ready',
+            'metrics': {
+                'accuracy': 0.72,
+                'precision': 0.70,
+                'recall': 0.68,
+                'f1_score': 0.69,
+                'auc_roc': 0.78,
+                'loss': 0.45,
+                'predictions_today': 124,
+                'avg_confidence': 0.66,
+                'last_retrain': datetime.now().isoformat(),
+                'drift_score': 0.12,
+                'model_version': 'v1.0.0'
             }
+        }
+
+    def health_check(self) -> Dict[str, Any]:
+        try:
+            status = {
+                'db_connected': self._connected,
+                'cache_items': len(self.cache),
+                'cache_ttl_sec': self.cache_ttl,
+                'symbols': self.config.get('symbols', []),
+                'last_updated': datetime.now().isoformat(),
+            }
+            if self._connected:
+                with self._get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT 1")
+                    cursor.fetchone()
+            return status
+        except Exception as e:
+            return {'db_connected': False, 'error': str(e), 'last_updated': datetime.now().isoformat()}
+
+    def get_summary(self) -> Dict[str, Any]:
+        return {
+            'connected': self._connected,
+            'symbols_tracked': len(self.config.get('symbols', [])),
+            'cache_keys': list(self.cache.keys()),
+            'config': self.config,
+        }
