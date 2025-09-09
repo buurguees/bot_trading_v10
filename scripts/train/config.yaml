@@ -6,6 +6,9 @@ general:
   log_level: INFO
   max_workers: 4
   timeout_seconds: 300
+  auto_save_cycles: 10  # Guardar progreso cada X ciclos
+  agents_directory: "agents"  # Directorio para modelos de agentes
+  enable_infinite_mode: true  # Modo infinito habilitado
 
 # Configuración de entrenamiento histórico
 historical:

@@ -105,15 +105,22 @@ class LiveTrainer:
         self.config = self._load_config(config_path)
         self.state = None
         self.telegram_bot = None
+        self.state_manager = None
         self.update_lock = threading.Lock()
         self.last_update_time = 0
         self.rate_limit_seconds = self.config.get('telegram', {}).get('update_rate_limit_sec', 3)
         self.websocket_connections = {}
         self.data_buffer = {}
         self.running = False
+        self.is_running = False
+        self.stop_requested = False
         
         # Configurar directorios
         self._setup_directories()
+        
+        # Inicializar gestor de estado
+        from state_manager import StateManager
+        self.state_manager = StateManager(self.config)
         
         logger.info("🤖 Entrenador en vivo inicializado")
     
@@ -557,16 +564,19 @@ Artefactos: strategies.json ✅ | bad_strategies.json ✅ | ckpt_ppo.zip ✅
             # Inicializar estado
             symbols = self.config['symbols']
             self.state = self._initialize_state(symbols, cycle_minutes)
+            self.state_manager.state = self.state
             self.running = True
+            self.is_running = True
+            self.stop_requested = False
             
             # Conectar WebSockets
             logger.info("🔌 Conectando WebSockets...")
             for symbol in symbols:
                 await self._connect_websocket(symbol)
             
-            # Procesar ciclos continuos
+            # Procesar ciclos continuos (modo infinito)
             cycle_count = 0
-            while self.running and not self.state.stopped:
+            while self.running and not self.state.stopped and not self.stop_requested:
                 self.state.cycle_id = cycle_count
                 self.state.current_cycle_start = datetime.now()
                 self.state.current_cycle_end = self.state.current_cycle_start + timedelta(minutes=cycle_minutes)
@@ -598,6 +608,11 @@ Artefactos: strategies.json ✅ | bad_strategies.json ✅ | ckpt_ppo.zip ✅
                 # Guardar artefactos
                 self._save_artifacts(self.state)
                 
+                # Verificar si debe guardar automáticamente
+                if self.state_manager.should_auto_save():
+                    logger.info(f"💾 Guardado automático en ciclo {cycle_count + 1}")
+                    self.state_manager.update_agent_models()
+                
                 # Enviar resumen final del ciclo
                 await self._update_telegram_message(self.state, is_final=True)
                 
@@ -621,9 +636,33 @@ Artefactos: strategies.json ✅ | bad_strategies.json ✅ | ckpt_ppo.zip ✅
     def stop_training(self):
         """Detiene el entrenamiento"""
         self.running = False
+        self.is_running = False
+        self.stop_requested = True
         if self.state:
             self.state.stopped = True
             logger.info("🛑 Entrenamiento en vivo detenido")
+    
+    def stop_training_gracefully(self):
+        """Detiene el entrenamiento de forma elegante"""
+        try:
+            logger.info("🛑 Deteniendo entrenamiento en vivo de forma elegante...")
+            
+            self.stop_requested = True
+            self.is_running = False
+            self.running = False
+            
+            if self.state_manager:
+                self.state_manager.stop_training_gracefully()
+            
+            # Cerrar conexiones WebSocket
+            for symbol, ws in self.websocket_connections.items():
+                if ws and not ws.closed:
+                    asyncio.create_task(ws.close())
+            
+            logger.info("✅ Entrenamiento en vivo detenido correctamente")
+            
+        except Exception as e:
+            logger.error(f"❌ Error deteniendo entrenamiento en vivo: {e}")
 
 async def main():
     """Función principal"""

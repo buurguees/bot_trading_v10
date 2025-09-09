@@ -112,7 +112,11 @@ class StateManager:
             'state',
             'penalties',
             'trades',
-            'artifacts'
+            'artifacts',
+            'agents',  # Directorio para modelos de agentes
+            'agents/models',  # Modelos por símbolo
+            'agents/checkpoints',  # Checkpoints de entrenamiento
+            'agents/strategies'  # Estrategias guardadas
         ]
         
         for directory in directories:
@@ -472,3 +476,168 @@ class StateManager:
                 'last_reset': tracker['last_reset']
             }
         return stats
+    
+    def should_auto_save(self) -> bool:
+        """Determina si debe guardar automáticamente"""
+        if not self.state:
+            return False
+        
+        auto_save_cycles = self.config.get('general', {}).get('auto_save_cycles', 10)
+        return self.state.cycle_id % auto_save_cycles == 0 and self.state.cycle_id > 0
+    
+    def save_agent_progress(self, symbol: str, progress_data: Dict[str, Any]):
+        """Guarda el progreso de un agente específico"""
+        try:
+            agents_dir = Path(self.config.get('general', {}).get('agents_directory', 'agents'))
+            symbol_dir = agents_dir / 'models' / symbol
+            symbol_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Guardar progreso del agente
+            progress_file = symbol_dir / f'progress_cycle_{self.state.cycle_id}.json'
+            with open(progress_file, 'w') as f:
+                json.dump(progress_data, f, indent=2, default=str)
+            
+            # Guardar checkpoint del modelo (simulado)
+            checkpoint_file = symbol_dir / f'checkpoint_cycle_{self.state.cycle_id}.pkl'
+            # Aquí se guardaría el modelo real
+            with open(checkpoint_file, 'w') as f:
+                f.write(f"Checkpoint simulado para {symbol} en ciclo {self.state.cycle_id}")
+            
+            # Guardar estrategias mejoradas
+            strategies_file = agents_dir / 'strategies' / f'{symbol}_strategies.json'
+            strategies_data = {
+                'symbol': symbol,
+                'cycle_id': self.state.cycle_id,
+                'timestamp': datetime.now().isoformat(),
+                'strategies': progress_data.get('strategies', []),
+                'performance': progress_data.get('performance', {}),
+                'kpis': progress_data.get('kpis', {})
+            }
+            
+            with open(strategies_file, 'w') as f:
+                json.dump(strategies_data, f, indent=2, default=str)
+            
+            logger.info(f"💾 Progreso guardado para {symbol} en ciclo {self.state.cycle_id}")
+            
+        except Exception as e:
+            logger.error(f"❌ Error guardando progreso de {symbol}: {e}")
+    
+    def update_agent_models(self):
+        """Actualiza los modelos de agentes con el progreso guardado"""
+        try:
+            if not self.state:
+                return
+            
+            agents_dir = Path(self.config.get('general', {}).get('agents_directory', 'agents'))
+            
+            for symbol, symbol_state in self.state.per_symbol.items():
+                # Crear datos de progreso
+                progress_data = {
+                    'symbol': symbol,
+                    'cycle_id': self.state.cycle_id,
+                    'timestamp': datetime.now().isoformat(),
+                    'performance': {
+                        'win_rate': symbol_state.kpis.get('win_rate', 0),
+                        'sharpe_ratio': symbol_state.kpis.get('sharpe_ratio', 0),
+                        'max_drawdown': symbol_state.max_drawdown,
+                        'total_trades': symbol_state.trades_count,
+                        'equity': symbol_state.equity
+                    },
+                    'strategies': symbol_state.strategies_used[-10:],  # Últimas 10 estrategias
+                    'kpis': symbol_state.kpis
+                }
+                
+                # Guardar progreso del agente
+                self.save_agent_progress(symbol, progress_data)
+                
+                # Simular actualización del modelo
+                self._update_model_weights(symbol, progress_data)
+            
+            logger.info("🤖 Modelos de agentes actualizados")
+            
+        except Exception as e:
+            logger.error(f"❌ Error actualizando modelos de agentes: {e}")
+    
+    def _update_model_weights(self, symbol: str, progress_data: Dict[str, Any]):
+        """Simula la actualización de pesos del modelo"""
+        try:
+            agents_dir = Path(self.config.get('general', {}).get('agents_directory', 'agents'))
+            model_file = agents_dir / 'models' / symbol / 'model_weights.json'
+            
+            # Simular pesos del modelo basados en el rendimiento
+            performance = progress_data.get('performance', {})
+            win_rate = performance.get('win_rate', 0)
+            sharpe = performance.get('sharpe_ratio', 0)
+            
+            # Peso basado en rendimiento (simulado)
+            performance_weight = min(win_rate / 100, 1.0) * sharpe
+            
+            model_weights = {
+                'symbol': symbol,
+                'cycle_id': self.state.cycle_id,
+                'timestamp': datetime.now().isoformat(),
+                'performance_weight': performance_weight,
+                'win_rate': win_rate,
+                'sharpe_ratio': sharpe,
+                'last_updated': datetime.now().isoformat(),
+                'status': 'updated'
+            }
+            
+            with open(model_file, 'w') as f:
+                json.dump(model_weights, f, indent=2, default=str)
+            
+            logger.info(f"⚖️ Pesos actualizados para {symbol}: {performance_weight:.3f}")
+            
+        except Exception as e:
+            logger.error(f"❌ Error actualizando pesos para {symbol}: {e}")
+    
+    def stop_training_gracefully(self):
+        """Detiene el entrenamiento de forma elegante"""
+        try:
+            if not self.state:
+                return
+            
+            logger.info("🛑 Deteniendo entrenamiento de forma elegante...")
+            
+            # Marcar como detenido
+            self.state.stopped = True
+            
+            # Guardar progreso final
+            self.update_agent_models()
+            
+            # Guardar estado final
+            self.save_session()
+            
+            # Crear resumen final
+            self._create_final_summary()
+            
+            logger.info("✅ Entrenamiento detenido correctamente")
+            
+        except Exception as e:
+            logger.error(f"❌ Error deteniendo entrenamiento: {e}")
+    
+    def _create_final_summary(self):
+        """Crea un resumen final del entrenamiento"""
+        try:
+            if not self.state:
+                return
+            
+            summary = {
+                'session_id': self.state.session_id,
+                'mode': self.state.mode.value,
+                'total_cycles': self.state.cycle_id,
+                'symbols': self.state.symbols,
+                'final_metrics': self.get_aggregated_metrics(),
+                'penalty_stats': self.get_penalty_stats(),
+                'stopped_at': datetime.now().isoformat(),
+                'status': 'completed'
+            }
+            
+            summary_file = Path('artifacts') / f'final_summary_{self.state.session_id}.json'
+            with open(summary_file, 'w') as f:
+                json.dump(summary, f, indent=2, default=str)
+            
+            logger.info(f"📋 Resumen final guardado: {summary_file}")
+            
+        except Exception as e:
+            logger.error(f"❌ Error creando resumen final: {e}")

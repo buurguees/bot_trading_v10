@@ -100,12 +100,19 @@ class HistoricalTrainer:
         self.config = self._load_config(config_path)
         self.state = None
         self.telegram_bot = None
+        self.state_manager = None
         self.update_lock = threading.Lock()
         self.last_update_time = 0
         self.rate_limit_seconds = self.config.get('telegram', {}).get('update_rate_limit_sec', 3)
+        self.is_running = False
+        self.stop_requested = False
         
         # Configurar directorios
         self._setup_directories()
+        
+        # Inicializar gestor de estado
+        from state_manager import StateManager
+        self.state_manager = StateManager(self.config)
         
         logger.info("🤖 Entrenador histórico inicializado")
     
@@ -514,6 +521,9 @@ Artefactos: strategies.json ✅ | bad_strategies.json ✅ | ckpt_ppo.zip ✅
             # Inicializar estado
             symbols = self.config['symbols']
             self.state = self._initialize_state(symbols)
+            self.state_manager.state = self.state
+            self.is_running = True
+            self.stop_requested = False
             
             # Cargar datos históricos
             logger.info("📊 Cargando datos históricos...")
@@ -533,14 +543,21 @@ Artefactos: strategies.json ✅ | bad_strategies.json ✅ | ckpt_ppo.zip ✅
             
             logger.info(f"✅ Datos preparados: {min_length} barras, {self.state.total_cycles} ciclos")
             
-            # Procesar ciclos
-            for cycle_idx in range(self.state.total_cycles):
+            # Procesar ciclos (modo infinito)
+            cycle_idx = 0
+            while self.is_running and not self.stop_requested:
                 if self.state.stopped:
                     break
                 
                 self.state.cycle_id = cycle_idx
                 start_idx = cycle_idx * cycle_size
                 end_idx = min(start_idx + cycle_size, min_length)
+                
+                # Verificar si hemos llegado al final de los datos
+                if start_idx >= min_length:
+                    logger.info("📊 Fin de datos históricos alcanzado, reiniciando...")
+                    start_idx = 0
+                    end_idx = min(cycle_size, min_length)
                 
                 # Actualizar ventana del ciclo
                 cycle_data = {}
@@ -580,8 +597,16 @@ Artefactos: strategies.json ✅ | bad_strategies.json ✅ | ckpt_ppo.zip ✅
                 # Guardar artefactos
                 self._save_artifacts(self.state)
                 
+                # Verificar si debe guardar automáticamente
+                if self.state_manager.should_auto_save():
+                    logger.info(f"💾 Guardado automático en ciclo {cycle_idx + 1}")
+                    self.state_manager.update_agent_models()
+                
                 # Enviar resumen final del ciclo
                 await self._update_telegram_message(self.state, is_final=True)
+                
+                # Incrementar contador de ciclo
+                cycle_idx += 1
                 
                 # Pausa entre ciclos
                 await asyncio.sleep(1)
@@ -596,7 +621,25 @@ Artefactos: strategies.json ✅ | bad_strategies.json ✅ | ckpt_ppo.zip ✅
         """Detiene el entrenamiento"""
         if self.state:
             self.state.stopped = True
+            self.is_running = False
+            self.stop_requested = True
             logger.info("🛑 Entrenamiento detenido")
+    
+    def stop_training_gracefully(self):
+        """Detiene el entrenamiento de forma elegante"""
+        try:
+            logger.info("🛑 Deteniendo entrenamiento de forma elegante...")
+            
+            self.stop_requested = True
+            self.is_running = False
+            
+            if self.state_manager:
+                self.state_manager.stop_training_gracefully()
+            
+            logger.info("✅ Entrenamiento detenido correctamente")
+            
+        except Exception as e:
+            logger.error(f"❌ Error deteniendo entrenamiento: {e}")
 
 async def main():
     """Función principal"""

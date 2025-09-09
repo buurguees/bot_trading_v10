@@ -190,6 +190,7 @@ class TelegramBot:
         # Comandos de Entrenamiento Avanzado
         self.application.add_handler(CommandHandler("train_hist", self.handlers.train_hist_command))
         self.application.add_handler(CommandHandler("train_live", self.handlers.train_live_command))
+        self.application.add_handler(CommandHandler("stop_train", self.handlers.stop_train_command))
         
         # Comandos de Datos y Análisis
         self.application.add_handler(CommandHandler("download_data", self.handlers.download_data_command))

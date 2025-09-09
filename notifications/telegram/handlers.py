@@ -1351,3 +1351,34 @@ class Handlers:
             error_msg = f"❌ Error cambiando leverage: {str(e)}"
             await update.message.reply_text(error_msg)
             logger.error(f"❌ Error en /set_leverage: {e}")
+    
+    async def stop_train_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Comando /stop_train - Detener entrenamiento de forma elegante"""
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.")
+            return
+        
+        try:
+            if not self.controller:
+                await update.message.reply_text("❌ Controlador del sistema no disponible.")
+                return
+            
+            # Enviar comando de parada elegante al controlador
+            await self.controller.command_queue.put({
+                'type': 'stop_train',
+                'args': {},
+                'chat_id': str(update.message.chat_id)
+            })
+            
+            await update.message.reply_text(
+                "🛑 **Deteniendo entrenamiento de forma elegante...**\n\n"
+                "⏳ Guardando progreso actual...\n"
+                "🤖 Actualizando modelos de agentes...\n"
+                "💾 Creando resumen final...\n\n"
+                "✅ El entrenamiento se detendrá de forma segura."
+            )
+            
+        except Exception as e:
+            error_msg = f"❌ Error deteniendo entrenamiento: {str(e)}"
+            await update.message.reply_text(error_msg)
+            logger.error(f"❌ Error en /stop_train: {e}")

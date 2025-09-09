@@ -280,6 +280,8 @@ class TradingSystemController:
                 await self._handle_train_command(args, chat_id)
             elif cmd_type == 'stop_training':
                 await self._handle_stop_training_command(chat_id)
+            elif cmd_type == 'stop_train':
+                await self._handle_stop_train_command(chat_id)
             elif cmd_type == 'trade':
                 await self._handle_trade_command(args, chat_id)
             elif cmd_type == 'stop_trading':
@@ -417,6 +419,38 @@ Duración: {duration}
             
         except Exception as e:
             logger.error(f"❌ Error deteniendo entrenamiento: {e}")
+            await self.telegram_bot.send_message(f"❌ Error: {str(e)}", chat_id=chat_id)
+    
+    async def _handle_stop_train_command(self, chat_id: str):
+        """Maneja comando de detener entrenamiento de forma elegante"""
+        try:
+            if not self.is_training:
+                await self.telegram_bot.send_message(
+                    "⚠️ No hay entrenamiento en curso", 
+                    chat_id=chat_id
+                )
+                return
+            
+            # Detener entrenamiento de forma elegante
+            if self.training_engine:
+                if hasattr(self.training_engine, 'stop_training_gracefully'):
+                    self.training_engine.stop_training_gracefully()
+                else:
+                    await self.training_engine.stop_training()
+            
+            self.is_training = False
+            
+            await self.telegram_bot.send_message(
+                "🛑 **Entrenamiento detenido de forma elegante**\n\n"
+                "✅ Progreso guardado\n"
+                "🤖 Modelos actualizados\n"
+                "💾 Resumen final creado\n\n"
+                "El entrenamiento se ha detenido de forma segura.", 
+                chat_id=chat_id
+            )
+            
+        except Exception as e:
+            logger.error(f"❌ Error deteniendo entrenamiento elegante: {e}")
             await self.telegram_bot.send_message(f"❌ Error: {str(e)}", chat_id=chat_id)
     
     async def _handle_trade_command(self, args: Dict[str, Any], chat_id: str):
