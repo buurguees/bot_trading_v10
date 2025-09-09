@@ -13,6 +13,7 @@ Uso:
 
 import sys
 import os
+import subprocess
 import logging
 import json
 import argparse
@@ -197,7 +198,8 @@ class IndependentDashboard:
                 n_intervals=0
             ),
             
-            # Stores para datos
+            # Salida de operaciones y stores
+            html.Div(id='operation-output', className='mt-2'),
             dcc.Store(id='dashboard-data-store')
             
         ], fluid=True)
@@ -340,11 +342,54 @@ class IndependentDashboard:
             except Exception as e:
                 logger.error(f"Error actualizando tabla de símbolos: {e}")
                 return html.P(f"Error: {e}")
+
+        @self.app.callback(
+            Output('operation-output', 'children'),
+            [Input('download-btn', 'n_clicks'),
+             Input('train-btn', 'n_clicks'),
+             Input('refresh-btn', 'n_clicks')],
+            [State('symbols-dropdown', 'value'), State('action-dropdown', 'value')],
+            prevent_initial_call=True
+        )
+        def handle_operations(download_clicks, train_clicks, refresh_clicks, symbols, action):
+            """Maneja Descargar Histórico, Entrenar y Actualizar."""
+            try:
+                triggered_id = dash.ctx.triggered_id if hasattr(dash, 'ctx') else None
+                if not symbols:
+                    symbols = self.get_configured_symbols()
+                symbols_arg = ','.join(symbols)
+
+                if triggered_id == 'download-btn':
+                    cmd = [sys.executable, 'bot.py', '--mode', 'download-historical', '--symbols', symbols_arg]
+                    logger.info(f"Ejecutando: {' '.join(cmd)}")
+                    res = subprocess.run(cmd, capture_output=True, text=True)
+                    return dbc.Alert('Descarga histórica completada' if res.returncode == 0 else 'Error en descarga histórica', color='info' if res.returncode == 0 else 'danger', duration=4000)
+
+                if triggered_id == 'train-btn':
+                    cmd = [sys.executable, 'bot.py', '--mode', 'train-short', '--symbols', symbols_arg]
+                    logger.info(f"Ejecutando: {' '.join(cmd)}")
+                    res = subprocess.run(cmd, capture_output=True, text=True)
+                    return dbc.Alert('Entrenamiento completado' if res.returncode == 0 else 'Error en entrenamiento', color='success' if res.returncode == 0 else 'danger', duration=4000)
+
+                if triggered_id == 'refresh-btn':
+                    return dbc.Alert('Datos actualizados', color='primary', duration=2000)
+
+                return dbc.Alert('Acción no reconocida', color='warning', duration=3000)
+            except Exception as e:
+                logger.error(f"Error manejando operación: {e}")
+                return dbc.Alert(f"Error: {e}", color='danger', duration=6000)
     
     def get_configured_symbols(self) -> List[str]:
-        """Obtiene los símbolos configurados"""
-        # Símbolos por defecto del sistema
-        return ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOGEUSDT', 
+        """Obtiene los símbolos configurados desde YAML con fallback por defecto."""
+        try:
+            sys.path.insert(0, str(Path('config')))
+            from config.config_loader import user_config  # type: ignore
+            symbols = user_config.get_symbols()
+            if symbols:
+                return symbols
+        except Exception as e:
+            logger.warning(f"No se pudieron cargar símbolos desde configuración: {e}")
+        return ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOGEUSDT',
                 'AVAXUSDT', 'TONUSDT', 'BNBUSDT', 'XRPUSDT', 'LINKUSDT']
     
     def get_models_data(self) -> Dict[str, Any]:
