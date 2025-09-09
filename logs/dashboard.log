@@ -16,3 +16,115 @@
 2025-09-09 10:28:24,030 - DASHBOARD - INFO - Iniciando dashboard en http://127.0.0.1:8050
 2025-09-09 10:28:29,354 - DASHBOARD - INFO - Dashboard independiente inicializado
 2025-09-09 10:28:29,354 - DASHBOARD - INFO - Iniciando dashboard en http://127.0.0.1:8050
+2025-09-09 10:43:56,924 - DASHBOARD - INFO - Dashboard independiente inicializado
+2025-09-09 10:43:56,925 - DASHBOARD - INFO - Iniciando dashboard en http://127.0.0.1:8050
+2025-09-09 10:44:14,237 - DASHBOARD - INFO - Dashboard independiente inicializado
+2025-09-09 10:44:14,238 - DASHBOARD - INFO - Iniciando dashboard en http://127.0.0.1:8050
+2025-09-09 10:53:37,748 - DASHBOARD - INFO - Dashboard independiente inicializado
+2025-09-09 10:53:37,748 - DASHBOARD - INFO - Iniciando dashboard en http://127.0.0.1:8050
+2025-09-09 10:53:37,749 - DASHBOARD - INFO - Dash is running on http://127.0.0.1:8050/
+
+2025-09-09 10:53:37,780 - DASHBOARD - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8050
+2025-09-09 10:53:37,780 - DASHBOARD - INFO - [33mPress CTRL+C to quit[0m
+2025-09-09 10:53:41,764 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:41] "GET / HTTP/1.1" 200 -
+2025-09-09 10:53:42,063 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:42] "GET /_favicon.ico?v=3.2.0 HTTP/1.1" 200 -
+2025-09-09 10:53:42,072 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:42] "GET /_dash-layout HTTP/1.1" 200 -
+2025-09-09 10:53:42,073 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:42] "GET /_dash-dependencies HTTP/1.1" 200 -
+2025-09-09 10:53:42,148 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:42] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2025-09-09 10:53:42,154 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:42] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2025-09-09 10:53:42,154 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:42] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2025-09-09 10:53:42,289 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:53:42,293 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:53:42,406 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:53:42,418 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:53:42,641 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:53:42] "GET /_favicon.ico?v=3.2.0 HTTP/1.1" 200 -
+2025-09-09 10:54:06,083 - DASHBOARD - INFO - Ejecutando: C:\Python313\python.exe bot.py --mode download-historical --symbols BTCUSDT,ETHUSDT,ADAUSDT,SOLUSDT,DOGEUSDT,AVAXUSDT,TONUSDT,XRPUSDT,LINKUSDT
+2025-09-09 10:54:12,174 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:54:12] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:54:12,184 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:54:12] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:54:12,197 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:54:12] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:54:12,203 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:54:12] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:54:20,014 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:54:20] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:54:23,530 - DASHBOARD - INFO - Ejecutando: C:\Python313\python.exe bot.py --mode download-historical --symbols BTCUSDT,ETHUSDT,ADAUSDT,SOLUSDT,DOGEUSDT,AVAXUSDT,TONUSDT,XRPUSDT,LINKUSDT
+2025-09-09 10:54:26,182 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:54:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:54:36,219 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:54:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:54:43,126 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:54:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:54:43,135 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:54:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:54:43,223 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:54:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:54:43,228 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:54:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:55:13,140 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:55:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:55:13,149 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:55:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:55:13,194 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:55:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:55:13,199 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:55:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:55:43,128 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:55:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:55:43,138 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:55:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:55:43,228 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:55:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:55:43,233 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:55:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:56:13,129 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:56:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:56:13,137 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:56:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:56:13,169 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:56:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:56:13,172 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:56:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:56:44,129 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:56:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:56:44,138 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:56:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:56:44,176 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:56:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:56:44,182 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:56:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:57:26,092 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:57:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:57:26,112 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:57:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:57:26,188 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:57:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:57:26,200 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:57:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:57:44,133 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:57:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:57:44,141 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:57:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:57:44,179 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:57:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:57:44,183 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:57:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:58:14,131 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:58:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:58:14,139 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:58:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:58:14,174 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:58:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:58:14,177 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:58:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:59:05,122 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:59:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:59:05,130 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:59:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:59:05,167 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:59:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 10:59:05,170 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 10:59:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:00:05,122 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:00:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:00:05,129 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:00:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:00:05,165 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:00:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:00:05,167 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:00:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:01:05,128 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:01:05,137 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:01:05,169 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:01:05,174 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:02:05,128 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:02:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:02:05,143 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:02:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:02:05,185 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:02:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:02:05,189 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:02:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:03:05,123 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:03:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:03:05,138 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:03:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:03:05,173 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:03:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:03:05,176 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:03:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:05,124 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:05,132 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:05,170 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:05,172 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:39,967 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:39,978 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:40,025 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:40,029 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:44,120 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:44,128 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:44,170 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:04:44,179 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:04:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:05:14,131 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:05:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:05:14,140 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:05:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:05:14,176 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:05:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:05:14,201 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:05:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:06:05,121 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:06:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:06:05,129 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:06:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:06:05,163 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:06:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:06:05,167 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:06:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:07:05,132 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:07:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:07:05,141 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:07:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:07:05,173 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:07:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:07:05,176 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:07:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:07:19,926 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:07:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:07:19,937 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:07:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:07:19,984 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:07:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 11:07:19,991 - DASHBOARD - INFO - 127.0.0.1 - - [09/Sep/2025 11:07:19] "POST /_dash-update-component HTTP/1.1" 200 -

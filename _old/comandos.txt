@@ -1,0 +1,175 @@
+# Bot Trading v10 - Comandos Principales
+# =====================================
+
+## 🐍 ACTIVACIÓN DEL ENTORNO VIRTUAL
+# ===================================
+# Activar entorno virtual (OBLIGATORIO antes de cualquier comando)
+venv\Scripts\activate
+
+# Desactivar entorno virtual
+deactivate
+
+## 🤖 BOT PRINCIPAL (bot.py)
+# ==========================
+# Verificar salud del sistema
+python bot.py --health-check
+
+# Descargar datos históricos
+python bot.py --mode download-historical --symbols BTCUSDT,ETHUSDT,ADAUSDT
+
+# Analizar datos descargados
+python bot.py --mode analyze --symbols BTCUSDT,ETHUSDT,ADAUSDT
+
+# Validar calidad de datos
+python bot.py --mode validate --symbols BTCUSDT,ETHUSDT,ADAUSDT
+
+# Entrenamiento corto (6 horas)
+python bot.py --mode train-short --symbols BTCUSDT,ETHUSDT,ADAUSDT
+
+# Entrenamiento infinito con dashboard
+python bot.py --mode train-infinite --symbols BTCUSDT,ETHUSDT,ADAUSDT
+
+# Trading en vivo (requiere API keys)
+python bot.py --mode live --symbols BTCUSDT,ETHUSDT --leverage 10
+
+# Trading en papel (simulación)
+python bot.py --mode paper --symbols BTCUSDT,ETHUSDT --leverage 5
+
+# Parada de emergencia
+python bot.py --mode emergency-stop --symbols BTCUSDT,ETHUSDT
+
+## 📊 DASHBOARD (dashboard.py)
+# ============================
+# Iniciar dashboard en puerto 8050
+python dashboard.py
+
+# Iniciar dashboard en puerto personalizado
+python dashboard.py --port 8051
+
+# Iniciar dashboard en modo debug
+python dashboard.py --port 8050 --debug
+
+# Iniciar dashboard en host específico
+python dashboard.py --host 0.0.0.0 --port 8050
+
+## 🧠 ENTRENAMIENTO AVANZADO
+# ==========================
+# Entrenamiento enterprise de 6 horas
+python scripts/root/start_6h_training_enterprise.py --symbols BTCUSDT,ETHUSDT,ADAUSDT
+
+# Entrenamiento con duración personalizada
+python scripts/root/start_6h_training_enterprise.py --symbols BTCUSDT,ETHUSDT --duration 2
+
+## 🔍 VERIFICACIÓN Y DIAGNÓSTICO
+# ===============================
+# Verificar robustez del sistema
+python scripts/root/robustness_check.py
+
+# Verificar estado de archivos
+python scripts/root/robustness_check.py --check-files
+
+# Verificar memoria y CPU
+python scripts/root/robustness_check.py --check-system
+
+## 📁 GESTIÓN DE DATOS
+# ====================
+# Verificar datos históricos disponibles
+dir data\historical\
+
+# Verificar modelos entrenados
+dir models\
+
+# Verificar reportes generados
+dir reports\
+
+# Verificar logs del sistema
+dir logs\enterprise\training\
+
+## 🔧 DESARROLLO Y MANTENIMIENTO
+# ===============================
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Actualizar dependencias
+pip install -r requirements.txt --upgrade
+
+# Verificar dependencias instaladas
+pip list
+
+# Ejecutar tests
+pytest tests/
+
+# Formatear código
+black .
+
+# Verificar calidad de código
+flake8 .
+
+## 📊 MONITOREO EN TIEMPO REAL
+# ============================
+# Dashboard principal (puerto 8050)
+python dashboard.py --port 8050
+
+# Dashboard secundario (puerto 8051)
+python dashboard.py --port 8051
+
+# Verificar logs en tiempo real
+Get-Content logs\enterprise\training\6h_training.log -Wait
+
+## 🚀 COMANDOS COMBINADOS
+# =======================
+# Flujo completo: Descargar -> Analizar -> Entrenar -> Dashboard
+python bot.py --mode download-historical --symbols BTCUSDT,ETHUSDT
+python bot.py --mode analyze --symbols BTCUSDT,ETHUSDT
+python bot.py --mode train-short --symbols BTCUSDT,ETHUSDT
+python dashboard.py --port 8050
+
+# Verificación completa del sistema
+python bot.py --health-check
+python scripts/root/robustness_check.py
+python dashboard.py --port 8050
+
+## 📋 SÍMBOLOS DISPONIBLES
+# ========================
+# Símbolos principales (recomendados)
+BTCUSDT, ETHUSDT, ADAUSDT, SOLUSDT, DOGEUSDT
+
+# Símbolos adicionales (alta volatilidad)
+AVAXUSDT, TONUSDT, BNBUSDT, XRPUSDT, LINKUSDT
+
+# Todos los símbolos
+BTCUSDT, ETHUSDT, ADAUSDT, SOLUSDT, DOGEUSDT, AVAXUSDT, TONUSDT, BNBUSDT, XRPUSDT, LINKUSDT
+
+## ⚠️ NOTAS IMPORTANTES
+# =====================
+# 1. SIEMPRE activar el entorno virtual antes de ejecutar comandos
+# 2. APIs configuradas en .env (Bitget API ya configurada)
+# 3. El dashboard se ejecuta en http://127.0.0.1:8050 por defecto
+# 4. Los logs se guardan en logs/enterprise/training/
+# 5. Los modelos se guardan en models/
+# 6. Los datos históricos se guardan en data/historical/
+
+## 🔑 CONFIGURACIÓN DE APIs
+# ==========================
+# El archivo .env ya está configurado con:
+# - BITGET_API_KEY: Configurada ✅
+# - BITGET_SECRET_KEY: Configurada ✅
+# - BITGET_PASSPHRASE: Vacía (correcto para futuros) ✅
+# - Otras configuraciones: ENVIRONMENT, LOG_LEVEL, etc.
+
+# Para verificar las APIs configuradas:
+python -c "import os; from dotenv import load_dotenv; load_dotenv(); print('BITGET_API_KEY:', os.getenv('BITGET_API_KEY', 'No encontrada'))"
+
+## 🆘 COMANDOS DE EMERGENCIA
+# ==========================
+# Parada de emergencia (cierra todas las posiciones)
+python bot.py --mode emergency-stop --symbols BTCUSDT,ETHUSDT
+
+# Verificar estado del sistema
+python bot.py --health-check
+
+# Verificar robustez
+python scripts/root/robustness_check.py
+
+# Reiniciar dashboard
+python dashboard.py --port 8050 --debug

@@ -1,0 +1,35 @@
+2025-09-08 22:04:46,105 - __main__ - INFO - Directorios configurados
+2025-09-08 22:04:46,117 - __main__ - INFO - Generando datos de entrenamiento...
+2025-09-08 22:04:46,280 - __main__ - INFO - Datos generados: 3000 registros
+2025-09-08 22:04:46,282 - __main__ - INFO - Creando características técnicas...
+2025-09-08 22:04:46,307 - __main__ - INFO - Características creadas: 18 columnas
+2025-09-08 22:04:46,307 - __main__ - INFO - Shape final: (3000, 18)
+2025-09-08 22:04:46,309 - __main__ - INFO - Valores NaN: 0
+2025-09-08 22:04:46,310 - __main__ - INFO - Valores infinitos: 0
+2025-09-08 22:04:46,311 - __main__ - INFO - Creando secuencias de entrenamiento...
+2025-09-08 22:04:46,313 - __main__ - INFO - Valores antes de normalizar - Min: -660.174762823859, Max: 1.2994958822027697e+68
+2025-09-08 22:04:46,314 - __main__ - INFO - Valores NaN: 0
+2025-09-08 22:04:46,314 - __main__ - INFO - Valores infinitos: 0
+2025-09-08 22:04:47,942 - __main__ - INFO - Normalización exitosa
+2025-09-08 22:04:47,942 - __main__ - INFO - Valores después de normalizar - Min: -100.0, Max: 2.5792112732830906e+27
+2025-09-08 22:04:47,943 - __main__ - INFO - Valores NaN después: 0
+2025-09-08 22:04:47,943 - __main__ - INFO - Valores infinitos después: 0
+2025-09-08 22:04:47,952 - __main__ - INFO - Secuencias creadas: 2940 muestras
+2025-09-08 22:04:47,952 - __main__ - INFO - Shape X: (2940, 60, 10), Shape y: (2940,)
+2025-09-08 22:04:47,956 - __main__ - INFO - X NaN: 0, y NaN: 0
+2025-09-08 22:04:47,960 - __main__ - INFO - X infinitos: 0, y infinitos: 0
+2025-09-08 22:04:47,960 - __main__ - INFO - Iniciando entrenamiento del modelo...
+2025-09-08 22:04:48,703 - __main__ - INFO - Datos de entrenamiento: (2352, 600)
+2025-09-08 22:04:48,704 - __main__ - INFO - Datos de prueba: (588, 600)
+2025-09-08 22:04:48,704 - __main__ - INFO - Entrenando RandomForest...
+2025-09-08 22:04:55,186 - __main__ - INFO - Modelo entrenado exitosamente!
+2025-09-08 22:04:55,186 - __main__ - INFO - MSE: 472508590449649653975654788378173246648655194095616.0000
+2025-09-08 22:04:55,186 - __main__ - INFO - MAE: 1167269773424671286362112.0000
+2025-09-08 22:04:55,186 - __main__ - INFO - R²: 0.9711
+2025-09-08 22:04:55,204 - __main__ - ERROR - Error entrenando modelo: name 'scaler' is not defined
+2025-09-08 22:04:55,207 - __main__ - ERROR - Traceback (most recent call last):
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\run_fixed_training.py", line 279, in train_robust_model
+    joblib.dump(scaler, 'checkpoints/robust_scaler.pkl')
+                ^^^^^^
+NameError: name 'scaler' is not defined
+

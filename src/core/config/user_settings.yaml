@@ -37,7 +37,7 @@ capital_management:
   target_balance: 1000000.0    # Objetivo de $1M para motivar al agente
   
   # Porcentaje máximo del balance a arriesgar por trade - OPTIMIZADO
-  max_risk_per_trade: 1.0      # Reducido del 5% al 1% para mejor gestión de riesgo
+  max_risk_per_trade: 3.0      # Reducido del 5% al 1% para mejor gestión de riesgo
   
   # Límites de pérdida
   max_daily_loss_pct: 10.0     # 10% pérdida máxima por día
@@ -45,7 +45,7 @@ capital_management:
   max_drawdown_pct: 30.0       # 30% drawdown máximo antes de parar
   
   # Límites de ganancias (para asegurar beneficios)
-  daily_profit_target: 10.0    # 10% ganancia diaria objetivo (más agresivo)
+  daily_profit_target: 15.0    # 10% ganancia diaria objetivo (más agresivo)
   take_profit_at_target: false # Parar al alcanzar objetivo diario
 
 # =============================================================================
@@ -56,7 +56,7 @@ trading:
   mode: "paper_trading"  # Opciones: "development", "backtesting", "paper_trading", "live_trading"
   
   # Configuración de futuros
-  futures: false  # true para futuros, false para spot
+  futures: true  # true para futuros, false para spot
   
   # Configuración de ejecución
   min_confidence: 0.6        # Confianza mínima para ejecutar (60%)
@@ -74,25 +74,26 @@ trading:
 # =============================================================================
 risk_management:
   # Límites de riesgo por trade - OPTIMIZADOS
-  max_risk_per_trade: 0.01    # Reducido del 5% al 1% del balance por trade
-  max_daily_loss_pct: 0.05    # Reducido del 10% al 5% pérdida máxima por día
-  max_drawdown_pct: 0.15      # Reducido del 30% al 15% drawdown máximo
+  max_risk_per_trade: 0.02    # 2% por trade para permitir aprendizaje con control
+  max_daily_loss_pct: 0.06    # 6% pérdida máxima diaria para margen de exploración
+  max_drawdown_pct: 0.20      # 20% drawdown máximo para aprender sin romper la cuenta
   
   # Configuración de leverage
-  max_leverage: 3.0           # Máximo 3x leverage para futuros
+  min_leverage: 5.0           # Mínimo 5x leverage para futuros
+  max_leverage: 30.0           # Máximo 3x leverage para futuros
   
   # Configuración de stop loss y take profit - OPTIMIZADA
-  default_stop_loss_pct: 0.01  # Reducido del 2% al 1% stop loss por defecto
-  risk_reward_ratio: 3.0       # Mejorado del 1:2 al 1:3 ratio riesgo:beneficio
+  default_stop_loss_pct: 0.015 # 1.5% por defecto para mayor margen de maniobra
+  risk_reward_ratio: 2.5       # 1:2.5 para permitir salidas más flexibles
 trading_settings:
   # Símbolo principal a operar
   primary_symbol: "BTCUSDT"
   
   # Timeframes a utilizar (el bot usará múltiples timeframes)
   timeframes:
-    primary: "1h"              # Timeframe principal para decisiones
-    secondary: "4h"            # Timeframe secundario para contexto
-    entry: "15m"               # Timeframe para entrada precisa
+    primary: "15m"             # Timeframe principal para decisiones
+    secondary: "5m"            # Timeframe secundario para contexto
+    entry: "1m"                # Timeframe para entrada precisa
   
   # Configuración de órdenes
   order_settings:
@@ -145,6 +146,8 @@ ai_model_settings:
     min_trades_before_retrain: 50
     retrain_on_poor_performance: true
     performance_threshold: 60.0 # Reentrenar si precisión < 60%
+  # Configuración externa de recompensas/penalizaciones
+  rewards_config: "src/core/config/rewards.yaml"
   
   # Features que el modelo debe priorizar
   feature_importance:
@@ -157,27 +160,92 @@ ai_model_settings:
 # SISTEMA DE RECOMPENSAS Y PENALIZACIONES
 # =============================================================================
 reward_system:
-  # El bot aprenderá de sus decisiones usando este sistema
-  
-  # Recompensas por trades exitosos
-  rewards:
-    profitable_trade: 1.0       # Recompensa base por trade ganador
-    high_profit_bonus: 2.0      # Bonus si ganancia > 5%
-    quick_profit_bonus: 0.5     # Bonus si ganancia en < 1 hora
-    low_risk_bonus: 0.3         # Bonus si trade con bajo riesgo
-  
-  # Penalizaciones por trades fallidos
-  penalties:
-    losing_trade: -0.5          # Penalización por trade perdedor
-    big_loss_penalty: -2.0      # Penalización extra si pérdida > 3%
-    missed_opportunity: -0.1    # Penalización leve por no operar en buen momento
-    early_stop_penalty: -0.2    # Penalización por salir muy temprano
-  
-  # Factores adicionales
-  learning_factors:
-    market_condition_bonus: 0.2  # Bonus por adaptarse a condiciones de mercado
-    consistency_bonus: 0.5       # Bonus por mantener performance consistente
-    volatility_adaptation: 0.3   # Bonus por manejar bien la volatilidad
+  # Esquema de recompensas/penalizaciones integrado
+
+  # === Tramos por %ROI del trade (aplicado al cerrar) ===
+  tiers:
+    pos:
+      - [0,    5,   0.2]
+      - [6,   15,   0.5]
+      - [16,  40,   1.0]
+      - [41,  60,   1.5]
+      - [60,  99,   2.5]
+      - [100, 1e9,  5.0]
+    neg:
+      - [0,    5,  -0.5]
+      - [6,   15,  -1.0]
+      - [16,  40,  -1.5]
+      - [41,  60,  -3.0]
+      - [60,  99,  -5.0]
+
+  # === Tramos por R-Multiple (aplicado al cerrar) ===
+  r_multiple_tiers:
+    pos:
+      - [0.0,  1.0,  0.1]
+      - [1.0,  2.0,  0.3]
+      - [2.0,  3.0,  0.5]
+      - [3.0,  5.0,  1.0]
+      - [5.0,  1e9, 2.0]
+    neg:
+      - [0.0,  1.0, -0.2]
+      - [1.0,  2.0, -0.5]
+      - [2.0,  3.0, -1.0]
+      - [3.0,  1e9, -2.0]
+
+  # === Rewards/Penalties por leverage ===
+  leverage_rewards:
+    high_leverage_bonus:
+      enabled: true
+      min_leverage: 5.0
+      reward_per_leverage: 0.1
+      max_bonus: 2.0
+    high_leverage_penalty:
+      enabled: true
+      min_leverage: 5.0
+      penalty_per_leverage: 0.2
+      max_penalty: 3.0
+    conservative_bonus:
+      enabled: true
+      max_leverage: 3.0
+      consistency_bonus: 0.05
+
+  # === SL/TP hits ===
+  sl_tp_hits:
+    sl_hit_penalty:
+      enabled: true
+      penalty_amount: -5.0
+      scale_with_loss: true
+      max_penalty: -20.0
+    tp_hit_reward:
+      enabled: true
+      reward_amount: 5.0
+      scale_with_profit: true
+      max_reward: 50.0
+      leverage_bonus: true
+
+  # === Overtrading y eficiencia temporal ===
+  overtrading_penalty:
+    enabled: true
+    window_bars: 200
+    trade_threshold: 5
+    penalty: 0.1
+  time_efficiency:
+    enabled: true
+    weight: 0.1
+    per_bar_cap: 0.03
+    per_trade_cap: 0.3
+
+  # === Clipping y pesos agregados ===
+  clipping:
+    per_step: [-0.2, 0.2]
+    per_close_event: [-1.0, 1.5]
+  weights:
+    r_multiple: 0.3
+    risk_efficiency: 0.2
+    trade_cost: -0.001
+    survival_bonus: 0.001
+    progress_bonus: 0.1
+    compound_bonus: 0.05
 
 # =============================================================================
 # CONFIGURACIÓN DE MONITOREO Y ALERTAS
@@ -253,61 +321,61 @@ multi_symbol_settings:
       enabled: true
       allocation_pct: 20.0      # 20% del capital
       risk_multiplier: 1.0      # Multiplicador de riesgo base
-      leverage: 10              # Leverage para futuros
+      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
     
     ETHUSDT:
       enabled: true
-      allocation_pct: 15.0      # 15% del capital
+      allocation_pct: 20.0      # 15% del capital
       risk_multiplier: 1.2      # ETH es más volátil
-      leverage: 8               # Leverage más conservador
+      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
     
     ADAUSDT:
       enabled: true
       allocation_pct: 10.0      # 10% del capital
       risk_multiplier: 1.5      # Altcoins más volátiles
-      leverage: 5               # Leverage conservador
+      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
     
     SOLUSDT:
       enabled: true
       allocation_pct: 10.0      # 10% del capital
       risk_multiplier: 1.4      # Volatilidad media-alta
-      leverage: 6               # Leverage moderado
+      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
     
     DOGEUSDT:
       enabled: true
       allocation_pct: 8.0       # 8% del capital
       risk_multiplier: 1.8      # Muy volátil
-      leverage: 4               # Leverage bajo
+      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
     
     AVAXUSDT:
       enabled: true
       allocation_pct: 10.0      # 10% del capital
       risk_multiplier: 1.3      # Volatilidad media
-      leverage: 7               # Leverage moderado
+      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
     
     TONUSDT:
       enabled: true
-      allocation_pct: 8.0       # 8% del capital
+      allocation_pct: 10.0       # 8% del capital
       risk_multiplier: 1.6      # Volatilidad alta
-      leverage: 5               # Leverage conservador
+      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
     
-    BNBUSDT:
+    TRUMPUSDT:
       enabled: true
       allocation_pct: 10.0      # 10% del capital
       risk_multiplier: 1.1      # Volatilidad media-baja
-      leverage: 8               # Leverage moderado
+      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
     
     XRPUSDT:
       enabled: true
-      allocation_pct: 7.0       # 7% del capital
+      allocation_pct: 10.0       # 7% del capital
       risk_multiplier: 1.7      # Volatilidad alta
-      leverage: 4               # Leverage bajo
+      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
     
     LINKUSDT:
       enabled: true
-      allocation_pct: 2.0       # 2% del capital
+      allocation_pct: 10.0       # 2% del capital
       risk_multiplier: 1.9      # Muy volátil
-      leverage: 3               # Leverage muy conservador
+      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
 
 # =============================================================================
 # CONFIGURACIÓN ENTERPRISE
@@ -381,11 +449,15 @@ data_collection:
       - "DOGEUSDT"
       - "AVAXUSDT"
       - "TONUSDT"
-      - "BNBUSDT"
+      - "TRUMPUSDT"
       - "XRPUSDT"
       - "LINKUSDT"
-    timeframes: ["1m", "5m", "15m", "1h"]
+    timeframes: ["1m", "5m", "15m", "1h", "4H", "1D"]
     data_types: ["kline", "ticker", "orderbook"]
+  historical:
+    years: 1  # Reducido de 5 a 1 año para evitar rate limits
+    timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
+    align_after_download: true
   
   storage:
     timescaledb_enabled: true

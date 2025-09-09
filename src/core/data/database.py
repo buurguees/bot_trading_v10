@@ -132,6 +132,7 @@ class TradeRecord:
     strategy_name: str = "default"
     market_conditions: Optional[str] = None
     risk_reward_ratio: Optional[float] = None
+    leverage: float = 1.0
     
     def __post_init__(self):
         if self.entry_time is None:
@@ -342,6 +343,7 @@ class DatabaseManager:
                     strategy_name TEXT DEFAULT 'default',
                     market_conditions TEXT,
                     risk_reward_ratio REAL,
+                    leverage REAL DEFAULT 1.0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)

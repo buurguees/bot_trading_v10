@@ -80,6 +80,8 @@ class CycleData:
     status: str  # 'active', 'completed', 'stopped'
     roi: float = 0.0
     profit_factor: float = 0.0
+    leverage_min: float = 1.0
+    leverage_max: float = 1.0
     
 @dataclass
 class TradeData:
@@ -421,14 +423,14 @@ class DataProvider:
     def get_cycles_data(self, symbol: Optional[str] = None, 
                        limit: int = 20) -> List[CycleData]:
         """
-        Obtiene datos de ciclos de trading
+        Obtiene datos de ciclos de trading calculados desde los trades
         
         Args:
             symbol: Símbolo específico o None para todos
             limit: Número máximo de ciclos
             
         Returns:
-            Lista de datos de ciclos
+            Lista de datos de ciclos con leverage min/max
         """
         try:
             cache_key = f"cycles_data_{symbol or 'all'}_{limit}"
@@ -439,10 +441,22 @@ class DataProvider:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
                 
+                # Query para obtener trades agrupados por ciclos (por día)
                 query = """
-                    SELECT cycle_id, symbol, start_date, end_date, start_balance, 
-                           end_balance, total_trades, status
-                    FROM trading_cycles 
+                    SELECT 
+                        symbol,
+                        DATE(entry_time) as cycle_date,
+                        MIN(entry_time) as start_time,
+                        MAX(COALESCE(exit_time, entry_time)) as end_time,
+                        COUNT(*) as total_trades,
+                        SUM(CASE WHEN status = 'closed' THEN 1 ELSE 0 END) as closed_trades,
+                        SUM(CASE WHEN pnl > 0 THEN 1 ELSE 0 END) as winning_trades,
+                        SUM(COALESCE(pnl, 0)) as total_pnl,
+                        AVG(COALESCE(pnl_pct, 0)) as avg_pnl_pct,
+                        MIN(leverage) as leverage_min,
+                        MAX(leverage) as leverage_max,
+                        AVG(leverage) as leverage_avg
+                    FROM trades 
                 """
                 params = []
                 
@@ -450,7 +464,12 @@ class DataProvider:
                     query += " WHERE symbol = ?"
                     params.append(symbol)
                 
-                query += " ORDER BY start_date DESC LIMIT ?"
+                query += """
+                    GROUP BY symbol, DATE(entry_time)
+                    HAVING total_trades > 0
+                    ORDER BY cycle_date DESC
+                    LIMIT ?
+                """
                 params.append(limit)
                 
                 cursor.execute(query, params)
@@ -458,7 +477,7 @@ class DataProvider:
                 
                 cycles = []
                 for row in rows:
-                    cycle_data = self._build_cycle_data_from_row(row)
+                    cycle_data = self._build_cycle_data_from_trades(row)
                     cycles.append(cycle_data)
                 
                 self._set_cached_data(cache_key, cycles)
@@ -926,6 +945,44 @@ class DataProvider:
             return 0
 
     # --------- Builders ---------
+    def _build_cycle_data_from_trades(self, row: Tuple[Any, ...]) -> CycleData:
+        """Construye CycleData desde datos de trades agrupados"""
+        symbol, cycle_date, start_time, end_time, total_trades, closed_trades, winning_trades, total_pnl, avg_pnl_pct, leverage_min, leverage_max, leverage_avg = row
+        
+        # Convertir timestamps
+        start_dt = datetime.fromisoformat(str(start_time)) if isinstance(start_time, str) else datetime.fromtimestamp(start_time)
+        end_dt = datetime.fromisoformat(str(end_time)) if isinstance(end_time, str) else datetime.fromtimestamp(end_time)
+        
+        # Calcular métricas
+        duration_days = (end_dt - start_dt).days if end_dt else 1
+        win_rate = (winning_trades / closed_trades * 100) if closed_trades > 0 else 0.0
+        daily_pnl = total_pnl / max(duration_days, 1)
+        
+        # Generar cycle_id único
+        cycle_id = f"{symbol}_{cycle_date}_{int(start_dt.timestamp())}"
+        
+        return CycleData(
+            cycle_id=cycle_id,
+            symbol=symbol,
+            start_date=start_dt,
+            end_date=end_dt,
+            start_balance=1000.0,  # Valor base para cálculo
+            end_balance=1000.0 + total_pnl,
+            pnl=total_pnl,
+            pnl_percentage=avg_pnl_pct,
+            total_trades=total_trades,
+            win_rate=win_rate,
+            avg_daily_pnl=daily_pnl,
+            max_drawdown=0.0,  # Se calcularía con datos más detallados
+            sharpe_ratio=0.0,  # Se calcularía con datos más detallados
+            duration_days=duration_days,
+            status='completed' if closed_trades == total_trades else 'active',
+            roi=avg_pnl_pct,
+            profit_factor=1.0,  # Se calcularía con datos más detallados
+            leverage_min=float(leverage_min) if leverage_min else 1.0,
+            leverage_max=float(leverage_max) if leverage_max else 1.0
+        )
+
     def _build_cycle_data_from_row(self, row: Tuple[Any, ...]) -> CycleData:
         cycle_id, symbol, start_date, end_date, start_balance, end_balance, total_trades, status = row
         start_dt = datetime.fromtimestamp(start_date) if isinstance(start_date, (int, float)) else datetime.fromisoformat(str(start_date))
@@ -1018,6 +1075,11 @@ class DataProvider:
                 end_bal = start_bal * np.random.uniform(0.9, 1.2)
                 pnl = end_bal - start_bal
                 pnl_pct = pnl / start_bal * 100
+                
+                # Generar leverage min/max realista
+                leverage_min = np.random.uniform(1.0, 3.0)
+                leverage_max = np.random.uniform(leverage_min, 10.0)
+                
                 cycles.append(CycleData(
                     cycle_id=f"{s}_{i}",
                     symbol=s,
@@ -1033,7 +1095,9 @@ class DataProvider:
                     max_drawdown=np.random.uniform(3, 20),
                     sharpe_ratio=np.random.uniform(0.2, 2.0),
                     duration_days=duration,
-                    status='completed'
+                    status='completed',
+                    leverage_min=leverage_min,
+                    leverage_max=leverage_max
                 ))
         return cycles[:limit]
 

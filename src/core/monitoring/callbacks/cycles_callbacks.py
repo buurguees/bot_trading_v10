@@ -573,6 +573,10 @@ def _generate_example_cycles(count: int) -> List[Dict[str, Any]]:
         win_rate = random.uniform(45, 85)
         total_pnl = random.uniform(-200, 1000) * base_multiplier
         
+        # Generar leverage min/max realista
+        leverage_min = round(random.uniform(1.0, 3.0), 1)
+        leverage_max = round(random.uniform(leverage_min, 10.0), 1)
+        
         cycle = {
             'cycle_id': f"CY{i+1:04d}",
             'symbol': symbol,
@@ -593,7 +597,9 @@ def _generate_example_cycles(count: int) -> List[Dict[str, Any]]:
             'largest_win': round(total_pnl * random.uniform(0.1, 0.3), 2),
             'largest_loss': round(total_pnl * random.uniform(-0.15, -0.05), 2),
             'initial_balance': round(random.uniform(5000, 20000), 2),
-            'current_balance': round(random.uniform(5000, 25000), 2)
+            'current_balance': round(random.uniform(5000, 25000), 2),
+            'leverage_min': leverage_min,
+            'leverage_max': leverage_max
         }
         
         cycles.append(cycle)
