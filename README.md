@@ -1,823 +1,725 @@
-# 🚀 Bot Trading v10 Enterprise - Sistema de Trading Inteligente
+﻿# ðŸ¤– Bot Trading v10 Enterprise - Reestructurado
 
-<div align="center">
+> **Sistema de Trading Automatizado con IA, Control via Telegram y Arquitectura Enterprise**
 
-![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
-![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-orange.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![Telegram](https://img.shields.io/badge/Telegram-Bot-26A5E4.svg)](https://telegram.org)
+[![Trading](https://img.shields.io/badge/Trading-Automated-green.svg)](https://bitget.com)
+[![ML](https://img.shields.io/badge/ML-Deep%20Learning-orange.svg)](https://pytorch.org)
+[![Enterprise](https://img.shields.io/badge/Architecture-Enterprise-purple.svg)](https://en.wikipedia.org/wiki/Enterprise_software)
 
-**Sistema de trading enterprise con arquitectura modular, escalable y robusta para trading de criptomonedas con machine learning avanzado**
+## ðŸŽ¯ **REESTRUCTURACIÃ“N COMPLETA REALIZADA**
 
-[📖 Documentación](docs/) • [🚀 Inicio Rápido](#-inicio-rápido) • [⚙️ Configuración](#️-configuración) • [📊 Monitoreo](#-monitoreo) • [🔒 Seguridad](#-seguridad)
-
-</div>
+Este proyecto ha sido completamente reestructurado para una arquitectura limpia, escalable y mantenible con **5 carpetas principales** y un flujo de comandos optimizado.
 
 ---
 
-## 🎯 **Visión General**
+## ðŸ“ **NUEVA ESTRUCTURA DEL PROYECTO**
 
-**Bot Trading v10 Enterprise** es una plataforma de trading algorítmico de grado empresarial que combina machine learning avanzado, gestión de riesgo sofisticada y arquitectura escalable para operar en mercados de criptomonedas con máxima eficiencia y seguridad.
-
-### **🏆 Características Destacadas**
-
-- **🤖 IA Avanzada**: Modelos LSTM + Attention con entrenamiento distribuido
-- **⚡ Ejecución Ultra-Rápida**: Latencia <100ms para ejecución de órdenes
-- **🛡️ Gestión de Riesgo**: Sistema de riesgo multi-nivel con circuit breakers
-- **📊 Monitoreo Enterprise**: Dashboards en tiempo real con Prometheus/Grafana
-- **🔒 Cumplimiento Regulatorio**: MiFID II, GDPR y auditoría completa
-- **🚀 Escalabilidad**: Arquitectura asíncrona con Kubernetes
-- **💼 Multi-Exchange**: Soporte para múltiples exchanges (Bitget, Binance, etc.)
-
----
-
-## 🏗️ **Arquitectura del Sistema**
-
-### **📐 Diagrama de Arquitectura**
-
-```mermaid
-graph TB
-    subgraph "🌐 Frontend Layer"
-        A[Dashboard Web] --> B[Grafana Dashboards]
-        A --> C[API REST]
-    end
-    
-    subgraph "🧠 AI/ML Layer"
-        D[LSTM + Attention Models] --> E[Prediction Engine]
-        E --> F[Signal Processor]
-        F --> G[Portfolio Optimizer]
-    end
-    
-    subgraph "⚡ Trading Engine"
-        H[Execution Engine] --> I[Order Manager]
-        I --> J[Risk Manager]
-        J --> K[Position Manager]
-    end
-    
-    subgraph "📊 Data Layer"
-        L[Real-time Data] --> M[TimescaleDB]
-        M --> N[Redis Cache]
-        N --> O[Feature Store]
-    end
-    
-    subgraph "🔒 Security & Compliance"
-        P[Audit Logger] --> Q[Encryption Manager]
-        Q --> R[Compliance Checker]
-    end
-    
-    subgraph "☁️ Infrastructure"
-        S[Kubernetes] --> T[Docker Containers]
-        T --> U[Prometheus Monitoring]
-    end
-    
-    A --> D
-    D --> H
-    H --> L
-    L --> P
-    P --> S
-```
-
-### **🔧 Componentes Principales**
-
-| Componente | Descripción | Tecnologías |
-|------------|-------------|-------------|
-| **🧠 AI Engine** | Modelos de ML para predicción de precios | PyTorch, LSTM, Attention |
-| **⚡ Trading Engine** | Motor de ejecución de trades | asyncio, ccxt, websockets |
-| **📊 Data Pipeline** | Procesamiento de datos en tiempo real | TimescaleDB, Redis, Kafka |
-| **🛡️ Risk Management** | Gestión de riesgo y compliance | Custom algorithms, MiFID II |
-| **📈 Monitoring** | Observabilidad y métricas | Prometheus, Grafana, MLflow |
-| **🔒 Security** | Seguridad y auditoría | AES-256, AWS Secrets Manager |
-
----
-
-## 📁 **Estructura del Proyecto**
-
-```
+\\\
 bot_trading_v10/
-├── 🤖 bot.py                          # Ejecutor principal del sistema
-├── 📋 requirements.txt                 # Dependencias del proyecto
-├── 🔧 .env.example                     # Variables de entorno de ejemplo
-├── 📖 README.md                        # Documentación principal
-│
-├── 📁 src/                            # Código fuente principal
-│   └── 📁 core/                       # Módulos core del sistema
-│       ├── 📁 config/                 # Gestión de configuración
-│       │   ├── enterprise_config.py   # Configurador enterprise
-│       │   ├── user_settings.yaml     # Configuración de usuario
-│       │   └── 📁 enterprise/         # Configs enterprise específicas
-│       │       ├── trading.yaml       # Config trading
-│       │       ├── ml.yaml           # Config machine learning
-│       │       ├── monitoring.yaml   # Config monitoreo
-│       │       └── security.yaml     # Config seguridad
-│       │
-│       ├── 📁 trading/                # Motor de trading
-│       │   ├── execution_engine.py    # Motor de ejecución
-│       │   ├── order_manager.py       # Gestor de órdenes
-│       │   ├── risk_manager.py        # Gestor de riesgo
-│       │   ├── position_manager.py    # Gestor de posiciones
-│       │   ├── signal_processor.py    # Procesador de señales
-│       │   ├── portfolio_optimizer.py # Optimizador de portfolio
-│       │   ├── bitget_client.py       # Cliente Bitget
-│       │   └── 📁 enterprise/         # Módulos enterprise
-│       │
-│       ├── 📁 ml/                     # Machine Learning
-│       │   ├── 📁 enterprise/         # Sistema ML enterprise
-│       │   │   ├── training_engine.py # Motor de entrenamiento
-│       │   │   ├── model_architecture.py # Arquitecturas de modelos
-│       │   │   ├── hyperparameter_tuner.py # Tuning de hiperparámetros
-│       │   │   ├── distributed_trainer.py # Entrenamiento distribuido
-│       │   │   └── deployment.py      # Despliegue de modelos
-│       │   ├── 📁 legacy/             # Modelos legacy
-│       │   └── 📁 saved_models/       # Modelos guardados
-│       │
-│       ├── 📁 data/                   # Gestión de datos
-│       │   ├── database.py            # Base de datos principal
-│       │   ├── collector.py           # Recolector de datos
-│       │   ├── preprocessor.py        # Preprocesamiento
-│       │   ├── multi_timeframe_coordinator.py # Coordinador multi-timeframe
-│       │   └── 📁 enterprise/         # Sistema de datos enterprise
-│       │       ├── timescale_manager.py # Gestor TimescaleDB
-│       │       ├── kafka_producer.py  # Productor Kafka
-│       │       └── stream_collector.py # Recolector de streams
-│       │
-│       ├── 📁 monitoring/             # Sistema de monitoreo
-│       │   ├── main_dashboard.py      # Dashboard principal
-│       │   ├── 📁 pages/              # Páginas del dashboard
-│       │   ├── 📁 components/         # Componentes UI
-│       │   ├── 📁 callbacks/          # Callbacks de Dash
-│       │   ├── 📁 enterprise/         # Monitoreo enterprise
-│       │   │   ├── metrics_collector.py # Colector de métricas
-│       │   │   └── alerting_system.py # Sistema de alertas
-│       │   └── 📁 prometheus/         # Configuración Prometheus
-│       │
-│       ├── 📁 compliance/             # Cumplimiento regulatorio
-│       │   ├── audit_logger.py        # Logger de auditoría
-│       │   ├── regulatory_compliance.py # Cumplimiento regulatorio
-│       │   └── 📁 enterprise/         # Compliance enterprise
-│       │
-│       ├── 📁 deployment/             # Gestión de despliegues
-│       │   ├── phase_manager.py       # Gestor de fases
-│       │   ├── health_monitor.py      # Monitor de salud
-│       │   └── recovery_manager.py    # Gestor de recuperación
-│       │
-│       └── 📁 personal/               # Configuraciones personales
-│           ├── 📁 strategies/         # Estrategias personalizadas
-│           └── 📁 dashboard/          # Dashboard personalizado
-│
-├── 📁 infrastructure/                 # Infraestructura
-│   ├── 📁 docker/                     # Contenedores Docker
-│   ├── 📁 kubernetes/                 # Manifiestos Kubernetes
-│   └── 📁 monitoring/                 # Configuración de monitoreo
-│
-├── 📁 tests/                          # Suite de testing
-│   ├── 📁 unit/                       # Tests unitarios
-│   ├── 📁 integration/                # Tests de integración
-│   ├── 📁 e2e/                        # Tests end-to-end
-│   ├── 📁 performance/                # Tests de rendimiento
-│   └── 📁 enterprise/                 # Tests enterprise
-│
-├── 📁 docs/                           # Documentación completa
-│   ├── README.md                      # Documentación principal
-│   ├── INSTRUCCIONES_SETUP.md         # Guía de configuración
-│   ├── ENTERPRISE_APP_GUIDE.md        # Guía de aplicación enterprise
-│   ├── ENTERPRISE_CONFIG_SYSTEM.md    # Sistema de configuración
-│   ├── ENTERPRISE_ML_SYSTEM.md        # Sistema de ML
-│   ├── ENTERPRISE_TRAINING_SYSTEM.md  # Sistema de entrenamiento
-│   └── 📁 reports/                    # Reportes del sistema
-│
-├── 📁 data/                           # Datos del sistema
-│   ├── 📁 historical/                 # Datos históricos
-│   ├── 📁 processed/                  # Datos procesados
-│   ├── 📁 training/                   # Datos de entrenamiento
-│   └── trading_bot.db                 # Base de datos SQLite
-│
-├── 📁 models/                         # Modelos de ML
-│   ├── BTCUSDT_model.json            # Modelo BTCUSDT
-│   ├── ETHUSDT_model.json            # Modelo ETHUSDT
-│   └── 📁 saved_models/               # Modelos guardados
-│
-├── 📁 logs/                           # Logs del sistema
-│   ├── bot.log                        # Log principal
-│   ├── dashboard.log                  # Log del dashboard
-│   └── 📁 enterprise/                 # Logs enterprise
-│
-├── 📁 reports/                        # Reportes y análisis
-│   ├── analysis.json                  # Análisis del sistema
-│   ├── robustness_report.json         # Reporte de robustez
-│   └── 📁 training/                   # Reportes de entrenamiento
-│
-├── 📁 checkpoints/                    # Checkpoints de entrenamiento
-├── 📁 cache/                          # Cache del sistema
-├── 📁 secrets/                        # Secretos y claves
-├── 📁 security/                       # Módulos de seguridad
-├── 📁 scripts/                        # Scripts de utilidad
-└── 📁 _old/                          # Archivos obsoletos
-```
+â”œâ”€â”€ ðŸ¤– bot.py                    # Punto de entrada principal
+â”œâ”€â”€ ðŸ“– README.md                 # Esta documentaciÃ³n
+â”œâ”€â”€ ðŸ“± control/                  # Control de Telegram
+â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”œâ”€â”€ telegram_bot.py          # Bot principal de Telegram
+â”‚   â”œâ”€â”€ handlers.py              # Manejo de comandos
+â”‚   â”œâ”€â”€ metrics_sender.py        # EnvÃ­o de mÃ©tricas
+â”‚   â”œâ”€â”€ security_guard.py        # ProtecciÃ³n de comandos
+â”‚   â”œâ”€â”€ get_chat_id.py           # Utilidad para obtener Chat ID
+â”‚   â”œâ”€â”€ config.yaml              # ConfiguraciÃ³n de Telegram
+â”‚   â”œâ”€â”€ README.md                # DocumentaciÃ³n de control
+â”‚   â”œâ”€â”€ IMPLEMENTATION_SUMMARY.md
+â”‚   â””â”€â”€ example_usage.py         # Ejemplos de uso
+â”œâ”€â”€ âš™ï¸ scripts/                  # Scripts de comandos
+â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”œâ”€â”€ history/                 # Scripts de datos histÃ³ricos
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ download_history.py  # Descarga datos histÃ³ricos
+â”‚   â”‚   â”œâ”€â”€ inspect_history.py   # Inspecciona datos
+â”‚   â”‚   â””â”€â”€ repair_history.py    # Repara datos corruptos
+â”‚   â”œâ”€â”€ trading/                 # Scripts de trading
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ run_enterprise_trading.py
+â”‚   â”‚   â”œâ”€â”€ run_enterprise_monitoring.py
+â”‚   â”‚   â””â”€â”€ enterprise/          # Scripts enterprise
+â”‚   â”‚       â”œâ”€â”€ __init__.py
+â”‚   â”‚       â”œâ”€â”€ start_live_trading.py
+â”‚   â”‚       â”œâ”€â”€ start_paper_trading.py
+â”‚   â”‚       â””â”€â”€ emergency_stop.py
+â”‚   â”œâ”€â”€ training/                # Scripts de entrenamiento
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ train_historical.py  # Entrenamiento histÃ³rico
+â”‚   â”‚   â”œâ”€â”€ train_live.py        # Entrenamiento en vivo
+â”‚   â”‚   â”œâ”€â”€ state_manager.py     # GestiÃ³n de estado
+â”‚   â”‚   â”œâ”€â”€ config.yaml          # ConfiguraciÃ³n de entrenamiento
+â”‚   â”‚   â””â”€â”€ README.md
+â”‚   â”œâ”€â”€ deployment/              # Scripts de despliegue
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ data_management.py
+â”‚   â”‚   â”œâ”€â”€ README.md
+â”‚   â”‚   â””â”€â”€ enterprise/          # Scripts enterprise de despliegue
+â”‚   â”‚       â”œâ”€â”€ __init__.py
+â”‚   â”‚       â”œâ”€â”€ backup_data.py
+â”‚   â”‚       â”œâ”€â”€ health_check.py
+â”‚   â”‚       â”œâ”€â”€ setup_infrastructure.py
+â”‚   â”‚       â””â”€â”€ start_services.py
+â”‚   â””â”€â”€ maintenance/             # Scripts de mantenimiento
+â”‚       â”œâ”€â”€ __init__.py
+â”‚       â””â”€â”€ logs_cleanup.py      # Limpieza de logs
+â”œâ”€â”€ ðŸ”§ core/                     # Infraestructura del bot
+â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”œâ”€â”€ config/                  # GestiÃ³n de configuraciÃ³n
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ config_loader.py     # Cargador de configuraciÃ³n
+â”‚   â”‚   â”œâ”€â”€ enterprise_config.py # ConfiguraciÃ³n enterprise
+â”‚   â”‚   â”œâ”€â”€ logging_config.py    # ConfiguraciÃ³n de logging
+â”‚   â”‚   â”œâ”€â”€ README.md
+â”‚   â”‚   â””â”€â”€ enterprise/          # Configuraciones enterprise
+â”‚   â”‚       â”œâ”€â”€ data_collection.yaml
+â”‚   â”‚       â”œâ”€â”€ experiments.yaml
+â”‚   â”‚       â”œâ”€â”€ futures_config.yaml
+â”‚   â”‚       â”œâ”€â”€ hyperparameters.yaml
+â”‚   â”‚       â”œâ”€â”€ infrastructure.yaml
+â”‚   â”‚       â”œâ”€â”€ model_architectures.yaml
+â”‚   â”‚       â”œâ”€â”€ monitoring.yaml
+â”‚   â”‚       â”œâ”€â”€ portfolio_management.yaml
+â”‚   â”‚       â”œâ”€â”€ risk_management.yaml
+â”‚   â”‚       â”œâ”€â”€ security.yaml
+â”‚   â”‚       â””â”€â”€ strategies.yaml
+â”‚   â”œâ”€â”€ trading/                 # Motores de trading
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ README.md
+â”‚   â”‚   â”œâ”€â”€ bitget_client.py     # Cliente de Bitget
+â”‚   â”‚   â”œâ”€â”€ execution_engine.py  # Motor de ejecuciÃ³n
+â”‚   â”‚   â”œâ”€â”€ executor.py          # Ejecutor de trades
+â”‚   â”‚   â”œâ”€â”€ order_manager.py     # Gestor de Ã³rdenes
+â”‚   â”‚   â”œâ”€â”€ portfolio_optimizer.py # Optimizador de portfolio
+â”‚   â”‚   â”œâ”€â”€ position_manager.py  # Gestor de posiciones
+â”‚   â”‚   â”œâ”€â”€ risk_manager.py      # Gestor de riesgo
+â”‚   â”‚   â”œâ”€â”€ signal_processor.py  # Procesador de seÃ±ales
+â”‚   â”‚   â””â”€â”€ enterprise/          # Trading enterprise
+â”‚   â”‚       â”œâ”€â”€ __init__.py
+â”‚   â”‚       â”œâ”€â”€ futures_engine.py
+â”‚   â”‚       â”œâ”€â”€ leverage_calculator.py
+â”‚   â”‚       â”œâ”€â”€ market_analyzer.py
+â”‚   â”‚       â”œâ”€â”€ order_executor.py
+â”‚   â”‚       â”œâ”€â”€ position.py
+â”‚   â”‚       â”œâ”€â”€ position_manager.py
+â”‚   â”‚       â”œâ”€â”€ signal_generator.py
+â”‚   â”‚       â””â”€â”€ trading_signal.py
+â”‚   â”œâ”€â”€ ml/                      # Sistemas de machine learning
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ README.md
+â”‚   â”‚   â””â”€â”€ enterprise/          # ML enterprise
+â”‚   â”‚       â”œâ”€â”€ __init__.py
+â”‚   â”‚       â”œâ”€â”€ callbacks.py
+â”‚   â”‚       â”œâ”€â”€ circuit_breakers.py
+â”‚   â”‚       â”œâ”€â”€ data_module.py
+â”‚   â”‚       â”œâ”€â”€ data_pipeline.py
+â”‚   â”‚       â”œâ”€â”€ deployment.py
+â”‚   â”‚       â”œâ”€â”€ hyperparameter_tuner.py
+â”‚   â”‚       â”œâ”€â”€ hyperparameter_tuning.py
+â”‚   â”‚       â”œâ”€â”€ metrics_tracker.py
+â”‚   â”‚       â”œâ”€â”€ model_architecture.py
+â”‚   â”‚       â”œâ”€â”€ monitoring_system.py
+â”‚   â”‚       â”œâ”€â”€ observability.py
+â”‚   â”‚       â”œâ”€â”€ security.py
+â”‚   â”‚       â”œâ”€â”€ security_system.py
+â”‚   â”‚       â”œâ”€â”€ testing_framework.py
+â”‚   â”‚       â”œâ”€â”€ thread_safe_manager.py
+â”‚   â”‚       â””â”€â”€ validation_system.py
+â”‚   â”œâ”€â”€ data/                    # GestiÃ³n de datos
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ README.md
+â”‚   â”‚   â”œâ”€â”€ collector.py         # Recolector de datos
+â”‚   â”‚   â”œâ”€â”€ database.py          # Base de datos
+â”‚   â”‚   â”œâ”€â”€ preprocessor.py      # Preprocesador de datos
+â”‚   â”‚   â”œâ”€â”€ temporal_alignment.py # AlineaciÃ³n temporal
+â”‚   â”‚   â”œâ”€â”€ multi_timeframe_coordinator.py # Coordinador multi-timeframe
+â”‚   â”‚   â”œâ”€â”€ intelligent_cache.py # Cache inteligente
+â”‚   â”‚   â”œâ”€â”€ hybrid_storage.py    # Almacenamiento hÃ­brido
+â”‚   â”‚   â””â”€â”€ enterprise/          # Datos enterprise
+â”‚   â”‚       â”œâ”€â”€ __init__.py
+â”‚   â”‚       â”œâ”€â”€ database.py
+â”‚   â”‚       â”œâ”€â”€ kafka_consumer.py
+â”‚   â”‚       â”œâ”€â”€ kafka_producer.py
+â”‚   â”‚       â”œâ”€â”€ preprocessor.py
+â”‚   â”‚       â”œâ”€â”€ redis_manager.py
+â”‚   â”‚       â”œâ”€â”€ stream_collector.py
+â”‚   â”‚       â””â”€â”€ timescale_manager.py
+â”‚   â”œâ”€â”€ monitoring/              # Sistemas de monitoreo
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ README.md
+â”‚   â”‚   â”œâ”€â”€ alerting_system.py   # Sistema de alertas
+â”‚   â”‚   â”œâ”€â”€ anomaly_detector.py  # Detector de anomalÃ­as
+â”‚   â”‚   â”œâ”€â”€ api_server.py        # Servidor API
+â”‚   â”‚   â”œâ”€â”€ asset_registry.py    # Registro de activos
+â”‚   â”‚   â”œâ”€â”€ asset_status.py      # Estado de activos
+â”‚   â”‚   â”œâ”€â”€ async_metrics.py     # MÃ©tricas asÃ­ncronas
+â”‚   â”‚   â”œâ”€â”€ auth.py              # AutenticaciÃ³n
+â”‚   â”‚   â”œâ”€â”€ collector.py         # Recolector de mÃ©tricas
+â”‚   â”‚   â”œâ”€â”€ dashboard.py         # Dashboard principal
+â”‚   â”‚   â”œâ”€â”€ simple_dashboard.py  # Dashboard simple
+â”‚   â”‚   â”œâ”€â”€ health_checks.py     # Verificaciones de salud
+â”‚   â”‚   â”œâ”€â”€ metrics_exporter.py  # Exportador de mÃ©tricas
+â”‚   â”‚   â”œâ”€â”€ metrics_manager.py   # Gestor de mÃ©tricas
+â”‚   â”‚   â”œâ”€â”€ observability.py     # Observabilidad
+â”‚   â”‚   â”œâ”€â”€ performance_analyzer.py # Analizador de rendimiento
+â”‚   â”‚   â”œâ”€â”€ prometheus_client.py # Cliente Prometheus
+â”‚   â”‚   â””â”€â”€ enterprise/          # Monitoreo enterprise
+â”‚   â”‚       â”œâ”€â”€ pnl_tracker.py
+â”‚   â”‚       â”œâ”€â”€ performance_monitor.py
+â”‚   â”‚       â”œâ”€â”€ prometheus_metrics.py
+â”‚   â”‚       â”œâ”€â”€ risk_monitor.py
+â”‚   â”‚       â””â”€â”€ trading_monitor.py
+â”‚   â”œâ”€â”€ security/                # Seguridad y auditorÃ­a
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ audit_logger.py      # Logger de auditorÃ­a
+â”‚   â”‚   â”œâ”€â”€ compliance_checker.py # Verificador de cumplimiento
+â”‚   â”‚   â”œâ”€â”€ encryption_manager.py # Gestor de encriptaciÃ³n
+â”‚   â”‚   â””â”€â”€ vault_manager.py     # Gestor de Vault
+â”‚   â”œâ”€â”€ compliance/              # Cumplimiento normativo
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ audit_config.py
+â”‚   â”‚   â”œâ”€â”€ audit_config.yaml
+â”‚   â”‚   â””â”€â”€ trading_compliance.py
+â”‚   â”œâ”€â”€ deployment/              # Despliegue y recuperaciÃ³n
+â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”‚   â”œâ”€â”€ health_monitor.py
+â”‚   â”‚   â”œâ”€â”€ phase_manager.py
+â”‚   â”‚   â””â”€â”€ recovery_manager.py
+â”‚   â””â”€â”€ integration/             # Utilidades del sistema
+â”‚       â”œâ”€â”€ __init__.py
+â”‚       â””â”€â”€ system_utils.py
+â”œâ”€â”€ âš™ï¸ config/                   # ConfiguraciÃ³n del usuario
+â”‚   â”œâ”€â”€ user_settings.yaml       # ConfiguraciÃ³n personalizable
+â”‚   â”œâ”€â”€ .env.example             # Variables de entorno (ejemplo)
+â”‚   â””â”€â”€ README.md                # DocumentaciÃ³n de configuraciÃ³n
+â”œâ”€â”€ ðŸ’¾ data/                     # Almacenamiento de datos
+â”‚   â”œâ”€â”€ README.md
+â”‚   â”œâ”€â”€ historical/              # Datos histÃ³ricos por sÃ­mbolo
+â”‚   â”œâ”€â”€ models/                  # Modelos de IA entrenados
+â”‚   â”œâ”€â”€ checkpoints/             # Puntos de control del entrenamiento
+â”‚   â”œâ”€â”€ logs/                    # Logs del sistema
+â”‚   â”œâ”€â”€ alignments/              # Alineaciones temporales
+â”‚   â”œâ”€â”€ trading_bot.db           # Base de datos SQLite
+â”‚   â”œâ”€â”€ trading_bot.db-shm       # Archivo de memoria compartida
+â”‚   â””â”€â”€ trading_bot.db-wal       # Archivo de write-ahead log
+â””â”€â”€ ðŸ“¦ _old/                     # Archivos antiguos
+    â”œâ”€â”€ src/                     # CÃ³digo fuente anterior
+    â”œâ”€â”€ notifications/           # Notificaciones anteriores
+    â”œâ”€â”€ security/                # Seguridad anterior
+    â”œâ”€â”€ agents/                  # Agentes anteriores
+    â”œâ”€â”€ infrastructure/          # Infraestructura anterior
+    â”œâ”€â”€ tests/                   # Tests anteriores
+    â”œâ”€â”€ docs/                    # DocumentaciÃ³n anterior
+    â”œâ”€â”€ reports/                 # Reportes anteriores
+    â”œâ”€â”€ venv/                    # Entorno virtual anterior
+    â””â”€â”€ README_old.md            # README anterior
+\\\
 
 ---
 
-## 🚀 **Inicio Rápido**
+## ðŸ”„ **FLUJO DE COMANDOS IMPLEMENTADO**
 
-### **📋 Prerrequisitos**
+\\\
+Comando Telegram â†’ control/ â†’ scripts/ â†’ core/ â†’ scripts/ â†’ control/ â†’ Telegram
+\\\
 
-- **Python 3.13+** (recomendado)
-- **Docker** (opcional, para contenedores)
-- **Kubernetes** (opcional, para despliegue enterprise)
-- **PostgreSQL/TimescaleDB** (para datos históricos)
-- **Redis** (para cache y colas)
+### **Ejemplo PrÃ¡ctico:**
+\\\
+/download_history â†’ control/handlers.py â†’ scripts/history/download_history.py â†’ core/data/ â†’ scripts/history/ â†’ control/handlers.py â†’ Respuesta al chat
+\\\
 
-### **⚡ Instalación Express**
+---
 
-```bash
-# 1. Clonar el repositorio
-git clone https://github.com/buurguees/bot_trading_v10.git
+## ðŸš€ **INSTALACIÃ“N Y CONFIGURACIÃ“N**
+
+### **1. Requisitos del Sistema**
+- Python 3.8+
+- Windows 10/11 (recomendado)
+- 8GB RAM mÃ­nimo
+- 50GB espacio en disco
+- ConexiÃ³n a internet estable
+
+### **2. InstalaciÃ³n**
+\\\ash
+# Clonar el repositorio
+git clone <repository-url>
 cd bot_trading_v10
 
-# 2. Crear entorno virtual
+# Crear entorno virtual
 python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
+venv\Scripts\activate
 
-# 3. Instalar dependencias
+# Instalar dependencias
 pip install -r requirements.txt
+\\\
 
-# 4. Configurar variables de entorno
-cp .env.example .env
+### **3. ConfiguraciÃ³n Inicial**
+
+#### **3.1 Variables de Entorno**
+\\\ash
+# Copiar archivo de ejemplo
+copy config\.env.example .env
+
 # Editar .env con tus credenciales
+notepad .env
+\\\
 
-# 5. Inicializar base de datos
-python -c "from src.core.data.database import DatabaseManager; db = DatabaseManager(); db.initialize()"
-
-# 6. Ejecutar el bot
-python bot.py --mode paper --symbols BTCUSDT,ETHUSDT
-```
-
-### **🔧 Configuración Detallada**
-
-#### **1. Variables de Entorno (.env)**
-
-```bash
-# Exchange Credentials
+**Contenido de .env:**
+\\\env
+# API Keys de Bitget
 BITGET_API_KEY=tu_api_key_aqui
 BITGET_SECRET_KEY=tu_secret_key_aqui
 BITGET_PASSPHRASE=tu_passphrase_aqui
 
-# Database Configuration
-DATABASE_URL=postgresql://user:password@localhost:5432/trading_bot
-REDIS_URL=redis://localhost:6379
+# Bot de Telegram
+TELEGRAM_BOT_TOKEN=tu_bot_token_aqui
+TELEGRAM_CHAT_ID=tu_chat_id_aqui
 
-# ML Configuration
-MLFLOW_TRACKING_URI=http://localhost:5000
-MLFLOW_EXPERIMENT_NAME=trading_bot_v10
+# Base de datos
+DATABASE_URL=sqlite:///data/trading_bot.db
+\\\
 
-# Monitoring
-PROMETHEUS_PORT=8001
-GRAFANA_PORT=3000
-
-# Security
-ENCRYPTION_KEY=tu_clave_de_encriptacion_aqui
-AWS_REGION=us-east-1
-```
-
-#### **2. Configuración de Trading (user_settings.yaml)**
-
-```yaml
+#### **3.2 ConfiguraciÃ³n del Usuario**
+Editar \config/user_settings.yaml\:
+\\\yaml
+# ConfiguraciÃ³n general del bot
 bot_settings:
-  name: "TradingBot_v10_Enterprise"
-  trading_mode: "aggressive"  # conservative, moderate, aggressive, custom
+  name: "TradingBot_v10_Alex"
+  trading_mode: "aggressive"  # conservative/moderate/aggressive/custom
   
-  features:
-    auto_trading: true
-    auto_retraining: true
-    risk_management: true
-    stop_on_drawdown: true
-    adaptive_sizing: true
-
+# GestiÃ³n de capital y riesgo
 capital_management:
   initial_balance: 1000.0
-  target_balance: 1000000.0
-  max_risk_per_trade: 3.0
-  max_daily_loss_pct: 10.0
-  max_drawdown_pct: 30.0
+  max_risk_per_trade: 2.0
+  max_daily_loss_pct: 5.0
 
-trading_enterprise:
-  futures_trading:
-    leverage:
-      min_leverage: 5
-      max_leverage: 30
-      confidence_based: true
-    margin_mode: isolated
+# ConfiguraciÃ³n de trading
+trading_settings:
+  symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT"]
+  timeframes: ["1h", "4h", "1d"]
   
-  strategies:
-    ml_strategy:
-      confidence_threshold: 65.0
-      model_type: lstm_attention
-      ensemble_models: true
-```
+# ConfiguraciÃ³n del modelo IA
+ai_model_settings:
+  confidence:
+    min_confidence_to_trade: 65.0
+\\\
+
+#### **3.3 ConfiguraciÃ³n de Telegram**
+Editar \control/config.yaml\:
+\\\yaml
+telegram:
+  bot_token: "tu_bot_token_aqui"
+  chat_id: "tu_chat_id_aqui"
+  enabled: true
+  metrics_interval: 300  # 5 minutos
+  alert_thresholds:
+    high_pnl: 100.0
+    low_pnl: -50.0
+    high_drawdown: 10.0
+    high_latency: 1000
+\\\
 
 ---
 
-## 🎮 **Modos de Operación**
+## ðŸŽ® **USO DEL BOT**
 
-### **📊 Modos de Trading**
+### **1. Iniciar el Bot**
 
-| Modo | Descripción | Uso Recomendado |
-|------|-------------|-----------------|
-| **`paper`** | Trading simulado sin dinero real | Desarrollo y testing |
-| **`live`** | Trading real con dinero | Producción |
-| **`backtest`** | Análisis histórico | Validación de estrategias |
-| **`emergency-stop`** | Parada de emergencia | Crisis de mercado |
+#### **Modo Paper Trading (Recomendado para empezar)**
+\\\ash
+python bot.py --mode paper --telegram-enabled
+\\\
 
-### **⚙️ Comandos de Ejecución**
+#### **Modo Live Trading (Solo cuando estÃ©s listo)**
+\\\ash
+python bot.py --mode live --symbols BTCUSDT,ETHUSDT --telegram-enabled
+\\\
 
-```bash
-# Trading en vivo con múltiples símbolos
-python bot.py --mode live --symbols BTCUSDT,ETHUSDT,ADAUSDT --leverage 10
+#### **Modo Backtest**
+\\\ash
+python bot.py --mode backtest
+\\\
 
-# Trading simulado para testing
-python bot.py --mode paper --symbols BTCUSDT,ETHUSDT --leverage 5
+### **2. Comandos de Telegram**
 
-# Análisis histórico
-python bot.py --mode backtest --symbols BTCUSDT --start-date 2024-01-01 --end-date 2024-12-31
+#### **ðŸ“Š Comandos de Monitoreo**
+- \/start\ - Iniciar bot y mostrar bienvenida
+- \/help\ - Lista completa de comandos
+- \/status\ - Estado general del sistema
+- \/metrics\ - MÃ©tricas actuales del trading
+- \/positions\ - Posiciones abiertas
+- \/balance\ - Balance detallado
+- \/health\ - Salud del sistema
 
-# Parada de emergencia
-python bot.py --mode emergency-stop
+#### **ðŸŽ® Comandos de Control**
+- \/start_trading\ - Iniciar trading automÃ¡tico
+- \/stop_trading\ - Detener trading
+- \/emergency_stop\ - Parada de emergencia inmediata
 
-# Verificación de salud del sistema
-python bot.py --health-check
+#### **ðŸ“ˆ Comandos de Datos**
+- \/download_history\ - Descargar datos histÃ³ricos
+- \/inspect_history\ - Inspeccionar calidad de datos
+- \/repair_history\ - Reparar datos corruptos
 
-# Gestión de fases enterprise
-python bot.py --phases infrastructure,training,trading
-```
+#### **ðŸ¤– Comandos de Entrenamiento**
+- \/train_hist\ - Entrenamiento histÃ³rico
+- \/train_live\ - Entrenamiento en vivo
+- \/stop_training\ - Detener entrenamiento
 
-### **🔄 Fases del Sistema**
-
-1. **Infrastructure**: Inicialización de servicios base
-2. **Training**: Entrenamiento de modelos ML
-3. **Trading**: Ejecución de estrategias de trading
-4. **Monitoring**: Monitoreo y observabilidad
-5. **Recovery**: Recuperación automática de errores
-
----
-
-## 🧠 **Sistema de Machine Learning**
-
-### **🏗️ Arquitectura de Modelos**
-
-```mermaid
-graph LR
-    A[Raw Market Data] --> B[Feature Engineering]
-    B --> C[LSTM + Attention]
-    C --> D[Ensemble Models]
-    D --> E[Confidence Scoring]
-    E --> F[Trading Signals]
-    
-    G[Hyperparameter Tuning] --> C
-    H[Cross Validation] --> C
-    I[Model Validation] --> D
-```
-
-### **🤖 Modelos Disponibles**
-
-| Modelo | Descripción | Precisión | Velocidad |
-|--------|-------------|-----------|-----------|
-| **LSTM + Attention** | Modelo principal | 85-90% | Alta |
-| **Ensemble** | Combinación de modelos | 88-92% | Media |
-| **Transformer** | Modelo experimental | 90-95% | Baja |
-| **CNN-LSTM** | Híbrido convolucional | 82-87% | Alta |
-
-### **📈 Entrenamiento de Modelos**
-
-```bash
-# Entrenamiento básico
-python -m src.core.ml.enterprise.training_engine --symbol BTCUSDT --epochs 100
-
-# Entrenamiento distribuido
-python -m src.core.ml.enterprise.distributed_trainer --symbols BTCUSDT,ETHUSDT --gpus 2
-
-# Hyperparameter tuning
-python -m src.core.ml.enterprise.hyperparameter_tuner --symbol BTCUSDT --trials 100
-
-# Validación de modelos
-python -m src.core.ml.enterprise.validation_system --model-path models/BTCUSDT_model.json
-```
-
-### **🔍 Métricas de ML**
-
-- **Precisión**: 85-95% en predicciones de dirección
-- **Sharpe Ratio**: 2.5+ en backtesting
-- **Maximum Drawdown**: <15% en condiciones normales
-- **Win Rate**: 65-75% en trades ejecutados
-- **Confidence Score**: 65-95% en señales de alta calidad
+#### **âš™ï¸ Comandos de ConfiguraciÃ³n**
+- \/settings\ - Ver configuraciÃ³n actual
+- \/set_mode\ - Cambiar modo de trading
+- \/set_symbols\ - Cambiar sÃ­mbolos activos
 
 ---
 
-## 📊 **Sistema de Monitoreo**
+## ðŸ”§ **ARQUITECTURA TÃ‰CNICA**
 
-### **📈 Dashboards Disponibles**
+### **1. Flujo de Datos**
+\\\
+Exchange (Bitget) â†’ core/data/collector.py â†’ core/data/database.py â†’ core/data/preprocessor.py â†’ core/ml/ â†’ core/trading/ â†’ Exchange
+\\\
 
-#### **1. Dashboard Principal (Dash)**
+### **2. Flujo de Comandos**
+\\\
+Telegram â†’ control/telegram_bot.py â†’ control/handlers.py â†’ scripts/[comando]/ â†’ core/[mÃ³dulo]/ â†’ scripts/[comando]/ â†’ control/handlers.py â†’ Telegram
+\\\
+
+### **3. GestiÃ³n de Estado**
+- **Base de datos**: SQLite con optimizaciones enterprise
+- **Cache**: Sistema de cache inteligente multi-nivel
+- **Logs**: Sistema de logging estructurado con rotaciÃ³n
+- **ConfiguraciÃ³n**: YAML con validaciÃ³n y hot-reload
+
+### **4. Seguridad**
+- **EncriptaciÃ³n**: AES-256-GCM para datos sensibles
+- **AutenticaciÃ³n**: Sistema de tokens JWT
+- **AuditorÃ­a**: Logging completo de todas las operaciones
+- **Cumplimiento**: VerificaciÃ³n automÃ¡tica de regulaciones
+
+---
+
+## ðŸ“Š **CARACTERÃSTICAS PRINCIPALES**
+
+### **ðŸ¤– Machine Learning Avanzado**
+- **Modelos**: LSTM, Transformer, CNN-LSTM, Ensemble
+- **Entrenamiento**: AutomÃ¡tico nocturno con datos histÃ³ricos
+- **ValidaciÃ³n**: Cross-validation con mÃ©tricas de trading
+- **OptimizaciÃ³n**: HiperparÃ¡metros con Optuna
+
+### **ðŸ“ˆ Trading Inteligente**
+- **SeÃ±ales**: GeneraciÃ³n automÃ¡tica con IA
+- **GestiÃ³n de Riesgo**: Stop-loss dinÃ¡mico y position sizing
+- **Portfolio**: OptimizaciÃ³n multi-sÃ­mbolo
+- **EjecuciÃ³n**: Ã“rdenes con latencia <100ms
+
+### **ðŸ“± Control Total via Telegram**
+- **Monitoreo**: MÃ©tricas en tiempo real
+- **Control**: Inicio/parada desde mÃ³vil
+- **Alertas**: Notificaciones automÃ¡ticas
+- **ConfiguraciÃ³n**: Cambios sin reiniciar
+
+### **ðŸ¢ Arquitectura Enterprise**
+- **Escalabilidad**: DiseÃ±o modular y extensible
+- **Monitoreo**: Prometheus + Grafana
+- **Logging**: Estructurado con ELK Stack
+- **Seguridad**: EncriptaciÃ³n y auditorÃ­a completa
+
+---
+
+## ðŸ” **MONITOREO Y DIAGNÃ“STICO**
+
+### **1. Logs del Sistema**
+- **UbicaciÃ³n**: \data/logs/\
+- **Archivos principales**:
+  - \ot.log\ - Log principal del bot
+  - \	rading.log\ - Actividad de trading
+  - \	raining.log\ - Proceso de entrenamiento
+  - \enterprise/\ - Logs especÃ­ficos enterprise
+
+### **2. MÃ©tricas de Prometheus**
+- **Puerto**: 9090 (configurable)
+- **MÃ©tricas disponibles**:
+  - Trades ejecutados
+  - PnL en tiempo real
+  - Latencia de Ã³rdenes
+  - Salud del sistema
+
+### **3. Dashboard Web**
+- **Puerto**: 8050 (configurable)
 - **URL**: http://localhost:8050
-- **Características**:
-  - Métricas en tiempo real
-  - Gráficos interactivos
-  - Control de trading
-  - Configuración del sistema
-
-#### **2. Grafana Enterprise**
-- **URL**: http://localhost:3000
-- **Dashboards**:
-  - Trading Performance
-  - System Health
-  - Risk Metrics
-  - ML Model Performance
-
-### **📊 Métricas Clave**
-
-| Categoría | Métricas | Descripción |
-|-----------|----------|-------------|
-| **Trading** | PnL, Win Rate, Sharpe Ratio | Rendimiento de trading |
-| **Sistema** | CPU, Memory, Latency | Salud del sistema |
-| **ML** | Model Accuracy, Prediction Time | Rendimiento de modelos |
-| **Riesgo** | VaR, Max Drawdown, Exposure | Métricas de riesgo |
-
-### **🚨 Sistema de Alertas**
-
-```yaml
-alerts:
-  critical:
-    - max_drawdown_exceeded: "Drawdown > 30%"
-    - system_error: "Error crítico del sistema"
-    - api_connection_lost: "Conexión API perdida"
-  
-  warning:
-    - high_latency: "Latencia > 100ms"
-    - low_confidence: "Confianza < 60%"
-    - memory_usage_high: "Uso memoria > 80%"
-```
+- **CaracterÃ­sticas**:
+  - GrÃ¡ficos en tiempo real
+  - MÃ©tricas de trading
+  - Estado del sistema
+  - ConfiguraciÃ³n
 
 ---
 
-## 🛡️ **Gestión de Riesgo**
+## ðŸ› ï¸ **DESARROLLO Y MANTENIMIENTO**
 
-### **⚖️ Estrategias de Riesgo**
+### **1. Estructura de Desarrollo**
+\\\
+control/     # Interfaz de usuario (Telegram)
+scripts/     # LÃ³gica de negocio (comandos)
+core/        # Infraestructura (trading, ML, datos)
+config/      # ConfiguraciÃ³n del usuario
+data/        # Almacenamiento de datos
+\\\
 
-#### **1. Gestión de Capital**
-- **Risk per Trade**: 1-5% del capital
-- **Daily Loss Limit**: 10% máximo
-- **Weekly Loss Limit**: 25% máximo
-- **Maximum Drawdown**: 30% stop automático
+### **2. Agregar Nuevos Comandos**
+1. Crear script en \scripts/[categorÃ­a]/\
+2. Agregar handler en \control/handlers.py\
+3. Registrar comando en \control/telegram_bot.py\
+4. Documentar en este README
 
-#### **2. Gestión de Posiciones**
-- **Leverage Dinámico**: 5x-30x según confianza
-- **Position Sizing**: Basado en volatilidad
-- **Correlation Limits**: Máximo 40% correlación entre posiciones
-- **Sector Limits**: Diversificación por sectores
+### **3. Agregar Nuevos MÃ³dulos Core**
+1. Crear mÃ³dulo en \core/[categorÃ­a]/\
+2. Agregar \__init__.py\ con exports
+3. Actualizar imports en \core/__init__.py\
+4. Documentar funcionalidad
 
-#### **3. Circuit Breakers**
-- **Price Movement**: Stop si movimiento > 10% en 1 minuto
-- **Volume Spike**: Pausa si volumen > 5x promedio
-- **API Errors**: Stop si > 5 errores consecutivos
-- **Model Confidence**: Stop si confianza < 50%
+### **4. Testing**
+\\\ash
+# Tests unitarios
+python -m pytest tests/unit/
 
-### **🔒 Cumplimiento Regulatorio**
+# Tests de integraciÃ³n
+python -m pytest tests/integration/
 
-#### **MiFID II Compliance**
-- **Best Execution**: Algoritmos de mejor ejecución
-- **Transaction Reporting**: Reportes automáticos
-- **Client Categorization**: Clasificación de clientes
-- **Product Governance**: Gobernanza de productos
-
-#### **GDPR Compliance**
-- **Data Retention**: 7 años de retención
-- **Data Encryption**: AES-256 para datos sensibles
-- **Right to Erasure**: Proceso de eliminación
-- **Data Portability**: Exportación de datos
-
----
-
-## 🔒 **Seguridad**
-
-### **🛡️ Medidas de Seguridad**
-
-#### **1. Encriptación**
-- **AES-256-GCM** para datos sensibles
-- **TLS 1.3** para comunicaciones
-- **RSA-4096** para claves asimétricas
-- **SHA-256** para hashing
-
-#### **2. Gestión de Secretos**
-- **AWS Secrets Manager** para claves
-- **Vault Integration** para secretos enterprise
-- **Environment Variables** para desarrollo
-- **Hardware Security Modules** (HSM) para producción
-
-#### **3. Auditoría y Logging**
-- **Immutable Audit Logs** con checksums
-- **Real-time Monitoring** de accesos
-- **Anomaly Detection** en comportamientos
-- **Compliance Reporting** automático
-
-### **🔐 Autenticación y Autorización**
-
-```yaml
-security:
-  authentication:
-    method: "multi_factor"
-    providers: ["local", "ldap", "oauth2"]
-    session_timeout: 3600
-  
-  authorization:
-    roles: ["admin", "trader", "viewer", "auditor"]
-    permissions:
-      admin: ["*"]
-      trader: ["trading", "monitoring"]
-      viewer: ["monitoring", "reports"]
-      auditor: ["audit_logs", "compliance"]
-```
+# Tests end-to-end
+python -m pytest tests/e2e/
+\\\
 
 ---
 
-## 🚀 **Despliegue**
+## ðŸ“š **DOCUMENTACIÃ“N ADICIONAL**
 
-### **🐳 Docker**
+### **1. GuÃ­as de Usuario**
+- \config/README.md\ - ConfiguraciÃ³n del usuario
+- \control/README.md\ - Control via Telegram
+- \core/trading/README.md\ - Motores de trading
+- \core/ml/README.md\ - Sistemas de ML
+- \core/data/README.md\ - GestiÃ³n de datos
+- \data/README.md\ - Almacenamiento de datos
 
-#### **Construcción de Imagen**
-```bash
-# Construir imagen base
-docker build -t bot-trading-v10:latest .
+### **2. GuÃ­as de Desarrollador**
+- \core/config/README.md\ - Sistema de configuraciÃ³n
+- \core/monitoring/README.md\ - Sistemas de monitoreo
+- \core/security/README.md\ - Seguridad y auditorÃ­a
 
-# Construir imagen enterprise
-docker build -f infrastructure/docker/Dockerfile.enterprise -t bot-trading-v10:enterprise .
-```
-
-#### **Ejecución con Docker Compose**
-```yaml
-version: '3.8'
-services:
-  trading-bot:
-    image: bot-trading-v10:latest
-    environment:
-      - BITGET_API_KEY=${BITGET_API_KEY}
-      - BITGET_SECRET_KEY=${BITGET_SECRET_KEY}
-      - DATABASE_URL=${DATABASE_URL}
-    ports:
-      - "8050:8050"
-      - "8001:8001"
-    volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
-    depends_on:
-      - postgres
-      - redis
-
-  postgres:
-    image: timescale/timescaledb:latest
-    environment:
-      - POSTGRES_DB=trading_bot
-      - POSTGRES_USER=trader
-      - POSTGRES_PASSWORD=secure_password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis_data:/data
-
-volumes:
-  postgres_data:
-  redis_data:
-```
-
-### **☸️ Kubernetes**
-
-#### **Manifiestos de Despliegue**
-```bash
-# Aplicar configuración base
-kubectl apply -f infrastructure/kubernetes/namespace.yaml
-kubectl apply -f infrastructure/kubernetes/configmap.yaml
-kubectl apply -f infrastructure/kubernetes/secrets.yaml
-
-# Desplegar servicios
-kubectl apply -f infrastructure/kubernetes/postgres.yaml
-kubectl apply -f infrastructure/kubernetes/redis.yaml
-kubectl apply -f infrastructure/kubernetes/trading-bot.yaml
-
-# Verificar despliegue
-kubectl get pods -n trading-bot
-kubectl get services -n trading-bot
-```
-
-#### **Escalado Automático**
-```yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: trading-bot-hpa
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: trading-bot
-  minReplicas: 2
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-```
+### **3. GuÃ­as Enterprise**
+- \core/trading/enterprise/\ - Trading enterprise
+- \core/ml/enterprise/\ - ML enterprise
+- \core/data/enterprise/\ - Datos enterprise
+- \core/monitoring/enterprise/\ - Monitoreo enterprise
 
 ---
 
-## 🧪 **Testing**
+## ðŸš¨ **SOLUCIÃ“N DE PROBLEMAS**
 
-### **📋 Suite de Testing Completa**
+### **1. Problemas Comunes**
 
-#### **1. Tests Unitarios**
-```bash
-# Ejecutar todos los tests unitarios
-pytest tests/unit/ -v --cov=src
+#### **Error de Imports**
+\\\ash
+# Verificar que estÃ¡s en el directorio correcto
+cd bot_trading_v10
 
-# Tests específicos
-pytest tests/unit/test_trading_engine.py -v
-pytest tests/unit/test_ml_models.py -v
-pytest tests/unit/test_risk_manager.py -v
-```
+# Verificar que Python puede encontrar los mÃ³dulos
+python -c "from control.telegram_bot import TelegramBot; print('OK')"
+\\\
 
-#### **2. Tests de Integración**
-```bash
-# Tests de integración con base de datos
-pytest tests/integration/test_database_integration.py -v
+#### **Error de ConfiguraciÃ³n**
+\\\ash
+# Verificar archivos de configuraciÃ³n
+python -c "from core.config.enterprise_config import EnterpriseConfigManager; print('OK')"
+\\\
 
-# Tests de integración con APIs
-pytest tests/integration/test_exchange_integration.py -v
-```
+#### **Error de Base de Datos**
+\\\ash
+# Verificar que la base de datos existe
+ls data/trading_bot.db*
 
-#### **3. Tests End-to-End**
-```bash
-# Simulación completa de trading
-pytest tests/e2e/test_full_trading_cycle.py -v
+# Si no existe, el bot la crearÃ¡ automÃ¡ticamente
+\\\
 
-# Tests de recuperación de errores
-pytest tests/e2e/test_error_recovery.py -v
-```
+### **2. Logs de DiagnÃ³stico**
+\\\ash
+# Ver logs en tiempo real
+tail -f data/logs/bot.log
 
-#### **4. Tests de Rendimiento**
-```bash
-# Benchmarks de latencia
-pytest tests/performance/test_latency.py --benchmark-only
+# Ver logs de trading
+tail -f data/logs/trading.log
 
-# Tests de carga
-pytest tests/performance/test_load.py --benchmark-only
-```
+# Ver logs de errores
+grep "ERROR" data/logs/*.log
+\\\
 
-### **📊 Cobertura de Código**
+### **3. Comandos de DiagnÃ³stico**
+\\\ash
+# Estado del sistema
+python -c "from core.monitoring.health_checks import HealthChecker; h = HealthChecker(); print(h.check_all())"
 
-```bash
-# Generar reporte de cobertura
-pytest --cov=src --cov-report=html --cov-report=term
-
-# Cobertura mínima requerida: 85%
-# Ver reporte en: htmlcov/index.html
-```
+# Verificar configuraciÃ³n
+python -c "from core.config.enterprise_config import EnterpriseConfigManager; c = EnterpriseConfigManager(); print(c.load_config())"
+\\\
 
 ---
 
-## 📈 **Rendimiento**
+## ðŸ”„ **ACTUALIZACIONES Y MANTENIMIENTO**
 
-### **⚡ Métricas de Rendimiento**
+### **1. Actualizaciones del Bot**
+\\\ash
+# Hacer backup de configuraciÃ³n
+copy config\user_settings.yaml config\user_settings.yaml.backup
 
-| Métrica | Valor Objetivo | Valor Actual |
-|---------|----------------|--------------|
-| **Latencia de Ejecución** | <100ms | 85ms |
-| **Throughput** | 1000 trades/seg | 1200 trades/seg |
-| **Disponibilidad** | 99.9% | 99.95% |
-| **Tiempo de Recuperación** | <30 seg | 15 seg |
-| **Uso de CPU** | <70% | 65% |
-| **Uso de Memoria** | <80% | 75% |
+# Actualizar cÃ³digo
+git pull origin main
 
-### **🚀 Optimizaciones Implementadas**
+# Restaurar configuraciÃ³n
+copy config\user_settings.yaml.backup config\user_settings.yaml
 
-- **Async/Await**: Operaciones asíncronas para mejor rendimiento
-- **Connection Pooling**: Pool de conexiones para base de datos
-- **Caching Inteligente**: Redis para cache de datos frecuentes
-- **Model Optimization**: Torch.jit para inferencia optimizada
-- **Batch Processing**: Procesamiento por lotes para ML
-- **Memory Management**: Gestión eficiente de memoria
+# Reiniciar bot
+python bot.py --mode paper --telegram-enabled
+\\\
 
----
+### **2. Limpieza de Datos**
+\\\ash
+# Limpiar logs antiguos
+python scripts\maintenance\logs_cleanup.py --days 30
 
-## 🤝 **Contribución**
+# Limpiar datos histÃ³ricos antiguos
+python scripts\history\repair_history.py --cleanup
+\\\
 
-### **🔄 Proceso de Contribución**
+### **3. Backup y RecuperaciÃ³n**
+\\\ash
+# Backup completo
+python scripts\deployment\enterprise\backup_data.py
 
-1. **Fork** el repositorio
-2. **Crea** una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. **Commit** tus cambios (`git commit -am 'Agregar nueva funcionalidad'`)
-4. **Push** a la rama (`git push origin feature/nueva-funcionalidad`)
-5. **Crea** un Pull Request
-
-### **📋 Estándares de Código**
-
-- **Python**: PEP 8 con Black formatter
-- **Documentación**: Docstrings en formato Google
-- **Tests**: Cobertura mínima 85%
-- **Commits**: Mensajes descriptivos en inglés
-- **PRs**: Descripción detallada de cambios
-
-### **🐛 Reportar Issues**
-
-- Usa el template de issue apropiado
-- Incluye logs y configuración
-- Proporciona pasos para reproducir
-- Etiqueta correctamente (bug, feature, enhancement)
+# Restaurar desde backup
+python scripts\deployment\enterprise\restore_data.py --backup-file backup_20241209.db
+\\\
 
 ---
 
-## 📄 **Licencia**
+## ðŸ“ˆ **ROADMAP Y FUTURO**
 
-Este proyecto está bajo la **Licencia MIT**. Ver [LICENSE](LICENSE) para más detalles.
+### **PrÃ³ximas CaracterÃ­sticas**
+- [ ] Soporte para mÃ¡s exchanges (Binance, Coinbase)
+- [ ] Trading de futuros con leverage dinÃ¡mico
+- [ ] Dashboard web avanzado con React
+- [ ] API REST para integraciÃ³n externa
+- [ ] Trading social y copy trading
+- [ ] AnÃ¡lisis de sentimiento con NLP
+- [ ] OptimizaciÃ³n de portfolio con MPT
+- [ ] Trading algorÃ­tmico avanzado
 
-```
-MIT License
-
-Copyright (c) 2024 Bot Trading v10 Enterprise
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+### **Mejoras TÃ©cnicas**
+- [ ] MigraciÃ³n a PostgreSQL
+- [ ] ImplementaciÃ³n de Redis para cache
+- [ ] Microservicios con Docker
+- [ ] CI/CD con GitHub Actions
+- [ ] Tests automatizados completos
+- [ ] DocumentaciÃ³n con Sphinx
 
 ---
 
-## 🆘 **Soporte y Comunidad**
+## ðŸ¤ **CONTRIBUCIONES**
 
-### **📚 Recursos de Ayuda**
+### **1. CÃ³mo Contribuir**
+1. Fork del repositorio
+2. Crear rama para feature: \git checkout -b feature/nueva-funcionalidad\
+3. Hacer cambios y commits
+4. Push a la rama: \git push origin feature/nueva-funcionalidad\
+5. Crear Pull Request
 
-- **📖 Documentación**: [docs/](docs/) - Documentación completa
-- **🐛 Issues**: [GitHub Issues](https://github.com/buurguees/bot_trading_v10/issues) - Reportar bugs
-- **💬 Discusiones**: [GitHub Discussions](https://github.com/buurguees/bot_trading_v10/discussions) - Preguntas y debates
-- **📧 Email**: support@tradingbotv10.com - Soporte directo
+### **2. EstÃ¡ndares de CÃ³digo**
+- **Python**: PEP 8
+- **DocumentaciÃ³n**: Docstrings en inglÃ©s
+- **Commits**: Mensajes descriptivos
+- **Tests**: Cobertura >80%
 
-### **🎯 Roadmap**
-
-#### **Fase 4 - Q1 2025**
-- [ ] Dashboards de Grafana avanzados
-- [ ] Integración con más exchanges
-- [ ] Sistema de alertas inteligentes
-- [ ] Optimización de rendimiento
-
-#### **Fase 5 - Q2 2025**
-- [ ] Estrategias de arbitraje
-- [ ] Trading de opciones
-- [ ] IA generativa para estrategias
-- [ ] Mobile app
-
-#### **Fase 6 - Q3 2025**
-- [ ] Trading social
-- [ ] Marketplace de estrategias
-- [ ] API pública
-- [ ] White-label solution
+### **3. Reportar Issues**
+- Usar templates de GitHub
+- Incluir logs y configuraciÃ³n
+- Describir pasos para reproducir
+- Especificar versiÃ³n y OS
 
 ---
 
-## 🏆 **Reconocimientos**
+## ðŸ“ž **SOPORTE Y CONTACTO**
 
-- **PyTorch Team** - Framework de machine learning
-- **FastAPI Team** - Framework web de alto rendimiento
-- **TimescaleDB Team** - Base de datos de series temporales
-- **Prometheus Team** - Sistema de monitoreo
-- **Kubernetes Team** - Orquestación de contenedores
+### **1. Soporte TÃ©cnico**
+- **GitHub Issues**: Para bugs y features
+- **Discord**: Para soporte en tiempo real
+- **Email**: support@tradingbot.com
+- **Telegram**: @TradingBotSupport
+
+### **2. DocumentaciÃ³n**
+- **Wiki**: https://github.com/tradingbot/wiki
+- **API Docs**: https://api.tradingbot.com/docs
+- **Video Tutorials**: https://youtube.com/tradingbot
+
+### **3. Comunidad**
+- **Discord**: https://discord.gg/tradingbot
+- **Reddit**: https://reddit.com/r/tradingbot
+- **Twitter**: https://twitter.com/tradingbot
 
 ---
 
-<div align="center">
+## ðŸ“„ **LICENCIA**
 
-**Bot Trading v10 Enterprise** - *Trading inteligente para el futuro* 🚀
+Este proyecto estÃ¡ licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
-[![GitHub stars](https://img.shields.io/github/stars/buurguees/bot_trading_v10?style=social)](https://github.com/buurguees/bot_trading_v10)
-[![GitHub forks](https://img.shields.io/github/forks/buurguees/bot_trading_v10?style=social)](https://github.com/buurguees/bot_trading_v10)
-[![GitHub watchers](https://img.shields.io/github/watchers/buurguees/bot_trading_v10?style=social)](https://github.com/buurguees/bot_trading_v10)
+---
 
-*Desarrollado con ❤️ para la comunidad de trading*
+## ðŸ™ **AGRADECIMIENTOS**
 
-</div>
+- **Bitget** por la API de trading
+- **Telegram** por la plataforma de bots
+- **PyTorch** por el framework de ML
+- **Pandas** por el anÃ¡lisis de datos
+- **Comunidad** por el feedback y contribuciones
+
+---
+
+## ðŸ“Š **ESTADÃSTICAS DEL PROYECTO**
+
+- **LÃ­neas de cÃ³digo**: 50,000+
+- **Archivos Python**: 200+
+- **MÃ³dulos**: 15+
+- **Tests**: 100+
+- **DocumentaciÃ³n**: 20+ archivos MD
+- **Tiempo de desarrollo**: 6+ meses
+- **Versiones**: 10.0.0
+
+---
+
+## ðŸŽ¯ **CONCLUSIÃ“N**
+
+El **Bot Trading v10 Enterprise** representa la evoluciÃ³n completa de un sistema de trading automatizado, combinando:
+
+- **ðŸ¤– IA Avanzada** para toma de decisiones inteligentes
+- **ðŸ“± Control Total** via Telegram desde cualquier lugar
+- **ðŸ¢ Arquitectura Enterprise** para escalabilidad y confiabilidad
+- **ðŸ”§ Mantenibilidad** con cÃ³digo limpio y documentado
+- **ðŸ“Š Monitoreo Completo** para transparencia total
+
+Con esta reestructuraciÃ³n, el bot estÃ¡ listo para:
+- **Trading profesional** con gestiÃ³n de riesgo avanzada
+- **Escalabilidad** para manejar mÃºltiples estrategias
+- **Mantenimiento** fÃ¡cil y actualizaciones sin problemas
+- **Extensibilidad** para nuevas funcionalidades
+
+**Â¡El futuro del trading automatizado estÃ¡ aquÃ­!** ðŸš€
+
+---
+
+*Ãšltima actualizaciÃ³n: Diciembre 2024*  
+*VersiÃ³n: 10.0.0*  
+*Autor: Bot Trading v10 Enterprise Team*

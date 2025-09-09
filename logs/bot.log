@@ -1369,3 +1369,2285 @@ Traceback (most recent call last):
   File "C:\Python313\Lib\asyncio\queues.py", line 186, in get
     await getter
 asyncio.exceptions.CancelledError
+2025-09-09 19:56:00,635 - __main__ - INFO - 🤖 Bot de Trading v10 Enterprise inicializado
+2025-09-09 19:56:00,637 - __main__ - INFO - 🚀 Iniciando Bot de Trading v10 Enterprise...
+2025-09-09 19:56:00,637 - __main__ - INFO - 🔧 Inicializando componentes...
+2025-09-09 19:56:00,643 - notifications.telegram.handlers - INFO - ✅ Handlers inicializados correctamente
+2025-09-09 19:56:00,643 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 19:56:02,968 - src.core.trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 19:56:02,968 - src.core.trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 19:56:06,082 - trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 19:56:06,082 - trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 19:56:17,202 - data.database - INFO - Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe
+2025-09-09 19:56:17,203 - data.database - WARNING - Error creando índice: no such column: strategy_name
+2025-09-09 19:56:17,203 - data.database - WARNING - Error creando índice: no such column: symbol
+2025-09-09 19:56:17,203 - data.database - WARNING - Error creando índice: no such column: alignment_session_id
+2025-09-09 19:56:17,204 - data.database - WARNING - Error creando índice: no such column: coherence_score
+2025-09-09 19:56:17,204 - data.database - INFO - Índices optimizados creados
+2025-09-09 19:56:17,204 - data.database - INFO - DatabaseManager inicializado: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-09 19:56:17,204 - data.database - INFO - Tamaño de BD: 66.8 MB
+2025-09-09 19:56:18,432 - notifications.telegram.metrics_sender - ERROR - ❌ Error inicializando componentes: 'ConfigLoader' object has no attribute 'get_ai_model_settings'
+2025-09-09 19:56:18,433 - notifications.telegram.metrics_sender - INFO - 📊 MetricsSender inicializado
+2025-09-09 19:56:18,433 - notifications.telegram.handlers - INFO - ✅ Controlador establecido en Handlers
+2025-09-09 19:56:18,434 - notifications.telegram.telegram_bot - INFO - ✅ Controlador establecido en TelegramBot
+2025-09-09 19:56:18,434 - __main__ - INFO - ✅ Bot de Telegram inicializado
+2025-09-09 19:56:19,256 - __main__ - INFO - ✅ Dashboard simple inicializado
+2025-09-09 19:56:19,256 - __main__ - INFO - ✅ Componentes inicializados correctamente
+2025-09-09 19:56:19,256 - __main__ - INFO - ✅ Bot de Telegram iniciado
+2025-09-09 19:56:20,306 - notifications.telegram.telegram_bot - INFO - 🚀 Iniciando bot de Telegram...
+2025-09-09 19:56:21,221 - notifications.telegram.telegram_bot - INFO - ✅ Handlers configurados correctamente
+2025-09-09 19:56:21,221 - notifications.telegram.telegram_bot - INFO - ✅ Bot de Telegram iniciado correctamente
+2025-09-09 19:56:21,221 - notifications.telegram.telegram_bot - INFO - 📱 Chat ID autorizado: 937027893
+2025-09-09 19:56:21,222 - notifications.telegram.metrics_sender - INFO - 📊 Iniciando envío de métricas cada 300 segundos
+2025-09-09 19:56:22,137 - notifications.telegram.metrics_sender - INFO - 🚨 Iniciando monitoreo de alertas
+2025-09-09 19:56:22,349 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 📊 <b>Métricas del Sistema</b>
+⏰ 19:56:21
+
+💰 <b>Bal...
+2025-09-09 19:56:22,350 - notifications.telegram.metrics_sender - INFO - 📤 Métricas enviadas correctamente
+2025-09-09 19:56:22,386 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 
+🚀 <b>Bot de Trading v10 Enterprise - OPERATIVO</b...
+2025-09-09 19:56:22,388 - __main__ - INFO - 📱 Mensaje de inicio enviado a Telegram
+2025-09-09 19:56:22,388 - __main__ - INFO - ✅ Sistema iniciado completamente
+2025-09-09 19:57:12,695 - __main__ - INFO - 🤖 Bot de Trading v10 Enterprise inicializado
+2025-09-09 19:57:12,696 - __main__ - INFO - 🚀 Iniciando Bot de Trading v10 Enterprise...
+2025-09-09 19:57:12,697 - __main__ - INFO - 🔧 Inicializando componentes...
+2025-09-09 19:57:12,703 - notifications.telegram.handlers - INFO - ✅ Handlers inicializados correctamente
+2025-09-09 19:57:12,703 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 19:57:14,228 - src.core.trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 19:57:14,228 - src.core.trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 19:57:14,867 - trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 19:57:14,867 - trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 19:57:18,836 - data.database - INFO - Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe
+2025-09-09 19:57:18,837 - data.database - WARNING - Error creando índice: no such column: strategy_name
+2025-09-09 19:57:18,837 - data.database - WARNING - Error creando índice: no such column: symbol
+2025-09-09 19:57:18,837 - data.database - WARNING - Error creando índice: no such column: alignment_session_id
+2025-09-09 19:57:18,838 - data.database - WARNING - Error creando índice: no such column: coherence_score
+2025-09-09 19:57:18,838 - data.database - INFO - Índices optimizados creados
+2025-09-09 19:57:18,838 - data.database - INFO - DatabaseManager inicializado: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-09 19:57:18,838 - data.database - INFO - Tamaño de BD: 66.8 MB
+2025-09-09 19:57:18,997 - notifications.telegram.metrics_sender - ERROR - ❌ Error inicializando componentes: 'ConfigLoader' object has no attribute 'get_ai_model_settings'
+2025-09-09 19:57:18,997 - notifications.telegram.metrics_sender - INFO - 📊 MetricsSender inicializado
+2025-09-09 19:57:18,997 - notifications.telegram.handlers - INFO - ✅ Controlador establecido en Handlers
+2025-09-09 19:57:18,998 - notifications.telegram.telegram_bot - INFO - ✅ Controlador establecido en TelegramBot
+2025-09-09 19:57:18,998 - __main__ - INFO - ✅ Bot de Telegram inicializado
+2025-09-09 19:57:19,578 - __main__ - INFO - ✅ Dashboard simple inicializado
+2025-09-09 19:57:19,578 - __main__ - INFO - ✅ Componentes inicializados correctamente
+2025-09-09 19:57:19,579 - __main__ - INFO - ✅ Bot de Telegram iniciado
+2025-09-09 19:57:20,600 - notifications.telegram.telegram_bot - INFO - 🚀 Iniciando bot de Telegram...
+2025-09-09 19:57:21,572 - notifications.telegram.telegram_bot - INFO - ✅ Handlers configurados correctamente
+2025-09-09 19:57:21,572 - notifications.telegram.telegram_bot - INFO - ✅ Bot de Telegram iniciado correctamente
+2025-09-09 19:57:21,573 - notifications.telegram.telegram_bot - INFO - 📱 Chat ID autorizado: 937027893
+2025-09-09 19:57:21,573 - notifications.telegram.metrics_sender - INFO - 📊 Iniciando envío de métricas cada 300 segundos
+2025-09-09 19:57:22,504 - notifications.telegram.metrics_sender - INFO - 🚨 Iniciando monitoreo de alertas
+2025-09-09 19:57:22,707 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 
+🚀 <b>Bot de Trading v10 Enterprise - OPERATIVO</b...
+2025-09-09 19:57:22,709 - __main__ - INFO - 📱 Mensaje de inicio enviado a Telegram
+2025-09-09 19:57:22,709 - __main__ - INFO - ✅ Sistema iniciado completamente
+2025-09-09 19:57:22,741 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 📊 <b>Métricas del Sistema</b>
+⏰ 19:57:21
+
+💰 <b>Bal...
+2025-09-09 19:57:22,743 - notifications.telegram.metrics_sender - INFO - 📤 Métricas enviadas correctamente
+2025-09-09 19:57:22,850 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:57:27,011 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:57:28,072 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:57:32,639 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:57:34,204 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:57:39,521 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:57:41,791 - __main__ - INFO - 🎮 Procesando comando: inspect_history
+2025-09-09 19:57:41,791 - __main__ - INFO - 🎮 Ejecutando comando: inspect_history
+2025-09-09 19:57:41,792 - __main__ - INFO - 🚀 Ejecutando comando: python scripts\history\inspect_history.py
+2025-09-09 19:57:41,833 - __main__ - INFO - 🎮 Procesando comando: inspect_history
+2025-09-09 19:57:41,834 - __main__ - INFO - 🎮 Ejecutando comando: inspect_history
+2025-09-09 19:57:41,834 - __main__ - INFO - 🚀 Ejecutando comando: python scripts\history\inspect_history.py
+2025-09-09 19:57:43,464 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:57:43,484 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 19:57:43,565 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 19:57:44,934 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): ✅ <b>Inspección de Historial Iniciado</b>
+
+• PID: ...
+2025-09-09 19:57:45,078 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): ✅ <b>Inspección de Historial Iniciado</b>
+
+• PID: ...
+2025-09-09 19:57:46,265 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 19:57:46,381 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 19:57:47,719 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 Traceback (most recent call last):
+📊 File "C:\Us...
+2025-09-09 19:57:47,785 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:57:47,816 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 Traceback (most recent call last):
+📊 File "C:\Us...
+2025-09-09 19:57:49,053 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:57:49,116 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 19:57:49,153 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 19:57:50,630 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 File "C:\Users\Alex B\Desktop\bot_trading_v9\bot...
+2025-09-09 19:57:50,692 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 File "C:\Users\Alex B\Desktop\bot_trading_v9\bot...
+2025-09-09 19:57:52,002 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 19:57:52,076 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 19:57:53,423 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): ❌ <b>Inspección de Historial Falló</b>
+
+• Código d...
+2025-09-09 19:57:53,424 - __main__ - INFO - ✅ Comando Inspección de Historial completado
+2025-09-09 19:57:53,499 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): ❌ <b>Inspección de Historial Falló</b>
+
+• Código d...
+2025-09-09 19:57:53,499 - __main__ - INFO - ✅ Comando Inspección de Historial completado
+2025-09-09 19:57:53,617 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:57:55,187 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:58:00,501 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:58:02,820 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:58:06,254 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:58:09,697 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:58:14,917 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:58:20,145 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:58:27,892 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:58:35,653 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:58:47,210 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:58:51,264 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:59:08,512 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:59:12,573 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 19:59:25,288 - __main__ - INFO - 🛑 Señal de interrupción recibida
+2025-09-09 19:59:25,288 - __main__ - INFO - 🛑 Apagando sistema...
+2025-09-09 19:59:25,288 - notifications.telegram.telegram_bot - INFO - 🛑 Bot de Telegram detenido
+2025-09-09 19:59:25,289 - __main__ - INFO - ✅ Sistema apagado correctamente
+2025-09-09 19:59:25,289 - telegram.ext.Application - CRITICAL - Fetching updates was aborted due to CancelledError(). Suppressing exception to ensure graceful shutdown.
+Traceback (most recent call last):
+  File "C:\Python313\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 707, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 678, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 1995, in _run_once
+    event_list = self._selector.select(timeout)
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 446, in select
+    self._poll(timeout)
+    ~~~~~~~~~~^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 775, in _poll
+    status = _overlapped.GetQueuedCompletionStatus(self._iocp, ms)
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\bot.py", line 1421, in signal_handler
+    sys.exit(0)
+    ~~~~~~~~^^^
+SystemExit: 0
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 673, in stop
+    self.__update_fetcher_task.result()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1228, in _update_fetcher
+    await self.__update_fetcher()
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1207, in __update_fetcher
+    update = await self.update_queue.get()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\queues.py", line 186, in get
+    await getter
+asyncio.exceptions.CancelledError
+2025-09-09 20:01:23,530 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 📊 <b>Métricas del Sistema</b>
+⏰ 20:01:22
+
+💰 <b>Bal...
+2025-09-09 20:01:23,532 - notifications.telegram.metrics_sender - INFO - 📤 Métricas enviadas correctamente
+2025-09-09 20:02:15,895 - __main__ - INFO - 🛑 Señal de interrupción recibida
+2025-09-09 20:02:15,896 - __main__ - INFO - 🛑 Apagando sistema...
+2025-09-09 20:02:15,897 - notifications.telegram.telegram_bot - INFO - 🛑 Bot de Telegram detenido
+2025-09-09 20:02:15,897 - __main__ - INFO - ✅ Sistema apagado correctamente
+2025-09-09 20:02:15,917 - __main__ - INFO - 🛑 Señal de interrupción recibida
+2025-09-09 20:02:15,917 - asyncio - ERROR - Task was destroyed but it is pending!
+task: <Task pending name='Task-79' coro=<TradingBotController.shutdown() running at C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\bot.py:352>>
+2025-09-09 20:02:16,084 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-78' coro=<Application.stop() done, defined at C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py:639> exception=SystemExit(0)>
+Traceback (most recent call last):
+  File "C:\Python313\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 707, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 678, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 1995, in _run_once
+    event_list = self._selector.select(timeout)
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 446, in select
+    self._poll(timeout)
+    ~~~~~~~~~~^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 775, in _poll
+    status = _overlapped.GetQueuedCompletionStatus(self._iocp, ms)
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\bot.py", line 1421, in signal_handler
+    sys.exit(0)
+    ~~~~~~~~^^^
+SystemExit: 0
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 673, in stop
+    self.__update_fetcher_task.result()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1228, in _update_fetcher
+    await self.__update_fetcher()
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1207, in __update_fetcher
+    update = await self.update_queue.get()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\queues.py", line 186, in get
+    await getter
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\bot.py", line 1436, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\bot.py", line 1427, in main
+    asyncio.run(bot.run())
+    ~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\runners.py", line 193, in run
+    with Runner(debug=debug, loop_factory=loop_factory) as runner:
+         ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\runners.py", line 62, in __exit__
+    self.close()
+    ~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\runners.py", line 70, in close
+    _cancel_all_tasks(loop)
+    ~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\runners.py", line 205, in _cancel_all_tasks
+    loop.run_until_complete(tasks.gather(*to_cancel, return_exceptions=True))
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 707, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 678, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 2033, in _run_once
+    handle._run()
+    ~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 675, in stop
+    _LOGGER.critical(
+    ~~~~~~~~~~~~~~~~^
+        "Fetching updates was aborted due to %r. Suppressing "
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        exc_info=True,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Python313\Lib\logging\__init__.py", line 1566, in critical
+    self._log(CRITICAL, msg, args, **kwargs)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\logging\__init__.py", line 1664, in _log
+    self.handle(record)
+    ~~~~~~~~~~~^^^^^^^^
+  File "C:\Python313\Lib\logging\__init__.py", line 1680, in handle
+    self.callHandlers(record)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Python313\Lib\logging\__init__.py", line 1736, in callHandlers
+    hdlr.handle(record)
+    ~~~~~~~~~~~^^^^^^^^
+  File "C:\Python313\Lib\logging\__init__.py", line 1026, in handle
+    self.emit(record)
+    ~~~~~~~~~^^^^^^^^
+  File "C:\Python313\Lib\logging\__init__.py", line 1150, in emit
+    msg = self.format(record)
+  File "C:\Python313\Lib\logging\__init__.py", line 998, in format
+    return fmt.format(record)
+           ~~~~~~~~~~^^^^^^^^
+  File "C:\Python313\Lib\logging\__init__.py", line 719, in format
+    record.exc_text = self.formatException(record.exc_info)
+                      ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\logging\__init__.py", line 669, in formatException
+    traceback.print_exception(ei[0], ei[1], tb, limit=None, file=sio)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\traceback.py", line 130, in print_exception
+    te.print(file=file, chain=chain, colorize=colorize)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\traceback.py", line 1454, in print
+    for line in self.format(chain=chain, colorize=colorize):
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\traceback.py", line 1390, in format
+    yield from _ctx.emit(exc.stack.format(colorize=colorize))
+                         ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\traceback.py", line 749, in format
+    formatted_frame = self.format_frame_summary(frame_summary, colorize=colorize)
+  File "C:\Python313\Lib\traceback.py", line 541, in format_frame_summary
+    if frame_summary._dedented_lines and frame_summary._dedented_lines.strip():
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\traceback.py", line 364, in _dedented_lines
+    self._lines_dedented = textwrap.dedent(self._lines)
+                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python313\Lib\textwrap.py", line 466, in dedent
+    text = re.sub(r'(?m)^' + margin, '', text)
+  File "C:\Python313\Lib\re\__init__.py", line 183, in sub
+    def sub(pattern, repl, string, *args, count=_zero_sentinel, flags=_zero_sentinel):
+    
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\bot.py", line 1421, in signal_handler
+    sys.exit(0)
+    ~~~~~~~~^^^
+SystemExit: 0
+2025-09-09 20:22:18,242 - __main__ - INFO - 🤖 Bot de Trading v10 Enterprise inicializado
+2025-09-09 20:22:18,244 - __main__ - INFO - 🚀 Iniciando Bot de Trading v10 Enterprise...
+2025-09-09 20:22:18,244 - __main__ - INFO - 🔧 Inicializando componentes...
+2025-09-09 20:22:18,252 - notifications.telegram.handlers - INFO - ✅ Handlers inicializados correctamente
+2025-09-09 20:22:18,252 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 20:22:20,426 - src.core.trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 20:22:20,427 - src.core.trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 20:22:21,129 - trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 20:22:21,129 - trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 20:22:25,429 - data.database - INFO - Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe
+2025-09-09 20:22:25,430 - data.database - WARNING - Error creando índice: no such column: strategy_name
+2025-09-09 20:22:25,430 - data.database - WARNING - Error creando índice: no such column: symbol
+2025-09-09 20:22:25,430 - data.database - WARNING - Error creando índice: no such column: alignment_session_id
+2025-09-09 20:22:25,431 - data.database - WARNING - Error creando índice: no such column: coherence_score
+2025-09-09 20:22:25,431 - data.database - INFO - Índices optimizados creados
+2025-09-09 20:22:25,431 - data.database - INFO - DatabaseManager inicializado: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-09 20:22:25,431 - data.database - INFO - Tamaño de BD: 66.8 MB
+2025-09-09 20:22:25,675 - notifications.telegram.metrics_sender - ERROR - ❌ Error inicializando componentes: 'ConfigLoader' object has no attribute 'get_ai_model_settings'
+2025-09-09 20:22:25,676 - notifications.telegram.metrics_sender - INFO - 📊 MetricsSender inicializado
+2025-09-09 20:22:25,676 - notifications.telegram.handlers - INFO - ✅ Controlador establecido en Handlers
+2025-09-09 20:22:25,677 - notifications.telegram.telegram_bot - INFO - ✅ Controlador establecido en TelegramBot
+2025-09-09 20:22:25,677 - __main__ - INFO - ✅ Bot de Telegram inicializado
+2025-09-09 20:22:26,426 - __main__ - INFO - ✅ Dashboard simple inicializado
+2025-09-09 20:22:26,427 - __main__ - INFO - ✅ Componentes inicializados correctamente
+2025-09-09 20:22:26,427 - __main__ - INFO - ✅ Bot de Telegram iniciado
+2025-09-09 20:22:27,602 - notifications.telegram.telegram_bot - INFO - 🚀 Iniciando bot de Telegram...
+2025-09-09 20:22:28,578 - notifications.telegram.telegram_bot - INFO - ✅ Handlers configurados correctamente
+2025-09-09 20:22:28,578 - notifications.telegram.telegram_bot - INFO - ✅ Bot de Telegram iniciado correctamente
+2025-09-09 20:22:28,578 - notifications.telegram.telegram_bot - INFO - 📱 Chat ID autorizado: 937027893
+2025-09-09 20:22:28,579 - notifications.telegram.metrics_sender - INFO - 📊 Iniciando envío de métricas cada 300 segundos
+2025-09-09 20:22:29,536 - notifications.telegram.metrics_sender - INFO - 🚨 Iniciando monitoreo de alertas
+2025-09-09 20:22:29,881 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 📊 <b>Métricas del Sistema</b>
+⏰ 20:22:28
+
+💰 <b>Bal...
+2025-09-09 20:22:29,883 - notifications.telegram.metrics_sender - INFO - 📤 Métricas enviadas correctamente
+2025-09-09 20:22:29,938 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 
+🚀 <b>Bot de Trading v10 Enterprise - OPERATIVO</b...
+2025-09-09 20:22:29,940 - __main__ - INFO - 📱 Mensaje de inicio enviado a Telegram
+2025-09-09 20:22:29,940 - __main__ - INFO - ✅ Sistema iniciado completamente
+2025-09-09 20:22:38,369 - __main__ - INFO - 🎮 Procesando comando: inspect_history
+2025-09-09 20:22:38,370 - __main__ - INFO - 🎮 Ejecutando comando: inspect_history
+2025-09-09 20:22:38,370 - __main__ - INFO - 🚀 Ejecutando comando: python scripts\history\inspect_history.py
+2025-09-09 20:22:39,482 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:22:40,597 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): ✅ <b>Inspección de Historial Iniciado</b>
+
+• PID: ...
+2025-09-09 20:22:41,692 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:22:43,025 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 --- Logging error ---
+📊 Traceback (most recent c...
+2025-09-09 20:22:44,072 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:22:45,174 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 FileNotFoundError: [Errno 2] No such file or dir...
+2025-09-09 20:22:46,444 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:22:47,529 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+📊 File "C:\P...
+2025-09-09 20:22:48,605 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:22:49,804 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 Call stack:
+📊 File "C:\Users\Alex B\Desktop\bot_...
+2025-09-09 20:22:50,849 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:22:51,967 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 File "C:\Python313\Lib\asyncio\runners.py", line...
+2025-09-09 20:22:53,023 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:22:54,114 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 self._run_once()
+📊 File "C:\Python313\Lib\asynci...
+2025-09-09 20:22:55,173 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:22:56,272 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 File "C:\Users\Alex B\Desktop\bot_trading_v9\bot...
+2025-09-09 20:22:57,360 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:22:58,731 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 logger.error(f"\u274c Error cargando configuraci...
+2025-09-09 20:22:59,826 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:01,070 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 Traceback (most recent call last):
+📊 File "C:\Py...
+2025-09-09 20:23:02,113 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:03,238 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 return codecs.charmap_encode(input,self.errors,e...
+2025-09-09 20:23:04,287 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:05,551 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 asyncio.run(main())
+📊 File "C:\Python313\Lib\asy...
+2025-09-09 20:23:06,643 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:07,817 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 File "C:\Python313\Lib\asyncio\base_events.py", ...
+2025-09-09 20:23:08,892 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:10,311 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 handle._run()
+📊 File "C:\Python313\Lib\asyncio\e...
+2025-09-09 20:23:11,826 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:13,171 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 File "C:\Users\Alex B\Desktop\bot_trading_v9\bot...
+2025-09-09 20:23:14,261 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:15,431 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 --- Logging error ---
+📊 Traceback (most recent c...
+2025-09-09 20:23:16,478 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:17,605 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 File "C:\Python313\Lib\encodings\cp1252.py", lin...
+2025-09-09 20:23:18,648 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:19,866 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 File "C:\Users\Alex B\Desktop\bot_trading_v9\bot...
+2025-09-09 20:23:20,927 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:22,048 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 return self._loop.run_until_complete(task)
+📊 Fil...
+2025-09-09 20:23:23,130 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:24,376 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 File "C:\Python313\Lib\asyncio\base_events.py", ...
+2025-09-09 20:23:25,448 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:26,595 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 await inspector.inspect_all_historical_data()
+📊 ...
+2025-09-09 20:23:27,684 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:23:28,806 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 2025-09-09 20:22:39,334 - __main__ - INFO - \u27...
+2025-09-09 20:23:28,807 - __main__ - INFO - ✅ Comando Inspección de Historial completado
+2025-09-09 20:27:31,199 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 📊 <b>Métricas del Sistema</b>
+⏰ 20:27:29
+
+💰 <b>Bal...
+2025-09-09 20:27:31,201 - notifications.telegram.metrics_sender - INFO - 📤 Métricas enviadas correctamente
+2025-09-09 20:27:40,212 - __main__ - INFO - 🛑 Señal de interrupción recibida
+2025-09-09 20:27:40,213 - __main__ - INFO - 🛑 Apagando sistema...
+2025-09-09 20:27:40,213 - notifications.telegram.telegram_bot - INFO - 🛑 Bot de Telegram detenido
+2025-09-09 20:27:40,213 - __main__ - INFO - ✅ Sistema apagado correctamente
+2025-09-09 20:27:40,214 - telegram.ext.Application - CRITICAL - Fetching updates was aborted due to CancelledError(). Suppressing exception to ensure graceful shutdown.
+Traceback (most recent call last):
+  File "C:\Python313\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 707, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 678, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 1995, in _run_once
+    event_list = self._selector.select(timeout)
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 446, in select
+    self._poll(timeout)
+    ~~~~~~~~~~^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 775, in _poll
+    status = _overlapped.GetQueuedCompletionStatus(self._iocp, ms)
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\bot.py", line 1421, in signal_handler
+    sys.exit(0)
+    ~~~~~~~~^^^
+SystemExit: 0
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 673, in stop
+    self.__update_fetcher_task.result()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1228, in _update_fetcher
+    await self.__update_fetcher()
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1207, in __update_fetcher
+    update = await self.update_queue.get()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\queues.py", line 186, in get
+    await getter
+asyncio.exceptions.CancelledError
+2025-09-09 20:38:44,309 - __main__ - INFO - 🤖 Bot de Trading v10 Enterprise inicializado
+2025-09-09 20:38:44,310 - __main__ - INFO - 🚀 Iniciando Bot de Trading v10 Enterprise...
+2025-09-09 20:38:44,311 - __main__ - INFO - 🔧 Inicializando componentes...
+2025-09-09 20:38:44,317 - notifications.telegram.handlers - INFO - ✅ Handlers inicializados correctamente
+2025-09-09 20:38:44,318 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 20:38:46,016 - src.core.trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 20:38:46,016 - src.core.trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 20:38:46,430 - __main__ - INFO - 🤖 Bot de Trading v10 Enterprise inicializado
+2025-09-09 20:38:46,432 - __main__ - INFO - 🚀 Iniciando Bot de Trading v10 Enterprise...
+2025-09-09 20:38:46,432 - __main__ - INFO - 🔧 Inicializando componentes...
+2025-09-09 20:38:46,438 - notifications.telegram.handlers - INFO - ✅ Handlers inicializados correctamente
+2025-09-09 20:38:46,439 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 20:38:46,797 - trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 20:38:46,797 - trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 20:38:48,492 - src.core.trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 20:38:48,492 - src.core.trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 20:38:49,200 - trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 20:38:49,200 - trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 20:38:51,971 - data.database - INFO - Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe
+2025-09-09 20:38:51,972 - data.database - WARNING - Error creando índice: no such column: strategy_name
+2025-09-09 20:38:51,972 - data.database - WARNING - Error creando índice: no such column: symbol
+2025-09-09 20:38:51,973 - data.database - WARNING - Error creando índice: no such column: alignment_session_id
+2025-09-09 20:38:51,973 - data.database - WARNING - Error creando índice: no such column: coherence_score
+2025-09-09 20:38:51,973 - data.database - INFO - Índices optimizados creados
+2025-09-09 20:38:51,974 - data.database - INFO - DatabaseManager inicializado: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-09 20:38:51,974 - data.database - INFO - Tamaño de BD: 66.8 MB
+2025-09-09 20:38:52,205 - notifications.telegram.metrics_sender - ERROR - ❌ Error inicializando componentes: 'ConfigLoader' object has no attribute 'get_ai_model_settings'
+2025-09-09 20:38:52,205 - notifications.telegram.metrics_sender - INFO - 📊 MetricsSender inicializado
+2025-09-09 20:38:52,205 - notifications.telegram.handlers - INFO - ✅ Controlador establecido en Handlers
+2025-09-09 20:38:52,206 - notifications.telegram.telegram_bot - INFO - ✅ Controlador establecido en TelegramBot
+2025-09-09 20:38:52,206 - __main__ - INFO - ✅ Bot de Telegram inicializado
+2025-09-09 20:38:52,973 - __main__ - INFO - ✅ Dashboard simple inicializado
+2025-09-09 20:38:52,973 - __main__ - INFO - ✅ Componentes inicializados correctamente
+2025-09-09 20:38:52,974 - __main__ - INFO - ✅ Bot de Telegram iniciado
+2025-09-09 20:38:54,060 - notifications.telegram.telegram_bot - INFO - 🚀 Iniciando bot de Telegram...
+2025-09-09 20:38:54,132 - data.database - INFO - Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe
+2025-09-09 20:38:54,133 - data.database - WARNING - Error creando índice: no such column: strategy_name
+2025-09-09 20:38:54,133 - data.database - WARNING - Error creando índice: no such column: symbol
+2025-09-09 20:38:54,133 - data.database - WARNING - Error creando índice: no such column: alignment_session_id
+2025-09-09 20:38:54,134 - data.database - WARNING - Error creando índice: no such column: coherence_score
+2025-09-09 20:38:54,134 - data.database - INFO - Índices optimizados creados
+2025-09-09 20:38:54,134 - data.database - INFO - DatabaseManager inicializado: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-09 20:38:54,135 - data.database - INFO - Tamaño de BD: 66.8 MB
+2025-09-09 20:38:54,308 - notifications.telegram.metrics_sender - ERROR - ❌ Error inicializando componentes: 'ConfigLoader' object has no attribute 'get_ai_model_settings'
+2025-09-09 20:38:54,308 - notifications.telegram.metrics_sender - INFO - 📊 MetricsSender inicializado
+2025-09-09 20:38:54,308 - notifications.telegram.handlers - INFO - ✅ Controlador establecido en Handlers
+2025-09-09 20:38:54,309 - notifications.telegram.telegram_bot - INFO - ✅ Controlador establecido en TelegramBot
+2025-09-09 20:38:54,309 - __main__ - INFO - ✅ Bot de Telegram inicializado
+2025-09-09 20:38:54,923 - __main__ - INFO - ✅ Dashboard simple inicializado
+2025-09-09 20:38:54,923 - __main__ - INFO - ✅ Componentes inicializados correctamente
+2025-09-09 20:38:54,924 - __main__ - INFO - ✅ Bot de Telegram iniciado
+2025-09-09 20:38:55,017 - notifications.telegram.telegram_bot - INFO - ✅ Handlers configurados correctamente
+2025-09-09 20:38:55,017 - notifications.telegram.telegram_bot - INFO - ✅ Bot de Telegram iniciado correctamente
+2025-09-09 20:38:55,017 - notifications.telegram.telegram_bot - INFO - 📱 Chat ID autorizado: 937027893
+2025-09-09 20:38:55,229 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 
+🚀 <b>Bot de Trading v10 Enterprise - OPERATIVO</b...
+2025-09-09 20:38:55,231 - __main__ - INFO - 📱 Mensaje de inicio enviado a Telegram
+2025-09-09 20:38:55,231 - __main__ - INFO - ✅ Sistema iniciado completamente
+2025-09-09 20:38:55,977 - notifications.telegram.telegram_bot - INFO - 🚀 Iniciando bot de Telegram...
+2025-09-09 20:38:56,931 - notifications.telegram.telegram_bot - INFO - ✅ Handlers configurados correctamente
+2025-09-09 20:38:56,931 - notifications.telegram.telegram_bot - INFO - ✅ Bot de Telegram iniciado correctamente
+2025-09-09 20:38:56,932 - notifications.telegram.telegram_bot - INFO - 📱 Chat ID autorizado: 937027893
+2025-09-09 20:38:57,131 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 
+🚀 <b>Bot de Trading v10 Enterprise - OPERATIVO</b...
+2025-09-09 20:38:57,132 - __main__ - INFO - 📱 Mensaje de inicio enviado a Telegram
+2025-09-09 20:38:57,133 - __main__ - INFO - ✅ Sistema iniciado completamente
+2025-09-09 20:38:57,282 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 20:39:01,341 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 20:39:02,415 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 20:39:02,982 - __main__ - INFO - 🎮 Procesando comando: inspect_history
+2025-09-09 20:39:02,983 - __main__ - INFO - 🎮 Ejecutando comando: inspect_history
+2025-09-09 20:39:02,983 - __main__ - INFO - 🚀 Ejecutando comando: python scripts\history\inspect_history.py
+2025-09-09 20:39:03,979 - __main__ - INFO - 🎮 Procesando comando: inspect_history
+2025-09-09 20:39:03,980 - __main__ - INFO - 🎮 Ejecutando comando: inspect_history
+2025-09-09 20:39:03,980 - __main__ - INFO - 🚀 Ejecutando comando: python scripts\history\inspect_history.py
+2025-09-09 20:39:04,090 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:39:05,263 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:39:05,427 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): ✅ <b>Inspección de Historial Iniciado</b>
+
+• PID: ...
+2025-09-09 20:39:06,673 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): ✅ <b>Inspección de Historial Iniciado</b>
+
+• PID: ...
+2025-09-09 20:39:06,742 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:39:07,991 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 20:39:08,128 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 2025-09-09 20:39:03,977 - __main__ - INFO - \U00...
+2025-09-09 20:39:08,128 - __main__ - INFO - ✅ Comando Inspección de Historial completado
+2025-09-09 20:39:08,164 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 20:39:09,092 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado (sin formato): 📊 2025-09-09 20:39:05,015 - __main__ - INFO - \U00...
+2025-09-09 20:39:09,092 - __main__ - INFO - ✅ Comando Inspección de Historial completado
+2025-09-09 20:39:09,232 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 20:39:13,288 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 20:39:14,855 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 20:39:19,421 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 20:39:21,739 - telegram.ext.Updater - ERROR - Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_utils\networkloop.py", line 108, in do_action
+    return action_cb_task.result()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 670, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 4611, in get_updates
+    await self._post(
+    ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    ),
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-09 20:39:24,701 - __main__ - INFO - 🛑 Señal de interrupción recibida
+2025-09-09 20:39:24,702 - __main__ - INFO - 🛑 Apagando sistema...
+2025-09-09 20:39:24,702 - notifications.telegram.telegram_bot - INFO - 🛑 Bot de Telegram detenido
+2025-09-09 20:39:24,702 - __main__ - INFO - ✅ Sistema apagado correctamente
+2025-09-09 20:39:24,702 - telegram.ext.Application - CRITICAL - Fetching updates was aborted due to CancelledError(). Suppressing exception to ensure graceful shutdown.
+Traceback (most recent call last):
+  File "C:\Python313\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 707, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 678, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 1995, in _run_once
+    event_list = self._selector.select(timeout)
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 446, in select
+    self._poll(timeout)
+    ~~~~~~~~~~^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 775, in _poll
+    status = _overlapped.GetQueuedCompletionStatus(self._iocp, ms)
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\bot.py", line 1421, in signal_handler
+    sys.exit(0)
+    ~~~~~~~~^^^
+SystemExit: 0
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 673, in stop
+    self.__update_fetcher_task.result()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1228, in _update_fetcher
+    await self.__update_fetcher()
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1207, in __update_fetcher
+    update = await self.update_queue.get()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\queues.py", line 186, in get
+    await getter
+asyncio.exceptions.CancelledError

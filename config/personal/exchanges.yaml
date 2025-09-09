@@ -50,6 +50,13 @@ latency:
     - BTCUSDT
     - ETHUSDT
     - ADAUSDT
+    - SOLUSDT
+    - DOGEUSDT
+    - AVAXUSDT
+    - TONUSDT
+    - BNBUSDT
+    - XRPUSDT
+    - LINKUSDT
   
   # Configuración de HFT
   max_operations_per_second: 100
