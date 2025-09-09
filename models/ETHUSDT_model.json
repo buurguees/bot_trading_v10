@@ -1,0 +1,29 @@
+{
+  "symbol": "ETHUSDT",
+  "saved_at": "2025-09-09T09:13:36.294601",
+  "model": {
+    "symbol": "ETHUSDT",
+    "model_architecture": "lstm_attention",
+    "training_time_seconds": 0.000813,
+    "test_results": {
+      "test_accuracy": 0.653,
+      "test_loss": 0.303,
+      "precision": 0.673,
+      "recall": 0.643,
+      "f1_score": 0.663
+    },
+    "hyperparameters": {
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "epochs": 100,
+      "hidden_units": 128,
+      "dropout": 0.2
+    },
+    "data_collection": {
+      "samples_collected": 11803,
+      "data_quality_score": 0.88
+    },
+    "model_size_mb": 18.5,
+    "status": "completed"
+  }
+}

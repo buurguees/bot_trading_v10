@@ -1,0 +1,72 @@
+{
+  "training_summary": {
+    "start_time": "2025-09-09T09:13:31.285805",
+    "end_time": "2025-09-09T09:13:36.295325",
+    "duration_hours": 0.001391531111111111,
+    "total_symbols": 2,
+    "successful_training": 2,
+    "failed_training": 0
+  },
+  "performance_metrics": {
+    "average_accuracy": 0.6555,
+    "best_accuracy": 0.658,
+    "worst_accuracy": 0.653,
+    "average_loss": 0.3055,
+    "total_training_time_seconds": 0.001631,
+    "average_training_time_per_symbol": 0.0008155,
+    "average_model_size_mb": 21.0,
+    "total_model_size_mb": 42.0
+  },
+  "model_results": {
+    "BTCUSDT": {
+      "symbol": "BTCUSDT",
+      "model_architecture": "lstm_attention",
+      "training_time_seconds": 0.000818,
+      "test_results": {
+        "test_accuracy": 0.658,
+        "test_loss": 0.308,
+        "precision": 0.678,
+        "recall": 0.648,
+        "f1_score": 0.668
+      },
+      "hyperparameters": {
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "epochs": 100,
+        "hidden_units": 128,
+        "dropout": 0.2
+      },
+      "data_collection": {
+        "samples_collected": 10758,
+        "data_quality_score": 0.9299999999999999
+      },
+      "model_size_mb": 23.5,
+      "status": "completed"
+    },
+    "ETHUSDT": {
+      "symbol": "ETHUSDT",
+      "model_architecture": "lstm_attention",
+      "training_time_seconds": 0.000813,
+      "test_results": {
+        "test_accuracy": 0.653,
+        "test_loss": 0.303,
+        "precision": 0.673,
+        "recall": 0.643,
+        "f1_score": 0.663
+      },
+      "hyperparameters": {
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "epochs": 100,
+        "hidden_units": 128,
+        "dropout": 0.2
+      },
+      "data_collection": {
+        "samples_collected": 11803,
+        "data_quality_score": 0.88
+      },
+      "model_size_mb": 18.5,
+      "status": "completed"
+    }
+  },
+  "recommendations": 
