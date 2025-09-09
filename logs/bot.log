@@ -323,3 +323,1049 @@
 2025-09-09 12:57:45,609 - __main__ - INFO - Descargando 1 años de BTC/USDT @ 1m...
 2025-09-09 13:17:44,868 - __main__ - INFO - Guardado: data\historical\BTCUSDT_1m.csv (525620 velas)
 2025-09-09 13:17:44,869 - __main__ - INFO - Descargando 1 años de ETH/USDT @ 1m...
+2025-09-09 13:37:35,998 - __main__ - INFO - Guardado: data\historical\ETHUSDT_1m.csv (525640 velas)
+2025-09-09 13:37:35,998 - __main__ - INFO - Descargando 1 años de BTC/USDT @ 5m...
+2025-09-09 13:41:35,409 - __main__ - INFO - Guardado: data\historical\BTCUSDT_5m.csv (105129 velas)
+2025-09-09 13:41:35,409 - __main__ - INFO - Descargando 1 años de ETH/USDT @ 5m...
+2025-09-09 13:45:35,013 - __main__ - INFO - Guardado: data\historical\ETHUSDT_5m.csv (105130 velas)
+2025-09-09 13:45:35,013 - __main__ - INFO - Descargando 1 años de BTC/USDT @ 15m...
+2025-09-09 13:46:55,416 - __main__ - INFO - Guardado: data\historical\BTCUSDT_15m.csv (35044 velas)
+2025-09-09 13:46:55,416 - __main__ - INFO - Descargando 1 años de ETH/USDT @ 15m...
+2025-09-09 13:48:16,060 - __main__ - INFO - Guardado: data\historical\ETHUSDT_15m.csv (35044 velas)
+2025-09-09 13:48:16,060 - __main__ - INFO - Descargando 1 años de BTC/USDT @ 1h...
+2025-09-09 13:48:35,221 - __main__ - INFO - Guardado: data\historical\BTCUSDT_1h.csv (8761 velas)
+2025-09-09 13:48:35,221 - __main__ - INFO - Descargando 1 años de ETH/USDT @ 1h...
+2025-09-09 13:48:54,198 - __main__ - INFO - Guardado: data\historical\ETHUSDT_1h.csv (8761 velas)
+2025-09-09 13:48:54,210 - __main__ - INFO - Descargando 1 años de BTC/USDT @ 4h...
+2025-09-09 13:48:59,489 - __main__ - INFO - Guardado: data\historical\BTCUSDT_4h.csv (2190 velas)
+2025-09-09 13:48:59,489 - __main__ - INFO - Descargando 1 años de ETH/USDT @ 4h...
+2025-09-09 13:49:04,829 - __main__ - INFO - Guardado: data\historical\ETHUSDT_4h.csv (2190 velas)
+2025-09-09 13:49:04,830 - __main__ - INFO - Descargando 1 años de BTC/USDT @ 1d...
+2025-09-09 13:49:05,638 - __main__ - INFO - Guardado: data\historical\BTCUSDT_1d.csv (365 velas)
+2025-09-09 13:49:05,639 - __main__ - INFO - Descargando 1 años de ETH/USDT @ 1d...
+2025-09-09 13:49:06,445 - __main__ - INFO - Guardado: data\historical\ETHUSDT_1d.csv (365 velas)
+2025-09-09 13:49:06,445 - __main__ - INFO - Descarga de historico completada
+2025-09-09 13:49:07,717 - __main__ - INFO - Alineación completada: data\alignments\multi_symbol_aligned.json
+2025-09-09 13:49:07,788 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 13:49:07,789 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 13:55:50,772 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 13:55:50,772 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 13:55:50,814 - __main__ - INFO - Configuracion cargada
+2025-09-09 13:55:50,820 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 13:55:50,826 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 13:55:50,830 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 13:55:52,015 - notifications.telegram.handlers - WARNING - ⚠️ No se pudieron importar algunos componentes: No module named 'trading_scripts'
+2025-09-09 13:55:52,015 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 13:55:52,016 - __main__ - INFO - Bot de Telegram inicializado
+2025-09-09 13:55:52,016 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 13:55:52,016 - __main__ - ERROR - ❌ Se requiere especificar símbolos con --symbols
+2025-09-09 13:55:52,017 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 13:55:52,018 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 13:59:04,795 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 13:59:04,795 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 13:59:04,836 - __main__ - INFO - Configuracion cargada
+2025-09-09 13:59:04,842 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 13:59:04,848 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 13:59:04,853 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 13:59:05,772 - notifications.telegram.handlers - WARNING - ⚠️ No se pudieron importar algunos componentes: No module named 'trading_scripts'
+2025-09-09 13:59:05,772 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 13:59:05,773 - __main__ - INFO - Bot de Telegram inicializado
+2025-09-09 13:59:05,773 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 13:59:05,786 - __main__ - INFO - Descargando 1 años de BTC/USDT @ 1m...
+2025-09-09 13:59:11,967 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 13:59:11,970 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 14:00:14,150 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 14:00:14,150 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 14:00:14,196 - __main__ - INFO - Configuracion cargada
+2025-09-09 14:00:14,202 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 14:00:14,209 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 14:00:14,213 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 14:00:14,932 - notifications.telegram.handlers - WARNING - ⚠️ No se pudieron importar algunos componentes: No module named 'trading_scripts'
+2025-09-09 14:00:14,933 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 14:00:14,933 - __main__ - INFO - Bot de Telegram inicializado
+2025-09-09 14:00:14,933 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 14:00:14,950 - __main__ - INFO - Descargando 1 años de BTC/USDT @ 1m...
+2025-09-09 14:03:22,702 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 14:03:22,702 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 14:03:47,797 - bot - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 14:03:47,804 - bot - ERROR - ❌ Error en alineación avanzada: cannot import name 'TradingSignal' from partially initialized module 'trading.enterprise.futures_engine' (most likely due to a circular import) (C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\src\core\trading\enterprise\futures_engine.py)
+2025-09-09 14:03:49,738 - bot - WARNING - Alinear: rango común vacío
+2025-09-09 14:04:30,496 - bot - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 14:04:30,496 - bot - INFO - 🔄 Iniciando alineación avanzada multi-timeframe
+2025-09-09 14:04:32,861 - bot - INFO - 🔄 Alineando 1m
+2025-09-09 14:04:36,859 - bot - INFO - ✅ 1m alineado - Calidad: 1.000
+2025-09-09 14:04:36,860 - bot - INFO - 🔄 Alineando 5m
+2025-09-09 14:04:37,207 - bot - INFO - ✅ 5m alineado - Calidad: 1.000
+2025-09-09 14:04:37,208 - bot - INFO - 🔄 Alineando 15m
+2025-09-09 14:04:37,288 - bot - INFO - ✅ 15m alineado - Calidad: 1.000
+2025-09-09 14:04:37,288 - bot - INFO - 🔄 Alineando 1h
+2025-09-09 14:04:37,315 - bot - INFO - ✅ 1h alineado - Calidad: 1.000
+2025-09-09 14:04:37,315 - bot - INFO - 🔄 Alineando 4h
+2025-09-09 14:04:37,321 - bot - INFO - ✅ 4h alineado - Calidad: 1.000
+2025-09-09 14:04:37,321 - bot - INFO - 🔄 Alineando 1d
+2025-09-09 14:04:37,323 - bot - INFO - ✅ 1d alineado - Calidad: 1.000
+2025-09-09 14:04:37,559 - bot - INFO - ✅ Alineación completada - Resumen guardado en data\alignments\multi_timeframe_alignment_summary.json
+2025-09-09 14:04:37,560 - bot - INFO - 📊 Timeframes procesados: 6
+2025-09-09 14:04:37,560 - bot - INFO - 📈 Calidad promedio: 1.000
+2025-09-09 14:09:14,406 - bot - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 14:09:14,407 - bot - INFO - 🚀 Iniciando descarga inteligente de datos históricos...
+2025-09-09 14:09:14,407 - bot - INFO - 📊 PASO 1: Analizando datos existentes...
+2025-09-09 14:09:14,407 - bot - INFO - 🔍 Analizando datos existentes...
+2025-09-09 14:09:14,484 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:14,589 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:14,629 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:14,643 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:14,650 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:14,655 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:15,076 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:15,185 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:15,221 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:15,235 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:15,241 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:15,244 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:16,801 - bot - ERROR - Error detectando gaps: name 'pd' is not defined
+2025-09-09 14:09:16,861 - bot - INFO - 📊 Análisis completado - 18 archivos analizados
+2025-09-09 14:09:16,862 - bot - INFO - ✅ Archivos OK: 13
+2025-09-09 14:09:16,862 - bot - INFO - ⚠️ Necesitan reparación: 0
+2025-09-09 14:09:16,862 - bot - INFO - ❌ Faltan: 5
+2025-09-09 14:09:16,863 - bot - INFO - 🔧 Total gaps encontrados: 0
+2025-09-09 14:09:16,877 - bot - INFO - 📋 PASO 2: Preparando descargas basadas en análisis...
+2025-09-09 14:09:16,903 - bot - INFO - ⏭️ Saltando BTCUSDT 1m - Datos completos y sin errores
+2025-09-09 14:09:16,903 - bot - INFO - ⏭️ Saltando BTCUSDT 5m - Datos completos y sin errores
+2025-09-09 14:09:16,904 - bot - INFO - ⏭️ Saltando BTCUSDT 15m - Datos completos y sin errores
+2025-09-09 14:09:16,904 - bot - INFO - ⏭️ Saltando BTCUSDT 1h - Datos completos y sin errores
+2025-09-09 14:09:16,904 - bot - INFO - ⏭️ Saltando BTCUSDT 4h - Datos completos y sin errores
+2025-09-09 14:09:16,905 - bot - INFO - ⏭️ Saltando BTCUSDT 1d - Datos completos y sin errores
+2025-09-09 14:09:16,905 - bot - INFO - ⏭️ Saltando ETHUSDT 1m - Datos completos y sin errores
+2025-09-09 14:09:16,905 - bot - INFO - ⏭️ Saltando ETHUSDT 5m - Datos completos y sin errores
+2025-09-09 14:09:16,906 - bot - INFO - ⏭️ Saltando ETHUSDT 15m - Datos completos y sin errores
+2025-09-09 14:09:16,906 - bot - INFO - ⏭️ Saltando ETHUSDT 1h - Datos completos y sin errores
+2025-09-09 14:09:16,906 - bot - INFO - ⏭️ Saltando ETHUSDT 4h - Datos completos y sin errores
+2025-09-09 14:09:16,906 - bot - INFO - ⏭️ Saltando ETHUSDT 1d - Datos completos y sin errores
+2025-09-09 14:09:16,906 - bot - INFO - ⏭️ Saltando ADAUSDT 1m - Datos completos y sin errores
+2025-09-09 14:09:16,907 - bot - INFO - 📥 Descargando ADAUSDT 5m completo...
+2025-09-09 14:13:23,674 - bot - INFO - ✅ ADAUSDT 5m: 105121 registros descargados
+2025-09-09 14:13:24,692 - bot - INFO - 📥 Descargando ADAUSDT 15m completo...
+2025-09-09 14:14:47,252 - bot - INFO - ✅ ADAUSDT 15m: 35040 registros descargados
+2025-09-09 14:14:48,260 - bot - INFO - 📥 Descargando ADAUSDT 1h completo...
+2025-09-09 14:15:09,013 - bot - INFO - ✅ ADAUSDT 1h: 8760 registros descargados
+2025-09-09 14:15:10,017 - bot - INFO - 📥 Descargando ADAUSDT 4h completo...
+2025-09-09 14:15:17,019 - bot - INFO - ✅ ADAUSDT 4h: 2190 registros descargados
+2025-09-09 14:15:18,028 - bot - INFO - 📥 Descargando ADAUSDT 1d completo...
+2025-09-09 14:15:20,482 - bot - INFO - ✅ ADAUSDT 1d: 365 registros descargados
+2025-09-09 14:15:21,486 - bot - INFO - ✅ Descarga inteligente completada:
+2025-09-09 14:15:21,486 - bot - INFO -    📥 Archivos descargados: 5
+2025-09-09 14:15:21,487 - bot - INFO -    🔧 Archivos reparados: 0
+2025-09-09 14:15:21,487 - bot - INFO -    ⏭️ Archivos saltados: 13
+2025-09-09 14:15:21,487 - bot - INFO - 🔄 PASO 3: Alineando datos después de descarga...
+2025-09-09 14:15:21,487 - bot - INFO - 🔄 Iniciando alineación avanzada multi-timeframe
+2025-09-09 14:15:23,997 - bot - INFO - 🔄 Alineando 1m
+2025-09-09 14:15:28,008 - bot - INFO - ✅ 1m alineado - Calidad: 1.000
+2025-09-09 14:15:28,009 - bot - INFO - 🔄 Alineando 5m
+2025-09-09 14:15:28,438 - bot - INFO - ✅ 5m alineado - Calidad: 1.000
+2025-09-09 14:15:28,438 - bot - INFO - 🔄 Alineando 15m
+2025-09-09 14:15:28,565 - bot - INFO - ✅ 15m alineado - Calidad: 1.000
+2025-09-09 14:15:28,566 - bot - INFO - 🔄 Alineando 1h
+2025-09-09 14:15:28,600 - bot - INFO - ✅ 1h alineado - Calidad: 1.000
+2025-09-09 14:15:28,601 - bot - INFO - 🔄 Alineando 4h
+2025-09-09 14:15:28,610 - bot - INFO - ✅ 4h alineado - Calidad: 1.000
+2025-09-09 14:15:28,611 - bot - INFO - 🔄 Alineando 1d
+2025-09-09 14:15:28,614 - bot - INFO - ✅ 1d alineado - Calidad: 1.000
+2025-09-09 14:15:29,021 - bot - INFO - ✅ Alineación completada - Resumen guardado en data\alignments\multi_timeframe_alignment_summary.json
+2025-09-09 14:15:29,021 - bot - INFO - 📊 Timeframes procesados: 6
+2025-09-09 14:15:29,022 - bot - INFO - 📈 Calidad promedio: 1.000
+2025-09-09 15:21:48,796 - __main__ - INFO - 🤖 Bot de Trading v10 Enterprise inicializado
+2025-09-09 15:21:48,799 - __main__ - INFO - 🚀 Iniciando Bot de Trading v10 Enterprise...
+2025-09-09 15:21:48,799 - __main__ - INFO - 🔧 Inicializando componentes...
+2025-09-09 15:21:50,845 - src.core.trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:21:50,845 - src.core.trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:21:51,591 - trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:21:51,592 - trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:21:56,014 - data.database - INFO - Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe
+2025-09-09 15:21:56,015 - data.database - WARNING - Error creando índice: no such column: strategy_name
+2025-09-09 15:21:56,015 - data.database - WARNING - Error creando índice: no such column: symbol
+2025-09-09 15:21:56,015 - data.database - WARNING - Error creando índice: no such column: alignment_session_id
+2025-09-09 15:21:56,016 - data.database - WARNING - Error creando índice: no such column: coherence_score
+2025-09-09 15:21:56,016 - data.database - INFO - Índices optimizados creados
+2025-09-09 15:21:56,017 - data.database - INFO - DatabaseManager inicializado: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-09 15:21:56,017 - data.database - INFO - Tamaño de BD: 66.8 MB
+2025-09-09 15:21:56,188 - notifications.telegram.handlers - ERROR - ❌ Error inicializando componentes: 'ConfigLoader' object has no attribute 'get_ai_model_settings'
+2025-09-09 15:21:56,189 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 15:21:56,189 - __main__ - WARNING - ⚠️ Error inicializando bot de Telegram: MetricsSender.__init__() missing 1 required positional argument: 'config'
+2025-09-09 15:21:56,817 - dashboard_integrated - INFO - 📊 Dashboard integrado inicializado
+2025-09-09 15:21:56,860 - dashboard_integrated - INFO - ✅ Aplicación Dash creada
+2025-09-09 15:21:56,860 - __main__ - INFO - ✅ Dashboard inicializado
+2025-09-09 15:21:56,861 - __main__ - INFO - ✅ Componentes inicializados correctamente
+2025-09-09 15:21:56,862 - dash.dash - INFO - Dash is running on http://127.0.0.1:8050/
+
+2025-09-09 15:21:56,883 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8050
+2025-09-09 15:21:56,883 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-09-09 15:21:59,580 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:21:59] "GET / HTTP/1.1" 200 -
+2025-09-09 15:22:00,224 - __main__ - INFO - 🌐 Dashboard abierto en http://127.0.0.1:8050
+2025-09-09 15:22:00,224 - __main__ - INFO - ✅ Bot de Telegram iniciado
+2025-09-09 15:22:00,336 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:00] "GET / HTTP/1.1" 200 -
+2025-09-09 15:22:01,104 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:01] "GET /_dash-layout HTTP/1.1" 200 -
+2025-09-09 15:22:01,107 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:01] "GET /_dash-dependencies HTTP/1.1" 200 -
+2025-09-09 15:22:01,110 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:01] "GET /_favicon.ico?v=3.2.0 HTTP/1.1" 200 -
+2025-09-09 15:22:01,256 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:01] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2025-09-09 15:22:01,264 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:01] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2025-09-09 15:22:01,318 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:01,320 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:01,322 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:01,333 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:01,660 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:01] "GET /_favicon.ico?v=3.2.0 HTTP/1.1" 200 -
+2025-09-09 15:22:02,027 - notifications.telegram.telegram_bot - INFO - 🚀 Iniciando bot de Telegram...
+2025-09-09 15:22:02,266 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:02,270 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:03,187 - notifications.telegram.telegram_bot - INFO - ✅ Handlers configurados correctamente
+2025-09-09 15:22:03,188 - notifications.telegram.telegram_bot - INFO - ✅ Bot de Telegram iniciado correctamente
+2025-09-09 15:22:03,188 - notifications.telegram.telegram_bot - INFO - 📱 Chat ID autorizado: 937027893
+2025-09-09 15:22:03,189 - notifications.telegram.telegram_bot - ERROR - ❌ Error iniciando bot de Telegram: Cannot close a running event loop
+2025-09-09 15:22:03,189 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-2' coro=<TelegramBot.start_polling() done, defined at C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\notifications\telegram\telegram_bot.py:114> exception=RuntimeError('Cannot close a running event loop')>
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1049, in __run
+    loop.run_until_complete(self._bootstrap_initialize(max_retries=bootstrap_retries))
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 696, in run_until_complete
+    self._check_running()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 632, in _check_running
+    raise RuntimeError('This event loop is already running')
+RuntimeError: This event loop is already running
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1074, in __run
+    loop.run_until_complete(self.shutdown())
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 696, in run_until_complete
+    self._check_running()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 632, in _check_running
+    raise RuntimeError('This event loop is already running')
+RuntimeError: This event loop is already running
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\notifications\telegram\telegram_bot.py", line 136, in start_polling
+    await self.application.run_polling()
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 839, in run_polling
+    return self.__run(
+           ~~~~~~~~~~^
+        updater_coroutine=self.updater.start_polling(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        close_loop=close_loop,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1079, in __run
+    loop.close()
+    ~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\proactor_events.py", line 684, in close
+    raise RuntimeError("Cannot close a running event loop")
+RuntimeError: Cannot close a running event loop
+2025-09-09 15:22:03,401 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 
+🚀 <b>Bot de Trading v10 Enterprise - OPERATIVO</b...
+2025-09-09 15:22:03,402 - __main__ - INFO - 📱 Mensaje de inicio enviado a Telegram
+2025-09-09 15:22:03,403 - __main__ - INFO - ✅ Sistema iniciado completamente
+2025-09-09 15:22:06,268 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:06,270 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:06,273 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:06,302 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:06,324 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:06,325 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:11,272 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:11,274 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:11,284 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:11,334 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:11,358 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:11,366 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:16,270 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:16,272 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:16,276 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:16,312 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:16,338 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:16,339 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:21,272 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:21,274 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:21,277 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:21,305 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:21,337 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:21,338 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:26,276 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:26,280 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:26,283 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:26,316 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:26,319 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:26,344 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:31,282 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:31] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:31,284 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:31] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:31,287 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:31] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:31,315 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:31] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:31,337 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:31] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:31,339 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:31] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:36,278 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:36,280 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:36,282 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:36,307 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:36,330 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:36,331 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:41,269 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:41,271 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:41,273 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:41,310 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:41,320 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:41,323 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:46,282 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:46,283 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:46,285 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:46,310 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:46,346 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:46,351 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:51,269 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:51,270 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:51,272 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:51,298 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:51,321 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:51,323 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:56,269 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:56] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:56,271 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:56] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:56,273 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:56] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:56,296 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:56] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:56,318 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:56] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:22:56,320 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:22:56] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:01,268 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:01,269 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:01,271 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:01,295 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:01,304 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:01,317 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:06,270 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:06,273 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:06,276 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:06,309 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:06,312 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:06,339 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:11,274 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:11,275 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:11,277 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:11,303 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:11,324 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:11,326 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:18,118 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:18,120 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:18,122 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:18,154 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:18,176 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:18,177 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:23,124 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:23] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:23,125 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:23] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:23,127 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:23] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:23,156 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:23] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:23,179 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:23] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:23,182 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:23] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:28,129 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:28,132 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:28,134 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:28,159 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:28,181 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:28,182 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:33,123 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:33,127 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:33,130 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:33,159 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:33,191 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:33,193 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:38,128 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:38,129 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:38,131 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:38,158 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:38,179 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:38,180 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:43,123 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:43,124 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:43,126 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:43,150 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:43,172 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:43,173 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:48,123 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:48,124 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:48,126 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:48,151 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:48,173 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:48,174 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:53,128 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:53,129 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:53,130 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:53,155 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:53,182 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:53,183 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:58,124 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:58,126 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:58,129 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:58,160 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:58,180 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:23:58,184 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:23:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:03,118 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:03,120 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:03,122 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:03,146 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:03,167 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:03,169 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:08,125 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:08,126 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:08,128 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:08,153 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:08,178 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:08,179 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:13,121 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:13,123 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:13,126 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:13,152 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:13,173 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:24:13,175 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:24:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:05,132 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:05,133 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:05,136 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:05,160 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:05,182 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:05,183 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:08,124 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:08,126 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:08,127 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:08,153 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:08,176 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:25:08,178 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:25:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:05,130 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:05,132 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:05,134 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:05,160 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:05,183 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:05,184 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:08,125 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:08,126 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:08,128 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:08,156 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:08,167 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:26:08,180 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:26:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:05,130 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:05,131 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:05,133 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:05,158 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:05,181 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:05,182 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:08,128 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:08,129 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:08,131 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:08,157 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:08,181 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:27:08,182 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:27:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:05,129 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:05,131 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:05,133 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:05,159 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:05,182 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:05,184 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:08,118 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:08,120 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:08,124 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:08,150 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:08,173 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:28:08,174 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:28:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:05,122 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:05,124 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:05,127 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:05,151 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:05,174 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:05,176 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:08,118 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:08,120 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:08,122 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:08,149 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:08,160 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:29:08,172 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:29:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:05,127 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:05,130 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:05,133 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:05,159 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:05,183 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:05,185 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:08,121 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:08,123 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:08,126 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:08,154 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:08,178 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:08,179 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:30:34,351 - __main__ - INFO - 🤖 Bot de Trading v10 Enterprise inicializado
+2025-09-09 15:30:34,355 - __main__ - INFO - 🚀 Iniciando Bot de Trading v10 Enterprise...
+2025-09-09 15:30:34,355 - __main__ - INFO - 🔧 Inicializando componentes...
+2025-09-09 15:30:36,288 - src.core.trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:30:36,288 - src.core.trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:30:36,942 - trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:30:36,942 - trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:30:41,047 - data.database - INFO - Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe
+2025-09-09 15:30:41,048 - data.database - WARNING - Error creando índice: no such column: strategy_name
+2025-09-09 15:30:41,048 - data.database - WARNING - Error creando índice: no such column: symbol
+2025-09-09 15:30:41,048 - data.database - WARNING - Error creando índice: no such column: alignment_session_id
+2025-09-09 15:30:41,048 - data.database - WARNING - Error creando índice: no such column: coherence_score
+2025-09-09 15:30:41,049 - data.database - INFO - Índices optimizados creados
+2025-09-09 15:30:41,049 - data.database - INFO - DatabaseManager inicializado: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-09 15:30:41,049 - data.database - INFO - Tamaño de BD: 66.8 MB
+2025-09-09 15:30:41,213 - notifications.telegram.handlers - ERROR - ❌ Error inicializando componentes: 'ConfigLoader' object has no attribute 'get_ai_model_settings'
+2025-09-09 15:30:41,213 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 15:30:41,214 - __main__ - WARNING - ⚠️ Error inicializando bot de Telegram: MetricsSender.__init__() missing 1 required positional argument: 'config'
+2025-09-09 15:30:41,219 - __main__ - WARNING - ⚠️ Dashboard no disponible: No module named 'config.enterprise_config'
+2025-09-09 15:30:41,220 - __main__ - INFO - ✅ Componentes inicializados correctamente
+2025-09-09 15:30:41,220 - __main__ - WARNING - ⚠️ Dashboard no disponible
+2025-09-09 15:30:41,220 - __main__ - INFO - ✅ Bot de Telegram iniciado
+2025-09-09 15:30:42,265 - notifications.telegram.telegram_bot - INFO - 🚀 Iniciando bot de Telegram...
+2025-09-09 15:30:43,307 - notifications.telegram.telegram_bot - INFO - ✅ Handlers configurados correctamente
+2025-09-09 15:30:43,308 - notifications.telegram.telegram_bot - INFO - ✅ Bot de Telegram iniciado correctamente
+2025-09-09 15:30:43,308 - notifications.telegram.telegram_bot - INFO - 📱 Chat ID autorizado: 937027893
+2025-09-09 15:30:43,308 - notifications.telegram.telegram_bot - ERROR - ❌ Error iniciando bot de Telegram: Cannot close a running event loop
+2025-09-09 15:30:43,309 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-2' coro=<TelegramBot.start_polling() done, defined at C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\notifications\telegram\telegram_bot.py:114> exception=RuntimeError('Cannot close a running event loop')>
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1049, in __run
+    loop.run_until_complete(self._bootstrap_initialize(max_retries=bootstrap_retries))
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 696, in run_until_complete
+    self._check_running()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 632, in _check_running
+    raise RuntimeError('This event loop is already running')
+RuntimeError: This event loop is already running
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1074, in __run
+    loop.run_until_complete(self.shutdown())
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 696, in run_until_complete
+    self._check_running()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 632, in _check_running
+    raise RuntimeError('This event loop is already running')
+RuntimeError: This event loop is already running
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\notifications\telegram\telegram_bot.py", line 136, in start_polling
+    await self.application.run_polling()
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 839, in run_polling
+    return self.__run(
+           ~~~~~~~~~~^
+        updater_coroutine=self.updater.start_polling(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        close_loop=close_loop,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1079, in __run
+    loop.close()
+    ~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\proactor_events.py", line 684, in close
+    raise RuntimeError("Cannot close a running event loop")
+RuntimeError: Cannot close a running event loop
+2025-09-09 15:30:43,548 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 
+🚀 <b>Bot de Trading v10 Enterprise - OPERATIVO</b...
+2025-09-09 15:30:43,549 - __main__ - INFO - 📱 Mensaje de inicio enviado a Telegram
+2025-09-09 15:30:43,550 - __main__ - INFO - ✅ Sistema iniciado completamente
+2025-09-09 15:30:58,617 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:30:58] "GET / HTTP/1.1" 200 -
+2025-09-09 15:31:05,120 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:31:05,122 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:31:05,125 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:31:05,150 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:31:05,173 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:31:05,174 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:31:08,133 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:31:08,136 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:31:08,139 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:31:08,164 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:31:08,189 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:31:08,190 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:31:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:05,132 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:05,133 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:05,134 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:05,159 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:05,161 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:05,181 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:08,134 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:08,136 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:08,139 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:08,166 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:08,191 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:32:08,192 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:32:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:05,143 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:05,144 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:05,146 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:05,175 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:05,198 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:05,199 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:08,130 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:08,133 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:08,135 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:08,163 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:08,188 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:08,190 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:25,808 - __main__ - INFO - 🤖 Bot de Trading v10 Enterprise inicializado
+2025-09-09 15:33:25,810 - __main__ - INFO - 🚀 Iniciando Bot de Trading v10 Enterprise...
+2025-09-09 15:33:25,810 - __main__ - INFO - 🔧 Inicializando componentes...
+2025-09-09 15:33:25,816 - notifications.telegram.handlers - INFO - ✅ Handlers inicializados correctamente
+2025-09-09 15:33:25,816 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 15:33:27,504 - src.core.trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:33:27,505 - src.core.trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:33:28,214 - trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:33:28,215 - trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:33:32,897 - data.database - INFO - Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe
+2025-09-09 15:33:32,897 - data.database - WARNING - Error creando índice: no such column: strategy_name
+2025-09-09 15:33:32,898 - data.database - WARNING - Error creando índice: no such column: symbol
+2025-09-09 15:33:32,898 - data.database - WARNING - Error creando índice: no such column: alignment_session_id
+2025-09-09 15:33:32,898 - data.database - WARNING - Error creando índice: no such column: coherence_score
+2025-09-09 15:33:32,899 - data.database - INFO - Índices optimizados creados
+2025-09-09 15:33:32,899 - data.database - INFO - DatabaseManager inicializado: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-09 15:33:32,899 - data.database - INFO - Tamaño de BD: 66.8 MB
+2025-09-09 15:33:33,075 - notifications.telegram.metrics_sender - ERROR - ❌ Error inicializando componentes: 'ConfigLoader' object has no attribute 'get_ai_model_settings'
+2025-09-09 15:33:33,075 - notifications.telegram.metrics_sender - INFO - 📊 MetricsSender inicializado
+2025-09-09 15:33:33,076 - __main__ - INFO - ✅ Bot de Telegram inicializado
+2025-09-09 15:33:33,736 - __main__ - INFO - ✅ Dashboard simple inicializado
+2025-09-09 15:33:33,736 - __main__ - INFO - ✅ Componentes inicializados correctamente
+2025-09-09 15:33:33,738 - dash.dash - INFO - Dash is running on http://127.0.0.1:8050/
+
+2025-09-09 15:33:33,760 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8050
+2025-09-09 15:33:33,761 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-09-09 15:33:37,109 - __main__ - INFO - 🌐 Dashboard abierto en http://127.0.0.1:8050
+2025-09-09 15:33:37,109 - __main__ - INFO - ✅ Bot de Telegram iniciado
+2025-09-09 15:33:37,208 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:37] "GET / HTTP/1.1" 200 -
+2025-09-09 15:33:37,747 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:37] "GET /_dash-layout HTTP/1.1" 200 -
+2025-09-09 15:33:37,748 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:37] "GET /_dash-dependencies HTTP/1.1" 200 -
+2025-09-09 15:33:37,752 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:37] "GET /_favicon.ico?v=3.2.0 HTTP/1.1" 200 -
+2025-09-09 15:33:37,940 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:37] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2025-09-09 15:33:37,949 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:37] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2025-09-09 15:33:38,001 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:38,008 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:38,048 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:38,109 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:38,125 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:38,151 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:38,252 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:38] "GET /_favicon.ico?v=3.2.0 HTTP/1.1" 200 -
+2025-09-09 15:33:38,879 - notifications.telegram.telegram_bot - INFO - 🚀 Iniciando bot de Telegram...
+2025-09-09 15:33:39,911 - notifications.telegram.telegram_bot - INFO - ✅ Handlers configurados correctamente
+2025-09-09 15:33:39,911 - notifications.telegram.telegram_bot - INFO - ✅ Bot de Telegram iniciado correctamente
+2025-09-09 15:33:39,912 - notifications.telegram.telegram_bot - INFO - 📱 Chat ID autorizado: 937027893
+2025-09-09 15:33:39,912 - notifications.telegram.metrics_sender - INFO - 📊 Iniciando envío de métricas cada 300 segundos
+2025-09-09 15:33:40,886 - notifications.telegram.metrics_sender - INFO - 🚨 Iniciando monitoreo de alertas
+2025-09-09 15:33:41,083 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:41] "GET / HTTP/1.1" 200 -
+2025-09-09 15:33:41,094 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 
+🚀 <b>Bot de Trading v10 Enterprise - OPERATIVO</b...
+2025-09-09 15:33:41,096 - __main__ - INFO - 📱 Mensaje de inicio enviado a Telegram
+2025-09-09 15:33:41,096 - __main__ - INFO - ✅ Sistema iniciado completamente
+2025-09-09 15:33:41,147 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 📊 <b>Métricas del Sistema</b>
+⏰ 15:33:39
+
+💰 <b>Bal...
+2025-09-09 15:33:41,149 - notifications.telegram.metrics_sender - INFO - 📤 Métricas enviadas correctamente
+2025-09-09 15:33:41,376 - notifications.telegram.handlers - INFO - ✅ Comando /start ejecutado por chat_id: 937027893
+2025-09-09 15:33:41,377 - __main__ - INFO - 🎮 Procesando comando: data_status
+2025-09-09 15:33:41,377 - __main__ - INFO - 🎮 Ejecutando comando: data_status
+2025-09-09 15:33:42,597 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 15:33:42,720 - notifications.telegram.handlers - INFO - ✅ Comando /start ejecutado por chat_id: 937027893
+2025-09-09 15:33:42,899 - notifications.telegram.handlers - INFO - ✅ Comando /start ejecutado por chat_id: 937027893
+2025-09-09 15:33:42,951 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:42,953 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:42,955 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:42,980 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:43,001 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:43,002 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:47,950 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:47,952 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:47,954 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:47,980 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:48,002 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:48,003 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:52,954 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:52] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:52,956 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:52] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:52,959 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:52] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:52,983 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:52] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:53,005 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:53,007 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:57,949 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:57] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:57,950 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:57] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:57,952 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:57] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:57,977 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:57] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:57,998 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:57] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:33:58,000 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:33:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:02,959 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:02,961 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:02,963 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:02,989 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:03,010 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:03,012 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:05,137 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:05,138 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:05,139 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:05,163 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:05,185 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:05,187 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:07,950 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:07] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:07,952 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:07] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:07,954 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:07] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:07,979 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:07] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:08,002 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:08,004 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:08,115 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:08,117 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:08,120 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:08,143 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:08,166 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:08,168 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:12,954 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:12] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:12,956 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:12] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:12,958 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:12] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:12,982 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:12] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:13,003 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:13,005 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:16,556 - notifications.telegram.handlers - INFO - ✅ Comando /help ejecutado por chat_id: 937027893
+2025-09-09 15:34:17,949 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:17,951 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:17,953 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:17,978 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:17,999 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:18,000 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:22,962 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:22] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:22,963 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:22] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:22,964 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:22] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:22,989 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:22] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:22,992 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:22] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:23,013 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:23] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:27,956 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:27,957 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:27,959 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:27,986 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:27,993 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:28,007 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:32,954 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:32,956 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:32,958 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:32,982 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:33,009 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:33,010 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:37,953 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:37,955 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:37,957 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:37,982 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:38,004 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:34:38,006 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:34:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:37:11,084 - __main__ - INFO - 🛑 Señal de interrupción recibida
+2025-09-09 15:37:11,084 - __main__ - INFO - 🛑 Apagando sistema...
+2025-09-09 15:37:11,085 - notifications.telegram.telegram_bot - INFO - 🛑 Bot de Telegram detenido
+2025-09-09 15:37:11,085 - __main__ - INFO - ✅ Sistema apagado correctamente
+2025-09-09 15:37:11,086 - telegram.ext.Application - CRITICAL - Fetching updates was aborted due to CancelledError(). Suppressing exception to ensure graceful shutdown.
+Traceback (most recent call last):
+  File "C:\Python313\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 707, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 678, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 1995, in _run_once
+    event_list = self._selector.select(timeout)
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 446, in select
+    self._poll(timeout)
+    ~~~~~~~~~~^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 775, in _poll
+    status = _overlapped.GetQueuedCompletionStatus(self._iocp, ms)
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\bot.py", line 1060, in signal_handler
+SystemExit: 0
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 673, in stop
+    self.__update_fetcher_task.result()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1228, in _update_fetcher
+    await self.__update_fetcher()
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1207, in __update_fetcher
+    update = await self.update_queue.get()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\queues.py", line 186, in get
+    await getter
+asyncio.exceptions.CancelledError
+2025-09-09 15:38:17,585 - __main__ - INFO - 🤖 Bot de Trading v10 Enterprise inicializado
+2025-09-09 15:38:17,587 - __main__ - INFO - 🚀 Iniciando Bot de Trading v10 Enterprise...
+2025-09-09 15:38:17,587 - __main__ - INFO - 🔧 Inicializando componentes...
+2025-09-09 15:38:17,597 - notifications.telegram.handlers - INFO - ✅ Handlers inicializados correctamente
+2025-09-09 15:38:17,598 - notifications.telegram.telegram_bot - INFO - 🤖 TelegramBot inicializado
+2025-09-09 15:38:19,358 - src.core.trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:38:19,358 - src.core.trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:38:20,035 - trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:38:20,035 - trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:38:24,081 - data.database - INFO - Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe
+2025-09-09 15:38:24,082 - data.database - WARNING - Error creando índice: no such column: strategy_name
+2025-09-09 15:38:24,082 - data.database - WARNING - Error creando índice: no such column: symbol
+2025-09-09 15:38:24,082 - data.database - WARNING - Error creando índice: no such column: alignment_session_id
+2025-09-09 15:38:24,083 - data.database - WARNING - Error creando índice: no such column: coherence_score
+2025-09-09 15:38:24,083 - data.database - INFO - Índices optimizados creados
+2025-09-09 15:38:24,083 - data.database - INFO - DatabaseManager inicializado: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-09 15:38:24,084 - data.database - INFO - Tamaño de BD: 66.8 MB
+2025-09-09 15:38:24,388 - notifications.telegram.metrics_sender - ERROR - ❌ Error inicializando componentes: 'ConfigLoader' object has no attribute 'get_ai_model_settings'
+2025-09-09 15:38:24,389 - notifications.telegram.metrics_sender - INFO - 📊 MetricsSender inicializado
+2025-09-09 15:38:24,389 - notifications.telegram.handlers - INFO - ✅ Controlador establecido en Handlers
+2025-09-09 15:38:24,389 - notifications.telegram.telegram_bot - INFO - ✅ Controlador establecido en TelegramBot
+2025-09-09 15:38:24,390 - __main__ - INFO - ✅ Bot de Telegram inicializado
+2025-09-09 15:38:25,164 - __main__ - INFO - ✅ Dashboard simple inicializado
+2025-09-09 15:38:25,164 - __main__ - INFO - ✅ Componentes inicializados correctamente
+2025-09-09 15:38:25,166 - dash.dash - INFO - Dash is running on http://127.0.0.1:8050/
+
+2025-09-09 15:38:25,189 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8050
+2025-09-09 15:38:25,190 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-09-09 15:38:28,512 - __main__ - INFO - 🌐 Dashboard abierto en http://127.0.0.1:8050
+2025-09-09 15:38:28,512 - __main__ - INFO - ✅ Bot de Telegram iniciado
+2025-09-09 15:38:28,628 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:28] "GET / HTTP/1.1" 200 -
+2025-09-09 15:38:29,402 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "GET /_favicon.ico?v=3.2.0 HTTP/1.1" 200 -
+2025-09-09 15:38:29,412 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "GET /_dash-layout HTTP/1.1" 200 -
+2025-09-09 15:38:29,414 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "GET /_dash-dependencies HTTP/1.1" 200 -
+2025-09-09 15:38:29,565 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2025-09-09 15:38:29,573 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2025-09-09 15:38:29,660 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:29,661 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:29,664 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:29,703 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:29,744 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:29,746 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:29,900 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:29] "GET /_favicon.ico?v=3.2.0 HTTP/1.1" 200 -
+2025-09-09 15:38:30,132 - notifications.telegram.telegram_bot - INFO - 🚀 Iniciando bot de Telegram...
+2025-09-09 15:38:31,337 - notifications.telegram.telegram_bot - INFO - ✅ Handlers configurados correctamente
+2025-09-09 15:38:31,337 - notifications.telegram.telegram_bot - INFO - ✅ Bot de Telegram iniciado correctamente
+2025-09-09 15:38:31,337 - notifications.telegram.telegram_bot - INFO - 📱 Chat ID autorizado: 937027893
+2025-09-09 15:38:31,338 - notifications.telegram.metrics_sender - INFO - 📊 Iniciando envío de métricas cada 300 segundos
+2025-09-09 15:38:32,286 - notifications.telegram.metrics_sender - INFO - 🚨 Iniciando monitoreo de alertas
+2025-09-09 15:38:32,418 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:32] "GET / HTTP/1.1" 200 -
+2025-09-09 15:38:32,523 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 
+🚀 <b>Bot de Trading v10 Enterprise - OPERATIVO</b...
+2025-09-09 15:38:32,525 - __main__ - INFO - 📱 Mensaje de inicio enviado a Telegram
+2025-09-09 15:38:32,525 - __main__ - INFO - ✅ Sistema iniciado completamente
+2025-09-09 15:38:32,536 - notifications.telegram.telegram_bot - INFO - 📤 Mensaje enviado: 📊 <b>Métricas del Sistema</b>
+⏰ 15:38:31
+
+💰 <b>Bal...
+2025-09-09 15:38:32,538 - notifications.telegram.metrics_sender - INFO - 📤 Métricas enviadas correctamente
+2025-09-09 15:38:34,594 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:34,595 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:34,596 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:34,628 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:34,655 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:34,657 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:39,585 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:39,590 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:39,595 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:39,681 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:39,689 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:39,691 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:44,586 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:44,587 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:44,590 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:44,615 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:44,638 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:44,639 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:49,581 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:49,583 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:49,585 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:49,612 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:49,634 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:49,636 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:54,573 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:54,575 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:54,577 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:54,602 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:54,614 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:54,625 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:59,591 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:59,592 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:59,594 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:59,619 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:59,643 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:38:59,644 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:38:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:04,582 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:04,582 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:04,584 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:04,607 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:04,628 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:04,631 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:09,588 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:09,589 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:09,590 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:09,615 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:09,641 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:09,644 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:11,124 - __main__ - INFO - 🎮 Ejecutando comando: metrics
+2025-09-09 15:39:12,196 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 15:39:12,196 - notifications.telegram.handlers - INFO - ✅ Comando /metrics ejecutado por chat_id: 937027893
+2025-09-09 15:39:14,579 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:14,580 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:14,582 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:14,606 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:14,627 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:14,629 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:19,214 - __main__ - INFO - 🎮 Ejecutando comando: positions
+2025-09-09 15:39:19,587 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:19,588 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:19,591 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:19,616 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:19,642 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:19,643 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:20,295 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 15:39:20,296 - notifications.telegram.handlers - INFO - ✅ Comando /positions ejecutado por chat_id: 937027893
+2025-09-09 15:39:22,146 - __main__ - INFO - 🎮 Procesando comando: data_status
+2025-09-09 15:39:22,147 - __main__ - INFO - 🎮 Ejecutando comando: data_status
+2025-09-09 15:39:23,244 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 15:39:24,590 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:24,592 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:24,593 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:24,618 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:24,642 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:24,643 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:25,817 - __main__ - INFO - 🎮 Procesando comando: agents_status
+2025-09-09 15:39:25,817 - __main__ - INFO - 🎮 Ejecutando comando: agents_status
+2025-09-09 15:39:25,817 - __main__ - WARNING - ⚠️ Comando desconocido: agents_status
+2025-09-09 15:39:29,584 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:29,586 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:29,586 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:29,611 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:29,633 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:29,635 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:34,593 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:34,594 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:34,595 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:34,621 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:34,646 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:34,647 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:39,582 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:39,583 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:39,584 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:39,611 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:39,633 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:39,634 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:44,582 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:44,584 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:44,586 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:44,615 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:44,640 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:44,642 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:49,575 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:49,576 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:49,578 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:49,606 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:49,627 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:49,629 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:54,586 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:54,589 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:54,592 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:54,640 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:54,658 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:54,665 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:59,590 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:59,591 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:59,594 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:59,621 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:59,645 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:39:59,649 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:39:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:04,584 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:04,585 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:04,587 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:04,615 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:04,637 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:04,638 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:06,337 - __main__ - INFO - 🎮 Ejecutando comando: metrics
+2025-09-09 15:40:07,427 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 15:40:07,428 - notifications.telegram.handlers - INFO - ✅ Comando /metrics ejecutado por chat_id: 937027893
+2025-09-09 15:40:09,576 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:09,578 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:09,581 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:09,605 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:09,628 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:09,630 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:14,587 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:14,589 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:14,591 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:14,615 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:14,638 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:14,641 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:15,562 - __main__ - INFO - 🎮 Procesando comando: data_status
+2025-09-09 15:40:15,562 - __main__ - INFO - 🎮 Ejecutando comando: data_status
+2025-09-09 15:40:16,626 - notifications.telegram.telegram_bot - ERROR - ❌ Error enviando mensaje: Unsupported parse_mode
+2025-09-09 15:40:19,582 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:19,583 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:19,585 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:19,610 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:19,631 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:19,632 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:24,579 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:24,580 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:24,581 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:24,606 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:24,627 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:24,628 - werkzeug - INFO - 127.0.0.1 - - [09/Sep/2025 15:40:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2025-09-09 15:40:32,848 - __main__ - INFO - 🛑 Señal de interrupción recibida
+2025-09-09 15:40:32,849 - __main__ - INFO - 🛑 Apagando sistema...
+2025-09-09 15:40:32,849 - notifications.telegram.telegram_bot - INFO - 🛑 Bot de Telegram detenido
+2025-09-09 15:40:32,849 - __main__ - INFO - ✅ Sistema apagado correctamente
+2025-09-09 15:40:32,849 - telegram.ext.Application - CRITICAL - Fetching updates was aborted due to CancelledError(). Suppressing exception to ensure graceful shutdown.
+Traceback (most recent call last):
+  File "C:\Python313\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 707, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 678, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 1995, in _run_once
+    event_list = self._selector.select(timeout)
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 446, in select
+    self._poll(timeout)
+    ~~~~~~~~~~^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\windows_events.py", line 775, in _poll
+    status = _overlapped.GetQueuedCompletionStatus(self._iocp, ms)
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\bot.py", line 1059, in signal_handler
+    sys.exit(0)
+    ~~~~~~~~^^^
+SystemExit: 0
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 673, in stop
+    self.__update_fetcher_task.result()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1228, in _update_fetcher
+    await self.__update_fetcher()
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1207, in __update_fetcher
+    update = await self.update_queue.get()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\queues.py", line 186, in get
+    await getter
+asyncio.exceptions.CancelledError

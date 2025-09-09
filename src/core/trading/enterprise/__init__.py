@@ -23,6 +23,8 @@ from .position_manager import PositionManager
 from .order_executor import OrderExecutor
 from .leverage_calculator import LeverageCalculator
 from .market_analyzer import MarketAnalyzer
+from .trading_signal import TradingSignal, SignalType, SignalStrength
+from .position import Position
 
 __all__ = [
     'FuturesEngine',
@@ -30,7 +32,11 @@ __all__ = [
     'PositionManager',
     'OrderExecutor',
     'LeverageCalculator',
-    'MarketAnalyzer'
+    'MarketAnalyzer',
+    'TradingSignal',
+    'SignalType',
+    'SignalStrength',
+    'Position'
 ]
 
 __version__ = '1.0.0'

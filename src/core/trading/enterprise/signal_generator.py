@@ -31,7 +31,7 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 
 # Imports del proyecto
-from trading.enterprise.futures_engine import TradingSignal
+from trading.enterprise.trading_signal import TradingSignal, SignalType, SignalStrength
 
 logger = logging.getLogger(__name__)
 

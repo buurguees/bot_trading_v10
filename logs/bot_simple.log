@@ -1,0 +1,122 @@
+2025-09-09 15:04:41,077 - src.core.trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:04:41,077 - src.core.trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:04:41,884 - trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:04:41,885 - trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:04:46,058 - data.database - INFO - Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe
+2025-09-09 15:04:46,059 - data.database - WARNING - Error creando índice: no such column: strategy_name
+2025-09-09 15:04:46,059 - data.database - WARNING - Error creando índice: no such column: symbol
+2025-09-09 15:04:46,059 - data.database - WARNING - Error creando índice: no such column: alignment_session_id
+2025-09-09 15:04:46,059 - data.database - WARNING - Error creando índice: no such column: coherence_score
+2025-09-09 15:04:46,060 - data.database - INFO - Índices optimizados creados
+2025-09-09 15:04:46,060 - data.database - INFO - DatabaseManager inicializado: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-09 15:04:46,060 - data.database - INFO - Tamaño de BD: 66.8 MB
+2025-09-09 15:04:52,722 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-2' coro=<TelegramBot.start_polling() done, defined at C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\notifications\telegram\telegram_bot.py:114> exception=RuntimeError('Cannot close a running event loop')>
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1049, in __run
+    loop.run_until_complete(self._bootstrap_initialize(max_retries=bootstrap_retries))
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 696, in run_until_complete
+    self._check_running()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 632, in _check_running
+    raise RuntimeError('This event loop is already running')
+RuntimeError: This event loop is already running
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1074, in __run
+    loop.run_until_complete(self.shutdown())
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 696, in run_until_complete
+    self._check_running()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 632, in _check_running
+    raise RuntimeError('This event loop is already running')
+RuntimeError: This event loop is already running
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\notifications\telegram\telegram_bot.py", line 136, in start_polling
+    await self.application.run_polling()
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 839, in run_polling
+    return self.__run(
+           ~~~~~~~~~~^
+        updater_coroutine=self.updater.start_polling(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        close_loop=close_loop,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1079, in __run
+    loop.close()
+    ~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\proactor_events.py", line 684, in close
+    raise RuntimeError("Cannot close a running event loop")
+RuntimeError: Cannot close a running event loop
+2025-09-09 15:04:52,892 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8/sendMessage "HTTP/1.1 400 Bad Request"
+2025-09-09 15:08:06,538 - src.core.trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:08:06,539 - src.core.trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:08:07,283 - trading.bitget_client - WARNING - Credenciales de Bitget no configuradas
+2025-09-09 15:08:07,283 - trading.bitget_client - INFO - BitgetClient enterprise inicializado - Modo: paper_trading, Futures: True
+2025-09-09 15:08:11,710 - data.database - INFO - Esquema de base de datos inicializado con optimizaciones y tablas multi-timeframe
+2025-09-09 15:08:11,710 - data.database - WARNING - Error creando índice: no such column: strategy_name
+2025-09-09 15:08:11,711 - data.database - WARNING - Error creando índice: no such column: symbol
+2025-09-09 15:08:11,711 - data.database - WARNING - Error creando índice: no such column: alignment_session_id
+2025-09-09 15:08:11,711 - data.database - WARNING - Error creando índice: no such column: coherence_score
+2025-09-09 15:08:11,712 - data.database - INFO - Índices optimizados creados
+2025-09-09 15:08:11,712 - data.database - INFO - DatabaseManager inicializado: C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\data\trading_bot.db
+2025-09-09 15:08:11,712 - data.database - INFO - Tamaño de BD: 66.8 MB
+2025-09-09 15:08:17,818 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-2' coro=<TelegramBot.start_polling() done, defined at C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\notifications\telegram\telegram_bot.py:114> exception=RuntimeError('Cannot close a running event loop')>
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1049, in __run
+    loop.run_until_complete(self._bootstrap_initialize(max_retries=bootstrap_retries))
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 696, in run_until_complete
+    self._check_running()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 632, in _check_running
+    raise RuntimeError('This event loop is already running')
+RuntimeError: This event loop is already running
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1074, in __run
+    loop.run_until_complete(self.shutdown())
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 696, in run_until_complete
+    self._check_running()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\base_events.py", line 632, in _check_running
+    raise RuntimeError('This event loop is already running')
+RuntimeError: This event loop is already running
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Alex B\Desktop\bot_trading_v9\bot_trading_v10\notifications\telegram\telegram_bot.py", line 136, in start_polling
+    await self.application.run_polling()
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 839, in run_polling
+    return self.__run(
+           ~~~~~~~~~~^
+        updater_coroutine=self.updater.start_polling(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        close_loop=close_loop,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alex B\AppData\Roaming\Python\Python313\site-packages\telegram\ext\_application.py", line 1079, in __run
+    loop.close()
+    ~~~~~~~~~~^^
+  File "C:\Python313\Lib\asyncio\proactor_events.py", line 684, in close
+    raise RuntimeError("Cannot close a running event loop")
+RuntimeError: Cannot close a running event loop
+2025-09-09 15:08:17,975 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8/sendMessage "HTTP/1.1 400 Bad Request"

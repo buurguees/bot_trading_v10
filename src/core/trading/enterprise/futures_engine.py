@@ -36,6 +36,8 @@ from prometheus_client import Counter, Gauge, Histogram, start_http_server
 
 # Imports del proyecto
 sys.path.append(str(Path(__file__).parent.parent.parent))
+from trading.enterprise.trading_signal import TradingSignal, SignalType, SignalStrength
+from trading.enterprise.position import Position
 from trading.enterprise.signal_generator import MLSignalGenerator
 from trading.enterprise.position_manager import PositionManager
 from trading.enterprise.order_executor import OrderExecutor
@@ -45,43 +47,6 @@ from data.enterprise.stream_collector import EnterpriseDataCollector
 from config.enterprise_config import EnterpriseConfigManager
 
 logger = logging.getLogger(__name__)
-
-@dataclass
-class TradingSignal:
-    """Señal de trading generada por ML"""
-    symbol: str
-    action: str  # 'BUY', 'SELL', 'HOLD'
-    confidence: float
-    predicted_return: float
-    predicted_volatility: float
-    time_horizon_minutes: int
-    features_used: Dict[str, float]
-    model_version: str
-    timestamp: datetime
-
-@dataclass
-class Position:
-    """Representa una posición abierta"""
-    symbol: str
-    side: str  # 'long', 'short'
-    size: float
-    entry_price: float
-    current_price: float
-    leverage: int
-    margin_used: float
-    unrealized_pnl: float
-    unrealized_pnl_pct: float
-    entry_time: datetime
-    stop_loss: Optional[float] = None
-    take_profit: Optional[float] = None
-    
-    @property
-    def market_value(self) -> float:
-        return self.size * self.current_price
-    
-    @property
-    def duration_hours(self) -> float:
-        return (datetime.now() - self.entry_time).total_seconds() / 3600
 
 class EnterpriseFuturesEngine:
     """

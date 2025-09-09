@@ -1,0 +1,272 @@
+{
+  "timestamp": "2025-09-09T14:09:14.407691",
+  "symbols": {
+    "BTCUSDT": {
+      "1m": {
+        "file_exists": true,
+        "file_size": 4635248,
+        "records_count": 80000,
+        "date_range": {
+          "start": "2024-09-09T12:01:00",
+          "end": "2024-11-04T01:20:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "5m": {
+        "file_exists": true,
+        "file_size": 6392287,
+        "records_count": 105129,
+        "date_range": {
+          "start": "2024-09-09T11:00:00",
+          "end": "2025-09-09T11:40:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "15m": {
+        "file_exists": true,
+        "file_size": 2148591,
+        "records_count": 35044,
+        "date_range": {
+          "start": "2024-09-09T11:00:00",
+          "end": "2025-09-09T11:45:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "1h": {
+        "file_exists": true,
+        "file_size": 542043,
+        "records_count": 8761,
+        "date_range": {
+          "start": "2024-09-09T11:00:00",
+          "end": "2025-09-09T11:00:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "4h": {
+        "file_exists": true,
+        "file_size": 136934,
+        "records_count": 2190,
+        "date_range": {
+          "start": "2024-09-09T12:00:00",
+          "end": "2025-09-09T08:00:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "1d": {
+        "file_exists": true,
+        "file_size": 23152,
+        "records_count": 365,
+        "date_range": {
+          "start": "2024-09-10T00:00:00",
+          "end": "2025-09-09T00:00:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      }
+    },
+    "ETHUSDT": {
+      "1m": {
+        "file_exists": true,
+        "file_size": 28841008,
+        "records_count": 525640,
+        "date_range": {
+          "start": "2024-09-09T10:58:00",
+          "end": "2025-09-09T11:37:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "5m": {
+        "file_exists": true,
+        "file_size": 5844397,
+        "records_count": 105130,
+        "date_range": {
+          "start": "2024-09-09T11:00:00",
+          "end": "2025-09-09T11:45:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "15m": {
+        "file_exists": true,
+        "file_size": 1965885,
+        "records_count": 35044,
+        "date_range": {
+          "start": "2024-09-09T11:00:00",
+          "end": "2025-09-09T11:45:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "1h": {
+        "file_exists": true,
+        "file_size": 497198,
+        "records_count": 8761,
+        "date_range": {
+          "start": "2024-09-09T11:00:00",
+          "end": "2025-09-09T11:00:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "4h": {
+        "file_exists": true,
+        "file_size": 125503,
+        "records_count": 2190,
+        "date_range": {
+          "start": "2024-09-09T12:00:00",
+          "end": "2025-09-09T08:00:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "1d": {
+        "file_exists": true,
+        "file_size": 21194,
+        "records_count": 365,
+        "date_range": {
+          "start": "2024-09-10T00:00:00",
+          "end": "2025-09-09T00:00:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      }
+    },
+    "ADAUSDT": {
+      "1m": {
+        "file_exists": true,
+        "file_size": 91927240,
+        "records_count": 1808000,
+        "date_range": {
+          "start": "2020-09-10T10:20:00",
+          "end": "2024-02-18T23:44:00"
+        },
+        "gaps": [],
+        "data_quality": 1.0,
+        "needs_download": false,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "5m": {
+        "file_exists": false,
+        "file_size": 0,
+        "records_count": 0,
+        "date_range": {
+          "start": null,
+          "end": null
+        },
+        "gaps": [],
+        "data_quality": 0.0,
+        "needs_download": true,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "15m": {
+        "file_exists": false,
+        "file_size": 0,
+        "records_count": 0,
+        "date_range": {
+          "start": null,
+          "end": null
+        },
+        "gaps": [],
+        "data_quality": 0.0,
+        "needs_download": true,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "1h": {
+        "file_exists": false,
+        "file_size": 0,
+        "records_count": 0,
+        "date_range": {
+          "start": null,
+          "end": null
+        },
+        "gaps": [],
+        "data_quality": 0.0,
+        "needs_download": true,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "4h": {
+        "file_exists": false,
+        "file_size": 0,
+        "records_count": 0,
+        "date_range": {
+          "start": null,
+          "end": null
+        },
+        "gaps": [],
+        "data_quality": 0.0,
+        "needs_download": true,
+        "needs_repair": false,
+        "missing_periods": []
+      },
+      "1d": {
+        "file_exists": false,
+        "file_size": 0,
+        "records_count": 0,
+        "date_range": {
+          "start": null,
+          "end": null
+        },
+        "gaps": [],
+        "data_quality": 0.0,
+        "needs_download": true,
+        "needs_repair": false,
+        "missing_periods": []
+      }
+    }
+  },
+  "summary": {
+    "total_files_checked": 18,
+    "files_ok": 13,
+    "files_with_gaps": 0,
+    "files_missing": 5,
+    "files_corrupted": 0,
+    "total_gaps_found": 0,
+    "total_records_to_download": 151475
+  }
+}
