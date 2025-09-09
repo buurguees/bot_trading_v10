@@ -202,6 +202,7 @@ class TelegramBot:
         # Comandos de Historial
         self.application.add_handler(CommandHandler("download_history", self.handlers.download_history_command))
         self.application.add_handler(CommandHandler("inspect_history", self.handlers.inspect_history_command))
+        self.application.add_handler(CommandHandler("repair_history", self.handlers.repair_history_command))
         
         # Comandos de Trading Avanzado
         self.application.add_handler(CommandHandler("close_position", self.handlers.close_position_command))

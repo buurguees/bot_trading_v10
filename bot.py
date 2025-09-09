@@ -248,6 +248,7 @@ class TradingBotController:
 
 • <b>/download_history</b> - Descargar y auditar datos históricos
 • <b>/inspect_history</b> - Inspeccionar cobertura de datos
+• <b>/repair_history</b> - Reparar y depurar datos históricos
 
 <b>🛑 CONTROL:</b>
 • <b>/stop_train</b> - Detener entrenamiento de forma elegante
@@ -407,6 +408,8 @@ class TradingBotController:
                 await self._handle_download_history_command(chat_id)
             elif command_type == 'inspect_history':
                 await self._handle_inspect_history_command(chat_id)
+            elif command_type == 'repair_history':
+                await self._handle_repair_history_command(chat_id)
             elif command_type == 'trade':
                 await self._handle_trade_command(args, chat_id)
             elif command_type == 'stop_trading':
@@ -1076,7 +1079,7 @@ Usa /training_status para ver el progreso.
                     await self.telegram_bot.send_message(error_message, chat_id)
                 logger.error(error_message)
                 
-        except Exception as e:
+                        except Exception as e:
             error_message = f"❌ Error iniciando entrenamiento histórico: {e}"
             if self.telegram_bot:
                 await self.telegram_bot.send_message(error_message, chat_id)
@@ -1130,7 +1133,7 @@ Usa /training_status para ver el progreso.
                 if self.telegram_bot:
                     await self.telegram_bot.send_message(error_message, chat_id)
                 logger.error(error_message)
-                
+
         except Exception as e:
             error_message = f"❌ Error iniciando entrenamiento en vivo: {e}"
             if self.telegram_bot:
@@ -1178,7 +1181,7 @@ Usa /training_status para ver el progreso.
                     else:
                         output_queue.put(f"❌ <b>{command_name} Falló</b>\n\n• Código de salida: {return_code}\n• Estado: Error")
                         
-                except Exception as e:
+            except Exception as e:
                     output_queue.put(f"❌ <b>Error en {command_name}</b>\n\n• Error: {str(e)}")
             
             # Iniciar comando en hilo separado
@@ -1373,6 +1376,34 @@ Usa /training_status para ver el progreso.
                 
         except Exception as e:
             error_message = f"❌ Error iniciando inspección de historial: {e}"
+            if self.telegram_bot:
+                await self.telegram_bot.send_message(error_message, chat_id)
+            logger.error(error_message)
+    
+    async def _handle_repair_history_command(self, chat_id: str):
+        """Maneja comando de reparación de datos históricos"""
+        try:
+            import subprocess
+            import asyncio
+            import threading
+            from pathlib import Path
+            
+            # Ejecutar script de reparación de historial
+            script_path = Path("scripts/history/repair_history.py")
+            if script_path.exists():
+                cmd = ["python", str(script_path)]
+                
+                # Ejecutar y capturar salida en tiempo real
+                await self._execute_command_with_output(cmd, chat_id, "Reparación de Historial")
+        
+        else:
+                error_message = "❌ Script de reparación de historial no encontrado"
+                if self.telegram_bot:
+                    await self.telegram_bot.send_message(error_message, chat_id)
+                logger.error(error_message)
+                
+        except Exception as e:
+            error_message = f"❌ Error iniciando reparación de historial: {e}"
             if self.telegram_bot:
                 await self.telegram_bot.send_message(error_message, chat_id)
             logger.error(error_message)

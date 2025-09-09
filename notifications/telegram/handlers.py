@@ -1416,6 +1416,40 @@ class Handlers:
             await update.message.reply_text(error_msg)
             logger.error(f"❌ Error en /inspect_history: {e}")
     
+    async def repair_history_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Comando /repair_history - Reparar datos históricos"""
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.")
+            return
+        
+        try:
+            if not self.controller:
+                await update.message.reply_text("❌ Controlador del sistema no disponible.")
+                return
+            
+            # Enviar comando de reparación de historial al controlador
+            await self.controller.command_queue.put({
+                'type': 'repair_history',
+                'args': {},
+                'chat_id': str(update.message.chat_id)
+            })
+            
+            await update.message.reply_text(
+                "🔧 **Iniciando reparación de datos históricos...**\n\n"
+                "• Pipeline completo de limpieza\n"
+                "• Eliminación de duplicados\n"
+                "• Corrección de orden temporal\n"
+                "• Detección y relleno de gaps\n"
+                "• Alineación multi-timeframe\n"
+                "• Validación de integridad\n\n"
+                "Los mensajes se actualizarán en tiempo real."
+            )
+            
+        except Exception as e:
+            error_msg = f"❌ Error iniciando reparación de historial: {str(e)}"
+            await update.message.reply_text(error_msg)
+            logger.error(f"❌ Error en /repair_history: {e}")
+    
     async def stop_train_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Comando /stop_train - Detener entrenamiento de forma elegante"""
         if not self._check_authorization(update):
