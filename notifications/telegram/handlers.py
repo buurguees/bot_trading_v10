@@ -1352,6 +1352,70 @@ class Handlers:
             await update.message.reply_text(error_msg)
             logger.error(f"❌ Error en /set_leverage: {e}")
     
+    async def download_history_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Comando /download_history - Descargar y auditar datos históricos"""
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.")
+            return
+        
+        try:
+            if not self.controller:
+                await update.message.reply_text("❌ Controlador del sistema no disponible.")
+                return
+            
+            # Enviar comando de descarga de historial al controlador
+            await self.controller.command_queue.put({
+                'type': 'download_history',
+                'args': {},
+                'chat_id': str(update.message.chat_id)
+            })
+            
+            await update.message.reply_text(
+                "📥 **Iniciando descarga de datos históricos...**\n\n"
+                "• Verificando datos existentes\n"
+                "• Descargando datos faltantes\n"
+                "• Auditando duplicados y gaps\n"
+                "• Reparando inconsistencias\n\n"
+                "Los mensajes se actualizarán en tiempo real."
+            )
+            
+        except Exception as e:
+            error_msg = f"❌ Error iniciando descarga de historial: {str(e)}"
+            await update.message.reply_text(error_msg)
+            logger.error(f"❌ Error en /download_history: {e}")
+    
+    async def inspect_history_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Comando /inspect_history - Inspeccionar datos históricos"""
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.")
+            return
+        
+        try:
+            if not self.controller:
+                await update.message.reply_text("❌ Controlador del sistema no disponible.")
+                return
+            
+            # Enviar comando de inspección de historial al controlador
+            await self.controller.command_queue.put({
+                'type': 'inspect_history',
+                'args': {},
+                'chat_id': str(update.message.chat_id)
+            })
+            
+            await update.message.reply_text(
+                "🔍 **Iniciando inspección de datos históricos...**\n\n"
+                "• Analizando cobertura por símbolo/TF\n"
+                "• Detectando gaps y duplicados\n"
+                "• Calculando integridad de datos\n"
+                "• Generando reportes detallados\n\n"
+                "Los mensajes se actualizarán en tiempo real."
+            )
+            
+        except Exception as e:
+            error_msg = f"❌ Error iniciando inspección de historial: {str(e)}"
+            await update.message.reply_text(error_msg)
+            logger.error(f"❌ Error en /inspect_history: {e}")
+    
     async def stop_train_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Comando /stop_train - Detener entrenamiento de forma elegante"""
         if not self._check_authorization(update):

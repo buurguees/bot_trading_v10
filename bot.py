@@ -244,6 +244,11 @@ class TradingBotController:
 • <b>/train_hist</b> - Entrenamiento sobre datos históricos
 • <b>/train_live</b> - Entrenamiento en tiempo real (paper trading)
 
+<b>📥 COMANDOS DE DATOS:</b>
+
+• <b>/download_history</b> - Descargar y auditar datos históricos
+• <b>/inspect_history</b> - Inspeccionar cobertura de datos
+
 <b>🛑 CONTROL:</b>
 • <b>/stop_train</b> - Detener entrenamiento de forma elegante
 
@@ -398,6 +403,10 @@ class TradingBotController:
                 await self._handle_align_data_command(args, chat_id)
             elif command_type == 'backtest':
                 await self._handle_backtest_command(args, chat_id)
+            elif command_type == 'download_history':
+                await self._handle_download_history_command(chat_id)
+            elif command_type == 'inspect_history':
+                await self._handle_inspect_history_command(chat_id)
             elif command_type == 'trade':
                 await self._handle_trade_command(args, chat_id)
             elif command_type == 'stop_trading':
@@ -1311,6 +1320,62 @@ Usa /training_status para ver el progreso.
             if self.telegram_bot:
                 await self.telegram_bot.send_message(error_message, chat_id)
             logger.error(f"❌ Error en /stop_train: {e}")
+    
+    async def _handle_download_history_command(self, chat_id: str):
+        """Maneja comando de descarga de datos históricos"""
+        try:
+            import subprocess
+            import asyncio
+            import threading
+            from pathlib import Path
+            
+            # Ejecutar script de descarga de historial
+            script_path = Path("scripts/history/download_history.py")
+            if script_path.exists():
+                cmd = ["python", str(script_path)]
+                
+                # Ejecutar y capturar salida en tiempo real
+                await self._execute_command_with_output(cmd, chat_id, "Descarga de Historial")
+                
+            else:
+                error_message = "❌ Script de descarga de historial no encontrado"
+                if self.telegram_bot:
+                    await self.telegram_bot.send_message(error_message, chat_id)
+                logger.error(error_message)
+                
+        except Exception as e:
+            error_message = f"❌ Error iniciando descarga de historial: {e}"
+            if self.telegram_bot:
+                await self.telegram_bot.send_message(error_message, chat_id)
+            logger.error(error_message)
+    
+    async def _handle_inspect_history_command(self, chat_id: str):
+        """Maneja comando de inspección de datos históricos"""
+        try:
+            import subprocess
+            import asyncio
+            import threading
+            from pathlib import Path
+            
+            # Ejecutar script de inspección de historial
+            script_path = Path("scripts/history/inspect_history.py")
+            if script_path.exists():
+                cmd = ["python", str(script_path)]
+                
+                # Ejecutar y capturar salida en tiempo real
+                await self._execute_command_with_output(cmd, chat_id, "Inspección de Historial")
+                
+            else:
+                error_message = "❌ Script de inspección de historial no encontrado"
+                if self.telegram_bot:
+                    await self.telegram_bot.send_message(error_message, chat_id)
+                logger.error(error_message)
+                
+        except Exception as e:
+            error_message = f"❌ Error iniciando inspección de historial: {e}"
+            if self.telegram_bot:
+                await self.telegram_bot.send_message(error_message, chat_id)
+            logger.error(error_message)
 
 def main():
     """Función principal"""
