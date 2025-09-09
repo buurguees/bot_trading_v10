@@ -1,0 +1,336 @@
+# risk_management.yaml - Configuración de gestión de riesgo enterprise
+# Ubicación: C:\TradingBot_v10\config\enterprise\risk_management.yaml
+
+version: "1.0"
+
+# Configuración global de riesgo
+risk_management:
+  enabled: true
+  
+  # Configuración de capital
+  capital_management:
+    # Balance inicial y límites
+    initial_balance_usd: 10000
+    min_balance_usd: 1000       # Balance mínimo para operar
+    reserve_balance_pct: 0.1    # 10% de reserva
+    
+    # Límites de riesgo por trade
+    max_risk_per_trade_pct: 0.02     # 2% del balance por trade
+    max_risk_per_symbol_pct: 0.05    # 5% del balance por símbolo
+    max_total_exposure_pct: 0.8      # 80% exposición máxima total
+    
+    # Límites temporales
+    max_daily_loss_pct: 0.05        # 5% pérdida máxima diaria
+    max_weekly_loss_pct: 0.15       # 15% pérdida máxima semanal
+    max_monthly_loss_pct: 0.25      # 25% pérdida máxima mensual
+    
+    # Límites de drawdown
+    max_drawdown_pct: 0.20          # 20% drawdown máximo
+    max_consecutive_losses: 5        # 5 pérdidas consecutivas máximo
+
+# Configuración de position sizing
+position_sizing:
+  # Método de cálculo de tamaño
+  method: "kelly_criterion"  # fixed_percentage, kelly_criterion, volatility_adjusted
+  
+  # Configuración por método
+  fixed_percentage:
+    percentage: 0.02  # 2% del balance por trade
+    
+  kelly_criterion:
+    lookback_days: 30
+    min_kelly_fraction: 0.01
+    max_kelly_fraction: 0.05
+    
+  volatility_adjusted:
+    target_volatility: 0.02
+    lookback_days: 20
+    min_position_size: 0.01
+    max_position_size: 0.05
+    
+  # Ajustes dinámicos
+  dynamic_adjustments:
+    enabled: true
+    
+    # Ajuste por confianza del modelo
+    confidence_adjustment:
+      high_confidence: 1.5    # >90% confianza
+      medium_confidence: 1.0  # 70-90% confianza
+      low_confidence: 0.7     # 50-70% confianza
+      very_low_confidence: 0.5 # <50% confianza
+      
+    # Ajuste por volatilidad del mercado
+    volatility_adjustment:
+      low_volatility: 1.2     # <1% volatilidad diaria
+      normal_volatility: 1.0  # 1-3% volatilidad diaria
+      high_volatility: 0.8    # 3-5% volatilidad diaria
+      extreme_volatility: 0.5 # >5% volatilidad diaria
+      
+    # Ajuste por performance reciente
+    performance_adjustment:
+      winning_streak: 1.1     # Aumentar 10% en racha ganadora
+      losing_streak: 0.9      # Reducir 10% en racha perdedora
+      large_loss: 0.7         # Reducir 30% después de pérdida grande
+
+# Configuración de stop loss y take profit
+stop_loss_take_profit:
+  # Stop Loss
+  stop_loss:
+    enabled: true
+    
+    # Métodos de cálculo
+    method: "atr_based"  # fixed_percentage, atr_based, volatility_based
+    
+    fixed_percentage:
+      percentage: 0.02  # 2% del precio de entrada
+      
+    atr_based:
+      atr_period: 14
+      atr_multiplier: 2.0
+      min_stop_loss_pct: 0.01
+      max_stop_loss_pct: 0.05
+      
+    volatility_based:
+      lookback_days: 20
+      volatility_multiplier: 1.5
+      
+    # Trailing stop
+    trailing_stop:
+      enabled: true
+      trigger_pct: 0.01      # Activar cuando ganancia > 1%
+      trail_distance_pct: 0.005  # Mantener 0.5% por debajo del máximo
+      
+  # Take Profit
+  take_profit:
+    enabled: true
+    
+    # Configuración escalonada
+    scaling:
+      enabled: true
+      levels:
+        - percentage: 50    # 50% de la posición
+          target_pct: 0.02  # En 2% de ganancia
+        - percentage: 30    # 30% de la posición
+          target_pct: 0.04  # En 4% de ganancia
+        - percentage: 20    # 20% restante
+          target_pct: 0.06  # En 6% de ganancia
+          
+    # Take profit fijo (alternativo)
+    fixed:
+      enabled: false
+      target_pct: 0.03  # 3% de ganancia
+
+# Configuración de circuit breakers
+circuit_breakers:
+  enabled: true
+  
+  # Circuit breaker por pérdidas
+  loss_circuit_breaker:
+    enabled: true
+    daily_loss_threshold_pct: 0.05    # 5% pérdida diaria
+    weekly_loss_threshold_pct: 0.12   # 12% pérdida semanal
+    monthly_loss_threshold_pct: 0.20  # 20% pérdida mensual
+    
+    # Acciones a tomar
+    actions:
+      - "close_all_positions"
+      - "pause_new_trades"
+      - "send_alert"
+      - "reduce_position_sizes"
+      
+  # Circuit breaker por drawdown
+  drawdown_circuit_breaker:
+    enabled: true
+    max_drawdown_threshold_pct: 0.15  # 15% drawdown
+    
+    actions:
+      - "close_losing_positions"
+      - "reduce_leverage"
+      - "pause_new_trades"
+      - "send_critical_alert"
+      
+  # Circuit breaker por volatilidad extrema
+  volatility_circuit_breaker:
+    enabled: true
+    volatility_threshold_pct: 0.10    # 10% movimiento en 1 hora
+    
+    actions:
+      - "reduce_position_sizes"
+      - "increase_stop_losses"
+      - "pause_momentum_strategies"
+
+# Configuración de correlación y concentración
+correlation_management:
+  enabled: true
+  
+  # Límites de correlación
+  max_correlation: 0.8               # Correlación máxima entre posiciones
+  correlation_lookback_days: 30      # Días para calcular correlación
+  
+  # Límites de concentración
+  max_concentration_per_asset: 0.3   # 30% máximo en un activo
+  max_concentration_per_sector: 0.5  # 50% máximo en un sector
+  
+  # Diversificación mínima
+  min_assets_in_portfolio: 3         # Mínimo 3 activos diferentes
+
+# Configuración de VaR (Value at Risk)
+var_calculation:
+  enabled: true
+  
+  # Configuración de cálculo
+  confidence_level: 0.95             # 95% nivel de confianza
+  holding_period_days: 1             # 1 día holding period
+  lookback_days: 252                 # 1 año de datos históricos
+  
+  # Métodos de cálculo
+  methods:
+    - "historical_simulation"
+    - "parametric_var"
+    - "monte_carlo"
+    
+  # Límites VaR
+  max_daily_var_pct: 0.03           # 3% VaR diario máximo
+  max_weekly_var_pct: 0.08          # 8% VaR semanal máximo
+
+# Configuración de stress testing
+stress_testing:
+  enabled: true
+  
+  # Escenarios de estrés
+  scenarios:
+    market_crash:
+      description: "Caída del mercado 20%"
+      shock_percentage: -0.20
+      correlation_increase: 0.3
+      
+    black_swan:
+      description: "Evento de cisne negro"
+      shock_percentage: -0.35
+      correlation_increase: 0.5
+      volatility_multiplier: 3.0
+      
+    sector_rotation:
+      description: "Rotación sectorial severa"
+      crypto_shock: -0.30
+      correlation_change: -0.2
+      
+  # Frecuencia de testing
+  testing_frequency: "daily"
+  
+  # Límites de pérdida en stress tests
+  max_stress_loss_pct: 0.25         # 25% pérdida máxima en stress test
+
+# Configuración de margin y leverage
+margin_management:
+  # Límites de margin
+  max_margin_ratio: 0.8             # 80% ratio de margin máximo
+  margin_call_threshold: 0.85       # 85% umbral para margin call
+  
+  # Gestión de leverage
+  leverage_management:
+    enabled: true
+    
+    # Ajuste dinámico de leverage
+    dynamic_leverage:
+      enabled: true
+      base_leverage: 5
+      max_leverage: 20               # Reducido por seguridad
+      
+      # Factores de ajuste
+      volatility_factor: true        # Reducir leverage en alta volatilidad
+      correlation_factor: true       # Reducir leverage en alta correlación
+      drawdown_factor: true          # Reducir leverage en drawdown
+      
+    # Limits por activo
+    leverage_limits:
+      BTCUSDT: 15
+      ETHUSDT: 12
+      ADAUSDT: 8
+      SOLUSDT: 8
+      DOGEUSDT: 5
+      default: 5
+
+# Configuración de monitoreo de riesgo
+risk_monitoring:
+  enabled: true
+  
+  # Frecuencia de monitoreo
+  monitoring_frequency_seconds: 10
+  
+  # Métricas de riesgo a monitorear
+  metrics:
+    - "portfolio_var"
+    - "portfolio_cvar"
+    - "current_drawdown"
+    - "correlation_matrix"
+    - "concentration_risk"
+    - "leverage_ratio"
+    - "margin_ratio"
+    - "liquidity_risk"
+    
+  # Alertas de riesgo
+  alerts:
+    enabled: true
+    
+    alert_conditions:
+      - name: "high_var"
+        condition: "daily_var > max_daily_var * 0.8"
+        severity: "warning"
+        
+      - name: "approaching_margin_call"
+        condition: "margin_ratio > 0.75"
+        severity: "critical"
+        
+      - name: "high_concentration"
+        condition: "max_asset_concentration > 0.25"
+        severity: "warning"
+        
+      - name: "high_correlation"
+        condition: "avg_correlation > 0.7"
+        severity: "warning"
+
+# Configuración de reporting
+risk_reporting:
+  enabled: true
+  
+  # Reportes automáticos
+  reports:
+    daily_risk_report:
+      enabled: true
+      time: "23:55"
+      recipients: ["risk@company.com"]
+      
+    weekly_var_report:
+      enabled: true
+      day: "friday"
+      time: "17:00"
+      
+    monthly_stress_test:
+      enabled: true
+      day: "last"
+      time: "16:00"
+      
+  # Formato de reportes
+  report_format: "json"  # json, pdf, excel
+  output_directory: "reports/risk/"
+  
+# Configuración de auditoría
+risk_audit:
+  enabled: true
+  
+  # Logging de eventos de riesgo
+  audit_events:
+    - "position_size_exceeded"
+    - "stop_loss_triggered"
+    - "margin_call_triggered"
+    - "circuit_breaker_activated"
+    - "risk_limit_violated"
+    - "correlation_limit_exceeded"
+    
+  # Retención de logs de auditoría
+  audit_retention_days: 2555  # 7 años para compliance
+  
+  # Integridad de logs
+  log_integrity_check: true
+  checksum_algorithm: "sha256"

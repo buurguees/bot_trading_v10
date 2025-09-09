@@ -1,0 +1,384 @@
+# futures_config.yaml - Configuración específica para trading de futuros
+# Ubicación: C:\TradingBot_v10\config\enterprise\futures_config.yaml
+
+version: "1.0"
+
+# Configuración de futuros por exchange
+exchanges:
+  bitget:
+    name: "Bitget"
+    type: "derivatives"
+    
+    endpoints:
+      rest_base: "https://api.bitget.com"
+      websocket_base: "wss://ws.bitget.com"
+      futures_path: "/api/mix/v1"
+      websocket_path: "/mix/v1/stream"
+      
+    connection:
+      timeout: 30
+      max_retries: 3
+      retry_delay: 1.0
+      rate_limit_per_second: 10
+      
+    authentication:
+      api_key: ""  # Configurar en .env
+      secret_key: ""  # Configurar en .env
+      passphrase: ""  # Configurar en .env
+      
+    limits:
+      max_leverage: 125
+      min_order_size: 1
+      max_order_size: 1000000
+      tick_size: 0.0001
+      
+    fees:
+      maker_fee: 0.0002
+      taker_fee: 0.0006
+      funding_fee_interval_hours: 8
+      
+    products:
+      BTCUSDT:
+        contract_type: "perpetual"
+        base_asset: "BTC"
+        quote_asset: "USDT"
+        contract_size: 0.001
+        tick_size: 0.1
+        min_order_qty: 1
+        max_leverage: 125
+        maintenance_margin_rate: 0.004
+        
+      ETHUSDT:
+        contract_type: "perpetual"
+        base_asset: "ETH"
+        quote_asset: "USDT"
+        contract_size: 0.01
+        tick_size: 0.01
+        min_order_qty: 1
+        max_leverage: 75
+        maintenance_margin_rate: 0.005
+        
+      ADAUSDT:
+        contract_type: "perpetual"
+        base_asset: "ADA"
+        quote_asset: "USDT"
+        contract_size: 1
+        tick_size: 0.0001
+        min_order_qty: 1
+        max_leverage: 50
+        maintenance_margin_rate: 0.01
+        
+      SOLUSDT:
+        contract_type: "perpetual"
+        base_asset: "SOL"
+        quote_asset: "USDT"
+        contract_size: 0.1
+        tick_size: 0.001
+        min_order_qty: 1
+        max_leverage: 50
+        maintenance_margin_rate: 0.01
+        
+      DOGEUSDT:
+        contract_type: "perpetual"
+        base_asset: "DOGE"
+        quote_asset: "USDT"
+        contract_size: 100
+        tick_size: 0.00001
+        min_order_qty: 1
+        max_leverage: 25
+        maintenance_margin_rate: 0.02
+
+# Configuración de leverage por estrategia
+leverage_strategies:
+  conservative:
+    base_leverage: 2
+    max_leverage: 10
+    volatility_adjustment: 0.5
+    
+  moderate:
+    base_leverage: 5
+    max_leverage: 20
+    volatility_adjustment: 0.8
+    
+  aggressive:
+    base_leverage: 10
+    max_leverage: 30
+    volatility_adjustment: 1.2
+
+# Configuración de margin modes
+margin_modes:
+  isolated:
+    enabled: true
+    default_margin_ratio: 0.1
+    auto_add_margin: false
+    
+  cross:
+    enabled: false
+    shared_margin: true
+    risk_multiplier: 1.5
+
+# Configuración de funding rates
+funding_rates:
+  enabled: true
+  
+  # Configuración de cálculo
+  calculation:
+    method: "exchange_provided"  # exchange_provided, calculated
+    lookback_hours: 8
+    smoothing_factor: 0.1
+    
+  # Límites de funding rate
+  limits:
+    max_funding_rate: 0.01      # 1% máximo
+    min_funding_rate: -0.01     # -1% mínimo
+    
+  # Configuración de costos
+  costs:
+    include_funding_costs: true
+    funding_cost_multiplier: 1.0
+    
+  # Alertas de funding
+  alerts:
+    enabled: true
+    high_funding_threshold: 0.005  # 0.5%
+    extreme_funding_threshold: 0.01  # 1%
+
+# Configuración de liquidación
+liquidation:
+  enabled: true
+  
+  # Configuración de liquidación automática
+  auto_liquidation:
+    enabled: true
+    liquidation_threshold: 0.95  # 95% del margin requirement
+    
+  # Configuración de liquidación manual
+  manual_liquidation:
+    enabled: true
+    liquidation_threshold: 0.90  # 90% del margin requirement
+    
+  # Configuración de liquidación parcial
+  partial_liquidation:
+    enabled: true
+    liquidation_percentage: 0.5  # 50% de la posición
+    
+  # Configuración de liquidación escalonada
+  staged_liquidation:
+    enabled: true
+    stages:
+      - threshold: 0.90
+        liquidation_pct: 0.25
+      - threshold: 0.95
+        liquidation_pct: 0.50
+      - threshold: 0.98
+        liquidation_pct: 1.00
+
+# Configuración de hedging
+hedging:
+  enabled: false
+  
+  # Configuración de hedge automático
+  auto_hedge:
+    enabled: false
+    hedge_ratio: 0.5
+    hedge_threshold: 0.1
+    
+  # Configuración de hedge manual
+  manual_hedge:
+    enabled: false
+    hedge_ratio: 1.0
+    
+  # Configuración de hedge dinámico
+  dynamic_hedge:
+    enabled: false
+    min_hedge_ratio: 0.3
+    max_hedge_ratio: 0.7
+    volatility_threshold: 0.05
+
+# Configuración de arbitraje
+arbitrage:
+  enabled: false
+  
+  # Configuración de arbitraje entre exchanges
+  cross_exchange:
+    enabled: false
+    min_profit_threshold: 0.001  # 0.1%
+    max_position_size: 1000
+    
+  # Configuración de arbitraje temporal
+  temporal:
+    enabled: false
+    time_window_minutes: 5
+    min_profit_threshold: 0.0005  # 0.05%
+
+# Configuración de market making
+market_making:
+  enabled: false
+  
+  # Configuración de spreads
+  spreads:
+    base_spread: 0.001  # 0.1%
+    min_spread: 0.0005  # 0.05%
+    max_spread: 0.005   # 0.5%
+    
+  # Configuración de inventario
+  inventory:
+    max_inventory_ratio: 0.3
+    rebalance_threshold: 0.2
+    
+  # Configuración de riesgo
+  risk_limits:
+    max_position_size: 1000
+    max_daily_trades: 1000
+
+# Configuración de notificaciones
+notifications:
+  enabled: true
+  
+  # Eventos de notificación
+  events:
+    position_opened:
+      enabled: true
+      channels: ["slack", "email"]
+      
+    position_closed:
+      enabled: true
+      channels: ["slack"]
+      
+    stop_loss_triggered:
+      enabled: true
+      channels: ["slack", "email", "discord"]
+      
+    take_profit_triggered:
+      enabled: true
+      channels: ["slack"]
+      
+    margin_call:
+      enabled: true
+      channels: ["slack", "email", "discord", "sms"]
+      
+    liquidation:
+      enabled: true
+      channels: ["slack", "email", "discord", "sms"]
+      
+    funding_payment:
+      enabled: true
+      channels: ["slack"]
+      
+    large_pnl:
+      enabled: true
+      channels: ["slack", "email"]
+      threshold: 1000  # USD
+      
+    high_leverage:
+      enabled: true
+      channels: ["slack"]
+      threshold: 20
+
+# Configuración de logging
+logging:
+  level: "INFO"
+  
+  # Archivos de log específicos
+  files:
+    futures_main:
+      path: "logs/enterprise/trading/futures/main.log"
+      max_size_mb: 100
+      backup_count: 10
+      
+    positions:
+      path: "logs/enterprise/trading/futures/positions.log"
+      max_size_mb: 50
+      backup_count: 20
+      
+    orders:
+      path: "logs/enterprise/trading/futures/orders.log"
+      max_size_mb: 50
+      backup_count: 20
+      
+    funding:
+      path: "logs/enterprise/trading/futures/funding.log"
+      max_size_mb: 25
+      backup_count: 30
+      
+    liquidation:
+      path: "logs/enterprise/trading/futures/liquidation.log"
+      max_size_mb: 25
+      backup_count: 30
+      
+  # Formato de logs
+  formatters:
+    futures: "%(asctime)s - FUTURES - %(levelname)s - [%(symbol)s] - %(message)s"
+    position: "%(asctime)s - POSITION - %(levelname)s - [%(symbol)s] - %(message)s"
+    order: "%(asctime)s - ORDER - %(levelname)s - [%(symbol)s] - %(message)s"
+    funding: "%(asctime)s - FUNDING - %(levelname)s - [%(symbol)s] - %(message)s"
+
+# Configuración de monitoreo
+monitoring:
+  enabled: true
+  
+  # Métricas específicas de futuros
+  metrics:
+    - "futures_positions_count"
+    - "futures_leverage_ratio"
+    - "futures_margin_usage"
+    - "futures_funding_payments"
+    - "futures_liquidation_risk"
+    - "futures_pnl_unrealized"
+    - "futures_pnl_realized"
+    - "futures_volume_24h"
+    
+  # Alertas específicas
+  alerts:
+    - name: "high_leverage"
+      condition: "leverage_ratio > 20"
+      severity: "warning"
+      
+    - name: "margin_call_risk"
+      condition: "margin_usage > 0.8"
+      severity: "critical"
+      
+    - name: "liquidation_risk"
+      condition: "liquidation_risk > 0.9"
+      severity: "critical"
+      
+    - name: "high_funding_cost"
+      condition: "funding_rate > 0.005"
+      severity: "warning"
+
+# Configuración de backtesting
+backtesting:
+  enabled: true
+  
+  # Configuración específica para futuros
+  futures_specific:
+    include_funding_costs: true
+    include_slippage: true
+    include_commission: true
+    
+  # Configuración de datos
+  data:
+    start_date: "2023-01-01"
+    end_date: "2024-12-31"
+    timeframe: "1h"
+    
+  # Configuración de costos
+  costs:
+    maker_fee: 0.0002
+    taker_fee: 0.0006
+    funding_rate: 0.0001
+    slippage_rate: 0.0001
+    
+  # Configuración de capital inicial
+  initial_capital: 10000
+  
+  # Métricas específicas de futuros
+  metrics:
+    - "total_return"
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "win_rate"
+    - "profit_factor"
+    - "funding_costs"
+    - "leverage_utilization"
+    - "liquidation_events"

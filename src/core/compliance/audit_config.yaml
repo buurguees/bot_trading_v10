@@ -1,0 +1,255 @@
+# audit_config.yaml - Configuración de auditoría enterprise
+# Ubicación: C:\TradingBot_v10\compliance\audit_config.yaml
+
+version: "1.0"
+
+# Configuración global de auditoría
+audit:
+  enabled: true
+  
+  # Configuración de retención
+  retention:
+    audit_logs_days: 2555  # 7 años para compliance
+    compliance_reports_days: 2555
+    violation_logs_days: 2555
+    
+  # Configuración de integridad
+  integrity:
+    checksum_algorithm: "sha256"
+    verify_integrity: true
+    integrity_check_frequency_hours: 24
+    
+  # Configuración de encriptación
+  encryption:
+    enabled: true
+    algorithm: "AES-256-GCM"
+    key_rotation_days: 90
+
+# Reglas de compliance
+compliance:
+  rules:
+    - id: "max_position_size"
+      name: "Tamaño máximo de posición"
+      description: "Verificar que el tamaño de posición no exceda límites"
+      level: "high"
+      enabled: true
+      condition: "position_size > max_position_size"
+      action: "alert"
+      severity: "warning"
+      
+    - id: "max_daily_loss"
+      name: "Pérdida diaria máxima"
+      description: "Verificar que la pérdida diaria no exceda límites"
+      level: "critical"
+      enabled: true
+      condition: "daily_pnl < max_daily_loss"
+      action: "stop_trading"
+      severity: "critical"
+      
+    - id: "max_leverage"
+      name: "Leverage máximo"
+      description: "Verificar que el leverage no exceda límites"
+      level: "high"
+      enabled: true
+      condition: "leverage > max_leverage"
+      action: "alert"
+      severity: "warning"
+      
+    - id: "min_balance"
+      name: "Balance mínimo"
+      description: "Verificar que el balance no esté por debajo del mínimo"
+      level: "critical"
+      enabled: true
+      condition: "balance < min_balance"
+      action: "stop_trading"
+      severity: "critical"
+      
+    - id: "max_drawdown"
+      name: "Drawdown máximo"
+      description: "Verificar que el drawdown no exceda límites"
+      level: "high"
+      enabled: true
+      condition: "current_drawdown > max_drawdown"
+      action: "reduce_positions"
+      severity: "warning"
+      
+    - id: "correlation_limit"
+      name: "Límite de correlación"
+      description: "Verificar que la correlación entre posiciones no exceda límites"
+      level: "medium"
+      enabled: true
+      condition: "max_correlation > correlation_limit"
+      action: "alert"
+      severity: "warning"
+      
+    - id: "concentration_limit"
+      name: "Límite de concentración"
+      description: "Verificar que la concentración por activo no exceda límites"
+      level: "medium"
+      enabled: true
+      condition: "max_concentration > concentration_limit"
+      action: "alert"
+      severity: "warning"
+      
+    - id: "margin_call_risk"
+      name: "Riesgo de margin call"
+      description: "Verificar que no haya riesgo de margin call"
+      level: "critical"
+      enabled: true
+      condition: "margin_ratio > margin_call_threshold"
+      action: "close_positions"
+      severity: "critical"
+      
+    - id: "liquidation_risk"
+      name: "Riesgo de liquidación"
+      description: "Verificar que no haya riesgo de liquidación"
+      level: "critical"
+      enabled: true
+      condition: "liquidation_risk > liquidation_threshold"
+      action: "emergency_close"
+      severity: "critical"
+      
+    - id: "unusual_activity"
+      name: "Actividad inusual"
+      description: "Detectar actividad de trading inusual"
+      level: "medium"
+      enabled: true
+      condition: "trades_per_minute > normal_trades_per_minute * 3"
+      action: "alert"
+      severity: "warning"
+
+# Configuración de reportes
+reporting:
+  enabled: true
+  
+  # Reportes automáticos
+  reports:
+    daily_compliance_report:
+      enabled: true
+      time: "23:55"
+      recipients: ["compliance@company.com"]
+      
+    weekly_risk_report:
+      enabled: true
+      day: "friday"
+      time: "17:00"
+      recipients: ["risk@company.com"]
+      
+    monthly_audit_report:
+      enabled: true
+      day: "last"
+      time: "16:00"
+      recipients: ["audit@company.com"]
+      
+  # Formato de reportes
+  format: "json"  # json, pdf, excel
+  output_directory: "reports/compliance/"
+  
+  # Configuración de notificaciones
+  notifications:
+    enabled: true
+    channels:
+      email:
+        enabled: true
+        smtp_server: "smtp.gmail.com"
+        smtp_port: 587
+        from_email: "compliance@company.com"
+        
+      slack:
+        enabled: true
+        webhook_url: ""  # Configurar en vault
+        channel: "#compliance-alerts"
+        
+      discord:
+        enabled: false
+        webhook_url: ""
+
+# Configuración de logging
+logging:
+  level: "INFO"
+  
+  # Archivos de log específicos
+  files:
+    compliance_main:
+      path: "logs/enterprise/trading/compliance/main.log"
+      max_size_mb: 100
+      backup_count: 10
+      
+    violations:
+      path: "logs/enterprise/trading/compliance/violations.log"
+      max_size_mb: 50
+      backup_count: 20
+      
+    audit:
+      path: "logs/enterprise/trading/compliance/audit.log"
+      max_size_mb: 50
+      backup_count: 20
+      
+    reports:
+      path: "logs/enterprise/trading/compliance/reports.log"
+      max_size_mb: 25
+      backup_count: 30
+      
+  # Formato de logs
+  formatters:
+    compliance: "%(asctime)s - COMPLIANCE - %(levelname)s - %(message)s"
+    violation: "%(asctime)s - VIOLATION - %(levelname)s - [%(rule_id)s] - %(message)s"
+    audit: "%(asctime)s - AUDIT - %(levelname)s - %(message)s"
+    report: "%(asctime)s - REPORT - %(levelname)s - %(message)s"
+
+# Configuración de monitoreo
+monitoring:
+  enabled: true
+  
+  # Métricas de compliance
+  metrics:
+    - "compliance_score"
+    - "total_violations"
+    - "open_violations"
+    - "resolved_violations"
+    - "violations_by_severity"
+    - "compliance_trend"
+    
+  # Alertas de compliance
+  alerts:
+    enabled: true
+    
+    alert_conditions:
+      - name: "high_violation_rate"
+        condition: "violations_per_hour > 10"
+        severity: "warning"
+        
+      - name: "critical_violation"
+        condition: "critical_violations > 0"
+        severity: "critical"
+        
+      - name: "low_compliance_score"
+        condition: "compliance_score < 0.8"
+        severity: "warning"
+        
+      - name: "unresolved_violations"
+        condition: "open_violations > 5"
+        severity: "warning"
+
+# Configuración de exportación
+export:
+  enabled: true
+  
+  # Formatos de exportación
+  formats:
+    - "json"
+    - "csv"
+    - "excel"
+    
+  # Frecuencia de exportación
+  frequency: "daily"
+  
+  # Configuración de compresión
+  compression: true
+  compression_algorithm: "gzip"
+  
+  # Configuración de encriptación
+  encryption:
+    enabled: true
+    algorithm: "AES-256-GCM"
+    key_rotation_days: 90

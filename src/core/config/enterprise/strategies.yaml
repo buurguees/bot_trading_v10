@@ -1,0 +1,431 @@
+# strategies.yaml - Configuración de estrategias de trading enterprise
+# Ubicación: C:\TradingBot_v10\config\enterprise\strategies.yaml
+
+version: "1.0"
+
+# Configuración global de estrategias
+strategies:
+  enabled: true
+  
+  # Configuración de ejecución
+  execution:
+    parallel_execution: true
+    max_concurrent_strategies: 3
+    strategy_timeout_minutes: 30
+    
+  # Configuración de capital
+  capital_allocation:
+    total_capital_pct: 1.0  # 100% del capital disponible
+    reserve_capital_pct: 0.1  # 10% de reserva
+    
+  # Configuración de monitoreo
+  monitoring:
+    enabled: true
+    update_frequency_seconds: 30
+    performance_tracking: true
+    risk_monitoring: true
+
+# Estrategia ML (Machine Learning)
+ml_strategy:
+  enabled: true
+  weight: 0.7  # 70% del capital
+  priority: 1
+  
+  # Configuración del modelo
+  model:
+    name: "lstm_attention"
+    version: "latest"
+    confidence_threshold: 0.65
+    prediction_horizon_minutes: 60
+    retrain_frequency_hours: 24
+    
+  # Configuración de señales
+  signals:
+    min_confidence: 0.65
+    signal_aggregation: "weighted_average"
+    signal_timeout_minutes: 30
+    signal_decay_factor: 0.95
+    
+  # Configuración de trading
+  trading:
+    max_position_size_pct: 0.3  # 30% del capital por posición
+    min_position_size_pct: 0.05  # 5% del capital por posición
+    max_positions: 5
+    position_holding_hours: 24
+    
+  # Configuración de risk management
+  risk_management:
+    stop_loss_pct: 0.02  # 2% stop loss
+    take_profit_pct: 0.04  # 4% take profit
+    trailing_stop: true
+    trailing_stop_pct: 0.01  # 1% trailing stop
+    
+  # Configuración de indicadores
+  indicators:
+    technical:
+      - "sma_20"
+      - "sma_50"
+      - "ema_12"
+      - "ema_26"
+      - "rsi_14"
+      - "macd"
+      - "bollinger_bands"
+      
+    fundamental:
+      - "volume_profile"
+      - "price_momentum"
+      - "volatility_regime"
+      
+    sentiment:
+      - "fear_greed_index"
+      - "social_sentiment"
+      - "news_sentiment"
+
+# Estrategia Momentum
+momentum_strategy:
+  enabled: true
+  weight: 0.2  # 20% del capital
+  priority: 2
+  
+  # Configuración de indicadores
+  indicators:
+    rsi:
+      period: 14
+      overbought: 70
+      oversold: 30
+      
+    macd:
+      fast_period: 12
+      slow_period: 26
+      signal_period: 9
+      
+    bollinger_bands:
+      period: 20
+      std_dev: 2
+      
+    stochastic:
+      k_period: 14
+      d_period: 3
+      overbought: 80
+      oversold: 20
+      
+  # Configuración de señales
+  signals:
+    entry_conditions:
+      - "rsi_oversold_and_macd_bullish"
+      - "price_above_bollinger_middle"
+      - "stochastic_oversold"
+      
+    exit_conditions:
+      - "rsi_overbought"
+      - "macd_bearish_crossover"
+      - "price_below_bollinger_lower"
+      
+  # Configuración de trading
+  trading:
+    max_position_size_pct: 0.2
+    min_position_size_pct: 0.05
+    max_positions: 3
+    position_holding_hours: 12
+    
+  # Configuración de risk management
+  risk_management:
+    stop_loss_pct: 0.015  # 1.5% stop loss
+    take_profit_pct: 0.03  # 3% take profit
+    trailing_stop: true
+    trailing_stop_pct: 0.008  # 0.8% trailing stop
+
+# Estrategia Mean Reversion
+mean_reversion_strategy:
+  enabled: true
+  weight: 0.1  # 10% del capital
+  priority: 3
+  
+  # Configuración de indicadores
+  indicators:
+    bollinger_bands:
+      period: 20
+      std_dev: 2
+      
+    rsi:
+      period: 14
+      overbought: 70
+      oversold: 30
+      
+    z_score:
+      period: 20
+      threshold: 2.0
+      
+    mean_reversion_threshold: 0.02  # 2% desviación del precio medio
+    
+  # Configuración de señales
+  signals:
+    entry_conditions:
+      - "price_below_bollinger_lower"
+      - "rsi_oversold"
+      - "z_score_below_threshold"
+      
+    exit_conditions:
+      - "price_above_bollinger_middle"
+      - "rsi_normal"
+      - "z_score_above_threshold"
+      
+  # Configuración de trading
+  trading:
+    max_position_size_pct: 0.15
+    min_position_size_pct: 0.03
+    max_positions: 2
+    position_holding_hours: 6
+    
+  # Configuración de risk management
+  risk_management:
+    stop_loss_pct: 0.01  # 1% stop loss
+    take_profit_pct: 0.02  # 2% take profit
+    trailing_stop: false
+
+# Estrategia Breakout
+breakout_strategy:
+  enabled: false
+  weight: 0.0
+  priority: 4
+  
+  # Configuración de indicadores
+  indicators:
+    support_resistance:
+      lookback_period: 20
+      min_touches: 2
+      
+    volume:
+      volume_threshold: 1.5  # 1.5x volumen promedio
+      
+    volatility:
+      atr_period: 14
+      volatility_threshold: 0.02
+      
+  # Configuración de señales
+  signals:
+    entry_conditions:
+      - "price_breaks_resistance"
+      - "volume_confirmation"
+      - "volatility_increase"
+      
+    exit_conditions:
+      - "price_returns_to_range"
+      - "volume_decrease"
+      - "time_based_exit"
+      
+  # Configuración de trading
+  trading:
+    max_position_size_pct: 0.1
+    min_position_size_pct: 0.02
+    max_positions: 1
+    position_holding_hours: 8
+    
+  # Configuración de risk management
+  risk_management:
+    stop_loss_pct: 0.025  # 2.5% stop loss
+    take_profit_pct: 0.05  # 5% take profit
+    trailing_stop: true
+    trailing_stop_pct: 0.015  # 1.5% trailing stop
+
+# Estrategia Arbitrage
+arbitrage_strategy:
+  enabled: false
+  weight: 0.0
+  priority: 5
+  
+  # Configuración de arbitraje
+  arbitrage:
+    type: "cross_exchange"  # cross_exchange, temporal, statistical
+    
+    cross_exchange:
+      enabled: false
+      exchanges: ["bitget", "binance", "okx"]
+      min_profit_threshold: 0.001  # 0.1%
+      max_position_size: 1000
+      
+    temporal:
+      enabled: false
+      time_window_minutes: 5
+      min_profit_threshold: 0.0005  # 0.05%
+      
+    statistical:
+      enabled: false
+      lookback_period: 30
+      z_score_threshold: 2.0
+      
+  # Configuración de trading
+  trading:
+    max_position_size_pct: 0.05
+    min_position_size_pct: 0.01
+    max_positions: 1
+    position_holding_minutes: 30
+    
+  # Configuración de risk management
+  risk_management:
+    stop_loss_pct: 0.005  # 0.5% stop loss
+    take_profit_pct: 0.002  # 0.2% take profit
+    trailing_stop: false
+
+# Estrategia Market Making
+market_making_strategy:
+  enabled: false
+  weight: 0.0
+  priority: 6
+  
+  # Configuración de market making
+  market_making:
+    spreads:
+      base_spread: 0.001  # 0.1%
+      min_spread: 0.0005  # 0.05%
+      max_spread: 0.005   # 0.5%
+      
+    inventory:
+      max_inventory_ratio: 0.3
+      rebalance_threshold: 0.2
+      
+    risk_limits:
+      max_position_size: 1000
+      max_daily_trades: 1000
+      
+  # Configuración de trading
+  trading:
+    max_position_size_pct: 0.1
+    min_position_size_pct: 0.02
+    max_positions: 2
+    position_holding_hours: 4
+    
+  # Configuración de risk management
+  risk_management:
+    stop_loss_pct: 0.01  # 1% stop loss
+    take_profit_pct: 0.005  # 0.5% take profit
+    trailing_stop: false
+
+# Configuración de estrategias personalizadas
+custom_strategies:
+  enabled: false
+  
+  # Configuración de estrategias definidas por usuario
+  user_defined:
+    enabled: false
+    max_strategies: 5
+    validation_required: true
+    
+  # Configuración de estrategias de terceros
+  third_party:
+    enabled: false
+    allowed_providers: []
+    validation_required: true
+
+# Configuración de monitoreo de estrategias
+strategy_monitoring:
+  enabled: true
+  
+  # Métricas de performance
+  performance_metrics:
+    - "total_return"
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "win_rate"
+    - "profit_factor"
+    - "calmar_ratio"
+    - "var_95"
+    - "cvar_95"
+    
+  # Métricas de riesgo
+  risk_metrics:
+    - "position_size"
+    - "leverage_ratio"
+    - "correlation_risk"
+    - "concentration_risk"
+    - "liquidity_risk"
+    
+  # Alertas de estrategias
+  alerts:
+    enabled: true
+    
+    alert_conditions:
+      - name: "strategy_large_loss"
+        condition: "daily_pnl < -1000"
+        severity: "warning"
+        
+      - name: "strategy_high_drawdown"
+        condition: "current_drawdown > 0.1"
+        severity: "critical"
+        
+      - name: "strategy_low_performance"
+        condition: "sharpe_ratio < 0.5"
+        severity: "warning"
+        
+      - name: "strategy_high_correlation"
+        condition: "correlation_with_market > 0.8"
+        severity: "warning"
+
+# Configuración de backtesting
+strategy_backtesting:
+  enabled: true
+  
+  # Configuración de datos
+  data:
+    start_date: "2023-01-01"
+    end_date: "2024-12-31"
+    timeframe: "1h"
+    
+  # Configuración de costos
+  costs:
+    commission_rate: 0.0006  # 0.06% por trade
+    slippage_rate: 0.0001    # 0.01% slippage promedio
+    funding_rate: 0.0001     # 0.01% funding rate promedio
+    
+  # Configuración de capital inicial
+  initial_capital: 10000
+  
+  # Métricas de backtesting
+  metrics:
+    - "total_return"
+    - "annualized_return"
+    - "volatility"
+    - "sharpe_ratio"
+    - "sortino_ratio"
+    - "max_drawdown"
+    - "calmar_ratio"
+    - "win_rate"
+    - "profit_factor"
+    - "average_trade_duration"
+    - "var_95"
+    - "cvar_95"
+    - "strategy_correlation"
+    - "strategy_beta"
+
+# Configuración de logging
+strategy_logging:
+  level: "INFO"
+  
+  # Archivos de log específicos
+  files:
+    strategies_main:
+      path: "logs/enterprise/trading/strategies/main.log"
+      max_size_mb: 100
+      backup_count: 10
+      
+    ml_strategy:
+      path: "logs/enterprise/trading/strategies/ml_strategy.log"
+      max_size_mb: 50
+      backup_count: 20
+      
+    momentum_strategy:
+      path: "logs/enterprise/trading/strategies/momentum_strategy.log"
+      max_size_mb: 50
+      backup_count: 20
+      
+    mean_reversion_strategy:
+      path: "logs/enterprise/trading/strategies/mean_reversion_strategy.log"
+      max_size_mb: 50
+      backup_count: 20
+      
+  # Formato de logs
+  formatters:
+    strategy: "%(asctime)s - STRATEGY - %(levelname)s - [%(strategy_name)s] - %(message)s"
+    ml: "%(asctime)s - ML_STRATEGY - %(levelname)s - [%(symbol)s] - %(message)s"
+    momentum: "%(asctime)s - MOMENTUM - %(levelname)s - [%(symbol)s] - %(message)s"
+    mean_reversion: "%(asctime)s - MEAN_REVERSION - %(levelname)s - [%(symbol)s] - %(message)s"

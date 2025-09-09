@@ -1,0 +1,137 @@
+# Bot Trading v10 Personal - Configuración de Exchanges
+# =====================================================
+
+exchanges:
+  bitget:
+    enabled: true
+    api_key: "${BITGET_API_KEY}"
+    secret: "${BITGET_SECRET_KEY}"
+    passphrase: "${BITGET_PASSPHRASE}"
+    sandbox: false
+    rate_limit: 100
+    timeout: 10000
+    description: "Exchange principal para trading de futuros"
+    
+  binance:
+    enabled: true
+    api_key: "${BINANCE_API_KEY}"
+    secret: "${BINANCE_SECRET_KEY}"
+    sandbox: false
+    rate_limit: 1200
+    timeout: 10000
+    description: "Exchange secundario para arbitraje"
+
+arbitrage:
+  enabled: true
+  min_profit_pct: 0.1
+  max_position_size: 1000
+  symbols:
+    - BTCUSDT
+    - ETHUSDT
+    - ADAUSDT
+    - SOLUSDT
+    - DOGEUSDT
+    - AVAXUSDT
+    - TONUSDT
+    - BNBUSDT
+    - XRPUSDT
+    - LINKUSDT
+  
+  # Configuración de arbitraje
+  max_spread_pct: 5.0
+  min_confidence: 0.7
+  execution_delay_ms: 100
+
+latency:
+  target_latency_ms: 50
+  optimization_enabled: true
+  cache_ttl: 1
+  preload_symbols:
+    - BTCUSDT
+    - ETHUSDT
+    - ADAUSDT
+  
+  # Configuración de HFT
+  max_operations_per_second: 100
+  preload_interval_ms: 100
+  cache_size_limit: 1000
+
+monitoring:
+  health_check_interval: 30
+  latency_threshold_ms: 1000
+  max_errors_per_minute: 10
+  
+  # Alertas
+  enable_alerts: true
+  alert_channels:
+    - telegram
+    - email
+  
+  # Métricas
+  enable_prometheus: true
+  prometheus_port: 8001
+
+sync:
+  enabled: true
+  sync_interval: 30
+  max_drift_threshold: 10.0
+  
+  # Configuración de sincronización
+  balance_sync: true
+  position_sync: true
+  price_sync: true
+  
+  # Detección de anomalías
+  anomaly_detection: true
+  drift_alert_threshold: 50.0
+
+trading:
+  # Configuración de trading personal
+  default_leverage: 10
+  max_leverage: 30
+  min_leverage: 5
+  
+  # Gestión de riesgo
+  max_risk_per_trade: 2.0
+  max_drawdown_pct: 15.0
+  max_positions: 10
+  
+  # Estrategias
+  enable_arbitrage: true
+  enable_hft: true
+  enable_ml_signals: true
+  
+  # Configuración de órdenes
+  default_order_type: market
+  stop_loss_enabled: true
+  take_profit_enabled: true
+
+security:
+  # Encriptación de credenciales
+  encrypt_credentials: true
+  encryption_key: "${ENCRYPTION_KEY}"
+  
+  # Validación de API keys
+  validate_api_keys: true
+  api_key_rotation_days: 30
+  
+  # Logging de seguridad
+  log_api_calls: true
+  log_trades: true
+  log_errors: true
+
+performance:
+  # Configuración de rendimiento
+  max_workers: 4
+  batch_size: 1000
+  cache_ttl: 300
+  
+  # Optimizaciones
+  enable_async: true
+  enable_caching: true
+  enable_preloading: true
+  
+  # Límites
+  max_memory_usage_mb: 1024
+  max_cpu_usage_pct: 80
+  max_disk_usage_mb: 5120

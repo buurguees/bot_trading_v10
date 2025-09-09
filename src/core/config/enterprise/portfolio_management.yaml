@@ -1,0 +1,370 @@
+# portfolio_management.yaml - Configuración de gestión de portfolio enterprise
+# Ubicación: C:\TradingBot_v10\config\enterprise\portfolio_management.yaml
+
+version: "1.0"
+
+# Configuración global de portfolio
+portfolio_management:
+  enabled: true
+  
+  # Configuración de capital
+  capital:
+    initial_capital_usd: 10000
+    min_capital_usd: 1000
+    max_capital_usd: 1000000
+    
+    # Configuración de reservas
+    reserve_capital_pct: 0.1  # 10% de reserva
+    emergency_reserve_pct: 0.05  # 5% de reserva de emergencia
+    
+    # Configuración de rebalanceo
+    rebalance_threshold_pct: 0.05  # 5% desviación para rebalancear
+    rebalance_frequency_hours: 24  # Rebalancear cada 24 horas
+
+# Configuración de asignación de capital
+capital_allocation:
+  # Método de asignación
+  method: "risk_parity"  # equal_weight, market_cap, risk_parity, kelly_optimal
+  
+  # Configuración por método
+  equal_weight:
+    enabled: false
+    weight_per_asset: 0.2  # 20% por activo
+    
+  market_cap:
+    enabled: false
+    min_weight: 0.05  # 5% mínimo
+    max_weight: 0.4   # 40% máximo
+    
+  risk_parity:
+    enabled: true
+    target_risk_per_asset: 0.02  # 2% de riesgo por activo
+    rebalance_frequency_days: 7   # Rebalancear semanalmente
+    
+  kelly_optimal:
+    enabled: false
+    lookback_days: 30
+    min_kelly_fraction: 0.01
+    max_kelly_fraction: 0.1
+
+# Configuración de diversificación
+diversification:
+  enabled: true
+  
+  # Límites de concentración
+  max_concentration_per_asset: 0.3    # 30% máximo por activo
+  max_concentration_per_sector: 0.5   # 50% máximo por sector
+  min_assets_in_portfolio: 3          # Mínimo 3 activos
+  
+  # Configuración de correlación
+  max_correlation_threshold: 0.8      # Correlación máxima entre activos
+  correlation_lookback_days: 30       # Días para calcular correlación
+  
+  # Configuración de sectores
+  sectors:
+    crypto_majors:
+      assets: ["BTCUSDT", "ETHUSDT"]
+      max_weight: 0.6
+      
+    crypto_altcoins:
+      assets: ["ADAUSDT", "SOLUSDT", "DOGEUSDT"]
+      max_weight: 0.4
+      
+    defi_tokens:
+      assets: ["LINKUSDT", "UNIUSDT", "AAVEUSDT"]
+      max_weight: 0.2
+      
+    layer1_tokens:
+      assets: ["ADAUSDT", "SOLUSDT", "AVAXUSDT"]
+      max_weight: 0.3
+
+# Configuración de rebalanceo
+rebalancing:
+  enabled: true
+  
+  # Frecuencia de rebalanceo
+  frequency:
+    daily: false
+    weekly: true
+    monthly: false
+    threshold_based: true
+    
+  # Configuración de umbrales
+  thresholds:
+    asset_deviation_pct: 0.05    # 5% desviación por activo
+    portfolio_deviation_pct: 0.1 # 10% desviación total
+    correlation_threshold: 0.8   # Correlación máxima
+    
+  # Configuración de costos
+  costs:
+    include_transaction_costs: true
+    transaction_cost_rate: 0.001  # 0.1% por transacción
+    min_rebalance_amount: 100     # $100 mínimo para rebalancear
+    
+  # Configuración de timing
+  timing:
+    rebalance_time: "02:00"       # 2:00 AM UTC
+    timezone: "UTC"
+    avoid_market_hours: false
+    avoid_news_events: true
+
+# Configuración de optimización
+optimization:
+  enabled: true
+  
+  # Método de optimización
+  method: "mean_variance"  # mean_variance, black_litterman, risk_parity, equal_weight
+  
+  # Configuración de mean-variance
+  mean_variance:
+    enabled: true
+    lookback_days: 252
+    risk_free_rate: 0.02
+    target_return: 0.15
+    max_volatility: 0.25
+    
+  # Configuración de Black-Litterman
+  black_litterman:
+    enabled: false
+    confidence_level: 0.5
+    risk_aversion: 3.0
+    
+  # Configuración de risk parity
+  risk_parity:
+    enabled: false
+    target_risk: 0.02
+    max_iterations: 100
+    
+  # Configuración de restricciones
+  constraints:
+    min_weight: 0.01    # 1% mínimo por activo
+    max_weight: 0.4     # 40% máximo por activo
+    max_turnover: 0.2   # 20% máximo turnover por rebalanceo
+
+# Configuración de monitoreo de portfolio
+portfolio_monitoring:
+  enabled: true
+  
+  # Frecuencia de monitoreo
+  monitoring_frequency_minutes: 15
+  
+  # Métricas a monitorear
+  metrics:
+    - "portfolio_value"
+    - "portfolio_return"
+    - "portfolio_volatility"
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "var_95"
+    - "cvar_95"
+    - "correlation_matrix"
+    - "concentration_risk"
+    - "leverage_ratio"
+    - "margin_usage"
+    
+  # Alertas de portfolio
+  alerts:
+    enabled: true
+    
+    alert_conditions:
+      - name: "high_concentration"
+        condition: "max_asset_weight > 0.35"
+        severity: "warning"
+        
+      - name: "high_correlation"
+        condition: "avg_correlation > 0.75"
+        severity: "warning"
+        
+      - name: "high_volatility"
+        condition: "portfolio_volatility > 0.3"
+        severity: "warning"
+        
+      - name: "large_drawdown"
+        condition: "current_drawdown > 0.15"
+        severity: "critical"
+        
+      - name: "low_diversification"
+        condition: "effective_assets < 3"
+        severity: "warning"
+
+# Configuración de reporting
+portfolio_reporting:
+  enabled: true
+  
+  # Reportes automáticos
+  reports:
+    daily_portfolio_report:
+      enabled: true
+      time: "23:55"
+      recipients: ["portfolio@company.com"]
+      
+    weekly_performance_report:
+      enabled: true
+      day: "friday"
+      time: "17:00"
+      recipients: ["performance@company.com"]
+      
+    monthly_risk_report:
+      enabled: true
+      day: "last"
+      time: "16:00"
+      recipients: ["risk@company.com"]
+      
+  # Formato de reportes
+  report_format: "json"  # json, pdf, excel
+  output_directory: "reports/portfolio/"
+  
+  # Configuración de gráficos
+  charts:
+    enabled: true
+    chart_types:
+      - "portfolio_value"
+      - "asset_allocation"
+      - "correlation_heatmap"
+      - "risk_metrics"
+      - "performance_attribution"
+      
+  # Configuración de exportación
+  export:
+    enabled: true
+    formats: ["csv", "json", "excel"]
+    frequency: "daily"
+
+# Configuración de backtesting
+portfolio_backtesting:
+  enabled: true
+  
+  # Configuración de datos
+  data:
+    start_date: "2023-01-01"
+    end_date: "2024-12-31"
+    timeframe: "1h"
+    
+  # Configuración de costos
+  costs:
+    transaction_cost: 0.001  # 0.1% por transacción
+    slippage_cost: 0.0005   # 0.05% slippage
+    funding_cost: 0.0001    # 0.01% funding cost
+    
+  # Configuración de capital inicial
+  initial_capital: 10000
+  
+  # Métricas de backtesting
+  metrics:
+    - "total_return"
+    - "annualized_return"
+    - "volatility"
+    - "sharpe_ratio"
+    - "sortino_ratio"
+    - "max_drawdown"
+    - "calmar_ratio"
+    - "win_rate"
+    - "profit_factor"
+    - "var_95"
+    - "cvar_95"
+    - "turnover"
+    - "transaction_costs"
+
+# Configuración de stress testing
+portfolio_stress_testing:
+  enabled: true
+  
+  # Escenarios de estrés
+  scenarios:
+    market_crash:
+      description: "Caída del mercado 20%"
+      shock_percentage: -0.20
+      correlation_increase: 0.3
+      
+    crypto_winter:
+      description: "Invierno cripto 50%"
+      shock_percentage: -0.50
+      correlation_increase: 0.5
+      
+    black_swan:
+      description: "Evento de cisne negro"
+      shock_percentage: -0.35
+      correlation_increase: 0.5
+      volatility_multiplier: 3.0
+      
+    sector_rotation:
+      description: "Rotación sectorial severa"
+      crypto_shock: -0.30
+      correlation_change: -0.2
+      
+  # Frecuencia de testing
+  testing_frequency: "weekly"
+  
+  # Límites de pérdida en stress tests
+  max_stress_loss_pct: 0.25  # 25% pérdida máxima en stress test
+
+# Configuración de compliance
+portfolio_compliance:
+  enabled: true
+  
+  # Reglas de compliance
+  rules:
+    - name: "max_concentration"
+      description: "Concentración máxima por activo"
+      threshold: 0.4
+      action: "alert"
+      
+    - name: "min_diversification"
+      description: "Diversificación mínima"
+      threshold: 3
+      action: "alert"
+      
+    - name: "max_leverage"
+      description: "Leverage máximo"
+      threshold: 20
+      action: "alert"
+      
+    - name: "max_drawdown"
+      description: "Drawdown máximo"
+      threshold: 0.2
+      action: "alert"
+      
+  # Configuración de auditoría
+  audit:
+    enabled: true
+    audit_frequency: "daily"
+    retention_days: 2555  # 7 años
+    
+  # Configuración de reporting
+  reporting:
+    enabled: true
+    report_frequency: "monthly"
+    recipients: ["compliance@company.com"]
+
+# Configuración de logging
+portfolio_logging:
+  level: "INFO"
+  
+  # Archivos de log específicos
+  files:
+    portfolio_main:
+      path: "logs/enterprise/trading/portfolio/main.log"
+      max_size_mb: 100
+      backup_count: 10
+      
+    rebalancing:
+      path: "logs/enterprise/trading/portfolio/rebalancing.log"
+      max_size_mb: 50
+      backup_count: 20
+      
+    performance:
+      path: "logs/enterprise/trading/portfolio/performance.log"
+      max_size_mb: 50
+      backup_count: 20
+      
+    risk:
+      path: "logs/enterprise/trading/portfolio/risk.log"
+      max_size_mb: 25
+      backup_count: 30
+      
+  # Formato de logs
+  formatters:
+    portfolio: "%(asctime)s - PORTFOLIO - %(levelname)s - %(message)s"
+    rebalancing: "%(asctime)s - REBALANCING - %(levelname)s - %(message)s"
+    performance: "%(asctime)s - PERFORMANCE - %(levelname)s - %(message)s"
+    risk: "%(asctime)s - RISK - %(levelname)s - %(message)s"

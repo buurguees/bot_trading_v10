@@ -1,0 +1,394 @@
+# model_architectures.yaml - Configuración de arquitecturas de modelos
+# Ubicación: C:\TradingBot_v10\config\enterprise\model_architectures.yaml
+
+version: "1.0"
+
+# Arquitectura LSTM con Attention (principal)
+lstm_attention:
+  name: "LSTMAttentionModel"
+  description: "LSTM con mecanismo de atención para series temporales"
+  
+  # Configuración de la arquitectura
+  architecture:
+    # Capa de entrada
+    input_layer:
+      input_size: 50  # Número de features
+      
+    # Capas LSTM
+    lstm_layers:
+      - layer_type: "LSTM"
+        hidden_size: 256
+        num_layers: 1
+        dropout: 0.2
+        bidirectional: false
+        batch_first: true
+        
+      - layer_type: "LSTM"
+        hidden_size: 128
+        num_layers: 1
+        dropout: 0.2
+        bidirectional: false
+        
+      - layer_type: "LSTM"
+        hidden_size: 64
+        num_layers: 1
+        dropout: 0.2
+        bidirectional: false
+        
+    # Mecanismo de atención
+    attention:
+      type: "multihead"
+      num_heads: 8
+      hidden_size: 64
+      dropout: 0.1
+      
+    # Capas densas
+    dense_layers:
+      - layer_type: "Linear"
+        input_size: 64
+        output_size: 32
+        activation: "relu"
+        dropout: 0.3
+        batch_norm: true
+        
+      - layer_type: "Linear"
+        input_size: 32
+        output_size: 16
+        activation: "relu"
+        dropout: 0.2
+        
+    # Capa de salida
+    output_layer:
+      layer_type: "Linear"
+      input_size: 16
+      output_size: 3  # BUY, HOLD, SELL
+      activation: "softmax"
+      
+  # Configuración de entrenamiento específica
+  training_config:
+    loss_function: "cross_entropy"
+    class_weights: [1.0, 1.2, 1.0]  # Penalizar más errores en HOLD
+    label_smoothing: 0.1
+    
+# Arquitectura Transformer
+transformer:
+  name: "TransformerModel"
+  description: "Transformer puro para series temporales financieras"
+  
+  architecture:
+    # Configuración del transformer
+    transformer_config:
+      d_model: 256
+      nhead: 8
+      num_encoder_layers: 6
+      num_decoder_layers: 6
+      dim_feedforward: 1024
+      dropout: 0.1
+      activation: "gelu"
+      
+    # Embedding posicional
+    positional_encoding:
+      max_len: 100
+      dropout: 0.1
+      
+    # Capas de proyección
+    projection_layers:
+      input_projection:
+        input_size: 50
+        output_size: 256
+        
+      output_projection:
+        input_size: 256
+        output_size: 3
+        
+  training_config:
+    loss_function: "cross_entropy"
+    warmup_steps: 4000
+    label_smoothing: 0.1
+
+# Arquitectura CNN-LSTM híbrida
+cnn_lstm:
+  name: "CNNLSTMModel"
+  description: "Híbrido CNN-LSTM para capturar patrones locales y temporales"
+  
+  architecture:
+    # Capas convolucionales
+    cnn_layers:
+      - layer_type: "Conv1d"
+        in_channels: 50
+        out_channels: 64
+        kernel_size: 3
+        padding: 1
+        activation: "relu"
+        batch_norm: true
+        dropout: 0.1
+        
+      - layer_type: "Conv1d"
+        in_channels: 64
+        out_channels: 128
+        kernel_size: 3
+        padding: 1
+        activation: "relu"
+        batch_norm: true
+        dropout: 0.1
+        
+      - layer_type: "MaxPool1d"
+        kernel_size: 2
+        
+    # Capas LSTM
+    lstm_layers:
+      - layer_type: "LSTM"
+        input_size: 128
+        hidden_size: 256
+        num_layers: 2
+        dropout: 0.2
+        bidirectional: true
+        
+    # Capas densas finales
+    dense_layers:
+      - layer_type: "Linear"
+        input_size: 512  # 256 * 2 (bidirectional)
+        output_size: 128
+        activation: "relu"
+        dropout: 0.3
+        
+      - layer_type: "Linear"
+        input_size: 128
+        output_size: 3
+        activation: "softmax"
+        
+  training_config:
+    loss_function: "cross_entropy"
+    optimizer: "adamw"
+    learning_rate: 0.001
+
+# Arquitectura GRU simple
+gru_simple:
+  name: "GRUSimpleModel"
+  description: "Modelo GRU simple y eficiente"
+  
+  architecture:
+    gru_layers:
+      - layer_type: "GRU"
+        input_size: 50
+        hidden_size: 256
+        num_layers: 2
+        dropout: 0.2
+        bidirectional: false
+        
+    dense_layers:
+      - layer_type: "Linear"
+        input_size: 256
+        output_size: 64
+        activation: "relu"
+        dropout: 0.3
+        
+      - layer_type: "Linear"
+        input_size: 64
+        output_size: 3
+        activation: "softmax"
+        
+  training_config:
+    loss_function: "cross_entropy"
+    optimizer: "adam"
+    learning_rate: 0.001
+
+# Ensemble de modelos
+ensemble:
+  name: "EnsembleModel"
+  description: "Ensemble de múltiples arquitecturas"
+  
+  models:
+    - name: "lstm_attention"
+      weight: 0.4
+      
+    - name: "transformer"
+      weight: 0.3
+      
+    - name: "cnn_lstm"
+      weight: 0.3
+      
+  aggregation:
+    method: "weighted_average"  # weighted_average, voting, stacking
+    
+    # Para stacking
+    stacking_model:
+      layer_type: "Linear"
+      input_size: 9  # 3 clases * 3 modelos
+      output_size: 3
+      activation: "softmax"
+      
+  training_config:
+    train_individual: true
+    train_ensemble: true
+    loss_function: "cross_entropy"
+
+# Configuración de hiperparámetros por arquitectura
+hyperparameter_spaces:
+  lstm_attention:
+    hidden_size:
+      type: "categorical"
+      choices: [128, 256, 512]
+      
+    num_layers:
+      type: "int"
+      low: 2
+      high: 5
+      
+    dropout:
+      type: "float"
+      low: 0.1
+      high: 0.5
+      
+    learning_rate:
+      type: "loguniform"
+      low: 1e-5
+      high: 1e-2
+      
+    attention_heads:
+      type: "categorical"
+      choices: [4, 8, 16]
+      
+  transformer:
+    d_model:
+      type: "categorical"
+      choices: [128, 256, 512]
+      
+    nhead:
+      type: "categorical"
+      choices: [4, 8, 16]
+      
+    num_encoder_layers:
+      type: "int"
+      low: 3
+      high: 8
+      
+    dropout:
+      type: "float"
+      low: 0.05
+      high: 0.3
+      
+    learning_rate:
+      type: "loguniform"
+      low: 1e-5
+      high: 1e-2
+
+# Configuración de optimizadores
+optimizers:
+  adamw:
+    class: "AdamW"
+    lr: 0.001
+    betas: [0.9, 0.999]
+    eps: 1e-8
+    weight_decay: 0.01
+    amsgrad: false
+    
+  adam:
+    class: "Adam"
+    lr: 0.001
+    betas: [0.9, 0.999]
+    eps: 1e-8
+    weight_decay: 0
+    amsgrad: false
+    
+  sgd:
+    class: "SGD"
+    lr: 0.01
+    momentum: 0.9
+    dampening: 0
+    weight_decay: 1e-4
+    nesterov: true
+    
+  rmsprop:
+    class: "RMSprop"
+    lr: 0.01
+    alpha: 0.99
+    eps: 1e-8
+    weight_decay: 0
+    momentum: 0
+    centered: false
+
+# Configuración de loss functions
+loss_functions:
+  cross_entropy:
+    class: "CrossEntropyLoss"
+    weight: null
+    size_average: null
+    ignore_index: -100
+    reduce: null
+    reduction: "mean"
+    label_smoothing: 0.0
+    
+  focal_loss:
+    class: "FocalLoss"
+    alpha: 1.0
+    gamma: 2.0
+    reduction: "mean"
+    
+  weighted_cross_entropy:
+    class: "CrossEntropyLoss"
+    weight: [1.0, 1.2, 1.0]  # BUY, HOLD, SELL
+    reduction: "mean"
+
+# Configuración de métricas
+metrics:
+  classification:
+    - name: "accuracy"
+      class: "Accuracy"
+      task: "multiclass"
+      num_classes: 3
+      
+    - name: "precision"
+      class: "Precision"
+      task: "multiclass"
+      num_classes: 3
+      average: "macro"
+      
+    - name: "recall"
+      class: "Recall"
+      task: "multiclass"
+      num_classes: 3
+      average: "macro"
+      
+    - name: "f1_score"
+      class: "F1Score"
+      task: "multiclass"
+      num_classes: 3
+      average: "macro"
+      
+    - name: "auroc"
+      class: "AUROC"
+      task: "multiclass"
+      num_classes: 3
+      
+    - name: "confusion_matrix"
+      class: "ConfusionMatrix"
+      task: "multiclass"
+      num_classes: 3
+
+# Configuración de callbacks por arquitectura
+callbacks:
+  common:
+    - name: "ModelCheckpoint"
+      monitor: "val_loss"
+      mode: "min"
+      save_top_k: 3
+      save_last: true
+      
+    - name: "EarlyStopping"
+      monitor: "val_loss"
+      patience: 50
+      mode: "min"
+      min_delta: 0.001
+      
+    - name: "LearningRateMonitor"
+      logging_interval: "epoch"
+      
+  lstm_attention_specific:
+    - name: "GradientClipping"
+      gradient_clip_val: 1.0
+      
+  transformer_specific:
+    - name: "LearningRateScheduler"
+      scheduler: "cosine_annealing"
+      T_max: 100

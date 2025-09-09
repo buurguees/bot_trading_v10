@@ -1,0 +1,637 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Trading Bot Enterprise - Positions Dashboard",
+    "tags": ["positions", "trading", "enterprise"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Position Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "trading_open_positions_count",
+            "legendFormat": "Open Positions"
+          },
+          {
+            "expr": "trading_exposure_percentage",
+            "legendFormat": "Exposure %"
+          },
+          {
+            "expr": "trading_margin_used",
+            "legendFormat": "Margin Used"
+          },
+          {
+            "expr": "trading_margin_available",
+            "legendFormat": "Margin Available"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "basic"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 5
+                },
+                {
+                  "color": "red",
+                  "value": 10
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Position Distribution by Symbol",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "pnl_by_symbol{symbol=\"BTCUSDT\"}",
+            "legendFormat": "BTCUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"ETHUSDT\"}",
+            "legendFormat": "ETHUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"ADAUSDT\"}",
+            "legendFormat": "ADAUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"SOLUSDT\"}",
+            "legendFormat": "SOLUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"DOGEUSDT\"}",
+            "legendFormat": "DOGEUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"AVAXUSDT\"}",
+            "legendFormat": "AVAXUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"TONUSDT\"}",
+            "legendFormat": "TONUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"BNBUSDT\"}",
+            "legendFormat": "BNBUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"XRPUSDT\"}",
+            "legendFormat": "XRPUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"LINKUSDT\"}",
+            "legendFormat": "LINKUSDT"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "basic"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 3,
+        "title": "Position Distribution by Strategy",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "pnl_by_strategy{strategy=\"ml_strategy\"}",
+            "legendFormat": "ML Strategy"
+          },
+          {
+            "expr": "pnl_by_strategy{strategy=\"momentum\"}",
+            "legendFormat": "Momentum"
+          },
+          {
+            "expr": "pnl_by_strategy{strategy=\"mean_reversion\"}",
+            "legendFormat": "Mean Reversion"
+          },
+          {
+            "expr": "pnl_by_strategy{strategy=\"breakout\"}",
+            "legendFormat": "Breakout"
+          },
+          {
+            "expr": "pnl_by_strategy{strategy=\"arbitrage\"}",
+            "legendFormat": "Arbitrage"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "basic"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Position Size Over Time",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "trading_open_positions_count",
+            "legendFormat": "Open Positions Count"
+          },
+          {
+            "expr": "trading_exposure_percentage",
+            "legendFormat": "Exposure %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "barAlignment": 0,
+              "lineWidth": 1,
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "never",
+              "pointSize": 5,
+              "stacking": {
+                "mode": "none",
+                "group": "A"
+              },
+              "axisPlacement": "auto",
+              "axisLabel": "",
+              "axisColorMode": "text",
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 5
+                },
+                {
+                  "color": "red",
+                  "value": 10
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 5,
+        "title": "Margin Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "trading_margin_used",
+            "legendFormat": "Margin Used"
+          },
+          {
+            "expr": "trading_margin_available",
+            "legendFormat": "Margin Available"
+          },
+          {
+            "expr": "trading_margin_ratio",
+            "legendFormat": "Margin Ratio"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "barAlignment": 0,
+              "lineWidth": 1,
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "never",
+              "pointSize": 5,
+              "stacking": {
+                "mode": "none",
+                "group": "A"
+              },
+              "axisPlacement": "auto",
+              "axisLabel": "",
+              "axisColorMode": "text",
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 0.5
+                },
+                {
+                  "color": "red",
+                  "value": 0.8
+                }
+              ]
+            },
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "Position PnL by Symbol",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "pnl_by_symbol{symbol=\"BTCUSDT\"}",
+            "legendFormat": "BTCUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"ETHUSDT\"}",
+            "legendFormat": "ETHUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"ADAUSDT\"}",
+            "legendFormat": "ADAUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"SOLUSDT\"}",
+            "legendFormat": "SOLUSDT"
+          },
+          {
+            "expr": "pnl_by_symbol{symbol=\"DOGEUSDT\"}",
+            "legendFormat": "DOGEUSDT"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "barAlignment": 0,
+              "lineWidth": 1,
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "never",
+              "pointSize": 5,
+              "stacking": {
+                "mode": "none",
+                "group": "A"
+              },
+              "axisPlacement": "auto",
+              "axisLabel": "",
+              "axisColorMode": "text",
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        }
+      },
+      {
+        "id": 7,
+        "title": "Position PnL by Strategy",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "pnl_by_strategy{strategy=\"ml_strategy\"}",
+            "legendFormat": "ML Strategy"
+          },
+          {
+            "expr": "pnl_by_strategy{strategy=\"momentum\"}",
+            "legendFormat": "Momentum"
+          },
+          {
+            "expr": "pnl_by_strategy{strategy=\"mean_reversion\"}",
+            "legendFormat": "Mean Reversion"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "barAlignment": 0,
+              "lineWidth": 1,
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "never",
+              "pointSize": 5,
+              "stacking": {
+                "mode": "none",
+                "group": "A"
+              },
+              "axisPlacement": "auto",
+              "axisLabel": "",
+              "axisColorMode": "text",
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 32
+        }
+      },
+      {
+        "id": 8,
+        "title": "Position Concentration Risk",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "risk_concentration",
+            "legendFormat": "Concentration Risk"
+          },
+          {
+            "expr": "risk_correlation",
+            "legendFormat": "Correlation Risk"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "basic"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 50
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 40
+        }
+      },
+      {
+        "id": 9,
+        "title": "Position Leverage Distribution",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "trading_leverage_distribution",
+            "legendFormat": "Leverage Distribution"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "basic"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 40
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "refresh": "5s",
+    "schemaVersion": 27,
+    "version": 0,
+    "links": []
+  }
+}

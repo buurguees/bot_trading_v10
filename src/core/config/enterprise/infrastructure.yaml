@@ -1,0 +1,158 @@
+# infrastructure.yaml - Configuración de infraestructura enterprise
+# Ubicación: C:\TradingBot_v10\config\enterprise\infrastructure.yaml
+
+version: "1.0"
+environment: "development"  # development, staging, production
+
+# Servicios Docker
+docker:
+  compose_file: "docker/docker-compose.enterprise.yml"
+  network_name: "trading_bot_enterprise"
+  restart_policy: "unless-stopped"
+  
+# Apache Kafka
+kafka:
+  bootstrap_servers: "localhost:9092"
+  topics:
+    market_ticks: 
+      name: "market_ticks"
+      partitions: 10
+      replication_factor: 1
+      retention_ms: 604800000  # 7 días
+    processed_data:
+      name: "processed_data" 
+      partitions: 5
+      replication_factor: 1
+      retention_ms: 259200000  # 3 días
+    alerts:
+      name: "alerts"
+      partitions: 2
+      replication_factor: 1
+      retention_ms: 86400000   # 1 día
+  producer:
+    batch_size: 16384
+    linger_ms: 10
+    compression_type: "gzip"
+    max_request_size: 1048576
+  consumer:
+    group_id: "trading_bot_consumer"
+    auto_offset_reset: "latest"
+    enable_auto_commit: true
+    auto_commit_interval_ms: 5000
+
+# Redis Cache
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""  # Configurar en vault para producción
+  db: 0
+  max_connections: 20
+  socket_timeout: 30
+  socket_connect_timeout: 30
+  health_check_interval: 30
+  decode_responses: true
+  
+  # Configuración de TTL por tipo de data
+  ttl_config:
+    market_ticks: 3600      # 1 hora
+    processed_features: 7200 # 2 horas  
+    model_predictions: 1800  # 30 minutos
+    account_balance: 300     # 5 minutos
+    open_positions: 60       # 1 minuto
+
+# TimescaleDB
+timescaledb:
+  host: "localhost"
+  port: 5432
+  database: "trading_bot_enterprise"
+  username: "trading_bot"
+  password: ""  # Configurar en vault para producción
+  pool_size: 10
+  max_overflow: 20
+  pool_timeout: 30
+  pool_recycle: 3600
+  
+  # Configuración de tablas
+  tables:
+    market_ticks:
+      chunk_time_interval: "1 hour"
+      compression_policy: "7 days"
+      retention_policy: "30 days"
+    processed_features:
+      chunk_time_interval: "4 hours"
+      compression_policy: "3 days"
+      retention_policy: "14 days"
+    model_predictions:
+      chunk_time_interval: "1 day"
+      compression_policy: "1 day"
+      retention_policy: "7 days"
+
+# Prometheus
+prometheus:
+  host: "localhost"
+  port: 9090
+  scrape_interval: "15s"
+  evaluation_interval: "15s"
+  retention_time: "15d"
+  
+  # Targets de scraping
+  scrape_configs:
+    - job_name: "trading_bot"
+      static_configs:
+        - targets: ["localhost:8000"]
+    - job_name: "kafka_exporter"
+      static_configs:
+        - targets: ["localhost:9308"]
+    - job_name: "redis_exporter"
+      static_configs:
+        - targets: ["localhost:9121"]
+
+# Grafana
+grafana:
+  host: "localhost"
+  port: 3000
+  admin_user: "admin"
+  admin_password: ""  # Configurar en vault para producción
+  
+# Paths de almacenamiento
+storage:
+  base_path: "C:/TradingBot_v10"
+  data_path: "data/realtime"
+  logs_path: "logs/enterprise"
+  backups_path: "backups/enterprise"
+  temp_path: "temp/enterprise"
+  
+  # Configuración de rotación de archivos
+  rotation:
+    raw_ticks:
+      max_file_size_mb: 100
+      max_files: 24  # 24 horas
+      compression: true
+    processed_data:
+      max_file_size_mb: 50
+      max_files: 48  # 48 horas
+      compression: true
+    logs:
+      max_file_size_mb: 10
+      max_files: 100
+      compression: true
+
+# Health checks
+health_checks:
+  interval_seconds: 30
+  timeout_seconds: 10
+  max_failures: 3
+  
+  services:
+    - name: "kafka"
+      url: "localhost:9092"
+      type: "tcp"
+    - name: "redis"  
+      url: "localhost:6379"
+      type: "tcp"
+    - name: "timescaledb"
+      url: "localhost:5432"
+      type: "tcp"
+    - name: "prometheus"
+      url: "http://localhost:9090/-/healthy"
+      type: "http"
