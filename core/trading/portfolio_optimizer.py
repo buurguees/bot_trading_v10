@@ -1,3 +1,4 @@
+# Ruta: core/trading/portfolio_optimizer.py
 """
 🧠 portfolio_optimizer.py - Optimizador Inteligente de Portfolio
 

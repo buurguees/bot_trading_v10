@@ -1,3 +1,4 @@
+# Ruta: core/ml/legacy/neural_network.py
 """
 models/neural_network.py
 Arquitecturas de redes neuronales para trading

@@ -1,3 +1,4 @@
+# Ruta: scripts/history/install_requirements.py
 #!/usr/bin/env python3
 """
 Script de Instalación Automática de Dependencias

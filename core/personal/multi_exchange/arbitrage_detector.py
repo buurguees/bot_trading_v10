@@ -1,3 +1,4 @@
+# Ruta: core/personal/multi_exchange/arbitrage_detector.py
 """
 Arbitrage Detector - Bot Trading v10 Personal
 =============================================

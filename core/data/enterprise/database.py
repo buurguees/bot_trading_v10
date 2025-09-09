@@ -1,3 +1,4 @@
+# Ruta: core/data/enterprise/database.py
 # database.py - Gestor de base de datos TimescaleDB
 # Ubicación: C:\TradingBot_v10\data\enterprise\database.py
 

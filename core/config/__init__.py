@@ -1,3 +1,4 @@
+# Ruta: core/config/__init__.py
 """
 Config Module - Bot Trading v10 Enterprise
 ==========================================

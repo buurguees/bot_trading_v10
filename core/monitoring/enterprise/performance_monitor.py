@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/enterprise/performance_monitor.py
 #!/usr/bin/env python3
 """
 Monitor de Performance Enterprise - Tiempo Real

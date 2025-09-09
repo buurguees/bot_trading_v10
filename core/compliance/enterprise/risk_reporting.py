@@ -1,3 +1,4 @@
+# Ruta: core/compliance/enterprise/risk_reporting.py
 #!/usr/bin/env python3
 """
 Risk Reporting Enterprise - Reportes de Riesgo

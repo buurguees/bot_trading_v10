@@ -1,3 +1,4 @@
+# Ruta: core/trading/order_manager.py
 """
 trading/order_manager.py
 Sistema de gestión de órdenes para trading

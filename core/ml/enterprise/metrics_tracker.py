@@ -1,3 +1,4 @@
+# Ruta: core/ml/enterprise/metrics_tracker.py
 # metrics_tracker.py - Tracker de métricas enterprise
 # Ubicación: C:\TradingBot_v10\models\enterprise\metrics_tracker.py
 

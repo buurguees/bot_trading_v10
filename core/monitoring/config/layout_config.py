@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/config/layout_config.py
 """
 monitoring/config/layout_config.py
 Configuración de Layout y Diseño - Trading Bot v10

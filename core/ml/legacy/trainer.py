@@ -1,3 +1,4 @@
+# Ruta: core/ml/legacy/trainer.py
 """
 models/trainer.py
 Sistema de entrenamiento adaptativo y aprendizaje por refuerzo

@@ -1,3 +1,4 @@
+# Ruta: scripts/deployment/data_management.py
 #!/usr/bin/env python3
 """
 scripts/data_management.py - Script de Gestión Profesional de Datos

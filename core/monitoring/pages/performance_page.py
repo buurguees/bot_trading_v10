@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/pages/performance_page.py
 """
 monitoring/pages/performance_page.py
 Página de Análisis de Rendimiento - Trading Bot v10

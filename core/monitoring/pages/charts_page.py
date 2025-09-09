@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/pages/charts_page.py
 """
 monitoring/pages/charts_page.py
 Página de Gráficos Interactivos - Trading Bot v10

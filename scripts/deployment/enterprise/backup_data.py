@@ -1,3 +1,4 @@
+# Ruta: scripts/deployment/enterprise/backup_data.py
 # backup_data.py - Script de backup de datos enterprise
 # Ubicación: C:\TradingBot_v10\scripts\enterprise\backup_data.py
 

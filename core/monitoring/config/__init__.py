@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/config/__init__.py
 """
 monitoring/config/__init__.py
 Configuración del Sistema de Monitoreo - Trading Bot v10

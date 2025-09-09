@@ -1,3 +1,4 @@
+# Ruta: control/telegram_bot.py
 #!/usr/bin/env python3
 """
 Telegram Bot para Trading Bot v10 Enterprise

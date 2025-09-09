@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/styles/__init__.py
 """
 monitoring/styles/__init__.py
 Sistema de Estilos y Temas - Trading Bot v10

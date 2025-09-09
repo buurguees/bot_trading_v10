@@ -1,3 +1,4 @@
+# Ruta: scripts/deployment/__init__.py
 """
 Deployment Scripts - Bot Trading v10 Enterprise
 ===============================================

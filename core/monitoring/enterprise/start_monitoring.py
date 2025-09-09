@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/enterprise/start_monitoring.py
 # start_monitoring.py - Iniciador del sistema de monitoreo
 # Ubicación: C:\TradingBot_v10\monitoring\enterprise\start_monitoring.py
 

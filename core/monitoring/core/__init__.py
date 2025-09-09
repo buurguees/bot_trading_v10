@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/core/__init__.py
 """
 monitoring/core/__init__.py
 Núcleo del Sistema de Monitoreo - Trading Bot v10

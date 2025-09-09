@@ -1,3 +1,4 @@
+# Ruta: core/data/enterprise/preprocessor.py
 # preprocessor.py - Preprocesador de datos en tiempo real
 # Ubicación: C:\TradingBot_v10\data\enterprise\preprocessor.py
 

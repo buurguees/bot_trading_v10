@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/pages/model_status_page.py
 """
 monitoring/pages/model_status_page.py
 Página de Estado del Modelo IA - Trading Bot v10

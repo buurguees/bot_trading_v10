@@ -1,3 +1,4 @@
+# Ruta: scripts/maintenance/__init__.py
 """
 Maintenance Scripts - Bot Trading v10 Enterprise
 ================================================

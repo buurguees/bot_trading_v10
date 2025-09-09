@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/config/dashboard_config.py
 """
 monitoring/config/dashboard_config.py
 Configuración del Dashboard - Trading Bot v10

@@ -1,3 +1,4 @@
+# Ruta: core/deployment/recovery_manager.py
 #!/usr/bin/env python3
 """
 Gestor de Recuperación Enterprise - Sistema de Backup y Restauración

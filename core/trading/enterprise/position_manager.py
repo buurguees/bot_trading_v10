@@ -1,3 +1,4 @@
+# Ruta: core/trading/enterprise/position_manager.py
 # position_manager.py - Gestor de posiciones avanzado
 # Ubicación: C:\TradingBot_v10\trading\enterprise\position_manager.py
 

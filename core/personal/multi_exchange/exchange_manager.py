@@ -1,3 +1,4 @@
+# Ruta: core/personal/multi_exchange/exchange_manager.py
 """
 Multi-Exchange Manager - Bot Trading v10 Personal
 ================================================

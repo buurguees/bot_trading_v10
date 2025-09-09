@@ -1,3 +1,4 @@
+# Ruta: core/data/multi_timeframe_coordinator.py
 """
 data/multi_timeframe_coordinator.py - Coordinador Multi-Timeframe
 Sistema para mantener coherencia entre todos los timeframes y coordinar operaciones

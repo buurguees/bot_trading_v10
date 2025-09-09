@@ -1,3 +1,4 @@
+# Ruta: scripts/trading/enterprise/emergency_stop.py
 #!/usr/bin/env python3
 """
 Script de Parada de Emergencia Enterprise

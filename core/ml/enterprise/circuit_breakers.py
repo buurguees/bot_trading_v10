@@ -1,3 +1,4 @@
+# Ruta: core/ml/enterprise/circuit_breakers.py
 """
 models/enterprise/circuit_breakers.py - Circuit Breaker Pattern for ML Services
 Sistema de circuit breakers y fallbacks para servicios de ML enterprise

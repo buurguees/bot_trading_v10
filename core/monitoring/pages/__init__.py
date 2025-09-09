@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/pages/__init__.py
 """
 monitoring/pages/__init__.py
 Páginas del Dashboard - Trading Bot v10

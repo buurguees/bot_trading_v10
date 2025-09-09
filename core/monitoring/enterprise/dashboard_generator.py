@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/enterprise/dashboard_generator.py
 # dashboard_generator.py - Generador de dashboards enterprise
 # Ubicación: C:\TradingBot_v10\monitoring\enterprise\dashboard_generator.py
 

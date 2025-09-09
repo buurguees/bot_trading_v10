@@ -1,3 +1,4 @@
+# Ruta: core/trading/bitget_client.py
 """
 trading/bitget_client.py
 Cliente de Bitget para trading y datos de mercado enterprise

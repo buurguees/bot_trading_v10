@@ -1,3 +1,4 @@
+# Ruta: core/data/enterprise/kafka_consumer.py
 # kafka_consumer.py - Consumidor Kafka para datos enterprise
 # Ubicación: C:\TradingBot_v10\data\enterprise\kafka_consumer.py
 

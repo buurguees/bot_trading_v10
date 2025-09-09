@@ -1,3 +1,4 @@
+# Ruta: scripts/trading/__init__.py
 """
 Trading Scripts - Bot Trading v10 Enterprise
 ===========================================

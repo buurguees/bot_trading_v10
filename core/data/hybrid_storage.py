@@ -1,3 +1,4 @@
+# Ruta: core/data/hybrid_storage.py
 """
 data/hybrid_storage.py - Sistema Híbrido de Almacenamiento SQLite + Parquet
 Sistema optimizado para datos calientes (SQLite) y datos históricos (Parquet)

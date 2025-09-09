@@ -1,3 +1,4 @@
+# Ruta: core/__init__.py
 """
 Core Module - Bot Trading v10 Enterprise
 =======================================

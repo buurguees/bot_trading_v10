@@ -1,3 +1,4 @@
+# Ruta: config/config_loader.py
 #!/usr/bin/env python3
 """
 Config Loader - Cargador de configuración simple

@@ -1,3 +1,4 @@
+# Ruta: core/compliance/__init__.py
 """
 Compliance Module - Bot Trading v10 Enterprise
 ==============================================

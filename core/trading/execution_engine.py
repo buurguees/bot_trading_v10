@@ -1,3 +1,4 @@
+# Ruta: core/trading/execution_engine.py
 """
 trading/execution_engine.py
 Motor de ejecución de señales de trading

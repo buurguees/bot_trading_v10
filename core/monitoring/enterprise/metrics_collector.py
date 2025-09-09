@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/enterprise/metrics_collector.py
 # metrics_collector.py - Colector de métricas enterprise
 # Ubicación: C:\TradingBot_v10\monitoring\enterprise\metrics_collector.py
 

@@ -1,3 +1,4 @@
+# Ruta: core/security/compliance_checker.py
 # compliance_checker.py - Verificador de compliance enterprise
 # Ubicación: C:\TradingBot_v10\security\compliance_checker.py
 

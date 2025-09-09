@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/callbacks/live_trading_callbacks.py
 """
 monitoring/callbacks/live_trading_callbacks.py
 Callbacks para Página de Trading en Vivo - Trading Bot v10

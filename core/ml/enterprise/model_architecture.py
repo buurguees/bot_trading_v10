@@ -1,3 +1,4 @@
+# Ruta: core/ml/enterprise/model_architecture.py
 # model_architecture.py - Arquitecturas de modelos enterprise
 # Ubicación: C:\TradingBot_v10\models\enterprise\model_architecture.py
 

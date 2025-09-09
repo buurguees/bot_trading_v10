@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/config/chart_config.py
 """
 monitoring/config/chart_config.py
 Configuración de Gráficos - Trading Bot v10

@@ -1,3 +1,4 @@
+# Ruta: control/metrics_sender.py
 #!/usr/bin/env python3
 """
 Metrics Sender para Telegram Bot - Trading Bot v10 Enterprise

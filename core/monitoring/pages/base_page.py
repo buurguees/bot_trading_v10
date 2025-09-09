@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/pages/base_page.py
 """
 monitoring/pages/base_page.py
 Clase Base para Páginas del Dashboard - Trading Bot v10

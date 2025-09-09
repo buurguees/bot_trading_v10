@@ -1,3 +1,4 @@
+# Ruta: core/config/enterprise_config.py
 #!/usr/bin/env python3
 """
 Gestor de Configuración Enterprise

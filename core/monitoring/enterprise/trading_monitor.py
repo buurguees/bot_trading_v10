@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/enterprise/trading_monitor.py
 #!/usr/bin/env python3
 """
 Monitor de Trading Enterprise - Tiempo Real

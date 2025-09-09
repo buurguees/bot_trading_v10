@@ -1,3 +1,4 @@
+# Ruta: core/security/encryption_manager.py
 # encryption_manager.py - Gestor de encriptación enterprise
 # Ubicación: C:\TradingBot_v10\security\encryption_manager.py
 

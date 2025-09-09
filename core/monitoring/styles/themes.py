@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/styles/themes.py
 """
 monitoring/styles/themes.py
 Sistema de Temas para Dashboard - Trading Bot v10

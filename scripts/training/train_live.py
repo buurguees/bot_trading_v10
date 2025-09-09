@@ -1,3 +1,4 @@
+# Ruta: scripts/training/train_live.py
 #!/usr/bin/env python3
 """
 Entrenamiento en Tiempo Real - Trading Bot v10 Enterprise

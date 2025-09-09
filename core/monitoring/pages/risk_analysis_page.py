@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/pages/risk_analysis_page.py
 """
 monitoring/pages/risk_analysis_page.py
 Página de Análisis de Riesgo - Trading Bot v10

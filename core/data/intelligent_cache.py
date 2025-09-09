@@ -1,3 +1,4 @@
+# Ruta: core/data/intelligent_cache.py
 """
 data/intelligent_cache.py - Sistema de Cache Inteligente con Invalidación Automática
 Sistema de cache distribuido con gestión por timeframe y invalidación automática

@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/pages/settings_page.py
 """
 monitoring/pages/settings_page.py
 Página de Configuración del Sistema - Trading Bot v10

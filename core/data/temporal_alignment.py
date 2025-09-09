@@ -1,3 +1,4 @@
+# Ruta: core/data/temporal_alignment.py
 """
 data/temporal_alignment.py - Sistema de Alineación Temporal para Trading Multi-Símbolo
 Sistema robusto para garantizar timestamps idénticos entre todos los símbolos y timeframes

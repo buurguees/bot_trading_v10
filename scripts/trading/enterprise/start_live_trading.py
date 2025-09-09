@@ -1,3 +1,4 @@
+# Ruta: scripts/trading/enterprise/start_live_trading.py
 # start_live_trading.py - Script para iniciar trading en vivo
 # Ubicación: C:\TradingBot_v10\trading_scripts\enterprise\start_live_trading.py
 

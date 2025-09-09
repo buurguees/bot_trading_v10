@@ -1,3 +1,4 @@
+# Ruta: core/security/__init__.py
 # __init__.py - Módulo de seguridad enterprise
 # Ubicación: C:\TradingBot_v10\security\__init__.py
 

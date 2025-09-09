@@ -1,3 +1,4 @@
+# Ruta: core/security/audit_logger.py
 # audit_logger.py - Logger de auditoría enterprise
 # Ubicación: C:\TradingBot_v10\security\audit_logger.py
 

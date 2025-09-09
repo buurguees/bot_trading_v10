@@ -1,3 +1,4 @@
+# Ruta: core/trading/enterprise/leverage_calculator.py
 # leverage_calculator.py - Calculador de leverage dinámico
 # Ubicación: C:\TradingBot_v10\trading\enterprise\leverage_calculator.py
 

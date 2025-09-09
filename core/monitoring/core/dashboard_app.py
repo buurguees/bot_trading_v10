@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/core/dashboard_app.py
 """
 monitoring/core/dashboard_app.py
 Aplicación Principal del Dashboard - Trading Bot v10

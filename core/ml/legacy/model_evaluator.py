@@ -1,3 +1,4 @@
+# Ruta: core/ml/legacy/model_evaluator.py
 """
 📊 model_evaluator.py - Evaluador de Performance de Modelos
 

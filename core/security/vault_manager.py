@@ -1,3 +1,4 @@
+# Ruta: core/security/vault_manager.py
 # vault_manager.py - Gestor Vault para secrets enterprise
 # Ubicación: C:\TradingBot_v10\security\vault_manager.py
 

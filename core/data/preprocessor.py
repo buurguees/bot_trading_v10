@@ -1,3 +1,4 @@
+# Ruta: core/data/preprocessor.py
 """
 data/preprocessor.py - VERSIÓN PROFESIONAL MEJORADA
 Procesador de datos y feature engineering para el modelo de ML

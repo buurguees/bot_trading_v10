@@ -1,3 +1,4 @@
+# Ruta: core/compliance/enterprise/audit_logger.py
 #!/usr/bin/env python3
 """
 Audit Logger Enterprise - Logging Inmutable

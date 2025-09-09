@@ -1,3 +1,4 @@
+# Ruta: control/security_guard.py
 #!/usr/bin/env python3
 """
 Seguridad de Telegram - Trading Bot v10 Enterprise

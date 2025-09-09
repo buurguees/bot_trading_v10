@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/enterprise/performance_analyzer.py
 # performance_analyzer.py - Analizador de rendimiento enterprise
 # Ubicación: C:\TradingBot_v10\monitoring\enterprise\performance_analyzer.py
 

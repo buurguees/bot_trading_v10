@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/enterprise/prometheus_metrics.py
 # prometheus_metrics.py - Métricas de Prometheus enterprise
 # Ubicación: C:\TradingBot_v10\monitoring\enterprise\prometheus_metrics.py
 

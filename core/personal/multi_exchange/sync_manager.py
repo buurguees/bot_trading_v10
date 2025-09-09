@@ -1,3 +1,4 @@
+# Ruta: core/personal/multi_exchange/sync_manager.py
 """
 Exchange Sync Manager - Bot Trading v10 Personal
 ================================================

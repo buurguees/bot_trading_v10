@@ -1,3 +1,4 @@
+# Ruta: scripts/deployment/enterprise/setup_infrastructure.py
 # setup_infrastructure.py - Script de configuración de infraestructura enterprise
 # Ubicación: C:\TradingBot_v10\scripts\enterprise\setup_infrastructure.py
 

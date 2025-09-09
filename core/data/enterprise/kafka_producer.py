@@ -1,3 +1,4 @@
+# Ruta: core/data/enterprise/kafka_producer.py
 # kafka_producer.py - Productor Kafka para datos enterprise
 # Ubicación: C:\TradingBot_v10\data\enterprise\kafka_producer.py
 

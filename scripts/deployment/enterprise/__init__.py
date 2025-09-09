@@ -1,3 +1,4 @@
+# Ruta: scripts/deployment/enterprise/__init__.py
 # __init__.py - Módulo de scripts enterprise
 # Ubicación: C:\TradingBot_v10\scripts\enterprise\__init__.py
 

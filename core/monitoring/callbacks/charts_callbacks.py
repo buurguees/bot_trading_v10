@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/callbacks/charts_callbacks.py
 """
 monitoring/callbacks/charts_callbacks.py
 Callbacks para Página de Gráficos - Trading Bot v10

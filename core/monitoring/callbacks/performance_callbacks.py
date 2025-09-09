@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/callbacks/performance_callbacks.py
 """
 monitoring/callbacks/performance_callbacks.py
 Callbacks para Página de Análisis de Rendimiento - Trading Bot v10

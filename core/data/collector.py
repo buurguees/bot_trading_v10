@@ -1,3 +1,4 @@
+# Ruta: core/data/collector.py
 """
 data/collector.py - VERSIÓN PROFESIONAL MEJORADA
 Recolector de datos de mercado desde Bitget API

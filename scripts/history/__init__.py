@@ -1,3 +1,4 @@
+# Ruta: scripts/history/__init__.py
 """
 History Scripts - Bot Trading v10 Enterprise
 ===========================================

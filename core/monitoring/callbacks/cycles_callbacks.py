@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/callbacks/cycles_callbacks.py
 """
 monitoring/callbacks/cycles_callbacks.py
 Callbacks para Página de Ciclos - Trading Bot v10

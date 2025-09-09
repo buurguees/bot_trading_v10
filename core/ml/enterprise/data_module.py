@@ -1,3 +1,4 @@
+# Ruta: core/ml/enterprise/data_module.py
 # data_module.py - PyTorch Lightning DataModule para trading
 # Ubicación: C:\TradingBot_v10\models\enterprise\data_module.py
 

@@ -1,3 +1,4 @@
+# Ruta: core/deployment/phase_manager.py
 #!/usr/bin/env python3
 """
 Gestor de Fases Enterprise - Coordinación de Dependencias

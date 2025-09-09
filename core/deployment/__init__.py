@@ -1,3 +1,4 @@
+# Ruta: core/deployment/__init__.py
 """
 Deployment Module - Bot Trading v10 Enterprise
 ==============================================

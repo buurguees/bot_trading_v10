@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/core/real_time_manager.py
 """
 monitoring/core/real_time_manager.py
 Gestor de Datos en Tiempo Real - Trading Bot v10

@@ -1,3 +1,4 @@
+# Ruta: core/trading/executor.py
 """
 ⚡ executor.py - Motor Principal de Trading
 

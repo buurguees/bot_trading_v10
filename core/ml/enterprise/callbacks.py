@@ -1,3 +1,4 @@
+# Ruta: core/ml/enterprise/callbacks.py
 # callbacks.py - Callbacks personalizados para PyTorch Lightning
 # Ubicación: C:\TradingBot_v10\models\enterprise\callbacks.py
 

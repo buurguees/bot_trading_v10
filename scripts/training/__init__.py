@@ -1,3 +1,4 @@
+# Ruta: scripts/training/__init__.py
 """
 Training Scripts - Bot Trading v10 Enterprise
 ============================================

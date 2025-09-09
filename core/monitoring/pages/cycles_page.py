@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/pages/cycles_page.py
 """
 monitoring/pages/cycles_page.py
 Página de Análisis de Ciclos - Trading Bot v10

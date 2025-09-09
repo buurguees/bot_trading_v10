@@ -1,3 +1,4 @@
+# Ruta: data/enterprise/stream_collector.py
 # stream_collector.py - Recopilador de datos en tiempo real enterprise
 # Ubicación: C:\TradingBot_v10\data\enterprise\stream_collector.py
 

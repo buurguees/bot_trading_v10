@@ -1,3 +1,4 @@
+# Ruta: core/ml/enterprise/testing_framework.py
 """
 models/enterprise/testing_framework.py - Enterprise Testing Framework
 Framework completo de testing para modelos ML enterprise

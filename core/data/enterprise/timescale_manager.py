@@ -1,3 +1,4 @@
+# Ruta: core/data/enterprise/timescale_manager.py
 # timescale_manager.py - Gestor TimescaleDB para datos enterprise
 # Ubicación: C:\TradingBot_v10\data\enterprise\timescale_manager.py
 

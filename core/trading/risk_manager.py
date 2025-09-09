@@ -1,3 +1,4 @@
+# Ruta: core/trading/risk_manager.py
 """
 trading/risk_manager.py
 Sistema de gestión de riesgo para trading (LONG/SHORT, spot/futures)

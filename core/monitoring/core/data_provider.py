@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/core/data_provider.py
 """
 monitoring/core/data_provider.py
 Proveedor Centralizado de Datos - Trading Bot v10

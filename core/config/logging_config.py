@@ -1,3 +1,4 @@
+# Ruta: core/config/logging_config.py
 #!/usr/bin/env python3
 """
 Configuración de Logging para Trading Bot v10

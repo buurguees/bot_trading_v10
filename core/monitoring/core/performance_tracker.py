@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/core/performance_tracker.py
 """
 monitoring/core/performance_tracker.py
 Seguimiento de Rendimiento - Trading Bot v10

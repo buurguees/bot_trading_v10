@@ -1,3 +1,4 @@
+# Ruta: core/data/enterprise/__init__.py
 # __init__.py - Módulo de recopilación de datos enterprise
 # Ubicación: C:\TradingBot_v10\data\enterprise\__init__.py
 

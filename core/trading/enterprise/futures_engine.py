@@ -1,3 +1,4 @@
+# Ruta: core/trading/enterprise/futures_engine.py
 # futures_engine.py - Motor principal de trading de futuros enterprise
 # Ubicación: C:\TradingBot_v10\trading\enterprise\futures_engine.py
 

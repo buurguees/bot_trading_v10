@@ -1,3 +1,4 @@
+# Ruta: core/trading/signal_processor.py
 """
 trading/signal_processor.py
 Procesador inteligente de señales de trading con filtrado avanzado.

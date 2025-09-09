@@ -1,3 +1,4 @@
+# Ruta: core/ml/legacy/adaptive_trainer.py
 """
 🎓 adaptive_trainer.py - Sistema de Entrenamiento Continuo
 

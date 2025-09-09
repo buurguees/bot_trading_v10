@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/enterprise/alert_manager.py
 # alert_manager.py - Gestor de alertas enterprise
 # Ubicación: C:\TradingBot_v10\monitoring\enterprise\alert_manager.py
 

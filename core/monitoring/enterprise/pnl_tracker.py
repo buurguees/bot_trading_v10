@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/enterprise/pnl_tracker.py
 #!/usr/bin/env python3
 """
 Tracker de PnL Enterprise - Tiempo Real

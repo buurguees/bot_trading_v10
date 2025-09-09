@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/simple_dashboard.py
 #!/usr/bin/env python3
 """
 Dashboard Simplificado del Trading Bot v10

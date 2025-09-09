@@ -1,3 +1,4 @@
+# Ruta: scripts/trading/enterprise/start_paper_trading.py
 #!/usr/bin/env python3
 """
 Script de Paper Trading Enterprise

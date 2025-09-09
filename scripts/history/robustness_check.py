@@ -1,3 +1,4 @@
+# Ruta: scripts/history/robustness_check.py
 #!/usr/bin/env python3
 """
 Verificación de Robustez del Sistema

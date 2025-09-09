@@ -1,3 +1,4 @@
+# Ruta: core/data/enterprise/data_validator.py
 # data_validator.py - Validador de datos enterprise
 # Ubicación: C:\TradingBot_v10\data\enterprise\data_validator.py
 

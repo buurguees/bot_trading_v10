@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/metrics_sender.py
 #!/usr/bin/env python3
 """
 Sistema de Métricas Enterprise para Telegram

@@ -1,3 +1,4 @@
+# Ruta: core/trading/enterprise/__init__.py
 """
 Módulo Enterprise Trading - Bot Trading v10
 ==========================================

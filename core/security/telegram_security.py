@@ -1,3 +1,4 @@
+# Ruta: core/security/telegram_security.py
 #!/usr/bin/env python3
 """
 Seguridad de Telegram - Trading Bot v10 Enterprise

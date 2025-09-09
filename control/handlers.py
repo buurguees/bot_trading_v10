@@ -1,3 +1,4 @@
+# Ruta: control/handlers.py
 #!/usr/bin/env python3
 """
 Handlers para Telegram Bot - Trading Bot v10 Enterprise

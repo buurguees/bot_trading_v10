@@ -1,3 +1,4 @@
+# Ruta: core/personal/latency/latency_optimizer.py
 """
 Latency Optimizer - Bot Trading v10 Personal
 ============================================

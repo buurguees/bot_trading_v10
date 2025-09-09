@@ -1,3 +1,4 @@
+# Ruta: core/data/database.py
 """
 data/database.py - VERSIÓN PROFESIONAL MEJORADA
 Gestor de base de datos para el sistema de trading

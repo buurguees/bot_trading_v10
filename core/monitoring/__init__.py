@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/__init__.py
 """
 Monitoring Module - Bot Trading v10 Enterprise
 ==============================================

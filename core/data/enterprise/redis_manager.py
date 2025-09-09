@@ -1,3 +1,4 @@
+# Ruta: core/data/enterprise/redis_manager.py
 # redis_manager.py - Gestor Redis para datos enterprise
 # Ubicación: C:\TradingBot_v10\data\enterprise\redis_manager.py
 

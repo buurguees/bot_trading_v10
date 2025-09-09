@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/callbacks/home_callbacks.py
 """
 monitoring/callbacks/home_callbacks.py
 Callbacks para Página Principal (HOME) - Trading Bot v10

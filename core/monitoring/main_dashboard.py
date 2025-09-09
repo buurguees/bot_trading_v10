@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/main_dashboard.py
 #!/usr/bin/env python3
 """
 Dashboard Principal del Trading Bot v10

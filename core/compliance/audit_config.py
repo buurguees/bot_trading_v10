@@ -1,3 +1,4 @@
+# Ruta: core/compliance/audit_config.py
 # audit_config.py - Configuración de auditoría enterprise
 # Ubicación: C:\TradingBot_v10\compliance\audit_config.py
 

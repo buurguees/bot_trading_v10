@@ -1,3 +1,4 @@
+# Ruta: scripts/deployment/enterprise/health_check.py
 # health_check.py - Script de verificación de salud enterprise
 # Ubicación: C:\TradingBot_v10\scripts\enterprise\health_check.py
 

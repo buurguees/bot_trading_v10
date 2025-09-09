@@ -1,3 +1,4 @@
+# Ruta: core/trading/enterprise/market_analyzer.py
 # market_analyzer.py - Analizador de mercado en tiempo real
 # Ubicación: C:\TradingBot_v10\trading\enterprise\market_analyzer.py
 

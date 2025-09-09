@@ -1,3 +1,4 @@
+# Ruta: core/personal/latency/__init__.py
 """
 Latency Optimization Module - Bot Trading v10 Personal
 ======================================================

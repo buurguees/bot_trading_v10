@@ -1,3 +1,4 @@
+# Ruta: core/personal/__init__.py
 """
 Personal Module - Bot Trading v10 Personal
 ==========================================

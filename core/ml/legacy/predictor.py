@@ -1,3 +1,4 @@
+# Ruta: core/ml/legacy/predictor.py
 """
 models/predictor.py
 Sistema de predicciones en tiempo real para trading

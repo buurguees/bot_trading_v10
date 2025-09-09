@@ -1,3 +1,4 @@
+# Ruta: scripts/training/train_historical.py
 #!/usr/bin/env python3
 """
 Entrenamiento Histórico - Trading Bot v10 Enterprise

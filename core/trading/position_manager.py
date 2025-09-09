@@ -1,3 +1,4 @@
+# Ruta: core/trading/position_manager.py
 """
 📊 position_manager.py - Gestor de Posiciones Inteligente
 

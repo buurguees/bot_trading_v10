@@ -1,3 +1,4 @@
+# Ruta: scripts/train/state_manager.py
 #!/usr/bin/env python3
 """
 Gestor de Estado - Trading Bot v10 Enterprise

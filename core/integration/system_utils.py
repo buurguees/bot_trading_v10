@@ -1,3 +1,4 @@
+# Ruta: core/integration/system_utils.py
 #!/usr/bin/env python3
 """
 Utilidades del Sistema Integrado - Trading Bot v10 Enterprise

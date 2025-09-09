@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/pages/live_trading_page.py
 """
 monitoring/pages/live_trading_page.py
 Página de Trading en Tiempo Real - Trading Bot v10

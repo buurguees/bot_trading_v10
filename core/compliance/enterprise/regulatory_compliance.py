@@ -1,3 +1,4 @@
+# Ruta: core/compliance/enterprise/regulatory_compliance.py
 #!/usr/bin/env python3
 """
 Regulatory Compliance Enterprise - Cumplimiento Regulatorio

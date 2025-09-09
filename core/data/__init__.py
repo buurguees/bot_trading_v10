@@ -1,3 +1,4 @@
+# Ruta: core/data/__init__.py
 """
 Data Module - Bot Trading v10 Enterprise
 ========================================

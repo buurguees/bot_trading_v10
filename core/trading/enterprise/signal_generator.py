@@ -1,3 +1,4 @@
+# Ruta: core/trading/enterprise/signal_generator.py
 # signal_generator.py - Generador de señales ML en tiempo real
 # Ubicación: C:\TradingBot_v10\trading\enterprise\signal_generator.py
 

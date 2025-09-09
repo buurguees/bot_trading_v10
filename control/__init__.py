@@ -1,3 +1,4 @@
+# Ruta: control/__init__.py
 """
 Control Module - Bot Trading v10 Enterprise
 ==========================================

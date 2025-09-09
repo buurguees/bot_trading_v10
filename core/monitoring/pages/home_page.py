@@ -1,3 +1,4 @@
+# Ruta: core/monitoring/pages/home_page.py
 """
 monitoring/pages/home_page.py
 Página Principal del Dashboard - Trading Bot v10

@@ -1,3 +1,4 @@
+# Ruta: scripts/deployment/enterprise/start_services.py
 # start_services.py - Script para iniciar servicios enterprise
 # Ubicación: C:\TradingBot_v10\scripts\enterprise\start_services.py
 

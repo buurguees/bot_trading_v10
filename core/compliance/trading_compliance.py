@@ -1,3 +1,4 @@
+# Ruta: core/compliance/trading_compliance.py
 # trading_compliance.py - Compliance de trading enterprise
 # Ubicación: C:\TradingBot_v10\compliance\trading_compliance.py
 
