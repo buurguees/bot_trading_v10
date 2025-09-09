@@ -45,8 +45,10 @@ class FeatureCache:
     
     def __init__(self, cache_dir: Path = None):
         if cache_dir is None:
-            from config.settings import DATA_DIR
-            self.cache_dir = DATA_DIR / "feature_cache"
+            from pathlib import Path
+            data_dir = Path(__file__).parent.parent.parent.parent / "data"
+            data_dir.mkdir(exist_ok=True)
+            self.cache_dir = data_dir / "feature_cache"
         else:
             self.cache_dir = Path(cache_dir)
         

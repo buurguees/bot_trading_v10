@@ -249,8 +249,10 @@ class DatabaseManager:
     
     def __init__(self, db_path: str = None):
         if db_path is None:
-            from config.settings import DATA_DIR
-            self.db_path = DATA_DIR / "trading_bot.db"
+            from pathlib import Path
+            data_dir = Path(__file__).parent.parent.parent.parent / "data"
+            data_dir.mkdir(exist_ok=True)
+            self.db_path = data_dir / "trading_bot.db"
         else:
             self.db_path = Path(db_path)
         

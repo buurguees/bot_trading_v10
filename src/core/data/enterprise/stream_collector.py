@@ -258,7 +258,7 @@ class EnterpriseDataCollector:
     @retry(
         stop=stop_after_attempt(10),
         wait=wait_exponential(multiplier=1, min=4, max=60),
-        retry=retry_if_exception_type((websockets.exceptions.ConnectionClosed, ConnectionError))
+        retry=retry_if_exception_type((ConnectionError, Exception))
     )
     async def _websocket_collection_loop(self):
         """Loop principal de recopilación WebSocket"""

@@ -99,7 +99,7 @@ class CoreManager:
             self.initialize()
         
         logger.info(f"Iniciando dashboard en http://{host}:{port}")
-        self.dashboard_app.run_server(host=host, port=port, debug=debug)
+        self.dashboard_app.run(host=host, port=port, debug=debug)
     
     def stop_all(self):
         """Detiene todos los componentes y limpia recursos"""
