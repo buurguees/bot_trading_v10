@@ -1,5 +1,5 @@
-# Bot Trading v10 Personal - Configuración de Exchanges
-# =====================================================
+# Bot Trading v10 Enterprise - Configuración de Exchanges
+# =======================================================
 
 exchanges:
   bitget:
@@ -8,8 +8,9 @@ exchanges:
     secret: "${BITGET_SECRET_KEY}"
     passphrase: "${BITGET_PASSPHRASE}"
     sandbox: false
-    rate_limit: 100
-    timeout: 10000
+    rate_limit: 100  # Verificado con Bitget API docs
+    timeout: 2000    # Reducido para HFT
+    timeframes: ["5m", "15m", "1h", "4h", "1d"]  # Para collector.py
     description: "Exchange principal para trading de futuros"
     
   binance:
@@ -17,9 +18,30 @@ exchanges:
     api_key: "${BINANCE_API_KEY}"
     secret: "${BINANCE_SECRET_KEY}"
     sandbox: false
-    rate_limit: 1200
-    timeout: 10000
+    rate_limit: 1200  # Verificar límites basados en peso de Binance
+    timeout: 2000
+    timeframes: ["5m", "15m", "1h", "4h", "1d"]
     description: "Exchange secundario para arbitraje"
+
+# Configuración de Kafka para enterprise
+kafka:
+  bootstrap_servers: "localhost:9092"
+  topics:
+    market_ticks: "market_ticks"
+    processed_data: "processed_data"
+    alerts: "alerts"
+    trades: "trades"
+    positions: "positions"
+  producer:
+    batch_size: 16384
+    linger_ms: 5
+    compression_type: "gzip"
+    acks: "all"
+  consumer:
+    group_id: "trading_bot_consumer"
+    auto_offset_reset: "latest"
+    enable_auto_commit: true
+    max_poll_records: 500
 
 arbitrage:
   enabled: true
@@ -37,10 +59,15 @@ arbitrage:
     - XRPUSDT
     - LINKUSDT
   
-  # Configuración de arbitraje
+  # Configuración de arbitraje optimizada
   max_spread_pct: 5.0
   min_confidence: 0.7
-  execution_delay_ms: 100
+  execution_delay_ms: 20  # Reducido para HFT
+  
+  # Configuración avanzada
+  max_concurrent_arbitrages: 5
+  min_volume_threshold: 1000
+  max_slippage_pct: 0.5
 
 latency:
   target_latency_ms: 50
@@ -58,25 +85,46 @@ latency:
     - XRPUSDT
     - LINKUSDT
   
-  # Configuración de HFT
+  # Configuración de HFT optimizada
   max_operations_per_second: 100
   preload_interval_ms: 100
   cache_size_limit: 1000
+  
+  # Configuración de red
+  connection_pool_size: 10
+  keep_alive: true
+  tcp_nodelay: true
 
 monitoring:
   health_check_interval: 30
   latency_threshold_ms: 1000
   max_errors_per_minute: 10
   
-  # Alertas
+  # Alertas mejoradas
   enable_alerts: true
   alert_channels:
-    - telegram
-    - email
+    telegram:
+      chat_id: "${TELEGRAM_CHAT_ID}"
+      enabled: true
+    email:
+      recipient: "${ALERT_EMAIL}"
+      enabled: true
+    discord:
+      webhook_url: "${DISCORD_WEBHOOK}"
+      enabled: false
   
-  # Métricas
+  # Métricas enterprise
   enable_prometheus: true
   prometheus_port: 8001
+  enable_grafana: true
+  grafana_port: 3000
+  
+  # Configuración de alertas
+  alert_thresholds:
+    high_latency_ms: 100
+    high_error_rate: 0.05
+    high_memory_usage: 0.8
+    high_cpu_usage: 0.8
 
 sync:
   enabled: true
@@ -87,45 +135,99 @@ sync:
   balance_sync: true
   position_sync: true
   price_sync: true
+  order_sync: true
   
   # Detección de anomalías
   anomaly_detection: true
   drift_alert_threshold: 50.0
+  
+  # Configuración de TimescaleDB
+  timescale_enabled: true
+  timescale_host: "localhost"
+  timescale_port: 5432
+  timescale_database: "trading_data"
+  timescale_username: "${TIMESCALE_USERNAME}"
+  timescale_password: "${TIMESCALE_PASSWORD}"
 
 trading:
-  # Configuración de trading personal
+  # Configuración de trading enterprise
   default_leverage: 10
   max_leverage: 30
   min_leverage: 5
   
-  # Gestión de riesgo
+  # Gestión de riesgo avanzada
   max_risk_per_trade: 2.0
   max_drawdown_pct: 15.0
   max_positions: 10
+  max_daily_trades: 100
   
   # Estrategias
   enable_arbitrage: true
   enable_hft: true
   enable_ml_signals: true
+  enable_momentum: true
+  enable_mean_reversion: true
   
   # Configuración de órdenes
   default_order_type: market
   stop_loss_enabled: true
   take_profit_enabled: true
+  trailing_stop_enabled: true
+  
+  # Configuración de ejecución
+  execution_timeout_ms: 5000
+  retry_attempts: 3
+  retry_delay_ms: 100
+
+# Configuración de entrenamiento ML
+training:
+  enabled: true
+  max_epochs: 100
+  batch_size: 32
+  learning_rate: 0.001
+  model_type: "transformer"
+  validation_split: 0.2
+  
+  # Configuración avanzada
+  early_stopping_patience: 10
+  model_checkpointing: true
+  tensorboard_logging: true
+  
+  # Configuración de datos
+  lookback_window: 60
+  feature_engineering: true
+  data_augmentation: true
+  
+  # Configuración de validación
+  cross_validation_folds: 5
+  test_size: 0.2
+  validation_metrics: ["accuracy", "precision", "recall", "f1"]
 
 security:
   # Encriptación de credenciales
   encrypt_credentials: true
   encryption_key: "${ENCRYPTION_KEY}"
+  encryption_algorithm: "AES-256-GCM"
   
   # Validación de API keys
   validate_api_keys: true
   api_key_rotation_days: 30
+  api_key_validation_interval: 3600
   
   # Logging de seguridad
   log_api_calls: true
   log_trades: true
   log_errors: true
+  log_security_events: true
+  
+  # Configuración de autenticación
+  jwt_secret: "${JWT_SECRET}"
+  jwt_expiration_hours: 24
+  
+  # Configuración de red
+  allowed_ips: []
+  rate_limiting: true
+  max_requests_per_minute: 1000
 
 performance:
   # Configuración de rendimiento
@@ -137,8 +239,69 @@ performance:
   enable_async: true
   enable_caching: true
   enable_preloading: true
+  enable_compression: true
   
-  # Límites
+  # Configuración de Redis
+  redis_enabled: true
+  redis_host: "localhost"
+  redis_port: 6379
+  redis_password: "${REDIS_PASSWORD}"
+  redis_db: 0
+  
+  # Límites de recursos
   max_memory_usage_mb: 1024
   max_cpu_usage_pct: 80
   max_disk_usage_mb: 5120
+  
+  # Configuración de garbage collection
+  gc_threshold: 0.8
+  gc_interval: 300
+  
+  # Configuración de logging
+  log_level: "INFO"
+  log_rotation: true
+  max_log_size_mb: 100
+  log_retention_days: 30
+
+# Configuración de backup
+backup:
+  enabled: true
+  interval_hours: 24
+  retention_days: 7
+  compress: true
+  include_models: true
+  include_data: true
+  include_logs: true
+  
+  # Configuración de almacenamiento
+  backup_location: "data/backups"
+  cloud_backup: false
+  s3_bucket: "${S3_BACKUP_BUCKET}"
+  s3_region: "${S3_BACKUP_REGION}"
+
+# Configuración de notificaciones
+notifications:
+  enabled: true
+  channels:
+    telegram:
+      enabled: true
+      bot_token: "${TELEGRAM_BOT_TOKEN}"
+      chat_id: "${TELEGRAM_CHAT_ID}"
+    email:
+      enabled: false
+      smtp_server: "smtp.gmail.com"
+      smtp_port: 587
+      username: "${EMAIL_USERNAME}"
+      password: "${EMAIL_PASSWORD}"
+    discord:
+      enabled: false
+      webhook_url: "${DISCORD_WEBHOOK}"
+  
+  # Configuración de eventos
+  events:
+    trade_executed: true
+    position_opened: true
+    position_closed: true
+    error_occurred: true
+    system_alert: true
+    performance_alert: true

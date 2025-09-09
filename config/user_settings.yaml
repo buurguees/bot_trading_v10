@@ -1,198 +1,118 @@
 # config/user_settings.yaml
 # Ubicación: C:\TradingBot_v10\config\user_settings.yaml
-# 
 # CONFIGURACIÓN PERSONALIZABLE DEL TRADING BOT
 # ============================================
-# 
-# Este archivo te permite configurar el bot sin tocar código.
-# Modifica los valores según tus preferencias y el bot se adaptará automáticamente.
 
-# =============================================================================
-# CONFIGURACIÓN GENERAL DEL BOT
-# =============================================================================
 bot_settings:
-  # Nombre del bot (aparecerá en logs y dashboard)
   name: "TradingBot_v10_Alex"
-  
-  # Modo de operación
-  # Opciones: "conservative", "moderate", "aggressive", "custom"
-  trading_mode: "aggressive"
-  
-  # Activar/desactivar funciones principales
+  trading_mode: "moderate"  # Safer for enterprise, test aggressive in paper mode
   features:
-    auto_trading: true          # El bot puede ejecutar trades automáticamente
-    auto_retraining: true       # El bot se reentrena automáticamente
-    risk_management: true       # Aplicar gestión de riesgo
-    stop_on_drawdown: true      # Parar si hay mucho drawdown
-    adaptive_sizing: true       # Ajustar tamaño de posición dinámicamente
+    auto_trading: true
+    auto_retraining: true
+    risk_management: true
+    stop_on_drawdown: true
+    adaptive_sizing: true
 
-# =============================================================================
-# CONFIGURACIÓN DE CAPITAL Y RIESGO
-# =============================================================================
 capital_management:
-  # Capital inicial para operar (en USDT)
-  initial_balance: 1000.0
-  
-  # OBJETIVO DE ENTRENAMIENTO: $1,000,000
-  target_balance: 1000000.0    # Objetivo de $1M para motivar al agente
-  
-  # Porcentaje máximo del balance a arriesgar por trade - OPTIMIZADO
-  max_risk_per_trade: 3.0      # Reducido del 5% al 1% para mejor gestión de riesgo
-  
-  # Límites de pérdida
-  max_daily_loss_pct: 10.0     # 10% pérdida máxima por día
-  max_weekly_loss_pct: 25.0    # 25% pérdida máxima por semana
-  max_drawdown_pct: 30.0       # 30% drawdown máximo antes de parar
-  
-  # Límites de ganancias (para asegurar beneficios)
-  daily_profit_target: 15.0    # 10% ganancia diaria objetivo (más agresivo)
-  take_profit_at_target: false # Parar al alcanzar objetivo diario
+  initial_balance: 10000.0  # Increased for enterprise realism
+  target_balance: 1000000.0
+  max_risk_per_trade: 1.0  # Reduced for enterprise safety
+  max_daily_loss_pct: 5.0  # Tighter for risk control
+  max_weekly_loss_pct: 15.0
+  max_drawdown_pct: 20.0
+  daily_profit_target: 5.0  # More realistic
+  take_profit_at_target: false
 
-# =============================================================================
-# CONFIGURACIÓN DE TRADING
-# =============================================================================
 trading:
-  # Modo de trading
-  mode: "paper_trading"  # Opciones: "development", "backtesting", "paper_trading", "live_trading"
-  
-  # Configuración de futuros
-  futures: true  # true para futuros, false para spot
-  
-  # Configuración de ejecución
-  min_confidence: 0.6        # Confianza mínima para ejecutar (60%)
-  max_trades_per_bar: 1      # Máximo 1 trade por barra
-  commission_rate: 0.001      # 0.1% de comisión
-  
-  # Circuit breakers
-  circuit_breaker_loss: 0.05  # 5% pérdida diaria para activar circuit breaker
-  
-  # Balance inicial para paper trading
-  initial_balance: 1000.0
+  mode: "paper_trading"
+  futures: true
+  min_confidence: 0.7  # Increased for quality
+  max_trades_per_bar: 1
+  commission_rate: 0.001
+  circuit_breaker_loss: 0.05
 
-# =============================================================================
-# GESTIÓN DE RIESGO
-# =============================================================================
 risk_management:
-  # Límites de riesgo por trade - OPTIMIZADOS
-  max_risk_per_trade: 0.02    # 2% por trade para permitir aprendizaje con control
-  max_daily_loss_pct: 0.06    # 6% pérdida máxima diaria para margen de exploración
-  max_drawdown_pct: 0.20      # 20% drawdown máximo para aprender sin romper la cuenta
-  
-  # Configuración de leverage
-  min_leverage: 5.0           # Mínimo 5x leverage para futuros
-  max_leverage: 30.0           # Máximo 3x leverage para futuros
-  
-  # Configuración de stop loss y take profit - OPTIMIZADA
-  default_stop_loss_pct: 0.015 # 1.5% por defecto para mayor margen de maniobra
-  risk_reward_ratio: 2.5       # 1:2.5 para permitir salidas más flexibles
-trading_settings:
-  # Símbolo principal a operar
-  primary_symbol: "BTCUSDT"
-  
-  # Timeframes a utilizar (el bot usará múltiples timeframes)
-  timeframes:
-    primary: "15m"             # Timeframe principal para decisiones
-    secondary: "5m"            # Timeframe secundario para contexto
-    entry: "1m"                # Timeframe para entrada precisa
-  
-  # Configuración de órdenes
-  order_settings:
-    # Tipo de orden preferido: "market", "limit"
-    preferred_order_type: "limit"
-    
-    # Tiempo máximo para que se ejecute una orden limit (en minutos)
-    limit_order_timeout: 5
-    
-    # Usar trailing stops
-    use_trailing_stops: true
-    trailing_stop_distance: 1.5  # 1.5% de distancia
-  
-  # Stop Loss y Take Profit
-  stop_loss:
-    method: "adaptive"           # "fixed", "adaptive", "atr_based"
-    default_pct: 2.0            # 2% por defecto
-    min_pct: 0.5                # Mínimo 0.5%
-    max_pct: 5.0                # Máximo 5%
-  
-  take_profit:
-    method: "scaled"            # "fixed", "scaled", "trailing"
-    default_pct: 4.0            # 4% por defecto
-    # Para take profit escalonado
-    levels:
-      - target: 2.0             # 2% ganancia
-        close_pct: 33           # Cerrar 33% de la posición
-      - target: 4.0             # 4% ganancia
-        close_pct: 50           # Cerrar 50% de la posición restante
-      - target: 8.0             # 8% ganancia
-        close_pct: 100          # Cerrar el resto
+  max_risk_per_trade: 0.01  # Tighter for enterprise
+  max_daily_loss_pct: 0.05
+  max_drawdown_pct: 0.15
+  min_leverage: 5.0
+  max_leverage: 20.0  # Reduced for safety
+  default_stop_loss_pct: 0.015
+  risk_reward_ratio: 2.5
 
-# =============================================================================
-# CONFIGURACIÓN DEL MODELO DE IA
-# =============================================================================
+trading_settings:
+  primary_symbol: "BTCUSDT"
+  timeframes:
+    primary: "15m"
+    secondary: "5m"
+    entry: "1m"
+  order_settings:
+    preferred_order_type: "limit"
+    limit_order_timeout: 5
+    use_trailing_stops: true
+    trailing_stop_distance: 1.5
+  stop_loss:
+    method: "adaptive"
+    default_pct: 2.0
+    min_pct: 0.5
+    max_pct: 5.0
+  take_profit:
+    method: "scaled"
+    default_pct: 4.0
+    levels:
+      - target: 2.0
+        close_pct: 33
+      - target: 4.0
+        close_pct: 50
+      - target: 8.0
+        close_pct: 100
+
 ai_model_settings:
-  # Configuración de confianza - OPTIMIZADA PARA MEJORAR WIN RATE
   confidence:
-    min_confidence_to_trade: 75.0    # Aumentado del 65% al 75% para mejor calidad
-    high_confidence_threshold: 85.0  # Aumentado del 80% al 85% para alta confianza
-    
-    # Ajustes por nivel de confianza
+    min_confidence_to_trade: 75.0
+    high_confidence_threshold: 85.0
     confidence_adjustments:
-      low_confidence: 0.5       # Reducir posición al 50% si confianza baja
-      high_confidence: 1.5      # Aumentar posición al 150% si confianza alta
-  
-  # Configuración de reentrenamiento
+      low_confidence: 0.5
+      high_confidence: 1.5
   retraining:
-    frequency: "adaptive"       # "fixed", "adaptive", "performance_based"
+    frequency: "adaptive"
     min_trades_before_retrain: 50
     retrain_on_poor_performance: true
-    performance_threshold: 60.0 # Reentrenar si precisión < 60%
-  # Configuración externa de recompensas/penalizaciones
+    performance_threshold: 60.0
   rewards_config: "src/core/config/rewards.yaml"
-  
-  # Features que el modelo debe priorizar
   feature_importance:
-    price_action: 0.3           # 30% importancia a acción del precio
-    technical_indicators: 0.4   # 40% a indicadores técnicos
-    volume_analysis: 0.2        # 20% a análisis de volumen
-    market_sentiment: 0.1       # 10% a sentimiento de mercado
+    price_action: 0.3
+    technical_indicators: 0.4
+    volume_analysis: 0.2
+    market_sentiment: 0.1
 
-# =============================================================================
-# SISTEMA DE RECOMPENSAS Y PENALIZACIONES
-# =============================================================================
 reward_system:
-  # Esquema de recompensas/penalizaciones integrado
-
-  # === Tramos por %ROI del trade (aplicado al cerrar) ===
   tiers:
     pos:
-      - [0,    5,   0.2]
-      - [6,   15,   0.5]
-      - [16,  40,   1.0]
-      - [41,  60,   1.5]
-      - [60,  99,   2.5]
-      - [100, 1e9,  5.0]
+      - [0, 5, 0.2]
+      - [6, 15, 0.5]
+      - [16, 40, 1.0]
+      - [41, 60, 1.5]
+      - [60, 99, 2.5]
+      - [100, 1e9, 5.0]
     neg:
-      - [0,    5,  -0.5]
-      - [6,   15,  -1.0]
-      - [16,  40,  -1.5]
-      - [41,  60,  -3.0]
-      - [60,  99,  -5.0]
-
-  # === Tramos por R-Multiple (aplicado al cerrar) ===
+      - [0, 5, -0.5]
+      - [6, 15, -1.0]
+      - [16, 40, -1.5]
+      - [41, 60, -3.0]
+      - [60, 99, -5.0]
   r_multiple_tiers:
     pos:
-      - [0.0,  1.0,  0.1]
-      - [1.0,  2.0,  0.3]
-      - [2.0,  3.0,  0.5]
-      - [3.0,  5.0,  1.0]
-      - [5.0,  1e9, 2.0]
+      - [0.0, 1.0, 0.1]
+      - [1.0, 2.0, 0.3]
+      - [2.0, 3.0, 0.5]
+      - [3.0, 5.0, 1.0]
+      - [5.0, 1e9, 2.0]
     neg:
-      - [0.0,  1.0, -0.2]
-      - [1.0,  2.0, -0.5]
-      - [2.0,  3.0, -1.0]
-      - [3.0,  1e9, -2.0]
-
-  # === Rewards/Penalties por leverage ===
+      - [0.0, 1.0, -0.2]
+      - [1.0, 2.0, -0.5]
+      - [2.0, 3.0, -1.0]
+      - [3.0, 1e9, -2.0]
   leverage_rewards:
     high_leverage_bonus:
       enabled: true
@@ -208,8 +128,6 @@ reward_system:
       enabled: true
       max_leverage: 3.0
       consistency_bonus: 0.05
-
-  # === SL/TP hits ===
   sl_tp_hits:
     sl_hit_penalty:
       enabled: true
@@ -222,8 +140,6 @@ reward_system:
       scale_with_profit: true
       max_reward: 50.0
       leverage_bonus: true
-
-  # === Overtrading y eficiencia temporal ===
   overtrading_penalty:
     enabled: true
     window_bars: 200
@@ -234,8 +150,6 @@ reward_system:
     weight: 0.1
     per_bar_cap: 0.03
     per_trade_cap: 0.3
-
-  # === Clipping y pesos agregados ===
   clipping:
     per_step: [-0.2, 0.2]
     per_close_event: [-1.0, 1.5]
@@ -247,141 +161,115 @@ reward_system:
     progress_bonus: 0.1
     compound_bonus: 0.05
 
-# =============================================================================
-# CONFIGURACIÓN DE MONITOREO Y ALERTAS
-# =============================================================================
 monitoring:
-  # Dashboard web
   dashboard:
     enabled: true
-    host: "127.0.0.1"      # Solo acceso local por seguridad
-    port: 8050             # Puerto del dashboard
-    auto_open: false       # Abrir automáticamente en browser
-    auto_refresh_seconds: 30
+    host: "127.0.0.1"
+    port: 8050
+    auto_open: true  # Enable for your requirement
+    auto_refresh_seconds: 5  # Match dashboard requirement
     show_detailed_metrics: true
     show_model_predictions: true
-  
-  # Alertas que quieres recibir
   alerts:
-    # Por email (si está configurado en .env)
+    telegram:  # Added for Telegram integration
+      enabled: true
+      bot_token: "${TELEGRAM_BOT_TOKEN}"
+      chat_id: "${TELEGRAM_CHAT_ID}"
+      training_update_interval: 60  # Seconds, for interactive messages
+      events:
+        - "training_cycle"
+        - "large_loss"
+        - "daily_limit_reached"
+        - "system_error"
+        - "high_profit"
     email_alerts:
       enabled: false
       events:
-        - "large_loss"          # Pérdida grande
-        - "daily_limit_reached" # Límite diario alcanzado
-        - "system_error"        # Error del sistema
-        - "high_profit"         # Ganancia alta
-    
-    # Por consola/logs
+        - "large_loss"
+        - "daily_limit_reached"
+        - "system_error"
+        - "high_profit"
     console_alerts:
       enabled: true
       events:
-        - "trade_executed"      # Trade ejecutado
-        - "model_retrained"     # Modelo reentrenado
-        - "risk_limit_hit"      # Límite de riesgo alcanzado
-        - "api_error"           # Error de API
-  
-  # Frecuencia de reportes automáticos
+        - "trade_executed"
+        - "model_retrained"
+        - "risk_limit_hit"
+        - "api_error"
   reporting:
-    daily_summary: true         # Resumen diario de performance
-    weekly_analysis: true       # Análisis semanal detallado
-    model_performance_report: true # Reporte de performance del modelo
+    daily_summary: true
+    weekly_analysis: true
+    model_performance_report: true
 
-# =============================================================================
-# CONFIGURACIÓN AVANZADA (Para usuarios experimentados)
-# =============================================================================
 advanced_settings:
-  # Configuración de backtesting
   backtesting:
-    lookback_days: 365          # Días de historia para backtesting
-    walk_forward_months: 3      # Meses para walk-forward analysis
-    min_trades_for_validation: 100 # Mínimo trades para validar estrategia
-  
-  # Configuración de API
+    lookback_days: 365
+    walk_forward_months: 3
+    min_trades_for_validation: 100
   api_settings:
-    request_timeout: 30         # Timeout en segundos
-    max_retries: 3              # Reintentos máximos
-    rate_limit_buffer: 0.8      # Usar 80% del rate limit máximo
-  
-  # Configuración de datos
+    request_timeout: 10  # Reduced for HFT
+    max_retries: 3
+    rate_limit_buffer: 0.8
   data_management:
-    cleanup_old_data_days: 90   # Limpiar datos > 90 días
-    backup_frequency_hours: 24  # Backup cada 24 horas
-    compress_old_logs: true     # Comprimir logs antiguos
+    cleanup_old_data_days: 90
+    backup_frequency_hours: 24
+    compress_old_logs: true
 
-# =============================================================================
-# CONFIGURACIÓN DE SÍMBOLOS ENTERPRISE (10 SÍMBOLOS)
-# =============================================================================
 multi_symbol_settings:
-  # Configuración enterprise para 10 símbolos
   enabled: true
-  
   symbols:
     BTCUSDT:
       enabled: true
-      allocation_pct: 20.0      # 20% del capital
-      risk_multiplier: 1.0      # Multiplicador de riesgo base
-      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
-    
+      allocation_pct: 20.0
+      risk_multiplier: 1.0
+      leverage: auto
     ETHUSDT:
       enabled: true
-      allocation_pct: 20.0      # 15% del capital
-      risk_multiplier: 1.2      # ETH es más volátil
-      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
-    
+      allocation_pct: 20.0
+      risk_multiplier: 1.2
+      leverage: auto
     ADAUSDT:
       enabled: true
-      allocation_pct: 10.0      # 10% del capital
-      risk_multiplier: 1.5      # Altcoins más volátiles
-      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
-    
+      allocation_pct: 10.0
+      risk_multiplier: 1.5
+      leverage: auto
     SOLUSDT:
       enabled: true
-      allocation_pct: 10.0      # 10% del capital
-      risk_multiplier: 1.4      # Volatilidad media-alta
-      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
-    
+      allocation_pct: 10.0
+      risk_multiplier: 1.4
+      leverage: auto
     DOGEUSDT:
       enabled: true
-      allocation_pct: 8.0       # 8% del capital
-      risk_multiplier: 1.8      # Muy volátil
-      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
-    
+      allocation_pct: 8.0
+      risk_multiplier: 1.8
+      leverage: auto
     AVAXUSDT:
       enabled: true
-      allocation_pct: 10.0      # 10% del capital
-      risk_multiplier: 1.3      # Volatilidad media
-      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
-    
+      allocation_pct: 10.0
+      risk_multiplier: 1.3
+      leverage: auto
     TONUSDT:
       enabled: true
-      allocation_pct: 10.0       # 8% del capital
-      risk_multiplier: 1.6      # Volatilidad alta
-      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
-    
-    TRUMPUSDT:
+      allocation_pct: 10.0
+      risk_multiplier: 1.6
+      leverage: auto
+    XRPUSDT:  # Replaced TRUMPUSDT with XRPUSDT for standard symbol
       enabled: true
-      allocation_pct: 10.0      # 10% del capital
-      risk_multiplier: 1.1      # Volatilidad media-baja
-      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
-    
-    XRPUSDT:
-      enabled: true
-      allocation_pct: 10.0       # 7% del capital
-      risk_multiplier: 1.7      # Volatilidad alta
-      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
-    
+      allocation_pct: 7.0
+      risk_multiplier: 1.7
+      leverage: auto
     LINKUSDT:
       enabled: true
-      allocation_pct: 10.0       # 2% del capital
-      risk_multiplier: 1.9      # Muy volátil
-      leverage: auto            # Usar rango global min/max y apalancamiento dinámico
+      allocation_pct: 5.0
+      risk_multiplier: 1.9
+      leverage: auto
+    BNBUSDT:  # Added to match exchanges.yaml
+      enabled: true
+      allocation_pct: 5.0
+      risk_multiplier: 1.5
+      leverage: auto
 
-# =============================================================================
-# CONFIGURACIÓN ENTERPRISE
-# =============================================================================
 enterprise_features:
-  # Funcionalidades enterprise
   real_time_data_collection: true
   futures_trading: true
   compliance_monitoring: true
@@ -389,44 +277,33 @@ enterprise_features:
   performance_tracking: true
   audit_logging: true
 
-# =============================================================================
-# CONFIGURACIÓN DE TRADING ENTERPRISE
-# =============================================================================
 trading_enterprise:
-  # Configuración de futuros
   futures_trading:
     enabled: true
     leverage:
       min_leverage: 5
-      max_leverage: 30
-      confidence_based: true    # Ajustar leverage según confianza
-    margin_mode: "isolated"     # Modo de margen aislado
-    funding_rate_check: true    # Verificar funding rates
-  
-  # Estrategias de trading
+      max_leverage: 20  # Reduced for safety
+      confidence_based: true
+    margin_mode: "isolated"
+    funding_rate_check: true
   strategies:
     ml_strategy:
       enabled: true
-      confidence_threshold: 65.0
+      confidence_threshold: 70.0  # Increased for quality
       model_type: "lstm_attention"
-      weight: 0.4               # 40% del capital
-    
+      weight: 0.4
     momentum_strategy:
       enabled: true
-      confidence_threshold: 70.0
-      weight: 0.3               # 30% del capital
-    
+      confidence_threshold: 75.0
+      weight: 0.3
     mean_reversion_strategy:
       enabled: true
-      confidence_threshold: 75.0
-      weight: 0.2               # 20% del capital
-    
+      confidence_threshold: 80.0
+      weight: 0.2
     breakout_strategy:
       enabled: true
-      confidence_threshold: 80.0
-      weight: 0.1               # 10% del capital
-  
-  # Gestión de órdenes
+      confidence_threshold: 85.0
+      weight: 0.1
   order_management:
     default_order_type: "market"
     stop_loss:
@@ -435,13 +312,10 @@ trading_enterprise:
     take_profit:
       risk_reward_ratio: 2.0
 
-# =============================================================================
-# CONFIGURACIÓN DE RECOLECCIÓN DE DATOS
-# =============================================================================
 data_collection:
   real_time:
     enabled: true
-    symbols: 
+    symbols:
       - "BTCUSDT"
       - "ETHUSDT"
       - "ADAUSDT"
@@ -449,31 +323,26 @@ data_collection:
       - "DOGEUSDT"
       - "AVAXUSDT"
       - "TONUSDT"
-      - "TRUMPUSDT"
       - "XRPUSDT"
       - "LINKUSDT"
-    timeframes: ["1m", "5m", "15m", "1h", "4H", "1D"]
+      - "BGBUSDT"
+    timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
     data_types: ["kline", "ticker", "orderbook"]
   historical:
-    years: 1  # Reducido de 5 a 1 año para evitar rate limits
+    years: 1
     timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
     align_after_download: true
-  
   storage:
     timescaledb_enabled: true
     redis_cache_enabled: true
     parquet_files: true
     retention_days: 365
 
-# =============================================================================
-# CONFIGURACIÓN DE SEGURIDAD Y CUMPLIMIENTO
-# =============================================================================
 security:
   encryption:
     enabled: true
     algorithm: "AES-256-GCM"
     key_rotation_days: 30
-  
   compliance:
     mifid2_enabled: true
     gdpr_enabled: true
@@ -481,15 +350,11 @@ security:
     audit_logging: true
     immutable_logs: true
 
-# =============================================================================
-# CONFIGURACIÓN DE MONITOREO ENTERPRISE
-# =============================================================================
 monitoring_enterprise:
   prometheus:
     enabled: true
     port: 8003
     metrics_path: "/metrics"
-  
   grafana:
     enabled: true
     port: 3000
@@ -498,57 +363,42 @@ monitoring_enterprise:
       - "risk_dashboard"
       - "pnl_dashboard"
       - "positions_dashboard"
-  
   alerting:
     enabled: true
     channels:
+      - "telegram"  # Updated to match alerts
       - "email"
       - "slack"
       - "webhook"
 
-# =============================================================================
-# CONFIGURACIÓN PARA ANÁLISIS AVANZADO
-# =============================================================================
 analysis:
   enabled: true
-  auto_analysis_interval: 3600  # segundos (1 hora)
+  auto_analysis_interval: 3600
   min_trades_for_analysis: 10
   analysis_lookback_days: 30
-  
-# Configuración para gráficos mejorados
+
 dashboard:
+  enabled: true  # Added to ensure dashboard_app.py
   enhanced_charts: true
   default_timeframe: "30d"
   auto_refresh_interval: 5
   show_recommendations: true
   max_recommendations: 5
 
-# Configuración para mejoras automáticas
 auto_optimization:
-  enabled: false  # Activar cuando el análisis esté estable
+  enabled: false
   confidence_threshold_adjustment: true
   position_size_adjustment: true
   stop_loss_adjustment: true
 
-# =============================================================================
-# NOTAS DE CONFIGURACIÓN
-# =============================================================================
-# 
-# TRADING MODES EXPLICADOS:
-# - conservative: Menos trades, mayor confianza requerida, stop loss más estrictos
-# - moderate: Balance entre frecuencia y seguridad
-# - aggressive: Más trades, menor confianza requerida, mayor riesgo
-# - custom: Usa exactamente los valores que configures arriba
-# 
-# IMPORTANTE:
-# - Siempre empezar con trading_mode: "conservative" o "moderate"
-# - Probar primero en paper trading antes de dinero real
-# - El bot aprende y mejora con el tiempo, sé paciente
-# - Revisar y ajustar configuración basado en performance
-# 
-# TIPS:
-# - Si el bot pierde mucho: Reducir max_risk_per_trade y aumentar min_confidence_to_trade
-# - Si el bot no opera suficiente: Reducir min_confidence_to_trade
-# - Si hay muchos falsos positivos: Aumentar min_confidence_to_trade
-# - Para más agresividad: Aumentar max_risk_per_trade (con cuidado)
-#
+kafka:  # Added for kafka_producer.py and kafka_consumer.py
+  bootstrap_servers: "localhost:9092"
+  topics:
+    market_ticks: "market_ticks"
+    processed_data: "processed_data"
+    alerts: "alerts"
+  producer:
+    batch_size: 16384
+    linger_ms: 5
+  consumer:
+    group_id: "trading_bot_consumer"
