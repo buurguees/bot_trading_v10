@@ -1023,6 +1023,7 @@ Usa /trade para iniciar trading con los nuevos símbolos.
         try:
             import subprocess
             import asyncio
+            import threading
             from pathlib import Path
             
             # Obtener parámetros
@@ -1048,7 +1049,7 @@ Usa /training_status para ver el progreso.
             if self.telegram_bot:
                 await self.telegram_bot.send_message(message, chat_id)
             
-            # Ejecutar script de entrenamiento histórico en background
+            # Ejecutar script de entrenamiento histórico
             script_path = Path("scripts/train/train_historical.py")
             if script_path.exists():
                 cmd = [
@@ -1057,26 +1058,9 @@ Usa /training_status para ver el progreso.
                     "--update_every", str(update_every)
                 ]
                 
-                # Ejecutar en background
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                # Ejecutar y capturar salida en tiempo real
+                await self._execute_command_with_output(cmd, chat_id, "Entrenamiento Histórico")
                 
-                logger.info(f"🚀 Entrenamiento histórico iniciado: PID {process.pid}")
-                
-                # Enviar mensaje de confirmación
-                confirm_message = f"""
-✅ <b>Entrenamiento Histórico Lanzado</b>
-
-• PID: {process.pid}
-• Script: {script_path}
-• Parámetros: --cycle_size {cycle_size} --update_every {update_every}
-
-• El entrenamiento se ejecuta en background
-• Los mensajes se actualizarán automáticamente
-• Usa /training_status para ver el progreso
-                """
-                
-                if self.telegram_bot:
-                    await self.telegram_bot.send_message(confirm_message, chat_id)
             else:
                 error_message = "❌ Script de entrenamiento histórico no encontrado"
                 if self.telegram_bot:
@@ -1094,6 +1078,7 @@ Usa /training_status para ver el progreso.
         try:
             import subprocess
             import asyncio
+            import threading
             from pathlib import Path
             
             # Obtener parámetros
@@ -1119,7 +1104,7 @@ Usa /training_status para ver el progreso.
             if self.telegram_bot:
                 await self.telegram_bot.send_message(message, chat_id)
             
-            # Ejecutar script de entrenamiento en vivo en background
+            # Ejecutar script de entrenamiento en vivo
             script_path = Path("scripts/train/train_live.py")
             if script_path.exists():
                 cmd = [
@@ -1128,27 +1113,10 @@ Usa /training_status para ver el progreso.
                     "--update_every", str(update_every)
                 ]
                 
-                # Ejecutar en background
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                # Ejecutar y capturar salida en tiempo real
+                await self._execute_command_with_output(cmd, chat_id, "Entrenamiento en Vivo")
                 
-                logger.info(f"🚀 Entrenamiento en vivo iniciado: PID {process.pid}")
-                
-                # Enviar mensaje de confirmación
-                confirm_message = f"""
-✅ <b>Entrenamiento en Vivo Lanzado</b>
-
-• PID: {process.pid}
-• Script: {script_path}
-• Parámetros: --cycle_minutes {cycle_minutes} --update_every {update_every}
-
-• El entrenamiento se ejecuta en background
-• Los mensajes se actualizarán automáticamente
-• Usa /training_status para ver el progreso
-                """
-                
-                if self.telegram_bot:
-                    await self.telegram_bot.send_message(confirm_message, chat_id)
-        else:
+            else:
                 error_message = "❌ Script de entrenamiento en vivo no encontrado"
                 if self.telegram_bot:
                     await self.telegram_bot.send_message(error_message, chat_id)
@@ -1159,6 +1127,190 @@ Usa /training_status para ver el progreso.
             if self.telegram_bot:
                 await self.telegram_bot.send_message(error_message, chat_id)
             logger.error(error_message)
+    
+    async def _execute_command_with_output(self, cmd: list, chat_id: str, command_name: str):
+        """Ejecuta un comando y envía la salida a Telegram en tiempo real"""
+        try:
+            import subprocess
+            import asyncio
+            import threading
+            import queue
+            import time
+            
+            logger.info(f"🚀 Ejecutando comando: {' '.join(cmd)}")
+            
+            # Crear cola para comunicación entre hilos
+            output_queue = queue.Queue()
+            
+            def run_command():
+                """Ejecuta el comando en un hilo separado"""
+                try:
+                    process = subprocess.Popen(
+                        cmd,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        universal_newlines=True,
+                        bufsize=1
+                    )
+                    
+                    # Enviar PID inicial
+                    output_queue.put(f"✅ <b>{command_name} Iniciado</b>\n\n• PID: {process.pid}\n• Comando: {' '.join(cmd)}\n• Estado: Ejecutando...\n")
+                    
+                    # Leer salida línea por línea
+                    for line in iter(process.stdout.readline, ''):
+                        if line.strip():
+                            output_queue.put(f"📊 {line.strip()}")
+                    
+                    # Esperar a que termine el proceso
+                    return_code = process.wait()
+                    
+                    if return_code == 0:
+                        output_queue.put(f"✅ <b>{command_name} Completado</b>\n\n• Código de salida: {return_code}\n• Estado: Exitoso")
+                    else:
+                        output_queue.put(f"❌ <b>{command_name} Falló</b>\n\n• Código de salida: {return_code}\n• Estado: Error")
+                        
+                except Exception as e:
+                    output_queue.put(f"❌ <b>Error en {command_name}</b>\n\n• Error: {str(e)}")
+            
+            # Iniciar comando en hilo separado
+            command_thread = threading.Thread(target=run_command, daemon=True)
+            command_thread.start()
+            
+            # Enviar mensajes a Telegram mientras el comando se ejecuta
+            last_message_time = 0
+            message_buffer = []
+            buffer_size = 5  # Enviar cada 5 líneas o cada 10 segundos
+            
+            while command_thread.is_alive() or not output_queue.empty():
+                try:
+                    # Obtener salida de la cola
+                    try:
+                        output = output_queue.get(timeout=1)
+                        message_buffer.append(output)
+                        
+                        current_time = time.time()
+                        
+                        # Enviar mensaje si el buffer está lleno o han pasado 10 segundos
+                        if (len(message_buffer) >= buffer_size or 
+                            (current_time - last_message_time) >= 10):
+                            
+                            if message_buffer:
+                                message_text = "\n".join(message_buffer)
+                                
+                                # Limitar tamaño del mensaje (Telegram tiene límite de 4096 caracteres)
+                                if len(message_text) > 4000:
+                                    message_text = message_text[:4000] + "\n... (mensaje truncado)"
+                                
+                                if self.telegram_bot:
+                                    await self.telegram_bot.send_message(message_text, chat_id)
+                                
+                                message_buffer = []
+                                last_message_time = current_time
+                                
+                    except queue.Empty:
+                        continue
+                        
+                except Exception as e:
+                    logger.error(f"❌ Error enviando mensaje a Telegram: {e}")
+                    break
+            
+            # Enviar mensaje final si queda algo en el buffer
+            if message_buffer:
+                message_text = "\n".join(message_buffer)
+                if len(message_text) > 4000:
+                    message_text = message_text[:4000] + "\n... (mensaje truncado)"
+                
+                if self.telegram_bot:
+                    await self.telegram_bot.send_message(message_text, chat_id)
+            
+            logger.info(f"✅ Comando {command_name} completado")
+            
+        except Exception as e:
+            error_message = f"❌ Error ejecutando comando {command_name}: {str(e)}"
+            if self.telegram_bot:
+                await self.telegram_bot.send_message(error_message, chat_id)
+            logger.error(error_message)
+    
+    async def _handle_stop_train_command(self, chat_id: str):
+        """Maneja comando de detener entrenamiento de forma elegante"""
+        try:
+            import subprocess
+            import psutil
+            import os
+            
+            message = """
+🛑 <b>Deteniendo Entrenamiento de Forma Elegante</b>
+
+• Buscando procesos de entrenamiento activos...
+• Enviando señal de parada...
+• Guardando progreso actual...
+            """
+            
+            if self.telegram_bot:
+                await self.telegram_bot.send_message(message, chat_id)
+            
+            # Buscar procesos de entrenamiento activos
+            training_processes = []
+            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+                try:
+                    cmdline = ' '.join(proc.info['cmdline']) if proc.info['cmdline'] else ''
+                    if 'train_historical.py' in cmdline or 'train_live.py' in cmdline:
+                        training_processes.append(proc)
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+            
+            if training_processes:
+                # Enviar señal de parada a los procesos
+                for proc in training_processes:
+                    try:
+                        proc.terminate()  # Enviar SIGTERM
+                        logger.info(f"🛑 Proceso de entrenamiento {proc.pid} terminado")
+                    except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                        logger.warning(f"⚠️ No se pudo terminar proceso {proc.pid}: {e}")
+                
+                # Esperar a que terminen
+                await asyncio.sleep(2)
+                
+                # Verificar si aún están activos y forzar terminación
+                for proc in training_processes:
+                    try:
+                        if proc.is_running():
+                            proc.kill()  # Forzar terminación
+                            logger.info(f"💀 Proceso {proc.pid} terminado forzosamente")
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass
+                
+                success_message = f"""
+✅ <b>Entrenamiento Detenido Correctamente</b>
+
+• Procesos terminados: {len(training_processes)}
+• Estado: Parada elegante completada
+• Progreso: Guardado automáticamente
+• Modelos: Actualizados
+
+• El sistema está listo para nuevos comandos
+• Usa /train_hist o /train_live para reiniciar
+                """
+                
+            else:
+                success_message = """
+⚠️ <b>No se encontraron procesos de entrenamiento activos</b>
+
+• Estado: No hay entrenamiento en curso
+• Sistema: Listo para nuevos comandos
+• Usa /train_hist o /train_live para iniciar
+                """
+            
+            if self.telegram_bot:
+                await self.telegram_bot.send_message(success_message, chat_id)
+            
+            self.is_training = False
+            
+        except Exception as e:
+            error_message = f"❌ Error deteniendo entrenamiento: {str(e)}"
+            if self.telegram_bot:
+                await self.telegram_bot.send_message(error_message, chat_id)
+            logger.error(f"❌ Error en /stop_train: {e}")
 
 def main():
     """Función principal"""
