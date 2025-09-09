@@ -239,48 +239,18 @@ class TradingBotController:
 ✅ Sistema completamente funcional
 🤖 Bot de Telegram listo para comandos
 
-<b>📱 COMANDOS PRINCIPALES:</b>
+<b>🎓 COMANDOS DE ENTRENAMIENTO:</b>
 
-<b>🎓 ENTRENAMIENTO AVANZADO:</b>
 • <b>/train_hist</b> - Entrenamiento sobre datos históricos
 • <b>/train_live</b> - Entrenamiento en tiempo real (paper trading)
 
-<b>🔍 MONITOREO:</b>
+<b>🛑 CONTROL:</b>
+• <b>/stop_train</b> - Detener entrenamiento de forma elegante
+
+<b>📊 MONITOREO:</b>
+• /training_status - Estado del entrenamiento
 • /status - Estado del sistema
 • /metrics - Métricas detalladas
-• /positions - Posiciones abiertas
-• /data_status - Estado de los datos
-• /agents - Estado de todos los agentes
-• /agent_status --symbol BTC - Estado de agente específico
-
-<b>📊 DATOS:</b>
-• /download_data --symbols BTC,ETH --days 30 - Descargar datos
-• /analyze_data --symbol BTC - Analizar datos históricos
-• /align_data --symbols BTC,ETH - Alinear datos
-• /backtest --symbol BTC --days 7 - Ejecutar backtest
-
-<b>💹 TRADING:</b>
-• /trade --mode paper --symbols BTC,ETH --leverage 10 - Iniciar trading
-• /stop_trading - Detener trading
-• /set_mode --mode live - Cambiar modo (paper/live)
-• /set_symbols --symbols BTC,ETH - Cambiar símbolos
-• /set_leverage --symbol BTC --leverage 15 - Cambiar leverage
-• /close_position --symbol BTC - Cerrar posición
-
-<b>📈 REPORTES:</b>
-• /performance_report - Reporte de rendimiento
-• /agent_analysis --symbol BTC - Análisis de agente
-• /risk_report - Reporte de riesgo
-• /trades_history --days 7 - Historial de trades
-
-<b>⚙️ SISTEMA:</b>
-• /restart_system - Reiniciar sistema
-• /clear_cache - Limpiar cache
-• /update_models - Actualizar modelos
-• /shutdown - Apagar sistema
-
-<b>❓ AYUDA:</b>
-• /help - Lista completa de comandos
 
 <b>🌐 Dashboard:</b> http://127.0.0.1:8050
             """
