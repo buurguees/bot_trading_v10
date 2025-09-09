@@ -30,6 +30,8 @@ import os
 from pathlib import Path
 from datetime import datetime
 from typing import List, Optional
+import subprocess
+import json
 
 # Agregar src al path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
@@ -39,12 +41,12 @@ from src.core.deployment.health_monitor import HealthMonitor
 from src.core.config.enterprise_config import EnterpriseConfigManager
 from src.scripts.trading.run_enterprise_trading import EnterpriseTradingLauncher
 
-# Configurar logging
+# Configurar logging (UTF-8 y sin emojis para compatibilidad Windows)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('logs/bot.log'),
+        logging.FileHandler('logs/bot.log', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
@@ -193,6 +195,115 @@ class BotTradingEnterprise:
         except Exception as e:
             logger.error(f"❌ Error cerrando sistema: {e}")
 
+    # ======= NUEVAS OPERACIONES PERSONALES DESDE MAIN =======
+    async def download_historical(self, symbols: List[str], timeframe: str = '1m', limit: int = 1000):
+        """Descarga histórico OHLCV usando ccxt y lo guarda en data/historical como CSV.
+        """
+        try:
+            import ccxt
+            Path('data/historical').mkdir(parents=True, exist_ok=True)
+            exchange = ccxt.binance({'enableRateLimit': True})
+            for symbol in symbols:
+                market_symbol = symbol.replace('USDT', '/USDT')
+                logger.info(f"Descargando {market_symbol} {timeframe} ({limit} velas)...")
+                ohlcv = exchange.fetch_ohlcv(market_symbol, timeframe=timeframe, limit=limit)
+                out = Path('data/historical') / f"{symbol}_{timeframe}.csv"
+                with open(out, 'w', encoding='utf-8') as f:
+                    f.write('timestamp,open,high,low,close,volume\n')
+                    for t, o, h, l, c, v in ohlcv:
+                        f.write(f"{t},{o},{h},{l},{c},{v}\n")
+                logger.info(f"Guardado: {out}")
+        except Exception as e:
+            logger.error(f"Error descargando histórico: {e}")
+            raise
+
+    async def analyze_data(self, symbols: List[str], timeframe: str = '1m'):
+        """Analiza CSVs en data/historical y genera métricas simples en reports/analysis.json."""
+        try:
+            import pandas as pd
+            Path('reports').mkdir(exist_ok=True)
+            report = {}
+            for symbol in symbols:
+                csv_path = Path('data/historical') / f"{symbol}_{timeframe}.csv"
+                if not csv_path.exists():
+                    logger.warning(f"No existe {csv_path}, omitiendo")
+                    continue
+                df = pd.read_csv(csv_path)
+                df['return'] = df['close'].pct_change()
+                report[symbol] = {
+                    'rows': int(df.shape[0]),
+                    'start_ts': int(df['timestamp'].iloc[0]) if df.shape[0] else None,
+                    'end_ts': int(df['timestamp'].iloc[-1]) if df.shape[0] else None,
+                    'mean_return': float(df['return'].mean()) if df['return'].notna().any() else 0.0,
+                    'volatility': float(df['return'].std()) if df['return'].notna().any() else 0.0,
+                    'missing': int(df.isna().sum().sum())
+                }
+            out = Path('reports') / 'analysis.json'
+            with open(out, 'w', encoding='utf-8') as f:
+                json.dump(report, f, indent=2, ensure_ascii=False)
+            logger.info(f"Reporte de análisis: {out}")
+        except Exception as e:
+            logger.error(f"Error analizando datos: {e}")
+            raise
+
+    async def validate_data(self, symbols: List[str], timeframe: str = '1m'):
+        """Valida CSVs en data/historical (NA, orden temporal, columnas)."""
+        try:
+            import pandas as pd
+            issues = {}
+            for symbol in symbols:
+                csv_path = Path('data/historical') / f"{symbol}_{timeframe}.csv"
+                sym_issues = []
+                if not csv_path.exists():
+                    sym_issues.append('missing_file')
+                else:
+                    df = pd.read_csv(csv_path)
+                    expected_cols = {'timestamp', 'open', 'high', 'low', 'close', 'volume'}
+                    if set(df.columns) != expected_cols:
+                        sym_issues.append('bad_columns')
+                    if df.isna().any().any():
+                        sym_issues.append('na_values')
+                    if (df['timestamp'].diff() <= 0).any():
+                        sym_issues.append('not_strictly_increasing_ts')
+                if sym_issues:
+                    issues[symbol] = sym_issues
+            out = Path('reports') / 'validation.json'
+            with open(out, 'w', encoding='utf-8') as f:
+                json.dump(issues, f, indent=2, ensure_ascii=False)
+            logger.info(f"Reporte de validación: {out}")
+        except Exception as e:
+            logger.error(f"Error validando datos: {e}")
+            raise
+
+    async def train_short(self, symbols: List[str]):
+        """Lanza entrenamiento corto usando el script personal."""
+        cmd = [sys.executable, 'scripts/root/start_6h_training_enterprise.py', '--symbols', *symbols, '--duration', '0']
+        logger.info(f"Ejecutando: {' '.join(cmd)}")
+        proc = await asyncio.create_subprocess_exec(*cmd)
+        await proc.wait()
+        logger.info("Entrenamiento corto finalizado")
+
+    async def train_infinite_with_dashboard(self, symbols: List[str]):
+        """Bucle de entrenamiento infinito y arranque de dashboard en paralelo."""
+        # Lanzar dashboard (si existe)
+        dash_path = Path('src/core/monitoring/main_dashboard.py')
+        dash_proc = None
+        if dash_path.exists():
+            dash_cmd = [sys.executable, str(dash_path)]
+            logger.info(f"Iniciando dashboard: {' '.join(dash_cmd)}")
+            dash_proc = await asyncio.create_subprocess_exec(*dash_cmd)
+
+        # Bucle de entrenamiento (simulación: usa entrenamiento corto en bucle)
+        try:
+            while True:
+                await self.train_short(symbols)
+                await asyncio.sleep(5)
+        except asyncio.CancelledError:
+            logger.info("Bucle de entrenamiento cancelado")
+        finally:
+            if dash_proc:
+                dash_proc.terminate()
+
 async def main():
     """Función principal del bot"""
     parser = argparse.ArgumentParser(
@@ -210,7 +321,7 @@ Ejemplos de uso:
     
     parser.add_argument(
         '--mode',
-        choices=['live', 'paper', 'emergency-stop'],
+        choices=['live', 'paper', 'emergency-stop', 'download-historical', 'analyze', 'validate', 'train-short', 'train-infinite'],
         help='Modo de operación del bot'
     )
     
@@ -267,15 +378,30 @@ Ejemplos de uso:
             if not args.symbols:
                 logger.error("❌ Se requiere especificar símbolos con --symbols")
                 return
-            
+
             symbols = [s.strip().upper() for s in args.symbols.split(',')]
-            
-            # Validar leverage
-            if not (5 <= args.leverage <= 30):
-                logger.error("❌ Leverage debe estar entre 5 y 30")
-                return
-            
-            await bot.run_trading(args.mode, symbols, args.leverage)
+
+            if args.mode in ['live', 'paper', 'emergency-stop']:
+                if args.mode != 'emergency-stop':
+                    if not (5 <= args.leverage <= 30):
+                        logger.error("❌ Leverage debe estar entre 5 y 30")
+                        return
+                await bot.run_trading(args.mode, symbols, args.leverage)
+
+            elif args.mode == 'download-historical':
+                await bot.download_historical(symbols, timeframe='1m', limit=1000)
+
+            elif args.mode == 'analyze':
+                await bot.analyze_data(symbols, timeframe='1m')
+
+            elif args.mode == 'validate':
+                await bot.validate_data(symbols, timeframe='1m')
+
+            elif args.mode == 'train-short':
+                await bot.train_short(symbols)
+
+            elif args.mode == 'train-infinite':
+                await bot.train_infinite_with_dashboard(symbols)
         
         else:
             logger.info("ℹ️ Usa --help para ver las opciones disponibles")
