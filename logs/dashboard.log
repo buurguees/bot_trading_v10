@@ -4,3 +4,15 @@
 2025-09-09 10:11:16,293 - DASHBOARD - INFO - Dashboard independiente inicializado
 2025-09-09 10:11:16,293 - DASHBOARD - INFO - Iniciando dashboard en http://127.0.0.1:8050
 2025-09-09 10:11:16,294 - DASHBOARD - ERROR - Error ejecutando dashboard: app.run_server has been replaced by app.run
+2025-09-09 10:23:07,969 - DASHBOARD - INFO - Dashboard independiente inicializado
+2025-09-09 10:23:07,969 - DASHBOARD - INFO - Iniciando dashboard en http://127.0.0.1:8050
+2025-09-09 10:23:07,971 - DASHBOARD - INFO - Dash is running on http://127.0.0.1:8050/
+
+2025-09-09 10:23:10,111 - DASHBOARD - INFO - Dashboard independiente inicializado
+2025-09-09 10:23:10,111 - DASHBOARD - INFO - Iniciando dashboard en http://127.0.0.1:8050
+2025-09-09 10:23:47,821 - DASHBOARD - INFO - Dashboard independiente inicializado
+2025-09-09 10:23:47,822 - DASHBOARD - INFO - Iniciando dashboard en http://127.0.0.1:8050
+2025-09-09 10:28:24,030 - DASHBOARD - INFO - Dashboard independiente inicializado
+2025-09-09 10:28:24,030 - DASHBOARD - INFO - Iniciando dashboard en http://127.0.0.1:8050
+2025-09-09 10:28:29,354 - DASHBOARD - INFO - Dashboard independiente inicializado
+2025-09-09 10:28:29,354 - DASHBOARD - INFO - Iniciando dashboard en http://127.0.0.1:8050

@@ -28,6 +28,10 @@ import logging
 import sys
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
 from datetime import datetime
 from typing import List, Optional
 import subprocess

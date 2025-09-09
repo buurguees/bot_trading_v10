@@ -83,3 +83,52 @@
 2025-09-09 10:19:13,784 - __main__ - INFO - Verificacion basica completada
 2025-09-09 10:19:13,784 - __main__ - INFO - Cerrando sistema enterprise...
 2025-09-09 10:19:13,785 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 10:26:27,198 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 10:26:27,198 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 10:26:27,231 - __main__ - INFO - Configuracion cargada
+2025-09-09 10:26:27,240 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 10:26:27,250 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 10:26:27,265 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 10:26:27,265 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 10:26:27,266 - __main__ - ERROR - ❌ Se requiere especificar símbolos con --symbols
+2025-09-09 10:26:27,266 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 10:26:27,266 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 10:28:01,624 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 10:28:01,625 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 10:28:01,658 - __main__ - INFO - Configuracion cargada
+2025-09-09 10:28:01,663 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 10:28:01,667 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 10:28:01,671 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 10:28:01,672 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 10:28:01,684 - __main__ - INFO - Analizado BTCUSDT: 1000 filas, volatilidad: 0.0003
+2025-09-09 10:28:01,691 - __main__ - INFO - Analizado ETHUSDT: 1000 filas, volatilidad: 0.0005
+2025-09-09 10:28:01,692 - __main__ - INFO - Reporte de analisis: reports\analysis.json
+2025-09-09 10:28:01,692 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 10:28:01,692 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 10:28:37,597 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 10:28:37,598 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 10:28:37,630 - __main__ - INFO - Configuracion cargada
+2025-09-09 10:28:37,634 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 10:28:37,637 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 10:28:37,640 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 10:28:37,641 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 10:28:37,651 - __main__ - INFO - Analizado BTCUSDT: 1000 filas, volatilidad: 0.0003
+2025-09-09 10:28:37,657 - __main__ - INFO - Analizado ETHUSDT: 1000 filas, volatilidad: 0.0005
+2025-09-09 10:28:37,658 - __main__ - INFO - Reporte de analisis: reports\analysis.json
+2025-09-09 10:28:37,658 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 10:28:37,659 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 10:28:48,605 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 10:28:48,605 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 10:28:48,637 - __main__ - INFO - Configuracion cargada
+2025-09-09 10:28:48,641 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 10:28:48,644 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 10:28:48,648 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 10:28:48,648 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 10:28:48,649 - __main__ - INFO - Iniciando trading en modo paper
+2025-09-09 10:28:48,649 - __main__ - INFO - Simbolos: BTCUSDT
+2025-09-09 10:28:48,649 - __main__ - INFO - Leverage: 10x
+2025-09-09 10:28:48,649 - __main__ - WARNING - Launcher de trading no disponible, usando modo simulacion
+2025-09-09 10:28:49,660 - __main__ - INFO - Simulacion de trading completada para BTCUSDT
+2025-09-09 10:28:49,660 - __main__ - INFO - Trading en modo paper completado
+2025-09-09 10:28:49,661 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 10:28:49,661 - __main__ - INFO - Sistema enterprise cerrado correctamente
