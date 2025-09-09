@@ -54,3 +54,14 @@
 2025-09-09 10:00:56,920 - __main__ - INFO - Reporte de validacion: reports\validation.json
 2025-09-09 10:00:56,920 - __main__ - INFO - Cerrando sistema enterprise...
 2025-09-09 10:00:56,920 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 10:05:45,776 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 10:05:45,776 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 10:05:45,809 - __main__ - INFO - Configuracion cargada
+2025-09-09 10:05:45,818 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 10:05:45,826 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 10:05:45,830 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 10:05:45,830 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 10:05:45,830 - __main__ - INFO - Ejecutando: C:\Python313\python.exe scripts/root/start_6h_training_enterprise.py --symbols BTCUSDT ETHUSDT ADAUSDT --duration 0
+2025-09-09 10:05:56,171 - __main__ - INFO - Entrenamiento corto completado exitosamente
+2025-09-09 10:05:56,172 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 10:05:56,172 - __main__ - INFO - Sistema enterprise cerrado correctamente

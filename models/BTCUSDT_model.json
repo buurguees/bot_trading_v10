@@ -1,16 +1,16 @@
 {
   "symbol": "BTCUSDT",
-  "saved_at": "2025-09-09T09:13:31.287892",
+  "saved_at": "2025-09-09T10:05:46.130687",
   "model": {
     "symbol": "BTCUSDT",
     "model_architecture": "lstm_attention",
-    "training_time_seconds": 0.000818,
+    "training_time_seconds": 0.000354,
     "test_results": {
-      "test_accuracy": 0.658,
-      "test_loss": 0.308,
-      "precision": 0.678,
-      "recall": 0.648,
-      "f1_score": 0.668
+      "test_accuracy": 0.657,
+      "test_loss": 0.307,
+      "precision": 0.677,
+      "recall": 0.647,
+      "f1_score": 0.667
     },
     "hyperparameters": {
       "learning_rate": 0.001,
@@ -20,10 +20,10 @@
       "dropout": 0.2
     },
     "data_collection": {
-      "samples_collected": 10758,
-      "data_quality_score": 0.9299999999999999
+      "samples_collected": 13157,
+      "data_quality_score": 0.9199999999999999
     },
-    "model_size_mb": 23.5,
+    "model_size_mb": 22.5,
     "status": "completed"
   }
 }
