@@ -426,7 +426,7 @@ class IndependentDashboard:
         """Ejecuta el dashboard"""
         try:
             logger.info(f"Iniciando dashboard en http://{host}:{port}")
-            self.app.run_server(host=host, port=port, debug=debug)
+            self.app.run(host=host, port=port, debug=debug)
         except Exception as e:
             logger.error(f"Error ejecutando dashboard: {e}")
             raise
