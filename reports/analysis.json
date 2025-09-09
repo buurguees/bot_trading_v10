@@ -1,0 +1,26 @@
+{
+  "BTCUSDT": {
+    "rows": 1000,
+    "start_ts": 1757344860000,
+    "end_ts": 1757404800000,
+    "mean_return": 2.5860803739773608e-06,
+    "volatility": 0.0003243953649184687,
+    "missing": 1,
+    "price_range": {
+      "min": 111111.0,
+      "max": 113293.29
+    }
+  },
+  "ETHUSDT": {
+    "rows": 1000,
+    "start_ts": 1757344860000,
+    "end_ts": 1757404800000,
+    "mean_return": -2.1276597413643914e-06,
+    "volatility": 0.0005457168871927374,
+    "missing": 1,
+    "price_range": {
+      "min": 4276.76,
+      "max": 4384.06
+    }
+  }
+}

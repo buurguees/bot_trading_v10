@@ -1,0 +1,56 @@
+2025-09-09 10:00:14,217 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 10:00:14,218 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 10:00:14,251 - __main__ - INFO - Configuracion cargada
+2025-09-09 10:00:14,261 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 10:00:14,268 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 10:00:14,281 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 10:00:14,282 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 10:00:14,282 - __main__ - INFO - Verificando salud del sistema...
+2025-09-09 10:00:14,283 - __main__ - INFO - Monitor de salud no disponible, ejecutando verificacion basica...
+2025-09-09 10:00:14,283 - __main__ - INFO - Configuracion: OK
+2025-09-09 10:00:14,284 - __main__ - INFO - Directorio logs: OK
+2025-09-09 10:00:14,284 - __main__ - INFO - Directorio models: OK
+2025-09-09 10:00:14,284 - __main__ - INFO - Directorio data/historical: OK
+2025-09-09 10:00:14,284 - __main__ - INFO - Directorio reports: OK
+2025-09-09 10:00:14,285 - __main__ - INFO - Simbolos configurados: 10 - BTCUSDT, ETHUSDT, ADAUSDT, SOLUSDT, DOGEUSDT
+2025-09-09 10:00:14,285 - __main__ - INFO - Verificacion basica completada
+2025-09-09 10:00:14,285 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 10:00:14,285 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 10:00:26,543 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 10:00:26,543 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 10:00:26,579 - __main__ - INFO - Configuracion cargada
+2025-09-09 10:00:26,588 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 10:00:26,597 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 10:00:26,602 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 10:00:26,603 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 10:00:26,616 - __main__ - INFO - Descargando BTC/USDT 1m (1000 velas)...
+2025-09-09 10:00:30,464 - __main__ - INFO - Guardado: data\historical\BTCUSDT_1m.csv (1000 velas)
+2025-09-09 10:00:30,464 - __main__ - INFO - Descargando ETH/USDT 1m (1000 velas)...
+2025-09-09 10:00:30,723 - __main__ - INFO - Guardado: data\historical\ETHUSDT_1m.csv (1000 velas)
+2025-09-09 10:00:30,723 - __main__ - INFO - Descarga de historico completada
+2025-09-09 10:00:30,767 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 10:00:30,768 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 10:00:44,241 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 10:00:44,241 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 10:00:44,273 - __main__ - INFO - Configuracion cargada
+2025-09-09 10:00:44,283 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 10:00:44,291 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 10:00:44,296 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 10:00:44,297 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 10:00:44,335 - __main__ - INFO - Analizado BTCUSDT: 1000 filas, volatilidad: 0.0003
+2025-09-09 10:00:44,351 - __main__ - INFO - Analizado ETHUSDT: 1000 filas, volatilidad: 0.0005
+2025-09-09 10:00:44,352 - __main__ - INFO - Reporte de analisis: reports\analysis.json
+2025-09-09 10:00:44,353 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 10:00:44,353 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 10:00:56,850 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 10:00:56,850 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 10:00:56,884 - __main__ - INFO - Configuracion cargada
+2025-09-09 10:00:56,892 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 10:00:56,901 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 10:00:56,906 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 10:00:56,907 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 10:00:56,915 - __main__ - INFO - Validado BTCUSDT: 0 problemas encontrados
+2025-09-09 10:00:56,919 - __main__ - INFO - Validado ETHUSDT: 0 problemas encontrados
+2025-09-09 10:00:56,920 - __main__ - INFO - Reporte de validacion: reports\validation.json
+2025-09-09 10:00:56,920 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 10:00:56,920 - __main__ - INFO - Sistema enterprise cerrado correctamente
