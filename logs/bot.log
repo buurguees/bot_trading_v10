@@ -65,3 +65,21 @@
 2025-09-09 10:05:56,171 - __main__ - INFO - Entrenamiento corto completado exitosamente
 2025-09-09 10:05:56,172 - __main__ - INFO - Cerrando sistema enterprise...
 2025-09-09 10:05:56,172 - __main__ - INFO - Sistema enterprise cerrado correctamente
+2025-09-09 10:19:13,727 - __main__ - INFO - Bot Trading v10 Enterprise inicializado
+2025-09-09 10:19:13,735 - __main__ - INFO - Inicializando sistema enterprise...
+2025-09-09 10:19:13,767 - __main__ - INFO - Configuracion cargada
+2025-09-09 10:19:13,771 - __main__ - WARNING - Gestor de fases no disponible
+2025-09-09 10:19:13,775 - __main__ - WARNING - Monitor de salud no disponible
+2025-09-09 10:19:13,782 - __main__ - WARNING - Launcher de trading no disponible
+2025-09-09 10:19:13,782 - __main__ - INFO - Sistema enterprise inicializado completamente
+2025-09-09 10:19:13,782 - __main__ - INFO - Verificando salud del sistema...
+2025-09-09 10:19:13,783 - __main__ - INFO - Monitor de salud no disponible, ejecutando verificacion basica...
+2025-09-09 10:19:13,783 - __main__ - INFO - Configuracion: OK
+2025-09-09 10:19:13,783 - __main__ - INFO - Directorio logs: OK
+2025-09-09 10:19:13,784 - __main__ - INFO - Directorio models: OK
+2025-09-09 10:19:13,784 - __main__ - INFO - Directorio data/historical: OK
+2025-09-09 10:19:13,784 - __main__ - INFO - Directorio reports: OK
+2025-09-09 10:19:13,784 - __main__ - INFO - Simbolos configurados: 10 - BTCUSDT, ETHUSDT, ADAUSDT, SOLUSDT, DOGEUSDT
+2025-09-09 10:19:13,784 - __main__ - INFO - Verificacion basica completada
+2025-09-09 10:19:13,784 - __main__ - INFO - Cerrando sistema enterprise...
+2025-09-09 10:19:13,785 - __main__ - INFO - Sistema enterprise cerrado correctamente
