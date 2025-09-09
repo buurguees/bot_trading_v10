@@ -89,6 +89,8 @@ class Handlers:
 /health - Salud del sistema
 
 <b>🎮 Control:</b>
+/train_hist - Entrenamiento histórico
+/train_live - Entrenamiento en vivo
 /start_trading - Iniciar trading
 /stop_trading - Detener trading
 /emergency_stop - Parada de emergencia
@@ -122,6 +124,8 @@ class Handlers:
 <code>/agent_status SYMBOL</code> - Estado de agente específico
 
 <b>🎓 ENTRENAMIENTO Y ML</b>
+<code>/train_hist</code> - Entrenamiento sobre datos históricos
+<code>/train_live</code> - Entrenamiento en tiempo real (paper trading)
 <code>/train --symbols BTC,ETH --duration 8h</code> - Entrenar agentes
 <code>/stop_training</code> - Detener entrenamiento
 <code>/retrain SYMBOL</code> - Reentrenar agente específico
@@ -886,19 +890,72 @@ class Handlers:
                 await update.message.reply_text("❌ Controlador del sistema no disponible.")
                 return
             
-            # Enviar comando al controlador
-            await self.controller.command_queue.put({
-                'type': 'training_status',
-                'args': {},
-                'chat_id': str(update.message.chat_id)
-            })
-            
-            await update.message.reply_text("🎓 Obteniendo estado del entrenamiento...")
+            # Llamar directamente al controlador
+            await self.controller.handle_command('training_status', {}, str(update.message.chat_id))
+            logger.info(f"✅ Comando /training_status ejecutado por chat_id: {update.message.chat_id}")
             
         except Exception as e:
             error_msg = f"❌ Error obteniendo estado de entrenamiento: {str(e)}"
             await update.message.reply_text(error_msg)
             logger.error(f"❌ Error en /training_status: {e}")
+    
+    async def train_hist_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Comando /train_hist - Entrenamiento histórico"""
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.")
+            return
+        
+        try:
+            # Parsear argumentos del comando
+            args = self._parse_command_args(context.args)
+            cycle_size = args.get('cycle_size', 500)
+            update_every = args.get('update_every', 25)
+            
+            if not self.controller:
+                await update.message.reply_text("❌ Controlador del sistema no disponible.")
+                return
+            
+            # Llamar directamente al controlador
+            await self.controller.handle_command('train_hist', {
+                'cycle_size': cycle_size,
+                'update_every': update_every
+            }, str(update.message.chat_id))
+            
+            logger.info(f"✅ Comando /train_hist ejecutado por chat_id: {update.message.chat_id}")
+            
+        except Exception as e:
+            error_msg = f"❌ Error iniciando entrenamiento histórico: {str(e)}"
+            await update.message.reply_text(error_msg)
+            logger.error(f"❌ Error en /train_hist: {e}")
+    
+    async def train_live_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Comando /train_live - Entrenamiento en vivo"""
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.")
+            return
+        
+        try:
+            # Parsear argumentos del comando
+            args = self._parse_command_args(context.args)
+            cycle_minutes = args.get('cycle_minutes', 30)
+            update_every = args.get('update_every', 5)
+            
+            if not self.controller:
+                await update.message.reply_text("❌ Controlador del sistema no disponible.")
+                return
+            
+            # Llamar directamente al controlador
+            await self.controller.handle_command('train_live', {
+                'cycle_minutes': cycle_minutes,
+                'update_every': update_every
+            }, str(update.message.chat_id))
+            
+            logger.info(f"✅ Comando /train_live ejecutado por chat_id: {update.message.chat_id}")
+            
+        except Exception as e:
+            error_msg = f"❌ Error iniciando entrenamiento en vivo: {str(e)}"
+            await update.message.reply_text(error_msg)
+            logger.error(f"❌ Error en /train_live: {e}")
     
     # Comandos de Datos y Análisis
     async def download_data_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):

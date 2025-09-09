@@ -237,10 +237,13 @@ class TradingBotController:
 🚀 <b>Bot de Trading v10 Enterprise - OPERATIVO</b>
 
 ✅ Sistema completamente funcional
-📊 Dashboard abierto en el navegador
 🤖 Bot de Telegram listo para comandos
 
-<b>📱 COMANDOS DISPONIBLES:</b>
+<b>📱 COMANDOS PRINCIPALES:</b>
+
+<b>🎓 ENTRENAMIENTO AVANZADO:</b>
+• <b>/train_hist</b> - Entrenamiento sobre datos históricos
+• <b>/train_live</b> - Entrenamiento en tiempo real (paper trading)
 
 <b>🔍 MONITOREO:</b>
 • /status - Estado del sistema
@@ -249,12 +252,6 @@ class TradingBotController:
 • /data_status - Estado de los datos
 • /agents - Estado de todos los agentes
 • /agent_status --symbol BTC - Estado de agente específico
-
-<b>🎓 ENTRENAMIENTO:</b>
-• /train --symbols BTC,ETH --duration 4h - Entrenar modelos
-• /training_status - Estado del entrenamiento
-• /model_info --symbol BTC - Información del modelo
-• /retrain --symbol BTC --duration 2h - Reentrenar modelo
 
 <b>📊 DATOS:</b>
 • /download_data --symbols BTC,ETH --days 30 - Descargar datos
@@ -290,7 +287,7 @@ class TradingBotController:
             
             await self.telegram_bot.send_message(message)
             logger.info("📱 Mensaje de inicio enviado a Telegram")
-            
+                
         except Exception as e:
             logger.error(f"❌ Error enviando mensaje de inicio: {e}")
     
@@ -345,7 +342,7 @@ class TradingBotController:
                 winning_trades = sum(1 for pos in self.positions.values() if pos.get('pnl', 0) > 0)
                 self.metrics['win_rate'] = (winning_trades / self.metrics['trades_today']) * 100
             
-        except Exception as e:
+                    except Exception as e:
             logger.error(f"❌ Error actualizando métricas: {e}")
     
     async def run(self):
@@ -413,6 +410,10 @@ class TradingBotController:
                 await self._handle_agent_status_command(args, chat_id)
             elif command_type == 'train':
                 await self._handle_train_command(args, chat_id)
+            elif command_type == 'train_hist':
+                await self._handle_train_hist_command(args, chat_id)
+            elif command_type == 'train_live':
+                await self._handle_train_live_command(args, chat_id)
             elif command_type == 'training_status':
                 await self._handle_training_status_command(chat_id)
             elif command_type == 'model_info':
@@ -527,7 +528,7 @@ class TradingBotController:
     async def _handle_positions_command(self, chat_id: str):
         if not self.positions:
             message = "📊 <b>Posiciones</b>\n\n• No hay posiciones abiertas"
-        else:
+            else:
             message = "📊 <b>Posiciones Abiertas</b>\n\n"
             for symbol, pos in self.positions.items():
                 message += f"• <b>{symbol}:</b>\n"
@@ -1045,6 +1046,149 @@ Usa /trade para iniciar trading con los nuevos símbolos.
         
         # Apagar el sistema
         self.is_running = False
+    
+    # Nuevos comandos de entrenamiento
+    async def _handle_train_hist_command(self, args: Dict[str, Any], chat_id: str):
+        """Maneja comando de entrenamiento histórico"""
+        try:
+            import subprocess
+            import asyncio
+            from pathlib import Path
+            
+            # Obtener parámetros
+            cycle_size = args.get('cycle_size', 500)
+            update_every = args.get('update_every', 25)
+            
+            message = f"""
+🎓 <b>Entrenamiento Histórico Iniciado</b>
+
+• Modo: Histórico
+• Símbolos: Todos los configurados en user_settings.yaml
+• Tamaño de ciclo: {cycle_size} barras
+• Actualización cada: {update_every} barras
+• Estado: Iniciando...
+
+• Procesando datos históricos...
+• Sincronizando símbolos...
+• Iniciando ciclos de entrenamiento...
+
+Usa /training_status para ver el progreso.
+            """
+            
+            if self.telegram_bot:
+                await self.telegram_bot.send_message(message, chat_id)
+            
+            # Ejecutar script de entrenamiento histórico en background
+            script_path = Path("scripts/train/train_historical.py")
+            if script_path.exists():
+                cmd = [
+                    "python", str(script_path),
+                    "--cycle_size", str(cycle_size),
+                    "--update_every", str(update_every)
+                ]
+                
+                # Ejecutar en background
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                
+                logger.info(f"🚀 Entrenamiento histórico iniciado: PID {process.pid}")
+                
+                # Enviar mensaje de confirmación
+                confirm_message = f"""
+✅ <b>Entrenamiento Histórico Lanzado</b>
+
+• PID: {process.pid}
+• Script: {script_path}
+• Parámetros: --cycle_size {cycle_size} --update_every {update_every}
+
+• El entrenamiento se ejecuta en background
+• Los mensajes se actualizarán automáticamente
+• Usa /training_status para ver el progreso
+                """
+                
+                if self.telegram_bot:
+                    await self.telegram_bot.send_message(confirm_message, chat_id)
+            else:
+                error_message = "❌ Script de entrenamiento histórico no encontrado"
+                if self.telegram_bot:
+                    await self.telegram_bot.send_message(error_message, chat_id)
+                logger.error(error_message)
+                
+        except Exception as e:
+            error_message = f"❌ Error iniciando entrenamiento histórico: {e}"
+            if self.telegram_bot:
+                await self.telegram_bot.send_message(error_message, chat_id)
+            logger.error(error_message)
+    
+    async def _handle_train_live_command(self, args: Dict[str, Any], chat_id: str):
+        """Maneja comando de entrenamiento en vivo"""
+        try:
+            import subprocess
+            import asyncio
+            from pathlib import Path
+            
+            # Obtener parámetros
+            cycle_minutes = args.get('cycle_minutes', 30)
+            update_every = args.get('update_every', 5)
+            
+            message = f"""
+🎓 <b>Entrenamiento en Vivo Iniciado</b>
+
+• Modo: Tiempo Real (Paper Trading)
+• Símbolos: Todos los configurados en user_settings.yaml
+• Duración de ciclo: {cycle_minutes} minutos
+• Actualización cada: {update_every} segundos
+• Estado: Iniciando...
+
+• Conectando WebSockets...
+• Iniciando streams de precios...
+• Configurando paper trading...
+
+Usa /training_status para ver el progreso.
+            """
+            
+            if self.telegram_bot:
+                await self.telegram_bot.send_message(message, chat_id)
+            
+            # Ejecutar script de entrenamiento en vivo en background
+            script_path = Path("scripts/train/train_live.py")
+            if script_path.exists():
+                cmd = [
+                    "python", str(script_path),
+                    "--cycle_minutes", str(cycle_minutes),
+                    "--update_every", str(update_every)
+                ]
+                
+                # Ejecutar en background
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                
+                logger.info(f"🚀 Entrenamiento en vivo iniciado: PID {process.pid}")
+                
+                # Enviar mensaje de confirmación
+                confirm_message = f"""
+✅ <b>Entrenamiento en Vivo Lanzado</b>
+
+• PID: {process.pid}
+• Script: {script_path}
+• Parámetros: --cycle_minutes {cycle_minutes} --update_every {update_every}
+
+• El entrenamiento se ejecuta en background
+• Los mensajes se actualizarán automáticamente
+• Usa /training_status para ver el progreso
+                """
+                
+                if self.telegram_bot:
+                    await self.telegram_bot.send_message(confirm_message, chat_id)
+        else:
+                error_message = "❌ Script de entrenamiento en vivo no encontrado"
+                if self.telegram_bot:
+                    await self.telegram_bot.send_message(error_message, chat_id)
+                logger.error(error_message)
+                
+        except Exception as e:
+            error_message = f"❌ Error iniciando entrenamiento en vivo: {e}"
+            if self.telegram_bot:
+                await self.telegram_bot.send_message(error_message, chat_id)
+            logger.error(error_message)
 
 def main():
     """Función principal"""
