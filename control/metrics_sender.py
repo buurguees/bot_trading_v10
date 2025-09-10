@@ -291,3 +291,79 @@ class MetricsSender:
             'last_alert': max(self.alert_history.values()) if self.alert_history else None,
             'total_alerts_sent': len(self.alert_history)
         }
+    
+    # ===== MÉTODOS ESPECÍFICOS PARA ENTRENAMIENTO =====
+    
+    async def get_training_metrics(self, cycle: int, symbol: str, total_cycles: int) -> Dict[str, Any]:
+        """Obtiene métricas de progreso del entrenamiento para un ciclo y símbolo"""
+        try:
+            # En producción, conectar con core/monitoring/metrics_manager.py
+            # Por ahora, simular métricas basadas en el progreso del ciclo
+            progress = min(cycle * 100 // total_cycles, 100)
+            
+            # Simular estados de entrenamiento
+            if progress < 20:
+                status = "Preparando pipeline"
+            elif progress < 50:
+                status = "Procesando datos"
+            elif progress < 80:
+                status = "Entrenando modelos"
+            else:
+                status = "Validando modelos"
+            
+            return {
+                "cycle": cycle + 1,
+                "total_cycles": total_cycles,
+                "progress": progress,
+                "symbols_processed": [symbol] if progress > 0 else [],
+                "status": status,
+                "current_symbol": symbol,
+                "timestamp": datetime.now().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"❌ Error obteniendo métricas de entrenamiento: {e}")
+            return {
+                "cycle": cycle + 1,
+                "total_cycles": total_cycles,
+                "progress": 0,
+                "symbols_processed": [symbol],
+                "status": "error",
+                "current_symbol": symbol,
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    def format_training_metrics_message(self, metrics: Dict[str, Any]) -> str:
+        """Formatea las métricas de entrenamiento para el mensaje de Telegram"""
+        try:
+            return (
+                f"🔧 <b>Entrenamiento histórico - Ciclo {metrics['cycle']}/{metrics.get('total_cycles', 1)}</b>\n\n"
+                f"• Símbolo actual: {metrics['current_symbol']}\n"
+                f"• Estado: {metrics.get('status', 'running').capitalize()}\n"
+                f"• Progreso: {metrics.get('progress', 0)}%\n"
+                f"• Símbolos procesados: {', '.join(metrics.get('symbols_processed', []) or ['Ninguno'])}\n"
+                f"• Actualizado: {datetime.now().strftime('%H:%M:%S')}\n\n"
+                f"Este mensaje se actualizará cada 10 segundos."
+            )
+        except Exception as e:
+            logger.error(f"❌ Error formateando métricas de entrenamiento: {e}")
+            return f"❌ Error formateando métricas: {e}"
+    
+    async def send_training_progress_update(self, chat_id: int, message_id: int, metrics: Dict[str, Any]) -> bool:
+        """Envía actualización de progreso de entrenamiento editando mensaje existente"""
+        try:
+            message_text = self.format_training_metrics_message(metrics)
+            
+            await self.telegram_bot.application.bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=message_id,
+                text=message_text,
+                parse_mode='HTML'
+            )
+            
+            logger.info(f"✅ Actualización de entrenamiento enviada: Ciclo {metrics['cycle']} - {metrics['progress']}%")
+            return True
+            
+        except Exception as e:
+            if "message is not modified" not in str(e):
+                logger.warning(f"⚠️ Error enviando actualización de entrenamiento: {e}")
+            return False

@@ -25,7 +25,7 @@ from prometheus_client import Counter, Gauge, Histogram
 from prometheus_client.core import CollectorRegistry
 
 from core.trading.bitget_client import bitget_client
-from core.config.config_loader import user_config
+from config.config_loader import user_config
 
 logger = logging.getLogger(__name__)
 

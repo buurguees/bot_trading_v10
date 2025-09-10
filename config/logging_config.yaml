@@ -1,0 +1,152 @@
+# Configuración de Logging del Bot Trading v10 Enterprise
+# ======================================================
+
+# Configuración general de logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  encoding: "utf-8"
+  
+  # Configuración de archivos
+  file:
+    enabled: true
+    path: "logs/bot.log"
+    max_size: "10MB"
+    backup_count: 5
+    rotation: "daily"
+  
+  # Configuración de consola
+  console:
+    enabled: true
+    level: "INFO"
+    colored: true
+  
+  # Configuración de handlers específicos
+  handlers:
+    # Handler para errores críticos
+    error_handler:
+      enabled: true
+      level: "ERROR"
+      file: "logs/errors.log"
+      max_size: "5MB"
+      backup_count: 3
+    
+    # Handler para auditoría
+    audit_handler:
+      enabled: true
+      level: "INFO"
+      file: "logs/audit.log"
+      max_size: "20MB"
+      backup_count: 10
+    
+    # Handler para trading
+    trading_handler:
+      enabled: true
+      level: "INFO"
+      file: "logs/trading.log"
+      max_size: "50MB"
+      backup_count: 7
+    
+    # Handler para ML
+    ml_handler:
+      enabled: true
+      level: "INFO"
+      file: "logs/ml.log"
+      max_size: "30MB"
+      backup_count: 5
+
+# Configuración de loggers específicos
+loggers:
+  # Logger principal del bot
+  __main__:
+    level: "INFO"
+    handlers: ["console", "file"]
+    propagate: false
+  
+  # Logger de control
+  control:
+    level: "INFO"
+    handlers: ["console", "file", "audit_handler"]
+    propagate: false
+  
+  # Logger de trading
+  core.trading:
+    level: "INFO"
+    handlers: ["console", "trading_handler"]
+    propagate: false
+  
+  # Logger de ML
+  core.ml:
+    level: "INFO"
+    handlers: ["console", "ml_handler"]
+    propagate: false
+  
+  # Logger de datos
+  core.data:
+    level: "INFO"
+    handlers: ["console", "file"]
+    propagate: false
+  
+  # Logger de monitoreo
+  core.monitoring:
+    level: "INFO"
+    handlers: ["console", "file"]
+    propagate: false
+  
+  # Logger de seguridad
+  core.security:
+    level: "INFO"
+    handlers: ["console", "audit_handler"]
+    propagate: false
+  
+  # Logger de errores
+  error:
+    level: "ERROR"
+    handlers: ["error_handler"]
+    propagate: false
+
+# Configuración de filtros
+filters:
+  # Filtro para mensajes sensibles
+  sensitive_data:
+    enabled: true
+    patterns:
+      - "password"
+      - "token"
+      - "key"
+      - "secret"
+    replacement: "***REDACTED***"
+  
+  # Filtro para datos de trading
+  trading_data:
+    enabled: true
+    patterns:
+      - "balance"
+      - "position"
+      - "pnl"
+    log_level: "DEBUG"
+
+# Configuración de formatters
+formatters:
+  standard:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  
+  detailed:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  
+  json:
+    format: '{"timestamp": "%(asctime)s", "logger": "%(name)s", "level": "%(levelname)s", "message": "%(message)s"}'
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+# Configuración de rotación
+rotation:
+  enabled: true
+  when: "midnight"
+  interval: 1
+  backup_count: 30
+  encoding: "utf-8"
+  delay: true
+  utc: false

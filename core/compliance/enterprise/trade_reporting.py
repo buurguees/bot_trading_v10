@@ -29,7 +29,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from enum import Enum
 
-from compliance.enterprise.audit_logger import AuditLogger, EventType
+from core.compliance.enterprise.audit_logger import AuditLogger, EventType
 from config.config_loader import user_config
 
 logger = logging.getLogger(__name__)

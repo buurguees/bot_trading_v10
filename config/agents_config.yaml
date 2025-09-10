@@ -1,0 +1,168 @@
+# Configuración de Agentes - Bot Trading v10 Enterprise
+# =====================================================
+
+# Configuración general de agentes
+agents:
+  enabled: true
+  max_concurrent_agents: 10
+  agent_timeout: 300  # segundos
+  retry_attempts: 3
+  health_check_interval: 60  # segundos
+
+# Configuración por símbolo
+symbols:
+  BTCUSDT:
+    enabled: true
+    agent_type: "ml_agent"
+    model_path: "agents/BTCUSDT/model.pkl"
+    strategies_path: "agents/BTCUSDT/strategies.json"
+    state_path: "agents/BTCUSDT/state.json"
+    logs_path: "agents/BTCUSDT/logs/"
+    max_memory_mb: 512
+    update_interval: 60
+    priority: 1
+    volatility_tier: "high"
+    
+  ETHUSDT:
+    enabled: true
+    agent_type: "ml_agent"
+    model_path: "agents/ETHUSDT/model.pkl"
+    strategies_path: "agents/ETHUSDT/strategies.json"
+    state_path: "agents/ETHUSDT/state.json"
+    logs_path: "agents/ETHUSDT/logs/"
+    max_memory_mb: 512
+    update_interval: 60
+    priority: 1
+    volatility_tier: "high"
+    
+  ADAUSDT:
+    enabled: true
+    agent_type: "ml_agent"
+    model_path: "agents/ADAUSDT/model.pkl"
+    strategies_path: "agents/ADAUSDT/strategies.json"
+    state_path: "agents/ADAUSDT/state.json"
+    logs_path: "agents/ADAUSDT/logs/"
+    max_memory_mb: 256
+    update_interval: 120
+    priority: 2
+    volatility_tier: "medium"
+    
+  SOLUSDT:
+    enabled: true
+    agent_type: "ml_agent"
+    model_path: "agents/SOLUSDT/model.pkl"
+    strategies_path: "agents/SOLUSDT/strategies.json"
+    state_path: "agents/SOLUSDT/state.json"
+    logs_path: "agents/SOLUSDT/logs/"
+    max_memory_mb: 256
+    update_interval: 120
+    priority: 2
+    volatility_tier: "medium"
+    
+  DOGEUSDT:
+    enabled: true
+    agent_type: "ml_agent"
+    model_path: "agents/DOGEUSDT/model.pkl"
+    strategies_path: "agents/DOGEUSDT/strategies.json"
+    state_path: "agents/DOGEUSDT/state.json"
+    logs_path: "agents/DOGEUSDT/logs/"
+    max_memory_mb: 128
+    update_interval: 180
+    priority: 3
+    volatility_tier: "high"
+    
+  AVAXUSDT:
+    enabled: true
+    agent_type: "ml_agent"
+    model_path: "agents/AVAXUSDT/model.pkl"
+    strategies_path: "agents/AVAXUSDT/strategies.json"
+    state_path: "agents/AVAXUSDT/state.json"
+    logs_path: "agents/AVAXUSDT/logs/"
+    max_memory_mb: 256
+    update_interval: 120
+    priority: 2
+    volatility_tier: "medium"
+    
+  TONUSDT:
+    enabled: true
+    agent_type: "ml_agent"
+    model_path: "agents/TONUSDT/model.pkl"
+    strategies_path: "agents/TONUSDT/strategies.json"
+    state_path: "agents/TONUSDT/state.json"
+    logs_path: "agents/TONUSDT/logs/"
+    max_memory_mb: 128
+    update_interval: 180
+    priority: 3
+    volatility_tier: "high"
+    
+  XRPUSDT:
+    enabled: true
+    agent_type: "ml_agent"
+    model_path: "agents/XRPUSDT/model.pkl"
+    strategies_path: "agents/XRPUSDT/strategies.json"
+    state_path: "agents/XRPUSDT/state.json"
+    logs_path: "agents/XRPUSDT/logs/"
+    max_memory_mb: 128
+    update_interval: 180
+    priority: 3
+    volatility_tier: "medium"
+    
+  LINKUSDT:
+    enabled: true
+    agent_type: "ml_agent"
+    model_path: "agents/LINKUSDT/model.pkl"
+    strategies_path: "agents/LINKUSDT/strategies.json"
+    state_path: "agents/LINKUSDT/state.json"
+    logs_path: "agents/LINKUSDT/logs/"
+    max_memory_mb: 128
+    update_interval: 180
+    priority: 4
+    volatility_tier: "high"
+
+# Configuración de modelos ML
+ml_models:
+  default_architecture: "lstm_attention"
+  input_features: 50
+  hidden_size: 128
+  num_layers: 3
+  dropout: 0.2
+  learning_rate: 0.001
+  batch_size: 64
+  epochs: 100
+  early_stopping_patience: 10
+
+# Configuración de estrategias
+strategies:
+  max_strategies_per_agent: 500
+  strategy_evaluation_period: 24  # horas
+  min_performance_threshold: 0.6
+  max_drawdown_threshold: 0.15
+  strategy_update_frequency: "daily"
+
+# Configuración de logs
+logging:
+  agent_logs_enabled: true
+  log_level: "INFO"
+  max_log_file_size: "10MB"
+  max_log_files: 5
+  log_rotation: "daily"
+  include_metrics: true
+  include_predictions: true
+
+# Configuración de persistencia
+persistence:
+  save_models: true
+  save_strategies: true
+  save_state: true
+  backup_frequency: "daily"
+  max_backups: 7
+  compression_enabled: true
+
+# Configuración de monitoreo
+monitoring:
+  performance_tracking: true
+  resource_monitoring: true
+  alert_on_errors: true
+  alert_on_high_memory: true
+  memory_threshold_mb: 400
+  cpu_threshold_percent: 80

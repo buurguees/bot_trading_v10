@@ -202,15 +202,34 @@ class HistoricalTrainer:
         
         for symbol in symbols:
             try:
-                # Buscar archivos de datos históricos
-                data_files = list(Path('data/historical').glob(f'{symbol}_*.csv'))
-                if not data_files:
+                # Usar el nuevo sistema de bases de datos SQLite
+                from core.data.historical_data_adapter import get_historical_data
+                from datetime import datetime, timedelta
+                
+                # Obtener datos de los últimos 30 días
+                end_date = datetime.now()
+                start_date = end_date - timedelta(days=30)
+                
+                # Intentar cargar desde diferentes timeframes
+                timeframes = ['1h', '4h', '1d']
+                data = None
+                
+                for timeframe in timeframes:
+                    try:
+                        data = get_historical_data(symbol, timeframe, start_date, end_date)
+                        if not data.empty and len(data) > 100:
+                            logger.info(f"✅ Cargados {len(data)} registros de {symbol}_{timeframe}")
+                            break
+                    except Exception as e:
+                        logger.warning(f"Error cargando {symbol}_{timeframe}: {e}")
+                        continue
+                
+                if data is None or data.empty:
                     logger.warning(f"⚠️ No se encontraron datos para {symbol}")
                     continue
                 
-                # Cargar el archivo más reciente
-                latest_file = max(data_files, key=lambda x: x.stat().st_mtime)
-                df = pd.read_csv(latest_file)
+                # Usar los datos cargados del nuevo sistema
+                df = data
                 
                 # Procesar datos
                 if 'timestamp' in df.columns:

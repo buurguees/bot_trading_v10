@@ -19,7 +19,7 @@ import uuid
 import numpy as np
 
 # Imports del proyecto
-from core.config.config_loader import user_config
+from config.config_loader import user_config
 from core.data.database import db_manager
 from core.data.collector import data_collector
 from .order_manager import TradeRecord, order_manager

@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Any, Union
 from pathlib import Path
 from enum import Enum
 
-from core.config.enterprise_config import get_enterprise_config
+from config.enterprise_config import EnterpriseConfigManager
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +37,8 @@ class AuditLogger:
     
     def __init__(self):
         """Inicializar el logger de auditoría"""
-        self.config = get_enterprise_config()
+        self.config_manager = EnterpriseConfigManager()
+        self.config = self.config_manager.load_config()
         self.security_config = self.config.get_security_config()
         self.audit_config = self.security_config.get("audit", {})
         
@@ -290,7 +291,7 @@ class AuditLogger:
             user_id=user_id,
             severity=AuditSeverity.HIGH,
             description=description,
-            metadata=dict(metadata or {), "symbol": symbol, "action": action, "amount": amount, "price": price},
+            metadata={**dict(metadata or {}), "symbol": symbol, "action": action, "amount": amount, "price": price},
             ip_address=ip_address
         )
     

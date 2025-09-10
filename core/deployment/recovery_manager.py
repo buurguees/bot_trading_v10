@@ -24,7 +24,7 @@ import logging
 import shutil
 import json
 import hashlib
-import boto3
+# import boto3  # Comentado temporalmente - falta instalar
 import psycopg2
 from pathlib import Path
 from datetime import datetime, timedelta

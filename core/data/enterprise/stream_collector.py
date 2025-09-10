@@ -29,8 +29,8 @@ from concurrent.futures import ThreadPoolExecutor
 import ssl
 
 # Kafka y base de datos
-from kafka import KafkaProducer, KafkaConsumer
-from kafka.errors import KafkaError
+# from kafka import KafkaProducer, KafkaConsumer  # Comentado temporalmente - falta instalar
+# from kafka.errors import KafkaError  # Comentado temporalmente - falta instalar
 import psycopg2
 from psycopg2.extras import execute_values
 
@@ -41,8 +41,8 @@ from prometheus_client import Counter, Histogram, Gauge, start_http_server
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 # Imports del proyecto
-from data.enterprise.database import TimescaleDBManager
-from data.enterprise.preprocessor import DataPreprocessor
+from core.data.enterprise.database import TimescaleDBManager
+from core.data.enterprise.preprocessor import DataPreprocessor
 
 logger = logging.getLogger(__name__)
 

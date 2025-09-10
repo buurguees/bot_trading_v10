@@ -1,0 +1,157 @@
+# Configuración de Logs - Bot Trading v10 Enterprise
+# ==================================================
+
+# Configuración general de logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  encoding: "utf-8"
+  
+  # Configuración de archivos
+  file:
+    enabled: true
+    path: "core/logs/bot.log"
+    max_size: "10MB"
+    backup_count: 5
+    rotation: "daily"
+  
+  # Configuración de consola
+  console:
+    enabled: true
+    level: "INFO"
+    colored: true
+
+# Configuración de logs por módulo
+modules:
+  # Logs del bot principal
+  bot:
+    level: "INFO"
+    file: "core/logs/bot.log"
+    max_size: "10MB"
+    backup_count: 5
+    
+  # Logs de trading
+  trading:
+    level: "INFO"
+    file: "core/logs/trading.log"
+    max_size: "50MB"
+    backup_count: 7
+    
+  # Logs de ML
+  ml:
+    level: "INFO"
+    file: "core/logs/ml.log"
+    max_size: "30MB"
+    backup_count: 5
+    
+  # Logs de datos
+  data:
+    level: "INFO"
+    file: "core/logs/data.log"
+    max_size: "20MB"
+    backup_count: 5
+    
+  # Logs de agentes
+  agents:
+    level: "INFO"
+    file: "core/logs/agents.log"
+    max_size: "25MB"
+    backup_count: 5
+    
+  # Logs de monitoreo
+  monitoring:
+    level: "INFO"
+    file: "core/logs/monitoring.log"
+    max_size: "15MB"
+    backup_count: 5
+    
+  # Logs de seguridad
+  security:
+    level: "INFO"
+    file: "core/logs/security.log"
+    max_size: "10MB"
+    backup_count: 10
+    
+  # Logs de errores
+  errors:
+    level: "ERROR"
+    file: "core/logs/errors.log"
+    max_size: "5MB"
+    backup_count: 3
+
+# Configuración de logs por agente
+agent_logs:
+  enabled: true
+  base_path: "agents/{symbol}/logs/"
+  files:
+    - "agent_{symbol}.log"
+    - "trading_{symbol}.log"
+    - "ml_{symbol}.log"
+    - "errors_{symbol}.log"
+  
+  rotation:
+    max_size: "5MB"
+    backup_count: 3
+    rotation: "daily"
+  
+  levels:
+    agent: "INFO"
+    trading: "INFO"
+    ml: "DEBUG"
+    errors: "ERROR"
+
+# Configuración de filtros
+filters:
+  # Filtro para datos sensibles
+  sensitive_data:
+    enabled: true
+    patterns:
+      - "password"
+      - "token"
+      - "key"
+      - "secret"
+      - "api_key"
+    replacement: "***REDACTED***"
+  
+  # Filtro para datos de trading
+  trading_data:
+    enabled: true
+    patterns:
+      - "balance"
+      - "position"
+      - "pnl"
+      - "leverage"
+    log_level: "DEBUG"
+
+# Configuración de formatters
+formatters:
+  standard:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  
+  detailed:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  
+  json:
+    format: '{"timestamp": "%(asctime)s", "logger": "%(name)s", "level": "%(levelname)s", "message": "%(message)s"}'
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+# Configuración de rotación
+rotation:
+  enabled: true
+  when: "midnight"
+  interval: 1
+  backup_count: 30
+  encoding: "utf-8"
+  delay: true
+  utc: false
+
+# Configuración de limpieza
+cleanup:
+  enabled: true
+  max_age_days: 30
+  max_total_size: "1GB"
+  cleanup_frequency: "daily"
+  compress_old_logs: true

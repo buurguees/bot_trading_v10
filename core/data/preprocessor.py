@@ -37,7 +37,7 @@ import pickle
 import hashlib
 
 from .database import db_manager
-from core.config.config_loader import ConfigLoader
+from config.config_loader import ConfigLoader
 
 logger = logging.getLogger(__name__)
 

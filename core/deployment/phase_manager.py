@@ -64,8 +64,8 @@ class PhaseManager:
     """Gestor de fases del sistema enterprise"""
     
     def __init__(self, config_path: str = "config/user_settings.yaml"):
-        self.config_manager = EnterpriseConfigManager(config_path)
-        self.config = self.config_manager.load_config()
+        self.config_manager = EnterpriseConfigManager()
+        self.config = self.config_manager.load_config("trading")
         
         # Definir fases y sus dependencias
         self.phases = {

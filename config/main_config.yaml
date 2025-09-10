@@ -1,0 +1,114 @@
+# Configuración Principal del Bot Trading v10 Enterprise
+# =====================================================
+
+# Configuración del bot
+bot:
+  name: "TradingBot_v10_Enterprise"
+  version: "10.0.0"
+  environment: "production"  # development, staging, production
+  debug: false
+  
+# Configuración de datos
+data:
+  # Datos históricos
+  historical:
+    enabled: true
+    years: 1
+    timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
+    symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT", "AVAXUSDT", "TONUSDT", "XRPUSDT", "LINKUSDT"]
+    storage_format: "sqlite"
+    database_per_symbol: true
+    auto_verify_coverage: true
+    min_coverage_days: 365
+    download_missing: true
+  
+  # Datos en tiempo real
+  real_time:
+    enabled: true
+    symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT", "AVAXUSDT", "TONUSDT", "XRPUSDT", "LINKUSDT"]
+    timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
+    data_types: ["kline", "ticker", "orderbook"]
+  
+  # Alineación temporal
+  alignment:
+    enabled: true
+    base_timeframe: "5m"
+    tolerance_minutes: 1
+    min_data_coverage: 0.95
+
+# Configuración de trading
+trading:
+  mode: "paper_trading"  # paper_trading, live_trading
+  futures_enabled: true
+  min_confidence: 0.7
+  max_trades_per_bar: 1
+  commission_rate: 0.001
+  
+  # Gestión de riesgo
+  risk_management:
+    max_risk_per_trade: 0.01
+    max_daily_loss_pct: 0.05
+    max_drawdown_pct: 0.15
+    min_leverage: 5.0
+    max_leverage: 20.0
+    default_stop_loss_pct: 0.015
+    risk_reward_ratio: 2.5
+
+# Configuración de ML
+ml:
+  model_type: "lstm_attention"
+  min_confidence: 75.0
+  retraining_frequency: "adaptive"
+  feature_importance:
+    price_action: 0.3
+    technical_indicators: 0.4
+    volume_analysis: 0.2
+    market_sentiment: 0.1
+
+# Configuración de monitoreo
+monitoring:
+  dashboard:
+    enabled: true
+    port: 8050
+    auto_refresh_seconds: 5
+  
+  prometheus:
+    enabled: true
+    port: 8003
+  
+  alerts:
+    telegram:
+      enabled: true
+      training_update_interval: 60
+    console:
+      enabled: true
+
+# Configuración de base de datos
+database:
+  primary: "sqlite"
+  sqlite:
+    path: "data/trading_bot.db"
+    per_symbol: true
+  redis:
+    enabled: true
+    url: "redis://localhost:6379"
+  timescaledb:
+    enabled: false
+
+# Configuración de seguridad
+security:
+  encryption:
+    enabled: true
+    algorithm: "AES-256-GCM"
+  compliance:
+    mifid2_enabled: true
+    gdpr_enabled: true
+    audit_logging: true
+
+# Configuración de performance
+performance:
+  max_workers: 4
+  memory_limit: "2GB"
+  cpu_limit: 80
+  cache_ttl: 300
+  health_check_interval: 30

@@ -20,7 +20,7 @@ import asyncio
 import ccxt
 import os
 
-from core.config.config_loader import user_config
+from config.config_loader import user_config
 from core.data.database import db_manager
 from .risk_manager import RiskDecision
 

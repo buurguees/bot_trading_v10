@@ -21,7 +21,7 @@ from scipy import linalg
 import json
 
 # Imports del proyecto
-from core.config.config_loader import ConfigLoader
+from config.config_loader import ConfigLoader
 from core.data.database import db_manager
 from .position_manager import position_manager
 from .signal_processor import signal_processor

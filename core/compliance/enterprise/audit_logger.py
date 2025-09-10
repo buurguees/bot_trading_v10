@@ -99,8 +99,8 @@ class AuditLogger:
         self.fernet = None
         
         # Estado del logger
-        self.session_id = self.generate_session_id()
         self.event_counter = 0
+        self.session_id = self.generate_session_id()
         
         # Directorios
         self.setup_directories()

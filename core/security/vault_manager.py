@@ -13,7 +13,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from core.config.enterprise_config import EnterpriseConfigManager
+from config.enterprise_config import EnterpriseConfigManager
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)

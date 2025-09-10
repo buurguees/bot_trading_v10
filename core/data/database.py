@@ -2,7 +2,7 @@
 """
 data/database.py - VERSIÓN PROFESIONAL MEJORADA
 Gestor de base de datos para el sistema de trading
-Ubicación: C:\TradingBot_v10\data\database.py
+Ubicación: C:\\TradingBot_v10\\data\\database.py
 
 MEJORAS PRINCIPALES:
 - Gestión robusta de timestamps con normalización automática
@@ -1051,7 +1051,7 @@ class DatabaseManager:
         """Crea backup optimizado con compresión opcional"""
         try:
             if backup_path is None:
-                from core.config.config_loader import ConfigLoader
+                from config.config_loader import ConfigLoader
                 config_loader = ConfigLoader()
                 BACKUPS_DIR = config_loader.get_config_value('backups_dir', 'data/backups')
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -1807,6 +1807,235 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Error obteniendo datos alineados: {e}")
             return {symbol: pd.DataFrame() for symbol in symbols}
+    
+    def get_last_timestamp(self, symbol: str, timeframe: str) -> Optional[int]:
+        """Obtiene el último timestamp de un símbolo/timeframe específico."""
+        try:
+            # Usar conexión directa a la BD unificada
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Buscar en la tabla principal (sin timeframe ya que no existe)
+                cursor.execute("""
+                    SELECT MAX(timestamp) FROM market_data 
+                    WHERE symbol = ?
+                """, (symbol,))
+                
+                result = cursor.fetchone()
+                if result and result[0]:
+                    return int(result[0])
+                
+                # Buscar en datos alineados
+                cursor.execute("""
+                    SELECT MAX(timestamp) FROM aligned_market_data 
+                    WHERE symbol = ? AND timeframe = ?
+                """, (symbol, timeframe))
+                
+                result = cursor.fetchone()
+                if result and result[0]:
+                    return int(result[0])
+                
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error obteniendo último timestamp para {symbol} {timeframe}: {e}")
+            return None
+    
+    def store_historical_data(self, data: pd.DataFrame, symbol: str, timeframe: str, db_path: str) -> bool:
+        """Almacena datos históricos en la base de datos."""
+        try:
+            if data is None or data.empty:
+                logger.warning(f"No hay datos para almacenar para {symbol} {timeframe}")
+                return False
+            
+            # Crear directorio si no existe
+            from pathlib import Path
+            Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+            
+            # Conectar a la base de datos específica
+            with sqlite3.connect(db_path) as conn:
+                # Crear tabla si no existe
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS market_data (
+                        timestamp INTEGER PRIMARY KEY,
+                        open REAL NOT NULL,
+                        high REAL NOT NULL,
+                        low REAL NOT NULL,
+                        close REAL NOT NULL,
+                        volume REAL NOT NULL,
+                        symbol TEXT,
+                        timeframe TEXT
+                    )
+                """)
+                
+                # Preparar datos para inserción
+                data_to_store = data.copy()
+                
+                # Si el índice es timestamp, resetearlo y usar como columna
+                if data_to_store.index.name == 'timestamp' or 'timestamp' in str(data_to_store.index.dtype):
+                    data_to_store = data_to_store.reset_index()
+                    if 'timestamp' not in data_to_store.columns:
+                        data_to_store.rename(columns={'index': 'timestamp'}, inplace=True)
+                
+                # Asegurar que timestamp sea entero (milisegundos)
+                if 'timestamp' in data_to_store.columns:
+                    data_to_store['timestamp'] = pd.to_datetime(data_to_store['timestamp']).astype('int64') // 10**6
+                
+                data_to_store['symbol'] = symbol
+                data_to_store['timeframe'] = timeframe
+                
+                # Insertar datos (reemplazar si existe)
+                data_to_store.to_sql(
+                    'market_data', 
+                    conn, 
+                    if_exists='replace', 
+                    index=False
+                )
+                
+                conn.commit()
+                logger.info(f"✅ Almacenados {len(data_to_store)} registros para {symbol} {timeframe}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Error almacenando datos históricos para {symbol} {timeframe}: {e}")
+            return False
+    
+    def store_real_time_data(self, data: Dict, symbol: str, timeframe: str, db_path: str) -> bool:
+        """Almacena datos en tiempo real en la base de datos."""
+        try:
+            if not data:
+                return False
+            
+            # Crear directorio si no existe
+            from pathlib import Path
+            Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+            
+            # Conectar a la base de datos específica
+            with sqlite3.connect(db_path) as conn:
+                # Crear tabla si no existe
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS market_data (
+                        timestamp INTEGER PRIMARY KEY,
+                        open REAL NOT NULL,
+                        high REAL NOT NULL,
+                        low REAL NOT NULL,
+                        close REAL NOT NULL,
+                        volume REAL NOT NULL,
+                        symbol TEXT,
+                        timeframe TEXT
+                    )
+                """)
+                
+                # Insertar o actualizar datos
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT OR REPLACE INTO market_data 
+                    (timestamp, open, high, low, close, volume, symbol, timeframe)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    data.get('timestamp', 0),
+                    data.get('open', 0.0),
+                    data.get('high', 0.0),
+                    data.get('low', 0.0),
+                    data.get('close', 0.0),
+                    data.get('volume', 0.0),
+                    symbol,
+                    timeframe
+                ))
+                
+                conn.commit()
+                return True
+                
+        except Exception as e:
+            logger.error(f"Error almacenando datos en tiempo real para {symbol} {timeframe}: {e}")
+            return False
+    
+    def get_latest_sync_session(self) -> Optional[str]:
+        """Obtiene la sesión de sincronización más reciente"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT session_id 
+                    FROM sync_metadata 
+                    ORDER BY created_at DESC 
+                    LIMIT 1
+                """)
+                result = cursor.fetchone()
+                return result[0] if result else None
+        except Exception as e:
+            logger.error(f"Error obteniendo sesión de sincronización más reciente: {e}")
+            return None
+    
+    def get_sync_metadata(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Obtiene los metadatos de una sesión de sincronización"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT metadata 
+                    FROM sync_metadata 
+                    WHERE session_id = ?
+                """, (session_id,))
+                result = cursor.fetchone()
+                if result:
+                    return json.loads(result[0])
+                return None
+        except Exception as e:
+            logger.error(f"Error obteniendo metadatos de sincronización: {e}")
+            return None
+    
+    def get_aligned_data(self, symbol: str, timeframe: str, session_id: str) -> Optional[pd.DataFrame]:
+        """Obtiene datos alineados para un símbolo y timeframe específicos"""
+        try:
+            with self._get_connection() as conn:
+                query = """
+                    SELECT timestamp, open, high, low, close, volume
+                    FROM aligned_market_data 
+                    WHERE symbol = ? AND timeframe = ? AND session_id = ?
+                    ORDER BY timestamp
+                """
+                df = pd.read_sql_query(query, conn, params=(symbol, timeframe, session_id))
+                
+                if df.empty:
+                    return None
+                
+                # Convertir timestamp a datetime y establecer como índice
+                df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s', utc=True)
+                df.set_index('timestamp', inplace=True)
+                
+                return df
+        except Exception as e:
+            logger.error(f"Error obteniendo datos alineados para {symbol} {timeframe}: {e}")
+            return None
+    
+    def store_alignment_metadata(self, session_id: str, metadata: Dict[str, Any]) -> bool:
+        """Almacena metadatos de alineación"""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Crear tabla si no existe
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS sync_metadata (
+                        session_id TEXT PRIMARY KEY,
+                        metadata TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                
+                # Insertar metadatos
+                cursor.execute("""
+                    INSERT OR REPLACE INTO sync_metadata (session_id, metadata)
+                    VALUES (?, ?)
+                """, (session_id, json.dumps(metadata)))
+                
+                conn.commit()
+                logger.info(f"Metadatos de alineación almacenados: {session_id}")
+                return True
+        except Exception as e:
+            logger.error(f"Error almacenando metadatos de alineación: {e}")
+            return False
     
     def __del__(self):
         """Cleanup al destruir el objeto"""

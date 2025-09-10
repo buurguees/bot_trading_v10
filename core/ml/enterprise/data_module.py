@@ -23,6 +23,9 @@ import logging
 from pathlib import Path
 import yaml
 
+# Importar el nuevo sistema de datos
+from core.data.historical_data_adapter import get_historical_data
+
 logger = logging.getLogger(__name__)
 
 class TradingDataset(Dataset):
@@ -170,15 +173,116 @@ class TradingDataModule(pl.LightningDataModule):
     
     def _load_data(self) -> pd.DataFrame:
         """Carga datos desde la fuente especificada"""
-        if self.data_source == "csv" and self.data_path:
-            return pd.read_csv(self.data_path)
-        elif self.data_source == "timescaledb":
-            return self._load_from_timescaledb()
-        elif self.data_source == "redis":
-            return self._load_from_redis()
-        else:
-            # Generar datos sintéticos para testing
+        try:
+            # Usar el nuevo sistema de bases de datos SQLite
+            if self.data_source == "csv" and self.data_path:
+                # Migrar de CSV a SQLite si es necesario
+                logger.info(f"Migrando datos CSV a SQLite para {self.symbol}")
+                return self._migrate_csv_to_sqlite()
+            elif self.data_source == "timescaledb":
+                return self._load_from_timescaledb()
+            elif self.data_source == "redis":
+                return self._load_from_redis()
+            else:
+                # Usar el nuevo sistema de datos históricos
+                return self._load_from_historical_db()
+        except Exception as e:
+            logger.error(f"Error cargando datos: {e}")
             return self._generate_synthetic_data()
+    
+    def _load_from_historical_db(self) -> pd.DataFrame:
+        """Carga datos desde el nuevo sistema de bases de datos históricos"""
+        try:
+            # Obtener datos de los últimos 30 días para entrenamiento
+            from datetime import datetime, timedelta
+            
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=30)
+            
+            # Intentar cargar desde diferentes timeframes
+            timeframes = ['1h', '4h', '1d']
+            
+            for timeframe in timeframes:
+                try:
+                    data = get_historical_data(
+                        symbol=self.symbol,
+                        timeframe=timeframe,
+                        start_date=start_date,
+                        end_date=end_date
+                    )
+                    
+                    if not data.empty and len(data) > 100:  # Mínimo 100 registros
+                        logger.info(f"Cargados {len(data)} registros de {self.symbol}_{timeframe}")
+                        return data
+                        
+                except Exception as e:
+                    logger.warning(f"Error cargando {self.symbol}_{timeframe}: {e}")
+                    continue
+            
+            # Si no se encontraron datos, generar sintéticos
+            logger.warning(f"No se encontraron datos históricos para {self.symbol}")
+            return self._generate_synthetic_data()
+            
+        except Exception as e:
+            logger.error(f"Error cargando datos históricos: {e}")
+            return self._generate_synthetic_data()
+    
+    def _migrate_csv_to_sqlite(self) -> pd.DataFrame:
+        """Migra datos CSV a SQLite y los carga"""
+        try:
+            # Cargar datos CSV
+            csv_data = pd.read_csv(self.data_path)
+            
+            # Convertir a OHLCVData
+            from core.data.symbol_database_manager import OHLCVData
+            from core.data.symbol_database_manager import symbol_db_manager
+            
+            ohlcv_data = []
+            for _, row in csv_data.iterrows():
+                try:
+                    # Convertir timestamp
+                    timestamp = row['timestamp']
+                    if isinstance(timestamp, str):
+                        timestamp = int(pd.to_datetime(timestamp).timestamp())
+                    elif isinstance(timestamp, pd.Timestamp):
+                        timestamp = int(timestamp.timestamp())
+                    
+                    ohlcv = OHLCVData(
+                        timestamp=int(timestamp),
+                        open=float(row['open']),
+                        high=float(row['high']),
+                        low=float(row['low']),
+                        close=float(row['close']),
+                        volume=float(row['volume'])
+                    )
+                    ohlcv_data.append(ohlcv)
+                except Exception as e:
+                    logger.warning(f"Error procesando fila: {e}")
+                    continue
+            
+            # Insertar en SQLite
+            if ohlcv_data:
+                # Determinar timeframe del nombre del archivo
+                timeframe = '1h'  # Default
+                if '_1m' in self.data_path:
+                    timeframe = '1m'
+                elif '_5m' in self.data_path:
+                    timeframe = '5m'
+                elif '_15m' in self.data_path:
+                    timeframe = '15m'
+                elif '_4h' in self.data_path:
+                    timeframe = '4h'
+                elif '_1d' in self.data_path:
+                    timeframe = '1d'
+                
+                symbol_db_manager.insert_data(self.symbol, timeframe, ohlcv_data)
+                logger.info(f"Migrados {len(ohlcv_data)} registros a SQLite")
+            
+            return csv_data
+            
+        except Exception as e:
+            logger.error(f"Error migrando CSV: {e}")
+            return pd.DataFrame()
     
     def _load_from_timescaledb(self) -> pd.DataFrame:
         """Carga datos desde TimescaleDB"""
@@ -346,9 +450,10 @@ class TradingDataModule(pl.LightningDataModule):
         processed_dir = Path("data/processed")
         processed_dir.mkdir(parents=True, exist_ok=True)
         
-        filename = f"{self.symbol}_processed.csv"
+        # Guardar como parquet para mejor rendimiento
+        filename = f"{self.symbol}_processed.parquet"
         filepath = processed_dir / filename
-        data.to_csv(filepath, index=False)
+        data.to_parquet(filepath, index=False)
         
         logger.info(f"Datos procesados guardados en {filepath}")
     
@@ -356,13 +461,13 @@ class TradingDataModule(pl.LightningDataModule):
         """Configura los datasets para cada etapa"""
         if stage == "fit" or stage is None:
             # Cargar datos procesados
-            processed_file = Path(f"data/processed/{self.symbol}_processed.csv")
+            processed_file = Path(f"data/processed/{self.symbol}_processed.parquet")
             if processed_file.exists():
-                data = pd.read_csv(processed_file)
+                data = pd.read_parquet(processed_file)
             else:
                 # Preparar datos si no existen
                 self.prepare_data()
-                data = pd.read_csv(processed_file)
+                data = pd.read_parquet(processed_file)
             
             # Dividir datos
             train_size = int(len(data) * self.train_split)
@@ -384,12 +489,12 @@ class TradingDataModule(pl.LightningDataModule):
         
         if stage == "test" or stage is None:
             # Cargar datos procesados
-            processed_file = Path(f"data/processed/{self.symbol}_processed.csv")
+            processed_file = Path(f"data/processed/{self.symbol}_processed.parquet")
             if processed_file.exists():
-                data = pd.read_csv(processed_file)
+                data = pd.read_parquet(processed_file)
             else:
                 self.prepare_data()
-                data = pd.read_csv(processed_file)
+                data = pd.read_parquet(processed_file)
             
             # Usar últimos datos para test
             test_size = int(len(data) * self.test_split)

@@ -32,9 +32,11 @@ import numpy as np
 import pandas as pd
 import talib
 
-from core.config.config_loader import user_config
+from config.config_loader import user_config
 from core.data.database import db_manager
 from core.data.preprocessor import data_preprocessor
+from core.data.symbol_database_manager import symbol_db_manager
+from core.data.historical_data_adapter import get_historical_data
 from core.ml.legacy.prediction_engine import prediction_engine
 from core.ml.legacy.confidence_estimator import confidence_estimator
 from .risk_manager import risk_manager
@@ -137,6 +139,36 @@ class SignalProcessor:
         self.multi_timeframe_weight = float(self.signal_config.get("multi_timeframe_weight", 0.20))
         self.volume_confirmation_required = bool(self.signal_config.get("volume_confirmation", True))
         self.trend_alignment_required = bool(self.signal_config.get("trend_alignment", True))
+    
+    async def _get_market_data_sqlite(self, symbol: str, start_time: datetime, end_time: datetime, limit: int = 100) -> Optional[pd.DataFrame]:
+        """Obtiene datos de mercado usando el nuevo sistema SQLite"""
+        try:
+            # Intentar obtener datos del timeframe más apropiado
+            timeframes = ['1h', '4h', '1d', '15m', '5m', '1m']
+            
+            for timeframe in timeframes:
+                try:
+                    data = get_historical_data(symbol, timeframe, start_time, end_time)
+                    if not data.empty and len(data) >= min(limit // 4, 10):  # Mínimo 10 registros
+                        return data.head(limit)
+                except Exception as e:
+                    logger.debug(f"Error obteniendo datos {symbol}_{timeframe}: {e}")
+                    continue
+            
+            # Fallback: usar datos más recientes disponibles
+            if symbol in symbol_db_manager.get_all_symbols():
+                timeframes_available = symbol_db_manager.get_symbol_timeframes(symbol)
+                if timeframes_available:
+                    timeframe = timeframes_available[0]
+                    data = symbol_db_manager.get_latest_data(symbol, timeframe, limit=limit)
+                    if not data.empty:
+                        return data
+            
+            return None
+            
+        except Exception as e:
+            logger.debug(f"Error obteniendo datos SQLite para {symbol}: {e}")
+            return None
 
         # Timeframes
         self.timeframes: List[str] = ["1m", "5m", "15m", "1h", "4h"]
@@ -409,12 +441,9 @@ class SignalProcessor:
             # Obtener datos de los últimos 60 períodos
             end_time = datetime.now()
             start_time = end_time - timedelta(hours=60)
-            data = db_manager.get_market_data(symbol, start_time, end_time, limit=60)
-            if not data or len(data) < 21:
+            df = await self._get_market_data_sqlite(symbol, start_time, end_time, limit=60)
+            if df is None or df.empty or len(df) < 21:
                 return False, 0.0
-
-            # Convertir a DataFrame para facilitar cálculos
-            df = pd.DataFrame(data)
             if "volume" not in df.columns:
                 return False, 0.0
 
@@ -465,11 +494,9 @@ class SignalProcessor:
             # Obtener datos de los últimos 200 períodos
             end_time = datetime.now()
             start_time = end_time - timedelta(hours=200)
-            data = db_manager.get_market_data(symbol, start_time, end_time, limit=200)
-            if not data or len(data) < 100:
+            df = await self._get_market_data_sqlite(symbol, start_time, end_time, limit=200)
+            if df is None or df.empty or len(df) < 100:
                 return True, 0.5
-
-            df = pd.DataFrame(data)
             if "close" not in df.columns:
                 return True, 0.5
 
@@ -503,11 +530,9 @@ class SignalProcessor:
             # Obtener datos de los últimos 120 períodos
             end_time = datetime.now()
             start_time = end_time - timedelta(hours=120)
-            data = db_manager.get_market_data(symbol, start_time, end_time, limit=120)
-            if not data or len(data) < 50:
+            df = await self._get_market_data_sqlite(symbol, start_time, end_time, limit=120)
+            if df is None or df.empty or len(df) < 50:
                 return True, 0.5
-
-            df = pd.DataFrame(data)
             if "close" not in df.columns:
                 return True, 0.5
 
@@ -543,11 +568,9 @@ class SignalProcessor:
             # Obtener datos de los últimos 200 períodos
             end_time = datetime.now()
             start_time = end_time - timedelta(hours=200)
-            data = db_manager.get_market_data(symbol, start_time, end_time, limit=200)
-            if not data or len(data) < 50:
+            df = await self._get_market_data_sqlite(symbol, start_time, end_time, limit=200)
+            if df is None or df.empty or len(df) < 50:
                 return False, 0.5
-
-            df = pd.DataFrame(data)
             if "close" not in df.columns:
                 return False, 0.5
 
@@ -581,11 +604,9 @@ class SignalProcessor:
             # Obtener datos de los últimos 20 períodos de 15m
             end_time = datetime.now()
             start_time = end_time - timedelta(minutes=20*15)
-            data = db_manager.get_market_data(symbol, start_time, end_time, limit=20)
-            if not data or len(data) < 5:
+            df = await self._get_market_data_sqlite(symbol, start_time, end_time, limit=20)
+            if df is None or df.empty or len(df) < 5:
                 return False, 0.5
-
-            df = pd.DataFrame(data)
             if not all(col in df.columns for col in ["open", "high", "low", "close"]):
                 return False, 0.5
 
@@ -639,8 +660,7 @@ class SignalProcessor:
             # Fallbacks por datos
             end_time = datetime.now()
             start_time = end_time - timedelta(hours=240)
-            data_1h = db_manager.get_market_data(symbol, start_time, end_time, limit=240)
-            df_1h = data_1h if not data_1h.empty else None
+            df_1h = await self._get_market_data_sqlite(symbol, start_time, end_time, limit=240)
             
             if regime is None:
                 regime = await self._detect_market_regime(df_1h)
@@ -890,8 +910,7 @@ class SignalProcessor:
     async def _calculate_volatility_level_from_data(self, symbol: str) -> str:
         end_time = datetime.now()
         start_time = end_time - timedelta(hours=120)
-        data = db_manager.get_market_data(symbol, start_time, end_time, limit=120)
-        df = data if not data.empty else None
+        df = await self._get_market_data_sqlite(symbol, start_time, end_time, limit=120)
         return await self._calculate_volatility_level(df)
 
     async def _calculate_volatility_level(self, df: Optional[pd.DataFrame]) -> str:
@@ -1005,11 +1024,9 @@ class SignalProcessor:
             # Obtener datos de los últimos 120 períodos
             end_time = datetime.now()
             start_time = end_time - timedelta(hours=120)
-            data = db_manager.get_market_data(symbol, start_time, end_time, limit=120)
-            if not data or len(data) < 50:
+            df = await self._get_market_data_sqlite(symbol, start_time, end_time, limit=120)
+            if df is None or df.empty or len(df) < 50:
                 return 0.5
-            
-            df = pd.DataFrame(data)
             if "close" not in df.columns:
                 return 0.5
                 
@@ -1043,11 +1060,9 @@ class SignalProcessor:
             # Obtener datos de los últimos 120 períodos
             end_time = datetime.now()
             start_time = end_time - timedelta(hours=120)
-            data = db_manager.get_market_data(symbol, start_time, end_time, limit=120)
-            if not data or len(data) < 50:
+            df = await self._get_market_data_sqlite(symbol, start_time, end_time, limit=120)
+            if df is None or df.empty or len(df) < 50:
                 return 0.5
-            
-            df = pd.DataFrame(data)
             if not all(col in df.columns for col in ["high", "low", "close"]):
                 return 0.5
                 
@@ -1070,11 +1085,9 @@ class SignalProcessor:
             # Obtener datos de los últimos 100 períodos de 15m
             end_time = datetime.now()
             start_time = end_time - timedelta(minutes=100*15)
-            data = db_manager.get_market_data(symbol, start_time, end_time, limit=100)
-            if not data or len(data) < 50:
+            df = await self._get_market_data_sqlite(symbol, start_time, end_time, limit=100)
+            if df is None or df.empty or len(df) < 50:
                 return 0.5
-            
-            df = pd.DataFrame(data)
             if "close" not in df.columns:
                 return 0.5
                 
@@ -1151,7 +1164,7 @@ class SignalProcessor:
         try:
             end_time = datetime.now()
             start_time = end_time - timedelta(hours=2)
-            _ = db_manager.get_market_data(self.trading_config.get("symbol", "BTCUSDT"), start_time, end_time, limit=2)
+            _ = await self._get_market_data_sqlite(self.trading_config.get("symbol", "BTCUSDT"), start_time, end_time, limit=2)
         except Exception:
             ok_db = False
         try:

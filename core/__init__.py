@@ -18,9 +18,9 @@ Submódulos:
 - integration: Utilidades del sistema
 """
 
-from .config import *
+# from .config import *  # Comentado temporalmente - no existe el módulo
 from .trading import *
-from .ml import *
+# from .ml import *  # Temporalmente comentado - legacy movido a _old/
 from .data import *
 from .monitoring import *
 from .security import *

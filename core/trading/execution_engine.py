@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 import asyncio
 from collections import defaultdict
 
-from core.config.config_loader import ConfigLoader
+from config.config_loader import ConfigLoader
 from .risk_manager import risk_manager, RiskDecision
 from .order_manager import order_manager, TradeRecord
 

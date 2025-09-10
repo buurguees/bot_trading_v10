@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
 from enum import Enum
 
-from core.config.enterprise_config import get_enterprise_config
+from config.enterprise_config import EnterpriseConfigManager
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -36,7 +36,8 @@ class ComplianceChecker:
     
     def __init__(self):
         """Inicializar el verificador de compliance"""
-        self.config = get_enterprise_config()
+        self.config_manager = EnterpriseConfigManager()
+        self.config = self.config_manager.load_config()
         self.security_config = self.config.get_security_config()
         self.compliance_config = self.security_config.get("compliance", {})
         

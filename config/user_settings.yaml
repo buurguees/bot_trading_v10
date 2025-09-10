@@ -15,11 +15,11 @@ bot_settings:
     adaptive_sizing: true
 
 capital_management:
-  initial_balance: 10000.0  # Increased for enterprise realism
-  target_balance: 1000000.0
-  max_risk_per_trade: 1.0  # Reduced for enterprise safety
-  max_daily_loss_pct: 5.0  # Tighter for risk control
-  max_weekly_loss_pct: 15.0
+  initial_balance: 1000.0  # Increased for enterprise realism
+  target_balance: 100000.0
+  max_risk_per_trade: 5.0  # Reduced for enterprise safety
+  max_daily_loss_pct: 10.0  # Tighter for risk control
+  max_weekly_loss_pct: 20.0
   max_drawdown_pct: 20.0
   daily_profit_target: 5.0  # More realistic
   take_profit_at_target: false
@@ -36,17 +36,42 @@ risk_management:
   max_risk_per_trade: 0.01  # Tighter for enterprise
   max_daily_loss_pct: 0.05
   max_drawdown_pct: 0.15
-  min_leverage: 5.0
-  max_leverage: 20.0  # Reduced for safety
+  min_leverage: 10.0
+  max_leverage: 50.0  # Reduced for safety
   default_stop_loss_pct: 0.015
   risk_reward_ratio: 2.5
 
 trading_settings:
   primary_symbol: "BTCUSDT"
   timeframes:
-    primary: "15m"
-    secondary: "5m"
-    entry: "1m"
+    # Timeframes unificados para todo el sistema
+    symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT", "XRPUSDT"]
+    timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
+    
+    # Configuración específica por uso
+    primary: "15m"        # Timeframe principal para análisis
+    secondary: "5m"       # Timeframe secundario para confirmación
+    entry: "1m"           # Timeframe de entrada (más granular)
+    trend: "1h"           # Timeframe de tendencia
+    position: "4h"        # Timeframe de posición
+    daily: "1d"           # Timeframe diario para contexto
+    
+    # Configuración de alineación temporal
+    alignment:
+      base_timeframe: "5m"        # Timeframe base para alineación
+      tolerance_minutes: 1        # Tolerancia en minutos
+      min_coverage: 0.95          # Cobertura mínima requerida
+      max_gap_minutes: 60         # Gap máximo permitido
+      
+    # Timeframes por prioridad
+    priority:
+      high: ["1m", "5m", "15m"]   # Timeframes de alta frecuencia
+      medium: ["1h", "4h"]        # Timeframes de análisis
+      low: ["1d"]                 # Timeframes de contexto
+      
+    # Timeframes para ML
+    ml_training: ["1h", "4h", "1d"]    # Timeframes para entrenamiento ML
+    ml_prediction: ["5m", "15m"]       # Timeframes para predicción ML
   order_settings:
     preferred_order_type: "limit"
     limit_order_timeout: 5
@@ -221,54 +246,59 @@ multi_symbol_settings:
   symbols:
     BTCUSDT:
       enabled: true
-      allocation_pct: 20.0
+      allocation_pct: 25.0
       risk_multiplier: 1.0
       leverage: auto
+      priority: 1
+      max_position_size_usd: 5000
+      min_position_size_usd: 100
+      volatility_tier: "high"
     ETHUSDT:
       enabled: true
-      allocation_pct: 20.0
+      allocation_pct: 25.0
       risk_multiplier: 1.2
       leverage: auto
+      priority: 1
+      max_position_size_usd: 5000
+      min_position_size_usd: 100
+      volatility_tier: "high"
     ADAUSDT:
       enabled: true
-      allocation_pct: 10.0
+      allocation_pct: 15.0
       risk_multiplier: 1.5
       leverage: auto
+      priority: 2
+      max_position_size_usd: 3000
+      min_position_size_usd: 50
+      volatility_tier: "medium"
     SOLUSDT:
       enabled: true
-      allocation_pct: 10.0
+      allocation_pct: 15.0
       risk_multiplier: 1.4
       leverage: auto
+      priority: 2
+      max_position_size_usd: 3000
+      min_position_size_usd: 50
+      volatility_tier: "medium"
     DOGEUSDT:
       enabled: true
-      allocation_pct: 8.0
+      allocation_pct: 10.0
       risk_multiplier: 1.8
       leverage: auto
-    AVAXUSDT:
+      priority: 3
+      max_position_size_usd: 2000
+      min_position_size_usd: 25
+      volatility_tier: "high"
+    XRPUSDT:
       enabled: true
       allocation_pct: 10.0
-      risk_multiplier: 1.3
-      leverage: auto
-    TONUSDT:
-      enabled: true
-      allocation_pct: 10.0
-      risk_multiplier: 1.6
-      leverage: auto
-    XRPUSDT:  # Replaced TRUMPUSDT with XRPUSDT for standard symbol
-      enabled: true
-      allocation_pct: 7.0
       risk_multiplier: 1.7
       leverage: auto
-    LINKUSDT:
-      enabled: true
-      allocation_pct: 5.0
-      risk_multiplier: 1.9
-      leverage: auto
-    BNBUSDT:  # Added to match exchanges.yaml
-      enabled: true
-      allocation_pct: 5.0
-      risk_multiplier: 1.5
-      leverage: auto
+      priority: 3
+      max_position_size_usd: 2000
+      min_position_size_usd: 25
+      volatility_tier: "medium"
+
 
 enterprise_features:
   real_time_data_collection: true
@@ -316,28 +346,88 @@ trading_enterprise:
 data_collection:
   real_time:
     enabled: true
-    symbols:
-      - "BTCUSDT"
-      - "ETHUSDT"
-      - "ADAUSDT"
-      - "SOLUSDT"
-      - "DOGEUSDT"
-      - "AVAXUSDT"
-      - "TONUSDT"
-      - "XRPUSDT"
-      - "LINKUSDT"
-      - "BGBUSDT"
+    symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT", "XRPUSDT"]
     timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
     data_types: ["kline", "ticker", "orderbook"]
   historical:
-    years: 1
+    enabled: true
+    years: 1  # Configuración principal para descarga histórica
+    symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT", "XRPUSDT"]
     timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
     align_after_download: true
+  
+  sync:
+    enabled: true
+    symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT", "XRPUSDT"]
+    timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
+    max_workers: 4  # Número máximo de workers paralelos
+    delay_ms: 100  # Delay entre operaciones para evitar conflictos API
+    quality_threshold: 80.0  # Umbral mínimo de calidad de sincronización
+    enable_metrics: true  # Habilitar métricas avanzadas
+    save_results: true  # Guardar resultados en base de datos
+    auto_verify_coverage: true  # Verificar automáticamente cobertura al inicio
+    min_coverage_days: 365  # Mínimo de días requeridos
+    download_missing: true  # Descargar automáticamente datos faltantes
+    verification_interval_hours: 24  # Verificar cada 24 horas
+    
+    # Configuración de alineación temporal
+    alignment:
+      enabled: true
+      base_timeframe: "5m"        # Timeframe base para alineación
+      tolerance_minutes: 1        # Tolerancia en minutos
+      min_coverage: 0.95          # Cobertura mínima requerida
+      max_gap_minutes: 60         # Gap máximo permitido
+      auto_align_on_startup: true # Alinear automáticamente al inicio
+      
+    # Configuración por timeframe
+    timeframe_config:
+      "1m":
+        priority: 1
+        buffer_size: 1000
+        flush_interval_ms: 60000
+        required_for_trading: true
+      "5m":
+        priority: 1
+        buffer_size: 200
+        flush_interval_ms: 300000
+        required_for_trading: true
+        base_for_alignment: true
+      "15m":
+        priority: 2
+        buffer_size: 100
+        flush_interval_ms: 900000
+        required_for_trading: true
+      "1h":
+        priority: 2
+        buffer_size: 24
+        flush_interval_ms: 3600000
+        required_for_ml: true
+      "4h":
+        priority: 3
+        buffer_size: 6
+        flush_interval_ms: 14400000
+        required_for_ml: true
+      "1d":
+        priority: 3
+        buffer_size: 1
+        flush_interval_ms: 86400000
+        required_for_ml: true
+    # Nueva configuración de almacenamiento por símbolo
+    storage_format: "sqlite"  # sqlite, csv, parquet
+    storage_structure: "symbol_based"  # symbol_based, unified
+    database_per_symbol: true  # Una DB por símbolo y timeframe
+    compression_enabled: true  # Compresión de datos antiguos
+    compression_days: 180  # Comprimir datos más antiguos que 30 días
   storage:
-    timescaledb_enabled: true
+    timescaledb_enabled: false  # Deshabilitado para usar SQLite por símbolo
     redis_cache_enabled: true
-    parquet_files: true
+    parquet_files: false  # Usar SQLite en su lugar
     retention_days: 365
+    # Configuración de migración
+    migration:
+      enabled: true  # Migrar datos del sistema legacy
+      auto_migrate: true  # Migración automática al inicio
+      backup_legacy: true  # Hacer backup del sistema legacy
 
 security:
   encryption:

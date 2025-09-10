@@ -18,7 +18,7 @@ import time
 from collections import defaultdict
 
 # Imports del proyecto
-from core.config.config_loader import ConfigLoader
+from config.config_loader import ConfigLoader
 from core.data.database import db_manager
 from core.data.preprocessor import data_preprocessor
 from core.ml.legacy.prediction_engine import prediction_engine

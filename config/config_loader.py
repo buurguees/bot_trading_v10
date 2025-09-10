@@ -12,7 +12,7 @@ from typing import Dict, Any, List
 class ConfigLoader:
     """Cargador de configuración simple"""
     
-    def __init__(self, config_path: str = "src/core/config/user_settings.yaml"):
+    def __init__(self, config_path: str = "config/user_settings.yaml"):
         self.config_path = config_path
         self._config = None
     
@@ -52,7 +52,7 @@ class ConfigLoader:
         
         if not symbols:
             # Fallback final: símbolos por defecto
-            symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOGEUSDT']
+            symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOGEUSDT', 'AVAXUSDT', 'TONUSDT', 'XRPUSDT', 'LINKUSDT']
         
         return symbols
     

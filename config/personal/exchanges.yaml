@@ -56,7 +56,6 @@ arbitrage:
     - DOGEUSDT
     - AVAXUSDT
     - TONUSDT
-    - BNBUSDT
     - XRPUSDT
     - LINKUSDT
   
@@ -82,7 +81,6 @@ latency:
     - DOGEUSDT
     - AVAXUSDT
     - TONUSDT
-    - BNBUSDT
     - XRPUSDT
     - LINKUSDT
   

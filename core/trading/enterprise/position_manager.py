@@ -25,7 +25,7 @@ import pandas as pd
 from enum import Enum
 
 # Imports del proyecto
-from trading.enterprise.position import Position
+from .position import Position
 
 logger = logging.getLogger(__name__)
 

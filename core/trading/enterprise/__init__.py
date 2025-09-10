@@ -18,8 +18,8 @@ Autor: Bot Trading v10 Enterprise
 Versión: 1.0.0
 """
 
-from .futures_engine import FuturesEngine
-from .signal_generator import SignalGenerator
+from .futures_engine import EnterpriseFuturesEngine as FuturesEngine
+from .signal_generator import MLSignalGenerator as SignalGenerator
 from .position_manager import PositionManager
 from .order_executor import OrderExecutor
 from .leverage_calculator import LeverageCalculator

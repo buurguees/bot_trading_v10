@@ -15,6 +15,9 @@ from enum import Enum
 import hashlib
 import json
 
+from .symbol_database_manager import symbol_db_manager
+from .historical_data_adapter import get_historical_data
+
 logger = logging.getLogger(__name__)
 
 class TimeframeType(Enum):
@@ -38,9 +41,9 @@ class AlignmentConfig:
     
     def __post_init__(self):
         if self.timeframes is None:
-            self.timeframes = ['5m', '15m', '1h', '4h', '1d']
+            self.timeframes = ['1m', '5m', '15m', '1h', '4h', '1d']
         if self.required_symbols is None:
-            self.required_symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+            self.required_symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOGEUSDT', 'AVAXUSDT', 'TONUSDT', 'XRPUSDT', 'LINKUSDT']
         if self.alignment_tolerance is None:
             self.alignment_tolerance = timedelta(minutes=1)
 
@@ -66,6 +69,7 @@ class TemporalAlignment:
         
         # Mapeo de timeframes a minutos
         self.timeframe_minutes = {
+            '1m': 1,
             '5m': 5,
             '15m': 15,
             '1h': 60,
@@ -75,6 +79,7 @@ class TemporalAlignment:
         
         # Reglas de agregación
         self.aggregation_rules = {
+            '5m': {'from': '1m', 'periods': 5},
             '15m': {'from': '5m', 'periods': 3},
             '1h': {'from': '15m', 'periods': 4},
             '4h': {'from': '1h', 'periods': 4},
@@ -159,8 +164,11 @@ class TemporalAlignment:
                 # Reindexar a la línea de tiempo maestra
                 df_aligned = df.reindex(master_timeline, method='ffill')
                 
+                # Eliminar filas con valores NaN (especialmente al principio)
+                df_aligned = df_aligned.dropna()
+                
                 # Validar que tenemos datos suficientes
-                data_coverage = df_aligned.notna().sum() / len(df_aligned)
+                data_coverage = df_aligned.notna().sum().sum() / (len(df_aligned) * len(df_aligned.columns))
                 if data_coverage < self.config.min_data_coverage:
                     self.logger.warning(f"Low data coverage for {symbol}: {data_coverage:.2%}")
                 

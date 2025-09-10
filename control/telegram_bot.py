@@ -39,6 +39,7 @@ from cryptography.fernet import Fernet
 
 # Imports locales
 from .handlers import Handlers
+from config.unified_config import unified_config
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +129,13 @@ class TelegramBot:
             # Crear aplicación
             self.application = Application.builder().token(self.bot_token).build()
             
+            # Eliminar webhook existente para evitar conflictos
+            try:
+                await self.application.bot.delete_webhook(drop_pending_updates=True)
+                logger.info("✅ Webhook eliminado correctamente")
+            except Exception as e:
+                logger.warning(f"⚠️ No se pudo eliminar webhook: {e}")
+            
             # Agregar handlers
             self._setup_handlers()
             
@@ -176,6 +184,15 @@ class TelegramBot:
         self.application.add_handler(CommandHandler("stop_trading", self.handlers.stop_trading_command))
         self.application.add_handler(CommandHandler("set_mode", self.handlers.set_mode_command))
         self.application.add_handler(CommandHandler("set_symbols", self.handlers.set_symbols_command))
+        
+        # Comandos de datos históricos
+        self.application.add_handler(CommandHandler("verify_historical_data", self.handlers.verify_historical_data_command))
+        self.application.add_handler(CommandHandler("download_historical_data", self.handlers.download_historical_data_command))
+        self.application.add_handler(CommandHandler("historical_data_report", self.handlers.historical_data_report_command))
+        # Nuevos comandos de datos
+        self.application.add_handler(CommandHandler("verify_align", self.handlers.verify_align_command))
+        self.application.add_handler(CommandHandler("sync_symbols", self.handlers.sync_symbols_command))
+        
         self.application.add_handler(CommandHandler("shutdown", self.handlers.shutdown_command))
         
         # Comandos de Agentes y ML
@@ -218,6 +235,11 @@ class TelegramBot:
         
         # Comandos de Configuración Adicional
         self.application.add_handler(CommandHandler("set_leverage", self.handlers.set_leverage_command))
+        
+        # Comandos adicionales de comandos_telegram.md
+        self.application.add_handler(CommandHandler("reload_config", self.handlers.reload_config_command))
+        self.application.add_handler(CommandHandler("reset_agent", self.handlers.reset_agent_command))
+        self.application.add_handler(CommandHandler("strategies", self.handlers.strategies_command))
         
         # Handler para mensajes de texto
         self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handlers.echo_command))

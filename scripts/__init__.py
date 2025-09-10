@@ -14,11 +14,11 @@ Submódulos:
 - maintenance: Scripts de mantenimiento
 """
 
-from .history import *
+# from .history import *  # Movido a _old/
 from .trading import *
 from .training import *
 from .deployment import *
-from .maintenance import *
+# from .maintenance import *  # Movido a _old/
 
 __version__ = '1.0.0'
 __author__ = 'Bot Trading v10 Enterprise'

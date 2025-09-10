@@ -34,7 +34,7 @@ from prometheus_client.core import CollectorRegistry
 
 from core.trading.enterprise.futures_engine import EnterpriseFuturesEngine
 from core.trading.bitget_client import bitget_client
-from core.config.config_loader import ConfigLoader
+from config.config_loader import ConfigLoader
 
 # Configurar logging
 logger = logging.getLogger(__name__)

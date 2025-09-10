@@ -36,7 +36,8 @@ class TelegramSecurity:
             'start', 'help', 'status', 'metrics', 'positions', 'balance', 'health',
             'train', 'stop_training', 'trade', 'stop_trading', 'set_mode', 
             'set_symbols', 'shutdown', 'start_trading', 'stop_trading', 
-            'emergency_stop', 'settings'
+            'emergency_stop', 'settings', 'verify_historical_data', 
+            'download_historical_data', 'historical_data_report'
         }
         self.critical_commands = {
             'trade', 'shutdown', 'emergency_stop', 'start_trading'
@@ -384,6 +385,70 @@ class TelegramSecurity:
             
         except Exception as e:
             logger.error(f"❌ Error limpiando datos antiguos: {e}")
+    
+    # ===== MÉTODOS ESPECÍFICOS PARA ENTRENAMIENTO =====
+    
+    def audit_training_cycle(self, cycle: int, symbol: str, status: str, chat_id: str, success: bool = True):
+        """Audita un ciclo específico de entrenamiento"""
+        try:
+            command = f"train_hist_cycle_{cycle}_{symbol}"
+            self.audit_command(command, chat_id, success)
+            
+            # Log específico para ciclos de entrenamiento
+            logger.info(
+                f"🔍 Ciclo de entrenamiento auditado: "
+                f"Ciclo {cycle} | Símbolo: {symbol} | Estado: {status} | "
+                f"Chat: {chat_id} | Success: {success}"
+            )
+            
+        except Exception as e:
+            logger.error(f"❌ Error auditando ciclo de entrenamiento: {e}")
+    
+    def audit_training_update(self, cycle: int, symbol: str, progress: int, chat_id: str):
+        """Audita una actualización de progreso de entrenamiento"""
+        try:
+            command = f"train_hist_update_cycle_{cycle}_{symbol}_{progress}%"
+            self.audit_command(command, chat_id, True)
+            
+            # Log de actualización (menos verboso)
+            if progress % 50 == 0:  # Solo log cada 50%
+                logger.info(
+                    f"📊 Actualización de entrenamiento: "
+                    f"Ciclo {cycle} | {symbol} | Progreso: {progress}%"
+                )
+            
+        except Exception as e:
+            logger.error(f"❌ Error auditando actualización de entrenamiento: {e}")
+    
+    def get_training_audit_summary(self, chat_id: str, hours: int = 24) -> Dict[str, Any]:
+        """Obtiene resumen de auditoría de entrenamiento"""
+        try:
+            cutoff_time = datetime.now() - timedelta(hours=hours)
+            
+            training_commands = [
+                cmd for cmd in self.audit_log
+                if (cmd['chat_id'] == chat_id and 
+                    cmd['command'].startswith('train_hist') and
+                    datetime.fromisoformat(cmd['timestamp']) > cutoff_time)
+            ]
+            
+            cycles_completed = len([cmd for cmd in training_commands if 'cycle_' in cmd['command'] and cmd['success']])
+            updates_sent = len([cmd for cmd in training_commands if 'update' in cmd['command']])
+            errors = len([cmd for cmd in training_commands if not cmd['success']])
+            
+            return {
+                'chat_id': chat_id,
+                'period_hours': hours,
+                'cycles_completed': cycles_completed,
+                'updates_sent': updates_sent,
+                'errors': errors,
+                'total_commands': len(training_commands),
+                'last_activity': max([cmd['timestamp'] for cmd in training_commands]) if training_commands else None
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error obteniendo resumen de auditoría de entrenamiento: {e}")
+            return {}
 
 # Instancia global
 telegram_security = TelegramSecurity()

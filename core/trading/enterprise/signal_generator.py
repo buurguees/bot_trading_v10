@@ -32,7 +32,7 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 
 # Imports del proyecto
-from trading.enterprise.trading_signal import TradingSignal, SignalType, SignalStrength
+from .trading_signal import TradingSignal, SignalType, SignalStrength
 
 logger = logging.getLogger(__name__)
 

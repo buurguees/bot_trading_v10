@@ -28,7 +28,7 @@ import ccxt.async_support as ccxt
 import os
 from urllib.parse import urlencode
 
-from core.config.config_loader import user_config
+from config.unified_config import unified_config
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class BitgetClient:
     """Cliente de Bitget para trading y datos de mercado enterprise"""
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        self.config = config or user_config.get_value(['trading'], {})
+        self.config = config or unified_config.get('trading', {})
         
         # Configuración de API
         self.api_key = os.getenv('BITGET_API_KEY')

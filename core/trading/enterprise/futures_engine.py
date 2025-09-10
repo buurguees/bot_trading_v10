@@ -36,15 +36,14 @@ from dataclasses import dataclass, asdict
 from prometheus_client import Counter, Gauge, Histogram, start_http_server
 
 # Imports del proyecto
-sys.path.append(str(Path(__file__).parent.parent.parent))
-from trading.enterprise.trading_signal import TradingSignal, SignalType, SignalStrength
-from trading.enterprise.position import Position
-from trading.enterprise.signal_generator import MLSignalGenerator
-from trading.enterprise.position_manager import PositionManager
-from trading.enterprise.order_executor import OrderExecutor
-from trading.enterprise.leverage_calculator import LeverageCalculator
-from trading.enterprise.market_analyzer import MarketAnalyzer
-from data.enterprise.stream_collector import EnterpriseDataCollector
+from .trading_signal import TradingSignal, SignalType, SignalStrength
+from .position import Position
+from .signal_generator import MLSignalGenerator
+from .position_manager import PositionManager
+from .order_executor import OrderExecutor
+from .leverage_calculator import LeverageCalculator
+from .market_analyzer import MarketAnalyzer
+from core.data.enterprise.stream_collector import EnterpriseDataCollector
 from config.enterprise_config import EnterpriseConfigManager
 
 logger = logging.getLogger(__name__)

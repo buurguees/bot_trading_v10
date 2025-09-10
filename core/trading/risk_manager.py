@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from datetime import datetime, date
 from decimal import Decimal, ROUND_DOWN, ROUND_HALF_UP, getcontext
 
-from core.config.config_loader import user_config
+from config.config_loader import user_config
 from core.data.database import db_manager
 
 logger = logging.getLogger(__name__)

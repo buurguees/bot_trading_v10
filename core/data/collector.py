@@ -37,7 +37,7 @@ import threading
 from itertools import chain
 
 from .database import db_manager, MarketData
-from core.config.config_loader import user_config
+from config.config_loader import user_config
 
 logger = logging.getLogger(__name__)
 
@@ -281,6 +281,11 @@ class BitgetDataCollector:
         self.chunk_size = 1000
         self.concurrent_downloads = 3
         
+        # Configuración de tiempo real
+        self.real_time_tasks = {}
+        self.stop_collection = False
+        self.websocket_connections = {}
+        
         logger.info("BitgetDataCollector inicializado con configuración robusta")
     
     def _load_credentials(self) -> BitgetCredentials:
@@ -519,14 +524,13 @@ class BitgetDataCollector:
             logger.debug(f"Descargando chunk: {symbol} {timeframe} "
                         f"{start_date.strftime('%Y-%m-%d')} a {end_date.strftime('%Y-%m-%d')}")
             
-            # Usar fetch_ohlcv con parámetros optimizados
+            # Usar fetch_ohlcv con parámetros optimizados para Bitget
             ohlcv = await self._exponential_backoff_retry(
                 self.exchange.fetch_ohlcv,
                 ccxt_symbol,
                 timeframe,
                 since,
-                self.chunk_size,
-                params={'until': until}
+                self.chunk_size
             )
             
             if not ohlcv:
@@ -560,8 +564,21 @@ class BitgetDataCollector:
             
             df = df.loc[valid_rows]
             
-            # Filtrar por rango de fechas
-            df = df[(df.index >= start_date) & (df.index <= end_date)]
+            # Filtrar por rango de fechas (convertir ambos a datetime64[ns] para comparación)
+            start_date_tz = pd.to_datetime(start_date).tz_localize('UTC') if start_date.tzinfo is None else pd.to_datetime(start_date)
+            end_date_tz = pd.to_datetime(end_date).tz_localize('UTC') if end_date.tzinfo is None else pd.to_datetime(end_date)
+            
+            # Convertir a Timestamp para comparación compatible
+            start_date_ts = pd.Timestamp(start_date_tz)
+            end_date_ts = pd.Timestamp(end_date_tz)
+            
+            # Asegurar que el índice del DataFrame tenga la misma zona horaria
+            if df.index.tz is None:
+                df.index = df.index.tz_localize('UTC')
+            elif start_date_ts.tz is not None:
+                df.index = df.index.tz_convert('UTC')
+            
+            df = df[(df.index >= start_date_ts) & (df.index <= end_date_ts)]
             
             # Actualizar progreso
             progress.downloaded_periods += 1
@@ -833,8 +850,7 @@ class BitgetDataCollector:
     def _get_symbols_from_config(self) -> List[str]:
         """Obtiene símbolos desde la configuración del usuario"""
         try:
-            bot_settings = user_config.get_value(['bot_settings'], {})
-            symbols = bot_settings.get('main_symbols', ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT'])
+            symbols = user_config.get_symbols()
             return [self._normalize_symbol(symbol) for symbol in symbols]
         except Exception as e:
             logger.error(f"Error obteniendo símbolos de configuración: {e}")
@@ -863,6 +879,150 @@ class BitgetDataCollector:
         self.running = False
         if self.websocket:
             asyncio.create_task(self.websocket.close())
+    
+    # ===== MÉTODOS DE TIEMPO REAL =====
+    
+    async def fetch_real_time_data(self, symbol: str, timeframe: str, data_type: str = "kline") -> Optional[Dict]:
+        """Recolecta datos en tiempo real desde Bitget (WebSocket o REST)."""
+        try:
+            if not self.exchange:
+                logger.error("❌ Exchange no inicializado")
+                return None
+            
+            if data_type == "kline":
+                # Usar WebSocket para klines en tiempo real
+                uri = "wss://ws.bitget.com/spot/v1/stream"
+                async with websockets.connect(uri) as websocket:
+                    # Suscribirse al canal
+                    subscribe_msg = {
+                        "op": "subscribe",
+                        "args": [f"market.{symbol.lower()}.kline.{timeframe}"]
+                    }
+                    await websocket.send(json.dumps(subscribe_msg))
+                    logger.debug(f"📡 Suscrito a {symbol} {timeframe} kline")
+                    
+                    # Escuchar un mensaje (para tiempo real, en producción sería un loop continuo)
+                    message = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+                    data = json.loads(message)
+                    
+                    if data.get("event") == "subscribe":
+                        logger.debug("Suscripción confirmada")
+                        return self._parse_kline_data(data)
+                    
+                    return self._parse_kline_data(data)
+            
+            elif data_type == "ticker":
+                # Usar REST API para ticker
+                ticker = await self.exchange.fetch_ticker(symbol)
+                return {
+                    "timestamp": ticker["timestamp"] / 1000,
+                    "last": ticker["last"],
+                    "symbol": symbol,
+                    "timeframe": timeframe,
+                    "data_type": data_type
+                }
+            
+            elif data_type == "orderbook":
+                # Usar REST API para orderbook
+                orderbook = await self.exchange.fetch_order_book(symbol)
+                return {
+                    "timestamp": orderbook["timestamp"] / 1000,
+                    "bids": orderbook["bids"],
+                    "asks": orderbook["asks"],
+                    "symbol": symbol,
+                    "timeframe": timeframe,
+                    "data_type": data_type
+                }
+            
+            else:
+                logger.warning(f"⚠️ Tipo de dato no soportado: {data_type}")
+                return None
+                
+        except asyncio.TimeoutError:
+            logger.warning(f"⚠️ Timeout en recolección de {symbol} ({timeframe})")
+            return None
+        except Exception as e:
+            logger.error(f"❌ Error fetching real-time data for {symbol} ({timeframe}): {e}")
+            return None
+    
+    def _parse_kline_data(self, data: Dict) -> Dict:
+        """Parsea datos de kline de WebSocket."""
+        try:
+            kline_data = data.get("data", [{}])[0]
+            return {
+                "timestamp": TimestampManager.normalize_timestamp(kline_data.get("t")),
+                "open": float(kline_data.get("o", 0)),
+                "high": float(kline_data.get("h", 0)),
+                "low": float(kline_data.get("l", 0)),
+                "close": float(kline_data.get("c", 0)),
+                "volume": float(kline_data.get("v", 0)),
+                "symbol": kline_data.get("s", ""),
+                "timeframe": kline_data.get("k", ""),
+                "data_type": "kline"
+            }
+        except Exception as e:
+            logger.error(f"❌ Error parsing kline data: {e}")
+            return {}
+    
+    async def start_real_time_collection(self, symbols: List[str], timeframes: List[str], 
+                                       data_types: List[str] = ["kline"], 
+                                       interval_seconds: int = 60) -> None:
+        """Inicia la recolección en tiempo real para múltiples símbolos."""
+        try:
+            logger.info(f"🚀 Iniciando recolección en tiempo real para símbolos: {symbols}")
+            self.stop_collection = False
+            
+            while not self.stop_collection:
+                tasks = []
+                for symbol in symbols:
+                    for timeframe in timeframes:
+                        for data_type in data_types:
+                            task = asyncio.create_task(
+                                self._collect_single_real_time(symbol, timeframe, data_type)
+                            )
+                            tasks.append(task)
+                
+                # Ejecutar todas las tareas en paralelo
+                if tasks:
+                    await asyncio.gather(*tasks, return_exceptions=True)
+                
+                # Esperar antes de la siguiente iteración
+                await asyncio.sleep(interval_seconds)
+                
+        except Exception as e:
+            logger.error(f"❌ Error en recolección en tiempo real: {e}")
+            raise
+    
+    async def _collect_single_real_time(self, symbol: str, timeframe: str, data_type: str) -> None:
+        """Recolecta datos para un símbolo/timeframe específico."""
+        try:
+            logger.debug(f"📥 Recolectando {data_type} para {symbol} ({timeframe})...")
+            
+            # Obtener datos en tiempo real
+            data = await self.fetch_real_time_data(symbol, timeframe, data_type)
+            if data:
+                # Crear directorio si no existe
+                from pathlib import Path
+                Path(f"data/{symbol}").mkdir(parents=True, exist_ok=True)
+                
+                # Guardar en la base de datos por símbolo
+                db_path = f"data/{symbol}/{symbol}_{timeframe}.db"
+                success = db_manager.store_real_time_data(data, symbol, timeframe, db_path)
+                if success:
+                    logger.debug(f"✅ Datos guardados para {symbol} ({timeframe}) en {db_path}")
+                else:
+                    logger.warning(f"⚠️ Error al guardar datos para {symbol} ({timeframe})")
+            else:
+                logger.warning(f"⚠️ No se recibieron datos para {symbol} ({timeframe})")
+                
+        except Exception as e:
+            logger.error(f"❌ Error recolectando datos para {symbol} ({timeframe}): {e}")
+            await asyncio.sleep(5)  # Espera breve antes de reintentar
+    
+    def stop_real_time_collection(self) -> None:
+        """Detiene la recolección en tiempo real."""
+        self.stop_collection = True
+        logger.info("🛑 Deteniendo recolección en tiempo real...")
 
 # Instancia global del recolector
 data_collector = BitgetDataCollector()
@@ -922,8 +1082,10 @@ async def collect_and_save_historical_data(
 async def download_extensive_historical_data(
     symbols: List[str] = None, 
     years: int = 5, 
-    timeframes: List[str] = None
-) -> Dict[str, Dict[str, int]]:
+    timeframes: List[str] = None,
+    start_date: datetime = None,
+    end_date: datetime = None
+) -> Dict[str, Any]:
     """
     Descarga datos históricos extensos para múltiples símbolos y timeframes
     
@@ -931,9 +1093,11 @@ async def download_extensive_historical_data(
         symbols: Lista de símbolos a descargar
         years: Años de datos históricos
         timeframes: Lista de timeframes
+        start_date: Fecha de inicio específica (opcional)
+        end_date: Fecha de fin específica (opcional)
     
     Returns:
-        Diccionario anidado con resultados por símbolo y timeframe
+        Diccionario con datos descargados y metadatos
     """
     try:
         if symbols is None:
@@ -942,6 +1106,50 @@ async def download_extensive_historical_data(
         if timeframes is None:
             timeframes = ['1h', '4h', '1d']
         
+        # Si se proporcionan fechas específicas, usar descarga por rango
+        if start_date and end_date:
+            logger.info(f"🚀 Descarga por rango de fechas:")
+            logger.info(f"   Símbolos: {len(symbols)} ({', '.join(symbols)})")
+            logger.info(f"   Timeframes: {len(timeframes)} ({', '.join(timeframes)})")
+            logger.info(f"   Período: {start_date} a {end_date}")
+            
+            all_data = {}
+            for symbol in symbols:
+                all_data[symbol] = {}
+                for timeframe in timeframes:
+                    try:
+                        logger.info(f"📊 Descargando {symbol} - {timeframe} desde {start_date} a {end_date}")
+                        
+                        # Calcular días hacia atrás
+                        days_back = (end_date - start_date).days
+                        
+                        # Descargar datos para el rango específico
+                        df = await data_collector.fetch_historical_data_chunk(
+                            symbol, timeframe, start_date, end_date, 
+                            DownloadProgress(symbol=symbol, total_periods=1)
+                        )
+                        
+                        if not df.empty:
+                            all_data[symbol][timeframe] = df
+                            logger.info(f"✅ {symbol} {timeframe}: {len(df)} registros")
+                        else:
+                            logger.warning(f"⚠️ No se obtuvieron datos para {symbol} {timeframe}")
+                            all_data[symbol][timeframe] = pd.DataFrame()
+                        
+                        await asyncio.sleep(1)  # Pausa entre descargas
+                        
+                    except Exception as e:
+                        logger.error(f"❌ Error descargando {symbol} {timeframe}: {e}")
+                        all_data[symbol][timeframe] = pd.DataFrame()
+            
+            return {
+                'status': 'success',
+                'data': all_data,
+                'total_records': sum(len(df) for symbol_data in all_data.values() 
+                                   for df in symbol_data.values() if isinstance(df, pd.DataFrame))
+            }
+        
+        # Lógica original para descarga masiva por años
         logger.info(f"🚀 Descarga masiva iniciada:")
         logger.info(f"   Símbolos: {len(symbols)} ({', '.join(symbols)})")
         logger.info(f"   Timeframes: {len(timeframes)} ({', '.join(timeframes)})")
@@ -980,7 +1188,7 @@ async def download_extensive_historical_data(
                     results[symbol][timeframe] = 0
                     completed_downloads += 1
         
-        # Resumen final
+        # Resumen final para descarga masiva
         total_records = 0
         for symbol_results in results.values():
             for timeframe_count in symbol_results.values():
@@ -993,11 +1201,19 @@ async def download_extensive_historical_data(
         logger.info(f"   Total de registros: {total_records:,}")
         logger.info(f"   Descargas exitosas: {completed_downloads}/{total_downloads}")
         
-        return results
+        return {
+            'status': 'success',
+            'results': results,
+            'total_records': total_records
+        }
         
     except Exception as e:
         logger.error(f"❌ Error en descarga masiva: {e}")
-        return {}
+        return {
+            'status': 'error',
+            'message': str(e),
+            'data': None
+        }
 
 async def download_missing_data(
     symbols: List[str] = None, 
@@ -1270,11 +1486,10 @@ async def download_coordinated_multi_timeframe(
                 chunk_days = calculate_optimal_chunk_size_by_timeframe(timeframe)
                 
                 # Descargar datos para este timeframe
-                tf_results = await download_extensive_historical_data_chunked(
+                tf_results = await download_extensive_historical_data(
                     symbols=symbols,
-                    timeframe=timeframe,
-                    days_back=days_back,
-                    chunk_days=chunk_days
+                    timeframes=[timeframe],
+                    years=days_back/365.25
                 )
                 
                 if tf_results['success']:
@@ -1567,9 +1782,25 @@ async def quick_download_multi_timeframe(
     days_back: int = 365
 ) -> Dict[str, Any]:
     """Función de conveniencia para descarga multi-timeframe rápida"""
-    if symbols is None:
-        symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
-    if timeframes is None:
-        timeframes = ['5m', '15m', '1h', '4h', '1d']
-    
+    # Cargar desde user_settings.yaml si no se pasan parámetros
+    if symbols is None or timeframes is None:
+        try:
+            from config.unified_config import unified_config
+            from config.config_loader import user_config as _user_config
+            # Símbolos habilitados
+            if symbols is None:
+                symbols_cfg = _user_config.get_value(['multi_symbol_settings', 'symbols'], {})
+                symbols = [sym for sym, cfg in symbols_cfg.items() if cfg.get('enabled', True)] or []
+            # Timeframes históricos
+            if timeframes is None:
+                hist_cfg = unified_config.get('data_collection', {}).get('historical', {})
+                timeframes = hist_cfg.get('timeframes', ['1m', '5m', '15m', '1h', '4h', '1d'])
+        except Exception:
+            # Fallback seguro
+            symbols = symbols or ['BTCUSDT']
+            timeframes = timeframes or ['1h']
+
     return await download_multi_timeframe_with_alignment(symbols, timeframes, days_back)
+
+# Alias para compatibilidad con bot.py
+DataCollector = BitgetDataCollector
