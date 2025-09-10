@@ -913,7 +913,10 @@ class BitgetDataCollector:
             
             elif data_type == "ticker":
                 # Usar REST API para ticker
-                ticker = await self.exchange.fetch_ticker(symbol)
+                ticker = await self._rate_limited_request(
+                    self.exchange.fetch_ticker, 
+                    self._symbol_to_ccxt_format(symbol)
+                )
                 return {
                     "timestamp": ticker["timestamp"] / 1000,
                     "last": ticker["last"],
@@ -924,7 +927,10 @@ class BitgetDataCollector:
             
             elif data_type == "orderbook":
                 # Usar REST API para orderbook
-                orderbook = await self.exchange.fetch_order_book(symbol)
+                orderbook = await self._rate_limited_request(
+                    self.exchange.fetch_order_book, 
+                    self._symbol_to_ccxt_format(symbol)
+                )
                 return {
                     "timestamp": orderbook["timestamp"] / 1000,
                     "bids": orderbook["bids"],
