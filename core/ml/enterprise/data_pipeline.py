@@ -7,15 +7,15 @@ Enterprise Data Pipeline - Sistema de Pipelines de Datos Escalables
 Sistema enterprise-grade para procesamiento de datos de trading con:
 - Pipelines escalables con Dask
 - Procesamiento distribuido
-- Caching inteligente
+- Caching inteligente (disco + Redis)
 - Validación de datos
-- ETL optimizado
-- Soporte para big data
+- ETL optimizado con indicadores trading (Volatility, Bollinger Bands, ATR)
+- Soporte para streaming en tiempo real (Kafka)
+- Auditoría detallada por símbolo
 
 Uso:
-    from models.enterprise.data_pipeline import EnterpriseDataPipeline
-    
-    pipeline = EnterpriseDataPipeline()
+    from core.ml.enterprise.data_pipeline import EnterpriseDataPipeline
+    pipeline = EnterpriseDataPipeline(config)
     processed_data = await pipeline.process_trading_data(data_config)
 """
 
@@ -36,566 +36,347 @@ import dask.dataframe as dd
 from dask.distributed import Client, LocalCluster
 from dask.diagnostics import ProgressBar
 import dask.array as da
-
-# MLflow para versionado de datos
 import mlflow
 import mlflow.data
+import redis
+from kafka import KafkaConsumer, KafkaProducer
+from core.data.historical_data_adapter import get_historical_data
 
-# Configurar logging
 logger = logging.getLogger(__name__)
 
 @dataclass
 class DataPipelineConfig:
     """Configuración del pipeline de datos"""
-    # Dask
     n_workers: int = 4
     threads_per_worker: int = 2
     memory_limit: str = "2GB"
-    cluster_type: str = "local"  # local, distributed
-    
-    # Procesamiento
+    cluster_type: str = "local"
     chunk_size: int = 10000
-    npartitions: int = None  # Auto si es None
+    npartitions: int = None
     memory_efficient: bool = True
-    
-    # Caching
     enable_caching: bool = True
     cache_dir: str = "cache/data_pipeline"
-    cache_ttl: int = 3600  # segundos
-    
-    # Validación
+    cache_ttl: int = 3600
     enable_validation: bool = True
     validation_rules: Dict[str, Any] = None
-    
-    # ETL
     enable_etl: bool = True
     etl_steps: List[str] = None
-    
-    # Logging
     log_level: str = "INFO"
     log_file: str = "logs/data_pipeline.log"
+    enable_streaming: bool = False
+    kafka_bootstrap_servers: List[str] = ["localhost:9092"]
+    kafka_topic: str = "trading_data"
+    redis_url: str = "redis://localhost:6379"
 
 class DataValidator:
     """Validador de datos enterprise"""
-    
     def __init__(self, rules: Dict[str, Any] = None):
-        self.rules = rules or self._get_default_rules()
-        self.logger = logging.getLogger(__name__)
-    
-    def _get_default_rules(self) -> Dict[str, Any]:
-        """Reglas de validación por defecto"""
-        return {
-            "required_columns": ["open", "high", "low", "close", "volume"],
-            "numeric_columns": ["open", "high", "low", "close", "volume"],
+        self.rules = rules or {
             "positive_columns": ["open", "high", "low", "close", "volume"],
-            "ohlc_consistency": True,
-            "volume_positive": True,
-            "no_duplicates": True,
-            "time_series_order": True
+            "max_gap_minutes": 60,
+            "outlier_threshold": 3.0
         }
-    
-    def validate_dataframe(self, df: pd.DataFrame) -> Dict[str, Any]:
-        """Valida un DataFrame de trading"""
-        results = {
-            "is_valid": True,
-            "errors": [],
-            "warnings": [],
-            "stats": {}
-        }
-        
-        try:
-            # Verificar columnas requeridas
-            missing_cols = set(self.rules["required_columns"]) - set(df.columns)
-            if missing_cols:
-                results["errors"].append(f"Columnas faltantes: {missing_cols}")
-                results["is_valid"] = False
-            
-            # Verificar tipos numéricos
-            for col in self.rules["numeric_columns"]:
-                if col in df.columns:
-                    if not pd.api.types.is_numeric_dtype(df[col]):
-                        results["errors"].append(f"Columna {col} no es numérica")
-                        results["is_valid"] = False
-            
-            # Verificar valores positivos
-            for col in self.rules["positive_columns"]:
-                if col in df.columns:
-                    negative_count = (df[col] <= 0).sum()
-                    if negative_count > 0:
-                        results["warnings"].append(f"Columna {col} tiene {negative_count} valores no positivos")
-            
-            # Verificar consistencia OHLC
-            if self.rules["ohlc_consistency"]:
-                ohlc_cols = ["open", "high", "low", "close"]
-                if all(col in df.columns for col in ohlc_cols):
-                    invalid_ohlc = (
-                        (df["high"] < df["low"]) |
-                        (df["high"] < df["open"]) |
-                        (df["high"] < df["close"]) |
-                        (df["low"] > df["open"]) |
-                        (df["low"] > df["close"])
-                    ).sum()
-                    
-                    if invalid_ohlc > 0:
-                        results["errors"].append(f"Consistencia OHLC: {invalid_ohlc} filas inválidas")
-                        results["is_valid"] = False
-            
-            # Verificar duplicados
-            if self.rules["no_duplicates"]:
-                duplicates = df.duplicated().sum()
-                if duplicates > 0:
-                    results["warnings"].append(f"Duplicados encontrados: {duplicates}")
-            
-            # Estadísticas
-            results["stats"] = {
-                "rows": len(df),
-                "columns": len(df.columns),
-                "memory_usage": df.memory_usage(deep=True).sum(),
-                "null_values": df.isnull().sum().to_dict()
-            }
-            
-        except Exception as e:
-            results["errors"].append(f"Error en validación: {str(e)}")
-            results["is_valid"] = False
-        
-        return results
+        self.logger = logging.getLogger(__name__)
 
-class DataETL:
-    """Sistema ETL para datos de trading"""
-    
+    def validate(self, data: dd.DataFrame) -> Tuple[bool, Dict[str, Any]]:
+        """Valida datos y retorna estado y reporte"""
+        try:
+            report = {}
+            # Validar columnas positivas
+            for col in self.rules.get("positive_columns", []):
+                if col in data.columns:
+                    invalid = data[data[col] <= 0][col].compute()
+                    report[f"invalid_{col}"] = len(invalid)
+                    data = data[data[col] > 0]
+
+            # Validar gaps temporales
+            if 'timestamp' in data.columns:
+                data['timestamp'] = dd.to_datetime(data['timestamp'], unit='s')
+                gaps = (data['timestamp'].diff().dt.total_seconds() / 60 > self.rules["max_gap_minutes"]).sum().compute()
+                report["gaps"] = gaps
+
+            # Validar outliers
+            for col in ['close', 'volume']:
+                if col in data.columns:
+                    z_scores = (data[col] - data[col].mean()) / data[col].std()
+                    outliers = (z_scores.abs() > self.rules["outlier_threshold"]).sum().compute()
+                    report[f"outliers_{col}"] = outliers
+                    data = data[z_scores.abs() <= self.rules["outlier_threshold"]]
+
+            return True, report
+        except Exception as e:
+            self.logger.error(f"Error en validación: {e}")
+            return False, {"error": str(e)}
+
+class EnterpriseDataPipeline:
+    """Pipeline de datos enterprise para trading"""
     def __init__(self, config: DataPipelineConfig):
         self.config = config
         self.logger = logging.getLogger(__name__)
-    
-    async def extract(self, source_config: Dict[str, Any]) -> dd.DataFrame:
-        """Extrae datos de fuentes"""
-        self.logger.info("Iniciando extracción de datos")
-        
-        source_type = source_config.get("type", "csv")
-        
-        if source_type == "csv":
-            return await self._extract_csv(source_config)
-        elif source_type == "database":
-            return await self._extract_database(source_config)
-        elif source_type == "api":
-            return await self._extract_api(source_config)
-        else:
-            raise ValueError(f"Tipo de fuente no soportado: {source_type}")
-    
-    async def _extract_csv(self, config: Dict[str, Any]) -> dd.DataFrame:
-        """Extrae datos de archivos CSV"""
-        file_path = config["file_path"]
-        
-        # Leer con Dask
-        df = dd.read_csv(
-            file_path,
-            parse_dates=config.get("parse_dates", []),
-            dtype=config.get("dtype", {}),
-            npartitions=self.config.npartitions
-        )
-        
-        self.logger.info(f"Datos CSV cargados: {len(df)} filas")
-        return df
-    
-    async def _extract_database(self, config: Dict[str, Any]) -> dd.DataFrame:
-        """Extrae datos de base de datos"""
-        # Implementar extracción de BD con Dask
-        # Por ahora, simular
-        self.logger.info("Extrayendo datos de base de datos...")
-        
-        # Simular datos
-        n_rows = config.get("n_rows", 10000)
-        data = {
-            "timestamp": pd.date_range("2020-01-01", periods=n_rows, freq="1H"),
-            "open": np.random.randn(n_rows) * 100 + 50000,
-            "high": np.random.randn(n_rows) * 100 + 50000,
-            "low": np.random.randn(n_rows) * 100 + 50000,
-            "close": np.random.randn(n_rows) * 100 + 50000,
-            "volume": np.random.randint(1000, 10000, n_rows)
-        }
-        
-        df = pd.DataFrame(data)
-        return dd.from_pandas(df, npartitions=self.config.npartitions)
-    
-    async def _extract_api(self, config: Dict[str, Any]) -> dd.DataFrame:
-        """Extrae datos de API"""
-        # Implementar extracción de API
-        self.logger.info("Extrayendo datos de API...")
-        
-        # Simular datos de API
-        n_rows = config.get("n_rows", 10000)
-        data = {
-            "timestamp": pd.date_range("2020-01-01", periods=n_rows, freq="1H"),
-            "open": np.random.randn(n_rows) * 100 + 50000,
-            "high": np.random.randn(n_rows) * 100 + 50000,
-            "low": np.random.randn(n_rows) * 100 + 50000,
-            "close": np.random.randn(n_rows) * 100 + 50000,
-            "volume": np.random.randint(1000, 10000, n_rows)
-        }
-        
-        df = pd.DataFrame(data)
-        return dd.from_pandas(df, npartitions=self.config.npartitions)
-    
-    async def transform(self, df: dd.DataFrame, transform_config: Dict[str, Any]) -> dd.DataFrame:
-        """Transforma los datos"""
-        self.logger.info("Iniciando transformación de datos")
-        
-        # Aplicar transformaciones
-        for step in transform_config.get("steps", []):
-            df = await self._apply_transform_step(df, step)
-        
-        return df
-    
-    async def _apply_transform_step(self, df: dd.DataFrame, step: Dict[str, Any]) -> dd.DataFrame:
-        """Aplica un paso de transformación"""
-        step_type = step["type"]
-        
-        if step_type == "filter":
-            return await self._filter_data(df, step)
-        elif step_type == "aggregate":
-            return await self._aggregate_data(df, step)
-        elif step_type == "feature_engineering":
-            return await self._engineer_features(df, step)
-        elif step_type == "normalize":
-            return await self._normalize_data(df, step)
-        else:
-            raise ValueError(f"Tipo de transformación no soportado: {step_type}")
-    
-    async def _filter_data(self, df: dd.DataFrame, step: Dict[str, Any]) -> dd.DataFrame:
-        """Filtra datos"""
-        conditions = step.get("conditions", {})
-        
-        for column, condition in conditions.items():
-            if column in df.columns:
-                if condition["operator"] == ">":
-                    df = df[df[column] > condition["value"]]
-                elif condition["operator"] == "<":
-                    df = df[df[column] < condition["value"]]
-                elif condition["operator"] == "==":
-                    df = df[df[column] == condition["value"]]
-        
-        return df
-    
-    async def _aggregate_data(self, df: dd.DataFrame, step: Dict[str, Any]) -> dd.DataFrame:
-        """Agrega datos"""
-        groupby = step.get("groupby", [])
-        agg_functions = step.get("agg_functions", {})
-        freq = step.get("freq", "1H")
-        
-        if "timestamp" in df.columns:
-            df = df.set_index("timestamp")
-            df = df.resample(freq).agg(agg_functions)
-            df = df.reset_index()
-        
-        return df
-    
-    async def _engineer_features(self, df: dd.DataFrame, step: Dict[str, Any]) -> dd.DataFrame:
-        """Ingeniería de características"""
-        features = step.get("features", [])
-        
-        for feature in features:
-            if feature["type"] == "sma":
-                df = self._add_sma(df, feature)
-            elif feature["type"] == "rsi":
-                df = self._add_rsi(df, feature)
-            elif feature["type"] == "macd":
-                df = self._add_macd(df, feature)
-        
-        return df
-    
-    def _add_sma(self, df: dd.DataFrame, feature: Dict[str, Any]) -> dd.DataFrame:
-        """Agrega media móvil simple"""
-        column = feature["column"]
-        window = feature["window"]
-        new_column = feature.get("new_column", f"{column}_sma_{window}")
-        
-        df[new_column] = df[column].rolling(window=window).mean()
-        return df
-    
-    def _add_rsi(self, df: dd.DataFrame, feature: Dict[str, Any]) -> dd.DataFrame:
-        """Agrega RSI"""
-        column = feature["column"]
-        window = feature["window"]
-        new_column = feature.get("new_column", f"{column}_rsi_{window}")
-        
-        # Calcular RSI
-        delta = df[column].diff()
-        gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-        loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-        rs = gain / loss
-        df[new_column] = 100 - (100 / (1 + rs))
-        
-        return df
-    
-    def _add_macd(self, df: dd.DataFrame, feature: Dict[str, Any]) -> dd.DataFrame:
-        """Agrega MACD"""
-        column = feature["column"]
-        fast = feature.get("fast", 12)
-        slow = feature.get("slow", 26)
-        signal = feature.get("signal", 9)
-        
-        ema_fast = df[column].ewm(span=fast).mean()
-        ema_slow = df[column].ewm(span=slow).mean()
-        
-        df[f"{column}_macd"] = ema_fast - ema_slow
-        df[f"{column}_macd_signal"] = df[f"{column}_macd"].ewm(span=signal).mean()
-        df[f"{column}_macd_histogram"] = df[f"{column}_macd"] - df[f"{column}_macd_signal"]
-        
-        return df
-    
-    async def _normalize_data(self, df: dd.DataFrame, step: Dict[str, Any]) -> dd.DataFrame:
-        """Normaliza datos"""
-        method = step.get("method", "zscore")
-        columns = step.get("columns", [])
-        
-        for column in columns:
-            if column in df.columns:
-                if method == "zscore":
-                    mean = df[column].mean()
-                    std = df[column].std()
-                    df[column] = (df[column] - mean) / std
-                elif method == "minmax":
-                    min_val = df[column].min()
-                    max_val = df[column].max()
-                    df[column] = (df[column] - min_val) / (max_val - min_val)
-        
-        return df
-    
-    async def load(self, df: dd.DataFrame, load_config: Dict[str, Any]) -> str:
-        """Carga datos procesados"""
-        self.logger.info("Cargando datos procesados")
-        
-        output_path = load_config.get("output_path", "processed_data.parquet")
-        
-        # Guardar como Parquet (formato eficiente)
-        df.to_parquet(output_path, engine="pyarrow")
-        
-        self.logger.info(f"Datos guardados en: {output_path}")
-        return output_path
-
-class DataCache:
-    """Sistema de cache para datos"""
-    
-    def __init__(self, cache_dir: str, ttl: int = 3600):
-        self.cache_dir = Path(cache_dir)
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.ttl = ttl
-        self.logger = logging.getLogger(__name__)
-    
-    def _get_cache_key(self, data_config: Dict[str, Any]) -> str:
-        """Genera clave de cache"""
-        config_str = json.dumps(data_config, sort_keys=True)
-        return hashlib.md5(config_str.encode()).hexdigest()
-    
-    def get(self, data_config: Dict[str, Any]) -> Optional[dd.DataFrame]:
-        """Obtiene datos del cache"""
-        cache_key = self._get_cache_key(data_config)
-        cache_file = self.cache_dir / f"{cache_key}.parquet"
-        metadata_file = self.cache_dir / f"{cache_key}.json"
-        
-        if not cache_file.exists() or not metadata_file.exists():
-            return None
-        
-        # Verificar TTL
-        try:
-            with open(metadata_file, 'r') as f:
-                metadata = json.load(f)
-            
-            cache_time = datetime.fromisoformat(metadata["timestamp"])
-            if (datetime.now() - cache_time).seconds > self.ttl:
-                self.logger.info("Cache expirado")
-                return None
-            
-            # Cargar datos
-            df = dd.read_parquet(cache_file)
-            self.logger.info(f"Datos cargados desde cache: {cache_key}")
-            return df
-            
-        except Exception as e:
-            self.logger.error(f"Error cargando cache: {e}")
-            return None
-    
-    def set(self, data_config: Dict[str, Any], df: dd.DataFrame):
-        """Guarda datos en cache"""
-        cache_key = self._get_cache_key(data_config)
-        cache_file = self.cache_dir / f"{cache_key}.parquet"
-        metadata_file = self.cache_dir / f"{cache_key}.json"
-        
-        try:
-            # Guardar datos
-            df.to_parquet(cache_file, engine="pyarrow")
-            
-            # Guardar metadata
-            metadata = {
-                "timestamp": datetime.now().isoformat(),
-                "config": data_config,
-                "rows": len(df),
-                "columns": list(df.columns)
-            }
-            
-            with open(metadata_file, 'w') as f:
-                json.dump(metadata, f)
-            
-            self.logger.info(f"Datos guardados en cache: {cache_key}")
-            
-        except Exception as e:
-            self.logger.error(f"Error guardando cache: {e}")
-
-class EnterpriseDataPipeline:
-    """Pipeline de datos enterprise"""
-    
-    def __init__(self, config: DataPipelineConfig = None):
-        self.config = config or DataPipelineConfig()
-        self.logger = logging.getLogger(__name__)
-        
-        # Componentes
-        self.validator = DataValidator(self.config.validation_rules)
-        self.etl = DataETL(self.config)
-        self.cache = DataCache(self.config.cache_dir, self.config.cache_ttl) if self.config.enable_caching else None
-        
-        # Cliente Dask
         self.client = None
-        
-        # Configurar logging
+        self.redis_client = None
+        self.kafka_producer = None
+        self.kafka_consumer = None
+        self._setup_logging()
+        if config.enable_streaming:
+            self._setup_kafka()
+        if config.redis_url:
+            self._setup_redis()
+
+    def _setup_logging(self):
+        """Configura logging"""
         logging.basicConfig(
+            filename=self.config.log_file,
             level=getattr(logging, self.config.log_level),
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(self.config.log_file),
-                logging.StreamHandler()
-            ]
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         )
-    
-    async def start(self):
-        """Inicia el pipeline"""
-        self.logger.info("Iniciando pipeline de datos enterprise")
-        
-        # Configurar Dask
-        if self.config.cluster_type == "local":
-            cluster = LocalCluster(
-                n_workers=self.config.n_workers,
-                threads_per_worker=self.config.threads_per_worker,
-                memory_limit=self.config.memory_limit
-            )
-            self.client = Client(cluster)
-        else:
-            self.client = Client()
-        
-        self.logger.info(f"Dask configurado: {self.client}")
-    
-    async def stop(self):
-        """Detiene el pipeline"""
-        if self.client:
-            self.client.close()
-        
-        self.logger.info("Pipeline de datos detenido")
-    
-    async def process_trading_data(
-        self, 
-        data_config: Dict[str, Any],
-        transform_config: Dict[str, Any] = None,
-        load_config: Dict[str, Any] = None
-    ) -> dd.DataFrame:
-        """Procesa datos de trading"""
-        
+
+    def _setup_kafka(self):
+        """Configura Kafka para streaming"""
         try:
-            # Verificar cache
-            if self.cache:
-                cached_data = self.cache.get(data_config)
-                if cached_data is not None:
-                    self.logger.info("Usando datos del cache")
-                    return cached_data
-            
-            # ETL Pipeline
-            with ProgressBar():
-                # Extract
-                df = await self.etl.extract(data_config)
-                
-                # Transform
-                if transform_config:
-                    df = await self.etl.transform(df, transform_config)
-                
-                # Validate
-                if self.config.enable_validation:
-                    validation_result = self.validator.validate_dataframe(df.compute())
-                    if not validation_result["is_valid"]:
-                        self.logger.error(f"Datos inválidos: {validation_result['errors']}")
-                        raise ValueError("Datos no pasaron validación")
-                    
-                    self.logger.info(f"Validación exitosa: {validation_result['stats']}")
-                
-                # Load
-                if load_config:
-                    output_path = await self.etl.load(df, load_config)
-                    self.logger.info(f"Datos guardados en: {output_path}")
-            
+            self.kafka_producer = KafkaProducer(
+                bootstrap_servers=self.config.kafka_bootstrap_servers,
+                value_serializer=lambda v: json.dumps(v).encode('utf-8')
+            )
+            self.kafka_consumer = KafkaConsumer(
+                self.config.kafka_topic,
+                bootstrap_servers=self.config.kafka_bootstrap_servers,
+                value_deserializer=lambda v: json.loads(v.decode('utf-8')),
+                auto_offset_reset='latest'
+            )
+            self.logger.info("Conexión a Kafka establecida")
+        except Exception as e:
+            self.logger.error(f"Error conectando a Kafka: {e}")
+            self.kafka_producer = None
+            self.kafka_consumer = None
+
+    def _setup_redis(self):
+        """Configura Redis para caching por símbolo"""
+        try:
+            self.redis_client = redis.Redis.from_url(self.config.redis_url)
+            self.logger.info("Conexión a Redis establecida para caching")
+        except Exception as e:
+            self.logger.error(f"Error conectando a Redis: {e}")
+            self.redis_client = None
+
+    async def start(self):
+        """Inicia el cluster Dask"""
+        try:
+            if self.config.cluster_type == "local":
+                self.client = Client(
+                    LocalCluster(
+                        n_workers=self.config.n_workers,
+                        threads_per_worker=self.config.threads_per_worker,
+                        memory_limit=self.config.memory_limit
+                    )
+                )
+            self.logger.info(f"Cluster Dask iniciado: {self.config.cluster_type}")
+        except Exception as e:
+            self.logger.error(f"Error iniciando Dask: {e}")
+
+    async def stop(self):
+        """Detiene el cluster Dask y cierra conexiones"""
+        try:
+            if self.client:
+                self.client.close()
+            if self.kafka_producer:
+                self.kafka_producer.close()
+            if self.kafka_consumer:
+                self.kafka_consumer.close()
+            if self.redis_client:
+                self.redis_client.close()
+            self.logger.info("Pipeline detenido")
+        except Exception as e:
+            self.logger.error(f"Error deteniendo pipeline: {e}")
+
+    async def process_trading_data(
+        self,
+        data_config: Dict[str, Any],
+        transform_config: Optional[Dict[str, Any]] = None
+    ) -> dd.DataFrame:
+        """Procesa datos de trading (históricos o en tiempo real)"""
+        try:
+            start_time = time.time()
+            symbol = data_config.get('symbol', 'BTCUSDT')
+            timeframe = data_config.get('timeframe', '1h')
+
+            # Verificar cache en Redis
+            if self.redis_client and self.config.enable_caching:
+                cache_key = f"pipeline_{symbol}_{timeframe}"
+                cached_data = self.redis_client.get(cache_key)
+                if cached_data:
+                    self.logger.info(f"Usando datos cacheados para {symbol}_{timeframe}")
+                    return dd.from_pandas(pd.read_json(cached_data), npartitions=self.config.npartitions or 1)
+
+            # Cargar datos
+            if data_config.get('type') == 'streaming':
+                data = await self._process_streaming_data(data_config)
+            else:
+                data = await self._load_historical_data(data_config)
+
+            # Validar datos
+            if self.config.enable_validation:
+                validator = DataValidator(self.config.validation_rules)
+                valid, report = validator.validate(data)
+                if not valid:
+                    self.logger.error(f"Validación fallida: {report}")
+                    return data
+                self.logger.info(f"Validación completada: {report}")
+
+            # Transformaciones
+            if transform_config and self.config.enable_etl:
+                data = self._apply_transformations(data, transform_config, symbol, timeframe)
+
             # Guardar en cache
-            if self.cache:
-                self.cache.set(data_config, df)
-            
-            return df
-            
+            if self.redis_client and self.config.enable_caching:
+                self.redis_client.setex(cache_key, self.config.cache_ttl, data.compute().to_json())
+                self.logger.info(f"Datos cacheados para {symbol}_{timeframe}")
+
+            # Guardar en disco
+            if data_config.get('save_to_disk', True):
+                output_path = Path(f"data/processed/{symbol}_{timeframe}_processed.parquet")
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                data.compute().to_parquet(output_path)
+                self.logger.info(f"Datos guardados en {output_path}")
+
+            # Log en MLflow
+            with mlflow.start_run():
+                mlflow.log_metrics({
+                    "processing_time": time.time() - start_time,
+                    "records_processed": len(data),
+                    "partitions": data.npartitions
+                })
+                mlflow.log_param("symbol", symbol)
+                mlflow.log_param("timeframe", timeframe)
+
+            return data
+
         except Exception as e:
             self.logger.error(f"Error procesando datos: {e}")
-            raise
-    
-    async def get_data_summary(self, df: dd.DataFrame) -> Dict[str, Any]:
-        """Obtiene resumen de datos"""
+            return dd.from_pandas(pd.DataFrame(), npartitions=1)
+
+    async def _load_historical_data(self, data_config: Dict[str, Any]) -> dd.DataFrame:
+        """Carga datos históricos desde SQLite"""
         try:
-            # Computar estadísticas básicas
-            stats = {
-                "rows": len(df),
-                "columns": list(df.columns),
-                "memory_usage": df.memory_usage(deep=True).sum().compute(),
-                "dtypes": df.dtypes.to_dict(),
-                "null_counts": df.isnull().sum().compute().to_dict()
-            }
+            symbol = data_config.get('symbol', 'BTCUSDT')
+            timeframe = data_config.get('timeframe', '1h')
+            data = get_historical_data(symbol, timeframe)
+            if data.empty:
+                self.logger.warning(f"No se encontraron datos para {symbol}_{timeframe}")
+                return dd.from_pandas(pd.DataFrame(), npartitions=1)
+            return dd.from_pandas(data, npartitions=self.config.npartitions or 1)
+        except Exception as e:
+            self.logger.error(f"Error cargando datos históricos: {e}")
+            return dd.from_pandas(pd.DataFrame(), npartitions=1)
+
+    async def _process_streaming_data(self, data_config: Dict[str, Any]) -> dd.DataFrame:
+        """Procesa datos en tiempo real desde Kafka"""
+        try:
+            if not self.kafka_consumer:
+                raise ValueError("Kafka no configurado")
             
-            # Estadísticas numéricas
-            numeric_cols = df.select_dtypes(include=[np.number]).columns
-            if len(numeric_cols) > 0:
-                stats["numeric_stats"] = df[numeric_cols].describe().compute().to_dict()
+            symbol = data_config.get('symbol', 'BTCUSDT')
+            timeframe = data_config.get('timeframe', '1h')
+            records = []
+            for message in self.kafka_consumer:
+                data = message.value
+                if data.get('symbol') == symbol and data.get('timeframe') == timeframe:
+                    records.append(data)
+                if len(records) >= self.config.chunk_size:
+                    break
             
+            df = pd.DataFrame(records)
+            if df.empty:
+                return dd.from_pandas(df, npartitions=1)
+            
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s')
+            return dd.from_pandas(df, npartitions=self.config.npartitions or 1)
+        except Exception as e:
+            self.logger.error(f"Error procesando streaming: {e}")
+            return dd.from_pandas(pd.DataFrame(), npartitions=1)
+
+    def _apply_transformations(self, data: dd.DataFrame, transform_config: Dict[str, Any], symbol: str, timeframe: str) -> dd.DataFrame:
+        """Aplica transformaciones de feature engineering"""
+        try:
+            steps = transform_config.get('steps', [])
+            for step in steps:
+                if step['type'] == 'feature_engineering':
+                    for feature in step.get('features', []):
+                        if feature['type'] == 'sma':
+                            data[f"sma_{feature['window']}"] = data[feature['column']].rolling(window=feature['window']).mean()
+                        elif feature['type'] == 'rsi':
+                            delta = data[feature['column']].diff()
+                            gain = delta.where(delta > 0, 0).rolling(window=feature['window']).mean()
+                            loss = -delta.where(delta < 0, 0).rolling(window=feature['window']).mean()
+                            rs = gain / loss
+                            data[f"rsi_{feature['window']}"] = 100 - (100 / (1 + rs))
+                        elif feature['type'] == 'macd':
+                            ema12 = data[feature['column']].ewm(span=12, adjust=False).mean()
+                            ema26 = data[feature['column']].ewm(span=26, adjust=False).mean()
+                            data['macd'] = ema12 - ema26
+                            data['macd_signal'] = data['macd'].ewm(span=9, adjust=False).mean()
+                        elif feature['type'] == 'volatility':
+                            returns = data[feature['column']].pct_change()
+                            data[f"volatility_{feature['window']}"] = returns.rolling(window=feature['window']).std()
+                        elif feature['type'] == 'bollinger':
+                            sma = data[feature['column']].rolling(window=feature['window']).mean()
+                            std = data[feature['column']].rolling(window=feature['window']).std()
+                            data[f"bb_upper_{feature['window']}"] = sma + 2 * std
+                            data[f"bb_lower_{feature['window']}"] = sma - 2 * std
+                        elif feature['type'] == 'atr':
+                            high_low = data['high'] - data['low']
+                            high_close = (data['high'] - data['close'].shift(1)).abs()
+                            low_close = (data['low'] - data['close'].shift(1)).abs()
+                            tr = da.maximum(da.maximum(high_low, high_close), low_close)
+                            data[f"atr_{feature['window']}"] = tr.rolling(window=feature['window']).mean()
+                elif step['type'] == 'normalize':
+                    if step['method'] == 'zscore':
+                        for col in step['columns']:
+                            data[col] = (data[col] - data[col].mean()) / data[col].std()
+            self.logger.info(f"Transformaciones aplicadas para {symbol}_{timeframe}")
+            return data
+        except Exception as e:
+            self.logger.error(f"Error aplicando transformaciones: {e}")
+            return data
+
+    async def get_data_summary(self, data: dd.DataFrame) -> Dict[str, Any]:
+        """Obtiene resumen estadístico de los datos"""
+        try:
+            stats = data.describe().compute().to_dict()
+            stats['symbol'] = data['symbol'].iloc[0].compute()
+            stats['timeframe'] = data['timeframe'].iloc[0].compute()
+            stats['records'] = len(data)
             return stats
-            
         except Exception as e:
             self.logger.error(f"Error obteniendo resumen: {e}")
             return {}
 
-# Funciones de utilidad
 def create_data_pipeline_config(
     n_workers: int = 4,
     memory_limit: str = "2GB",
-    enable_caching: bool = True
+    enable_caching: bool = True,
+    enable_streaming: bool = False
 ) -> DataPipelineConfig:
     """Crea configuración del pipeline"""
     return DataPipelineConfig(
         n_workers=n_workers,
         memory_limit=memory_limit,
-        enable_caching=enable_caching
+        enable_caching=enable_caching,
+        enable_streaming=enable_streaming
     )
 
-# Ejemplo de uso
 async def main():
-    """Ejemplo de uso del pipeline de datos"""
-    
-    # Crear configuración
-    config = create_data_pipeline_config()
-    
-    # Crear pipeline
+    """Ejemplo de uso"""
+    config = create_data_pipeline_config(enable_streaming=True)
     pipeline = EnterpriseDataPipeline(config)
-    
+    await pipeline.start()
     try:
-        # Iniciar pipeline
-        await pipeline.start()
-        
-        # Configurar datos
         data_config = {
-            "type": "csv",
-            "file_path": "data/sample_trading_data.csv",
-            "parse_dates": ["timestamp"]
+            "type": "historical",
+            "symbol": "BTCUSDT",
+            "timeframe": "1h",
+            "save_to_disk": True
         }
-        
         transform_config = {
             "steps": [
                 {
@@ -603,31 +384,24 @@ async def main():
                     "features": [
                         {"type": "sma", "column": "close", "window": 20},
                         {"type": "rsi", "column": "close", "window": 14},
-                        {"type": "macd", "column": "close"}
+                        {"type": "macd", "column": "close"},
+                        {"type": "volatility", "column": "close", "window": 20},
+                        {"type": "bollinger", "column": "close", "window": 20},
+                        {"type": "atr", "column": "close", "window": 14}
                     ]
                 },
                 {
                     "type": "normalize",
                     "method": "zscore",
-                    "columns": ["close", "volume"]
+                    "columns": ["close", "volume", "sma_20", "rsi_14", "macd", "volatility_20"]
                 }
             ]
         }
-        
-        # Procesar datos
-        processed_data = await pipeline.process_trading_data(
-            data_config=data_config,
-            transform_config=transform_config
-        )
-        
-        # Obtener resumen
+        processed_data = await pipeline.process_trading_data(data_config, transform_config)
         summary = await pipeline.get_data_summary(processed_data)
         print(f"Resumen de datos: {summary}")
-        
     finally:
-        # Detener pipeline
         await pipeline.stop()
 
 if __name__ == "__main__":
-    import hashlib
     asyncio.run(main())

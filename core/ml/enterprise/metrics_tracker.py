@@ -26,6 +26,9 @@ from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
 
+# Importar ConfigLoader
+from config.config_loader import ConfigLoader
+
 logger = logging.getLogger(__name__)
 
 class TradingMetrics:

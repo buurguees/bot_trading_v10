@@ -1,168 +1,277 @@
-# Configuración de Agentes - Bot Trading v10 Enterprise
-# =====================================================
+# Ruta: config/agents_config.yaml
+# agents_config.yaml - Configuración de agentes por símbolo
+# Ubicación: config/agents_config.yaml
+
+version: "1.0"
 
 # Configuración general de agentes
 agents:
   enabled: true
   max_concurrent_agents: 10
-  agent_timeout: 300  # segundos
-  retry_attempts: 3
-  health_check_interval: 60  # segundos
+  agent_timeout: 300  # seconds
+  restart_on_failure: true
+  max_restart_attempts: 3
+  restart_delay: 30  # seconds
 
 # Configuración por símbolo
 symbols:
   BTCUSDT:
     enabled: true
-    agent_type: "ml_agent"
-    model_path: "agents/BTCUSDT/model.pkl"
-    strategies_path: "agents/BTCUSDT/strategies.json"
-    state_path: "agents/BTCUSDT/state.json"
-    logs_path: "agents/BTCUSDT/logs/"
-    max_memory_mb: 512
-    update_interval: 60
     priority: 1
-    volatility_tier: "high"
+    model_path: "agents/BTCUSDT/models/model.pkl"
+    strategies_path: "agents/BTCUSDT/strategies/strategies.json"
+    state_path: "agents/BTCUSDT/state/agent_state.json"
+    logs_path: "agents/BTCUSDT/logs/"
     
+    # Configuración de trading
+    trading:
+      max_position_size: 0.1  # 10% del capital
+      min_confidence: 0.6
+      stop_loss_pct: 0.02
+      take_profit_pct: 0.04
+      max_leverage: 125
+      
+    # Configuración de ML
+    ml:
+      model_type: "lstm_attention"
+      retrain_frequency: "daily"
+      backtest_period: 30
+      feature_importance: true
+      
+    # Configuración de monitoreo
+    monitoring:
+      performance_tracking: true
+      resource_monitoring: true
+      alert_on_errors: true
+      alert_on_high_memory: true
+      memory_threshold: 80  # percentage
+      
   ETHUSDT:
     enabled: true
-    agent_type: "ml_agent"
-    model_path: "agents/ETHUSDT/model.pkl"
-    strategies_path: "agents/ETHUSDT/strategies.json"
-    state_path: "agents/ETHUSDT/state.json"
+    priority: 2
+    model_path: "agents/ETHUSDT/models/model.pkl"
+    strategies_path: "agents/ETHUSDT/strategies/strategies.json"
+    state_path: "agents/ETHUSDT/state/agent_state.json"
     logs_path: "agents/ETHUSDT/logs/"
-    max_memory_mb: 512
-    update_interval: 60
-    priority: 1
-    volatility_tier: "high"
     
+    trading:
+      max_position_size: 0.08
+      min_confidence: 0.65
+      stop_loss_pct: 0.025
+      take_profit_pct: 0.05
+      max_leverage: 100
+      
+    ml:
+      model_type: "lstm_attention"
+      retrain_frequency: "daily"
+      backtest_period: 30
+      feature_importance: true
+      
+    monitoring:
+      performance_tracking: true
+      resource_monitoring: true
+      alert_on_errors: true
+      alert_on_high_memory: true
+      memory_threshold: 80
+      
   ADAUSDT:
     enabled: true
-    agent_type: "ml_agent"
-    model_path: "agents/ADAUSDT/model.pkl"
-    strategies_path: "agents/ADAUSDT/strategies.json"
-    state_path: "agents/ADAUSDT/state.json"
+    priority: 3
+    model_path: "agents/ADAUSDT/models/model.pkl"
+    strategies_path: "agents/ADAUSDT/strategies/strategies.json"
+    state_path: "agents/ADAUSDT/state/agent_state.json"
     logs_path: "agents/ADAUSDT/logs/"
-    max_memory_mb: 256
-    update_interval: 120
-    priority: 2
-    volatility_tier: "medium"
     
+    trading:
+      max_position_size: 0.05
+      min_confidence: 0.7
+      stop_loss_pct: 0.03
+      take_profit_pct: 0.06
+      max_leverage: 50
+      
+    ml:
+      model_type: "lstm_attention"
+      retrain_frequency: "weekly"
+      backtest_period: 30
+      feature_importance: true
+      
+    monitoring:
+      performance_tracking: true
+      resource_monitoring: true
+      alert_on_errors: true
+      alert_on_high_memory: true
+      memory_threshold: 80
+      
   SOLUSDT:
     enabled: true
-    agent_type: "ml_agent"
-    model_path: "agents/SOLUSDT/model.pkl"
-    strategies_path: "agents/SOLUSDT/strategies.json"
-    state_path: "agents/SOLUSDT/state.json"
+    priority: 4
+    model_path: "agents/SOLUSDT/models/model.pkl"
+    strategies_path: "agents/SOLUSDT/strategies/strategies.json"
+    state_path: "agents/SOLUSDT/state/agent_state.json"
     logs_path: "agents/SOLUSDT/logs/"
-    max_memory_mb: 256
-    update_interval: 120
-    priority: 2
-    volatility_tier: "medium"
     
+    trading:
+      max_position_size: 0.05
+      min_confidence: 0.7
+      stop_loss_pct: 0.03
+      take_profit_pct: 0.06
+      max_leverage: 50
+      
+    ml:
+      model_type: "lstm_attention"
+      retrain_frequency: "weekly"
+      backtest_period: 30
+      feature_importance: true
+      
+    monitoring:
+      performance_tracking: true
+      resource_monitoring: true
+      alert_on_errors: true
+      alert_on_high_memory: true
+      memory_threshold: 80
+      
   DOGEUSDT:
     enabled: true
-    agent_type: "ml_agent"
-    model_path: "agents/DOGEUSDT/model.pkl"
-    strategies_path: "agents/DOGEUSDT/strategies.json"
-    state_path: "agents/DOGEUSDT/state.json"
+    priority: 5
+    model_path: "agents/DOGEUSDT/models/model.pkl"
+    strategies_path: "agents/DOGEUSDT/strategies/strategies.json"
+    state_path: "agents/DOGEUSDT/state/agent_state.json"
     logs_path: "agents/DOGEUSDT/logs/"
-    max_memory_mb: 128
-    update_interval: 180
-    priority: 3
-    volatility_tier: "high"
     
-  AVAXUSDT:
-    enabled: true
-    agent_type: "ml_agent"
-    model_path: "agents/AVAXUSDT/model.pkl"
-    strategies_path: "agents/AVAXUSDT/strategies.json"
-    state_path: "agents/AVAXUSDT/state.json"
-    logs_path: "agents/AVAXUSDT/logs/"
-    max_memory_mb: 256
-    update_interval: 120
-    priority: 2
-    volatility_tier: "medium"
-    
-  TONUSDT:
-    enabled: true
-    agent_type: "ml_agent"
-    model_path: "agents/TONUSDT/model.pkl"
-    strategies_path: "agents/TONUSDT/strategies.json"
-    state_path: "agents/TONUSDT/state.json"
-    logs_path: "agents/TONUSDT/logs/"
-    max_memory_mb: 128
-    update_interval: 180
-    priority: 3
-    volatility_tier: "high"
-    
-  XRPUSDT:
-    enabled: true
-    agent_type: "ml_agent"
-    model_path: "agents/XRPUSDT/model.pkl"
-    strategies_path: "agents/XRPUSDT/strategies.json"
-    state_path: "agents/XRPUSDT/state.json"
-    logs_path: "agents/XRPUSDT/logs/"
-    max_memory_mb: 128
-    update_interval: 180
-    priority: 3
-    volatility_tier: "medium"
-    
-  LINKUSDT:
-    enabled: true
-    agent_type: "ml_agent"
-    model_path: "agents/LINKUSDT/model.pkl"
-    strategies_path: "agents/LINKUSDT/strategies.json"
-    state_path: "agents/LINKUSDT/state.json"
-    logs_path: "agents/LINKUSDT/logs/"
-    max_memory_mb: 128
-    update_interval: 180
-    priority: 4
-    volatility_tier: "high"
+    trading:
+      max_position_size: 0.03
+      min_confidence: 0.75
+      stop_loss_pct: 0.035
+      take_profit_pct: 0.07
+      max_leverage: 25
+      
+    ml:
+      model_type: "lstm_attention"
+      retrain_frequency: "weekly"
+      backtest_period: 30
+      feature_importance: true
+      
+    monitoring:
+      performance_tracking: true
+      resource_monitoring: true
+      alert_on_errors: true
+      alert_on_high_memory: true
+      memory_threshold: 80
 
 # Configuración de modelos ML
 ml_models:
   default_architecture: "lstm_attention"
-  input_features: 50
-  hidden_size: 128
-  num_layers: 3
-  dropout: 0.2
   learning_rate: 0.001
-  batch_size: 64
+  batch_size: 32
   epochs: 100
-  early_stopping_patience: 10
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.2
+  
+  # Configuración de entrenamiento
+  training:
+    validation_split: 0.2
+    early_stopping: true
+    patience: 10
+    min_delta: 0.001
+    restore_best_weights: true
+    
+  # Configuración de features
+  features:
+    technical_indicators: true
+    price_features: true
+    volume_features: true
+    time_features: true
+    lag_features: 20
+    
+  # Configuración de evaluación
+  evaluation:
+    metrics: ["accuracy", "precision", "recall", "f1_score", "sharpe_ratio"]
+    cross_validation: true
+    cv_folds: 5
 
 # Configuración de estrategias
 strategies:
-  max_strategies_per_agent: 500
-  strategy_evaluation_period: 24  # horas
-  min_performance_threshold: 0.6
-  max_drawdown_threshold: 0.15
-  strategy_update_frequency: "daily"
+  default_strategy: "ml_strategy"
+  
+  # Estrategias disponibles
+  available_strategies:
+    - name: "ml_strategy"
+      enabled: true
+      weight: 0.6
+      
+    - name: "momentum_strategy"
+      enabled: true
+      weight: 0.2
+      
+    - name: "mean_reversion_strategy"
+      enabled: true
+      weight: 0.2
+      
+  # Configuración de ejecución
+  execution:
+    parallel_execution: true
+    max_concurrent_strategies: 3
+    strategy_timeout: 30  # seconds
+    
+  # Configuración de señales
+  signals:
+    min_confidence: 0.6
+    max_signals_per_minute: 10
+    signal_cooldown: 60  # seconds
 
-# Configuración de logs
+# Configuración de logging por agente
 logging:
   agent_logs_enabled: true
   log_level: "INFO"
-  max_log_file_size: "10MB"
-  max_log_files: 5
-  log_rotation: "daily"
-  include_metrics: true
-  include_predictions: true
-
-# Configuración de persistencia
-persistence:
-  save_models: true
-  save_strategies: true
-  save_state: true
-  backup_frequency: "daily"
-  max_backups: 7
-  compression_enabled: true
+  
+  # Configuración de logs
+  log_config:
+    - name: "agent_{symbol}.log"
+      level: "INFO"
+      max_size: "5MB"
+      backup_count: 3
+      
+    - name: "trading_{symbol}.log"
+      level: "INFO"
+      max_size: "10MB"
+      backup_count: 5
+      
+    - name: "ml_{symbol}.log"
+      level: "INFO"
+      max_size: "8MB"
+      backup_count: 3
+      
+    - name: "errors_{symbol}.log"
+      level: "ERROR"
+      max_size: "2MB"
+      backup_count: 2
 
 # Configuración de monitoreo
 monitoring:
   performance_tracking: true
   resource_monitoring: true
-  alert_on_errors: true
-  alert_on_high_memory: true
-  memory_threshold_mb: 400
-  cpu_threshold_percent: 80
+  
+  # Métricas de performance
+  performance_metrics:
+    - "total_trades"
+    - "win_rate"
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "total_pnl"
+    - "avg_trade_duration"
+    
+  # Métricas de recursos
+  resource_metrics:
+    - "memory_usage"
+    - "cpu_usage"
+    - "disk_usage"
+    - "network_io"
+    
+  # Alertas
+  alerts:
+    alert_on_errors: true
+    alert_on_high_memory: true
+    alert_on_low_performance: true
+    memory_threshold: 80  # percentage
+    performance_threshold: 0.5  # sharpe ratio

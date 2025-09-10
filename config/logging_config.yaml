@@ -1,152 +1,235 @@
-# Configuración de Logging del Bot Trading v10 Enterprise
-# ======================================================
+# Ruta: config/logging_config.yaml
+# logging_config.yaml - Configuración detallada de logging
+# Ubicación: config/logging_config.yaml
+
+version: "1.0"
 
 # Configuración general de logging
 logging:
-  level: "INFO"
-  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-  date_format: "%Y-%m-%d %H:%M:%S"
-  encoding: "utf-8"
+  version: 1
+  disable_existing_loggers: false
   
-  # Configuración de archivos
-  file:
-    enabled: true
-    path: "logs/bot.log"
-    max_size: "10MB"
-    backup_count: 5
-    rotation: "daily"
-  
-  # Configuración de consola
-  console:
-    enabled: true
-    level: "INFO"
-    colored: true
-  
-  # Configuración de handlers específicos
+  # Formatters
+  formatters:
+    standard:
+      format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+      datefmt: "%Y-%m-%d %H:%M:%S"
+      
+    detailed:
+      format: "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s - %(message)s"
+      datefmt: "%Y-%m-%d %H:%M:%S"
+      
+    json:
+      format: '{"timestamp": "%(asctime)s", "logger": "%(name)s", "level": "%(levelname)s", "message": "%(message)s", "module": "%(filename)s", "function": "%(funcName)s", "line": %(lineno)d}'
+      datefmt: "%Y-%m-%d %H:%M:%S"
+      
+    audit:
+      format: "%(asctime)s - AUDIT - %(levelname)s - %(message)s"
+      datefmt: "%Y-%m-%d %H:%M:%S"
+      
+    trading:
+      format: "%(asctime)s - TRADING - %(levelname)s - %(message)s"
+      datefmt: "%Y-%m-%d %H:%M:%S"
+      
+    ml:
+      format: "%(asctime)s - ML - %(levelname)s - %(message)s"
+      datefmt: "%Y-%m-%d %H:%M:%S"
+
+  # Handlers
   handlers:
-    # Handler para errores críticos
+    console:
+      class: "logging.StreamHandler"
+      level: "INFO"
+      formatter: "standard"
+      stream: "ext://sys.stdout"
+      
+    file:
+      class: "logging.handlers.RotatingFileHandler"
+      level: "INFO"
+      formatter: "detailed"
+      filename: "logs/bot.log"
+      maxBytes: 10485760  # 10MB
+      backupCount: 5
+      encoding: "utf-8"
+      
     error_handler:
-      enabled: true
+      class: "logging.handlers.RotatingFileHandler"
       level: "ERROR"
-      file: "logs/errors.log"
-      max_size: "5MB"
-      backup_count: 3
-    
-    # Handler para auditoría
+      formatter: "detailed"
+      filename: "logs/errors.log"
+      maxBytes: 5242880  # 5MB
+      backupCount: 3
+      encoding: "utf-8"
+      
     audit_handler:
-      enabled: true
+      class: "logging.handlers.RotatingFileHandler"
       level: "INFO"
-      file: "logs/audit.log"
-      max_size: "20MB"
-      backup_count: 10
-    
-    # Handler para trading
+      formatter: "audit"
+      filename: "logs/audit.log"
+      maxBytes: 10485760  # 10MB
+      backupCount: 10
+      encoding: "utf-8"
+      
     trading_handler:
-      enabled: true
+      class: "logging.handlers.RotatingFileHandler"
       level: "INFO"
-      file: "logs/trading.log"
-      max_size: "50MB"
-      backup_count: 7
-    
-    # Handler para ML
+      formatter: "trading"
+      filename: "logs/trading.log"
+      maxBytes: 52428800  # 50MB
+      backupCount: 7
+      encoding: "utf-8"
+      
     ml_handler:
-      enabled: true
+      class: "logging.handlers.RotatingFileHandler"
       level: "INFO"
-      file: "logs/ml.log"
-      max_size: "30MB"
-      backup_count: 5
+      formatter: "ml"
+      filename: "logs/ml.log"
+      maxBytes: 31457280  # 30MB
+      backupCount: 5
+      encoding: "utf-8"
+      
+    data_handler:
+      class: "logging.handlers.RotatingFileHandler"
+      level: "INFO"
+      formatter: "detailed"
+      filename: "logs/data.log"
+      maxBytes: 20971520  # 20MB
+      backupCount: 5
+      encoding: "utf-8"
+      
+    monitoring_handler:
+      class: "logging.handlers.RotatingFileHandler"
+      level: "INFO"
+      formatter: "detailed"
+      filename: "logs/monitoring.log"
+      maxBytes: 15728640  # 15MB
+      backupCount: 5
+      encoding: "utf-8"
+      
+    security_handler:
+      class: "logging.handlers.RotatingFileHandler"
+      level: "WARNING"
+      formatter: "detailed"
+      filename: "logs/security.log"
+      maxBytes: 10485760  # 10MB
+      backupCount: 10
+      encoding: "utf-8"
 
-# Configuración de loggers específicos
-loggers:
-  # Logger principal del bot
-  __main__:
-    level: "INFO"
-    handlers: ["console", "file"]
-    propagate: false
-  
-  # Logger de control
-  control:
-    level: "INFO"
-    handlers: ["console", "file", "audit_handler"]
-    propagate: false
-  
-  # Logger de trading
-  core.trading:
-    level: "INFO"
-    handlers: ["console", "trading_handler"]
-    propagate: false
-  
-  # Logger de ML
-  core.ml:
-    level: "INFO"
-    handlers: ["console", "ml_handler"]
-    propagate: false
-  
-  # Logger de datos
-  core.data:
-    level: "INFO"
-    handlers: ["console", "file"]
-    propagate: false
-  
-  # Logger de monitoreo
-  core.monitoring:
-    level: "INFO"
-    handlers: ["console", "file"]
-    propagate: false
-  
-  # Logger de seguridad
-  core.security:
-    level: "INFO"
-    handlers: ["console", "audit_handler"]
-    propagate: false
-  
-  # Logger de errores
-  error:
-    level: "ERROR"
-    handlers: ["error_handler"]
-    propagate: false
+  # Loggers
+  loggers:
+    __main__:
+      level: "INFO"
+      handlers: ["console", "file"]
+      propagate: false
+      
+    control:
+      level: "INFO"
+      handlers: ["console", "file", "audit_handler"]
+      propagate: false
+      
+    core.trading:
+      level: "INFO"
+      handlers: ["trading_handler", "console"]
+      propagate: false
+      
+    core.ml:
+      level: "INFO"
+      handlers: ["ml_handler", "console"]
+      propagate: false
+      
+    core.data:
+      level: "INFO"
+      handlers: ["data_handler", "console"]
+      propagate: false
+      
+    core.monitoring:
+      level: "INFO"
+      handlers: ["monitoring_handler", "console"]
+      propagate: false
+      
+    core.security:
+      level: "WARNING"
+      handlers: ["console", "security_handler", "audit_handler"]
+      propagate: false
+      
+    core.agents:
+      level: "INFO"
+      handlers: ["file", "console"]
+      propagate: false
+      
+    scripts:
+      level: "INFO"
+      handlers: ["file", "console"]
+      propagate: false
+      
+    # Loggers específicos para agentes
+    agents.BTCUSDT:
+      level: "INFO"
+      handlers: ["file", "console"]
+      propagate: false
+      
+    agents.ETHUSDT:
+      level: "INFO"
+      handlers: ["file", "console"]
+      propagate: false
+      
+    agents.ADAUSDT:
+      level: "INFO"
+      handlers: ["file", "console"]
+      propagate: false
+      
+    agents.SOLUSDT:
+      level: "INFO"
+      handlers: ["file", "console"]
+      propagate: false
+      
+    agents.DOGEUSDT:
+      level: "INFO"
+      handlers: ["file", "console"]
+      propagate: false
 
-# Configuración de filtros
+  # Root logger
+  root:
+    level: "INFO"
+    handlers: ["console", "file", "error_handler"]
+
+# Filtros
 filters:
-  # Filtro para mensajes sensibles
   sensitive_data:
-    enabled: true
+    class: "core.logging.filters.SensitiveDataFilter"
     patterns:
       - "password"
-      - "token"
-      - "key"
+      - "api_key"
       - "secret"
-    replacement: "***REDACTED***"
-  
-  # Filtro para datos de trading
+      - "token"
+      - "private_key"
+      - "passphrase"
+      - "bot_token"
+      - "chat_id"
+    replacement: "[REDACTED]"
+    
   trading_data:
-    enabled: true
+    class: "core.logging.filters.TradingDataFilter"
     patterns:
+      - "pnl"
       - "balance"
       - "position"
-      - "pnl"
+      - "leverage"
     log_level: "DEBUG"
-
-# Configuración de formatters
-formatters:
-  standard:
-    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    datefmt: "%Y-%m-%d %H:%M:%S"
-  
-  detailed:
-    format: "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
-    datefmt: "%Y-%m-%d %H:%M:%S"
-  
-  json:
-    format: '{"timestamp": "%(asctime)s", "logger": "%(name)s", "level": "%(levelname)s", "message": "%(message)s"}'
-    datefmt: "%Y-%m-%d %H:%M:%S"
 
 # Configuración de rotación
 rotation:
+  strategy: "size_and_time"
+  max_size: "50MB"
+  max_time: "1 day"
+  backup_count: 7
+  compress: true
+  compress_format: "gz"
+
+# Configuración de limpieza
+cleanup:
   enabled: true
-  when: "midnight"
-  interval: 1
-  backup_count: 30
-  encoding: "utf-8"
-  delay: true
-  utc: false
+  max_age_days: 30
+  max_total_size: "1GB"
+  schedule: "daily"
+  time: "02:00"

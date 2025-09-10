@@ -1,114 +1,186 @@
-# Configuración Principal del Bot Trading v10 Enterprise
-# =====================================================
+# Ruta: config/main_config.yaml
+# main_config.yaml - Configuración principal del bot enterprise
+# Ubicación: config/main_config.yaml
+
+version: "1.0"
 
 # Configuración del bot
 bot:
-  name: "TradingBot_v10_Enterprise"
+  name: "TradingBot v10 Enterprise"
   version: "10.0.0"
-  environment: "production"  # development, staging, production
+  environment: "development"  # development, staging, production
   debug: false
-  
+  timezone: "UTC"
+  language: "es"
+
 # Configuración de datos
 data:
-  # Datos históricos
-  historical:
-    enabled: true
-    years: 1
-    timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
-    symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT", "AVAXUSDT", "TONUSDT", "XRPUSDT", "LINKUSDT"]
-    storage_format: "sqlite"
-    database_per_symbol: true
-    auto_verify_coverage: true
-    min_coverage_days: 365
-    download_missing: true
-  
   # Datos en tiempo real
   real_time:
     enabled: true
-    symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT", "AVAXUSDT", "TONUSDT", "XRPUSDT", "LINKUSDT"]
+    symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT"]
     timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
-    data_types: ["kline", "ticker", "orderbook"]
-  
-  # Alineación temporal
-  alignment:
+    data_types: ["tick", "ohlcv", "volume", "orderbook"]
+    collection_interval: 1000  # ms
+    buffer_size: 10000
+    
+  # Datos históricos
+  historical:
     enabled: true
-    base_timeframe: "5m"
-    tolerance_minutes: 1
-    min_data_coverage: 0.95
+    years: 2
+    timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
+    symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT"]
+    storage_format: "parquet"
+    download_missing: true
+    min_coverage_days: 30
+    database_per_symbol: true
 
 # Configuración de trading
 trading:
   mode: "paper_trading"  # paper_trading, live_trading
   futures_enabled: true
-  min_confidence: 0.7
-  max_trades_per_bar: 1
-  commission_rate: 0.001
+  min_confidence: 0.6
+  max_position_size_pct: 0.1
+  default_stop_loss_pct: 0.02
+  default_take_profit_pct: 0.04
   
   # Gestión de riesgo
   risk_management:
-    max_risk_per_trade: 0.01
+    max_risk_per_trade: 0.02
     max_daily_loss_pct: 0.05
-    max_drawdown_pct: 0.15
-    min_leverage: 5.0
-    max_leverage: 20.0
-    default_stop_loss_pct: 0.015
-    risk_reward_ratio: 2.5
+    max_weekly_loss_pct: 0.15
+    max_monthly_loss_pct: 0.30
+    max_leverage: 125
+    min_leverage: 1
+    max_drawdown_pct: 0.20
+    position_sizing_method: "kelly_criterion"
+    
+  # Configuración de futuros
+  futures:
+    enabled: true
+    position_mode: "one_way"  # one_way, hedge
+    max_leverage: 125
+    min_leverage: 1
+    margin_mode: "isolated"  # isolated, cross
+    funding_fee_threshold: 0.01
 
 # Configuración de ML
 ml:
   model_type: "lstm_attention"
-  min_confidence: 75.0
-  retraining_frequency: "adaptive"
-  feature_importance:
-    price_action: 0.3
-    technical_indicators: 0.4
-    volume_analysis: 0.2
-    market_sentiment: 0.1
+  min_confidence: 0.6
+  feature_importance: true
+  retrain_frequency: "daily"
+  backtest_period: 30  # days
+  
+  # Hiperparámetros
+  hyperparameters:
+    learning_rate: 0.001
+    batch_size: 32
+    epochs: 100
+    hidden_size: 128
+    num_layers: 2
+    dropout: 0.2
+    
+  # Modelos por símbolo
+  models_per_symbol: true
+  model_storage: "agents/{symbol}/models"
+  model_format: "pkl"
 
 # Configuración de monitoreo
 monitoring:
   dashboard:
     enabled: true
-    port: 8050
-    auto_refresh_seconds: 5
-  
+    port: 8080
+    refresh_interval: 5  # seconds
+    
   prometheus:
     enabled: true
     port: 8003
-  
+    metrics_path: "/metrics"
+    
   alerts:
     telegram:
       enabled: true
-      training_update_interval: 60
-    console:
-      enabled: true
+      bot_token: ""  # Configurar en .env
+      chat_id: ""    # Configurar en .env
+      rate_limit: 10  # messages per minute
+      
+    email:
+      enabled: false
+      smtp_server: ""
+      smtp_port: 587
+      username: ""
+      password: ""
+      
+  # Métricas específicas
+  metrics:
+    - "trades_total"
+    - "pnl_gauge"
+    - "win_rate"
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "api_calls_total"
+    - "memory_usage"
+    - "cpu_usage"
 
 # Configuración de base de datos
 database:
-  primary: "sqlite"
+  # SQLite
   sqlite:
+    enabled: true
     path: "data/trading_bot.db"
     per_symbol: true
+    backup_frequency: "daily"
+    
+  # Redis
   redis:
     enabled: true
     url: "redis://localhost:6379"
+    db: 0
+    password: ""
+    max_connections: 10
+    
+  # TimescaleDB
   timescaledb:
     enabled: false
+    url: "postgresql://user:password@localhost:5432/trading_bot"
+    ssl_mode: "prefer"
+    max_connections: 5
 
 # Configuración de seguridad
 security:
   encryption:
     enabled: true
     algorithm: "AES-256-GCM"
+    key_storage: "environment"  # environment, vault
+    environment_vars:
+      - "ENCRYPTION_KEY"
+      - "API_KEY_ENCRYPTION_KEY"
+      
   compliance:
     mifid2_enabled: true
     gdpr_enabled: true
+    data_retention_years: 7
     audit_logging: true
+    
+  # Validación de datos
+  data_validation:
+    enabled: true
+    schema_validation: true
+    range_checks: true
+    anomaly_detection: true
 
 # Configuración de performance
 performance:
   max_workers: 4
   memory_limit: "2GB"
-  cpu_limit: 80
-  cache_ttl: 300
-  health_check_interval: 30
+  cpu_limit: 80  # percentage
+  gc_threshold: 1000
+  async_timeout: 30  # seconds
+  
+  # Optimizaciones
+  optimizations:
+    vectorization: true
+    parallel_processing: true
+    memory_mapping: true
+    lazy_loading: true

@@ -512,9 +512,67 @@ class MetricsAggregator:
     async def calculate_daily_metrics(self, date: str) -> Optional[DailyMetrics]:
         """Calcula métricas diarias para una fecha específica"""
         try:
-            # Implementar cálculo de métricas diarias
-            # Esto sería usado para análisis histórico
-            pass
+            from datetime import datetime
+            target_date = datetime.strptime(date, '%Y-%m-%d').date()
+            
+            # Obtener trades del día desde SQLite
+            trades = await db_manager.get_trades_by_date(target_date)
+            if not trades:
+                logger.warning(f"No hay trades para la fecha {date}")
+                return None
+            
+            # Calcular métricas básicas
+            total_pnl = sum(trade.get('pnl', 0) for trade in trades)
+            total_trades = len(trades)
+            winning_trades = sum(1 for trade in trades if trade.get('pnl', 0) > 0)
+            win_rate = (winning_trades / total_trades) * 100 if total_trades > 0 else 0
+            
+            # Calcular Sharpe ratio
+            daily_returns = [trade.get('pnl', 0) for trade in trades]
+            if len(daily_returns) > 1:
+                sharpe_ratio = np.mean(daily_returns) / np.std(daily_returns) if np.std(daily_returns) > 0 else 0
+            else:
+                sharpe_ratio = 0
+            
+            # Calcular max drawdown
+            cumulative_pnl = np.cumsum(daily_returns)
+            running_max = np.maximum.accumulate(cumulative_pnl)
+            drawdown = cumulative_pnl - running_max
+            max_drawdown = np.min(drawdown) if len(drawdown) > 0 else 0
+            
+            # Calcular métricas por símbolo
+            symbol_metrics = {}
+            for trade in trades:
+                symbol = trade.get('symbol', 'UNKNOWN')
+                if symbol not in symbol_metrics:
+                    symbol_metrics[symbol] = {'pnl': 0, 'trades': 0, 'win_rate': 0}
+                
+                symbol_metrics[symbol]['pnl'] += trade.get('pnl', 0)
+                symbol_metrics[symbol]['trades'] += 1
+                if trade.get('pnl', 0) > 0:
+                    symbol_metrics[symbol]['win_rate'] += 1
+            
+            # Calcular win rate por símbolo
+            for symbol in symbol_metrics:
+                total_trades_symbol = symbol_metrics[symbol]['trades']
+                winning_trades_symbol = symbol_metrics[symbol]['win_rate']
+                symbol_metrics[symbol]['win_rate'] = (winning_trades_symbol / total_trades_symbol) * 100 if total_trades_symbol > 0 else 0
+            
+            daily_metrics = DailyMetrics(
+                date=target_date,
+                total_pnl=total_pnl,
+                total_trades=total_trades,
+                win_rate=win_rate,
+                sharpe_ratio=sharpe_ratio,
+                max_drawdown=max_drawdown,
+                symbol_metrics=symbol_metrics,
+                best_symbol=max(symbol_metrics.keys(), key=lambda x: symbol_metrics[x]['pnl']) if symbol_metrics else None,
+                worst_symbol=min(symbol_metrics.keys(), key=lambda x: symbol_metrics[x]['pnl']) if symbol_metrics else None
+            )
+            
+            logger.info(f"Métricas diarias calculadas para {date}: PnL={total_pnl:.2f}, Trades={total_trades}, Win Rate={win_rate:.1f}%")
+            return daily_metrics
+            
         except Exception as e:
             logger.error(f"Error calculando métricas diarias: {e}")
             return None
@@ -522,16 +580,107 @@ class MetricsAggregator:
     async def track_strategy_performance(self, strategy_name: str, pnl: float, trades_count: int):
         """Rastrea rendimiento de estrategia específica"""
         try:
-            # Implementar tracking de estrategia
-            pass
+            # Actualizar métricas de estrategia
+            if strategy_name not in self.strategy_performance:
+                self.strategy_performance[strategy_name] = StrategyPerformance(
+                    strategy_name=strategy_name,
+                    total_pnl=0.0,
+                    total_trades=0,
+                    win_rate=0.0,
+                    profit_factor=0.0,
+                    sharpe_ratio=0.0,
+                    max_drawdown=0.0,
+                    usage_count=0,
+                    last_updated=datetime.now()
+                )
+            
+            strategy = self.strategy_performance[strategy_name]
+            strategy.total_pnl += pnl
+            strategy.total_trades += trades_count
+            strategy.usage_count += 1
+            strategy.last_updated = datetime.now()
+            
+            # Calcular win rate
+            if strategy.total_trades > 0:
+                winning_trades = strategy.total_trades * (strategy.win_rate / 100) if strategy.win_rate > 0 else 0
+                if pnl > 0:
+                    winning_trades += 1
+                strategy.win_rate = (winning_trades / strategy.total_trades) * 100
+            
+            # Calcular profit factor
+            if strategy.total_trades > 0:
+                # En un sistema real, esto vendría de datos históricos más detallados
+                strategy.profit_factor = abs(strategy.total_pnl) / max(abs(strategy.total_pnl), 1.0)
+            
+            # Cachear en Redis si está disponible
+            if self.redis_client:
+                cache_key = f"strategy_performance_{strategy_name}"
+                self.redis_client.setex(cache_key, 3600, json.dumps(asdict(strategy), default=str))
+            
+            logger.info(f"Estrategia {strategy_name} actualizada: PnL={strategy.total_pnl:.2f}, Trades={strategy.total_trades}")
+            
         except Exception as e:
             logger.error(f"Error trackeando estrategia: {e}")
     
     async def update_rankings(self) -> Dict[str, Any]:
         """Actualiza rankings de estrategias y símbolos"""
         try:
-            # Implementar actualización de rankings
-            pass
+            rankings = {
+                'strategies': {},
+                'symbols': {},
+                'timeframes': {},
+                'last_updated': datetime.now().isoformat()
+            }
+            
+            # Ranking de estrategias por Sharpe ratio
+            if self.strategy_performance:
+                strategy_list = list(self.strategy_performance.values())
+                strategy_list.sort(key=lambda x: x.sharpe_ratio, reverse=True)
+                
+                for i, strategy in enumerate(strategy_list):
+                    rankings['strategies'][strategy.strategy_name] = {
+                        'rank': i + 1,
+                        'sharpe_ratio': strategy.sharpe_ratio,
+                        'total_pnl': strategy.total_pnl,
+                        'win_rate': strategy.win_rate,
+                        'total_trades': strategy.total_trades
+                    }
+            
+            # Ranking de símbolos por performance
+            if self.symbol_performance:
+                symbol_list = list(self.symbol_performance.values())
+                symbol_list.sort(key=lambda x: x.total_pnl, reverse=True)
+                
+                for i, symbol in enumerate(symbol_list):
+                    rankings['symbols'][symbol.symbol] = {
+                        'rank': i + 1,
+                        'total_pnl': symbol.total_pnl,
+                        'win_rate': symbol.win_rate,
+                        'volatility': symbol.volatility,
+                        'best_timeframe': symbol.best_timeframe
+                    }
+            
+            # Ranking de timeframes por performance
+            if self.timeframe_performance:
+                timeframe_list = list(self.timeframe_performance.values())
+                timeframe_list.sort(key=lambda x: x.total_pnl, reverse=True)
+                
+                for i, timeframe in enumerate(timeframe_list):
+                    rankings['timeframes'][timeframe.timeframe] = {
+                        'rank': i + 1,
+                        'total_pnl': timeframe.total_pnl,
+                        'win_rate': timeframe.win_rate,
+                        'total_trades': timeframe.total_trades
+                    }
+            
+            # Cachear rankings en Redis
+            if self.redis_client:
+                cache_key = "portfolio_rankings"
+                self.redis_client.setex(cache_key, 1800, json.dumps(rankings, default=str))
+            
+            logger.info("Rankings actualizados exitosamente")
+            return rankings
+            
         except Exception as e:
             logger.error(f"Error actualizando rankings: {e}")
             return {}

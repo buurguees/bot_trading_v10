@@ -2,16 +2,16 @@
 """
 trading/bitget_client.py
 Cliente de Bitget para trading y datos de mercado enterprise
-Ubicación: C:\TradingBot_v10\trading\bitget_client.py
 
 Funcionalidades:
 - Conexión REST API para órdenes y datos
 - WebSocket para datos en tiempo real
-- Soporte completo para futures trading
+- Soporte completo para futures trading (one-way/hedge mode)
 - Leverage dinámico y gestión de posiciones
 - Sandbox/testnet para testing
 - Reconexión automática con backoff exponencial
 - Integración con sistema de recopilación de datos
+- Redis caching para datos WebSocket
 """
 
 import asyncio
@@ -27,8 +27,9 @@ import websockets
 import ccxt.async_support as ccxt
 import os
 from urllib.parse import urlencode
+import redis
 
-from config.unified_config import unified_config
+from core.config.config_loader import config_loader
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class BitgetClient:
     """Cliente de Bitget para trading y datos de mercado enterprise"""
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        self.config = config or unified_config.get('trading', {})
+        self.config = config or config_loader.get_trading_config()
         
         # Configuración de API
         self.api_key = os.getenv('BITGET_API_KEY')
@@ -46,6 +47,7 @@ class BitgetClient:
         # Modo de trading
         self.trading_mode = self.config.get('mode', 'paper_trading')
         self.is_futures = self.config.get('futures', True)
+        self.position_mode = self.config.get('position_mode', 'one-way')  # one-way or hedge
         
         # URLs de API
         self.base_url = self._get_base_url()
@@ -62,12 +64,18 @@ class BitgetClient:
         self.max_reconnect_attempts = 10
         self.reconnect_delay = 1
         
+        # Redis para caching
+        self.redis_client = None
+        self._setup_redis()
+        
         # Métricas
         self.requests_made = 0
         self.requests_failed = 0
         self.websocket_messages = 0
+        self.cache_hits = 0
+        self.cache_misses = 0
         
-        logger.info(f"BitgetClient enterprise inicializado - Modo: {self.trading_mode}, Futures: {self.is_futures}")
+        logger.info(f"BitgetClient enterprise inicializado - Modo: {self.trading_mode}, Futures: {self.is_futures}, Position Mode: {self.position_mode}")
     
     def _get_base_url(self) -> str:
         """Obtiene la URL base según el modo"""
@@ -77,753 +85,213 @@ class BitgetClient:
             return "https://api.bitget.com"
     
     def _get_websocket_url(self) -> str:
-        """Obtiene la URL del WebSocket según el modo"""
+        """Obtiene la URL de WebSocket según el modo"""
         if self.trading_mode in ['paper_trading', 'backtesting']:
-            return "wss://ws-sandbox.bitget.com/v2/ws/public"
+            return "wss://ws-sandbox.bitget.com:443/mix/v1/stream"
         else:
-            return "wss://ws.bitget.com/v2/ws/public"
+            return "wss://ws.bitget.com:443/mix/v1/stream"
+    
+    def _setup_redis(self):
+        """Configura Redis para caching de datos WebSocket"""
+        try:
+            redis_url = self.config.get('redis_url', 'redis://localhost:6379')
+            self.redis_client = redis.Redis.from_url(redis_url)
+            logger.info("Conexión a Redis establecida para caching")
+        except Exception as e:
+            logger.error(f"Error conectando a Redis: {e}")
+            self.redis_client = None
     
     def _initialize_rest_client(self):
-        """Inicializa el cliente REST asíncrono de Bitget"""
+        """Inicializa el cliente REST de ccxt"""
         try:
-            if not self.api_key or not self.secret_key:
-                logger.warning("Credenciales de Bitget no configuradas")
-                return
-            
-            # Configurar sandbox según el modo
-            sandbox = self.trading_mode in ['paper_trading', 'backtesting']
-            
-            self.rest_client = ccxt.bitget({
+            exchange_config = {
                 'apiKey': self.api_key,
                 'secret': self.secret_key,
                 'password': self.passphrase,
-                'sandbox': sandbox,
                 'enableRateLimit': True,
-                'rateLimit': 100,  # 100ms entre requests
-                'options': {
-                    'defaultType': 'swap' if self.is_futures else 'spot',
-                    'marginMode': 'isolated' if self.is_futures else None
-                }
-            })
-            
-            logger.info(f"Cliente REST asíncrono inicializado - Sandbox: {sandbox}")
-            
+                'asyncio_loop': asyncio.get_event_loop()
+            }
+            self.rest_client = ccxt.bitget(exchange_config)
+            self.rest_client.load_markets()
+            logger.info("Cliente REST inicializado")
         except Exception as e:
             logger.error(f"Error inicializando cliente REST: {e}")
             self.rest_client = None
     
-    async def get_market_data(self, symbol: str, timeframe: str = '1m', limit: int = 100) -> List[Dict]:
-        """
-        Obtiene datos de mercado históricos
-        
-        Args:
-            symbol: Símbolo del activo (ej: BTCUSDT)
-            timeframe: Timeframe (1m, 5m, 15m, 1h, 4h, 1d)
-            limit: Número de velas a obtener
-        
-        Returns:
-            Lista de velas OHLCV
-        """
+    async def set_position_mode(self, mode: str):
+        """Configura el modo de posición (one-way o hedge)"""
         try:
-            if not self.rest_client:
-                logger.error("Cliente REST no inicializado")
-                return []
-            
-            # Obtener datos históricos
-            ohlcv = self.rest_client.fetch_ohlcv(symbol, timeframe, limit=limit)
-            
-            # Convertir a formato estándar
-            klines = []
-            for candle in ohlcv:
-                klines.append({
-                    'timestamp': datetime.fromtimestamp(candle[0] / 1000),
-                    'open': float(candle[1]),
-                    'high': float(candle[2]),
-                    'low': float(candle[3]),
-                    'close': float(candle[4]),
-                    'volume': float(candle[5])
-                })
-            
-            logger.info(f"Datos obtenidos: {len(klines)} velas de {symbol}")
-            return klines
-            
+            if mode not in ['one-way', 'hedge']:
+                raise ValueError(f"Modo inválido: {mode}")
+            endpoint = '/api/mix/v1/position/setPositionMode'
+            params = {'positionMode': 'hedge_mode' if mode == 'hedge' else 'one_way_mode'}
+            response = await self._signed_request('POST', endpoint, params)
+            self.position_mode = mode
+            logger.info(f"Modo de posición configurado: {mode}")
+            return response
         except Exception as e:
-            logger.error(f"Error obteniendo datos de mercado: {e}")
-            return []
-    
-    async def get_current_price(self, symbol: str) -> Optional[float]:
-        """
-        Obtiene el precio actual de un símbolo
-        
-        Args:
-            symbol: Símbolo del activo
-        
-        Returns:
-            Precio actual o None si hay error
-        """
-        try:
-            if not self.rest_client:
-                return None
-            
-            ticker = self.rest_client.fetch_ticker(symbol)
-            return float(ticker['last'])
-            
-        except Exception as e:
-            logger.error(f"Error obteniendo precio actual: {e}")
+            logger.error(f"Error configurando modo de posición: {e}")
             return None
     
-    async def get_balance(self) -> Dict:
-        """
-        Obtiene el balance de la cuenta
-        
-        Returns:
-            Diccionario con balances por moneda
-        """
+    async def _signed_request(self, method: str, endpoint: str, params: Dict = None) -> Dict:
+        """Realiza una solicitud firmada a la API"""
         try:
-            if not self.rest_client:
-                return {}
+            timestamp = str(int(time.time() * 1000))
+            params = params or {}
+            query_string = urlencode(params)
+            sign_str = f"{timestamp}{method.upper()}{endpoint}{query_string}"
+            signature = hmac.new(
+                self.secret_key.encode('utf-8'),
+                sign_str.encode('utf-8'),
+                hashlib.sha256
+            ).hexdigest()
             
-            balance = self.rest_client.fetch_balance()
-            
-            # Filtrar solo balances con saldo > 0
-            filtered_balance = {}
-            for currency, data in balance.items():
-                if isinstance(data, dict) and data.get('free', 0) > 0:
-                    filtered_balance[currency] = {
-                        'free': data.get('free', 0),
-                        'used': data.get('used', 0),
-                        'total': data.get('total', 0)
-                    }
-            
-            return filtered_balance
-            
-        except Exception as e:
-            logger.error(f"Error obteniendo balance: {e}")
-            return {}
-    
-    async def create_order(
-        self,
-        symbol: str,
-        side: str,
-        amount: float,
-        price: Optional[float] = None,
-        order_type: str = 'limit',
-        client_order_id: Optional[str] = None
-    ) -> Optional[Dict]:
-        """
-        Crea una orden en Bitget
-        
-        Args:
-            symbol: Símbolo del activo
-            side: 'buy' o 'sell'
-            amount: Cantidad
-            price: Precio (para órdenes limit)
-            order_type: 'limit' o 'market'
-            client_order_id: ID único del cliente
-        
-        Returns:
-            Información de la orden creada
-        """
-        try:
-            if not self.rest_client:
-                logger.error("Cliente REST no inicializado")
-                return None
-            
-            # Preparar parámetros
-            order_params = {
-                'symbol': symbol,
-                'type': order_type,
-                'side': side,
-                'amount': amount,
+            headers = {
+                'ACCESS-KEY': self.api_key,
+                'ACCESS-SIGN': signature,
+                'ACCESS-TIMESTAMP': timestamp,
+                'ACCESS-PASSPHRASE': self.passphrase,
+                'Content-Type': 'application/json'
             }
             
-            if order_type == 'limit' and price:
-                order_params['price'] = price
-            
-            if client_order_id:
-                order_params['clientOrderId'] = client_order_id
-            
-            # Crear orden
-            order = self.rest_client.create_order(**order_params)
-            
-            logger.info(f"Orden creada: {order.get('id')} - {side} {amount} {symbol}")
-            return order
-            
-        except ccxt.InsufficientFunds as e:
-            logger.error(f"Fondos insuficientes: {e}")
-            return None
-        except ccxt.InvalidOrder as e:
-            logger.error(f"Orden inválida: {e}")
-            return None
-        except Exception as e:
-            logger.error(f"Error creando orden: {e}")
-            return None
-    
-    async def cancel_order(self, order_id: str, symbol: str) -> bool:
-        """
-        Cancela una orden
-        
-        Args:
-            order_id: ID de la orden
-            symbol: Símbolo del activo
-        
-        Returns:
-            True si se canceló exitosamente
-        """
-        try:
-            if not self.rest_client:
-                return False
-            
-            self.rest_client.cancel_order(order_id, symbol)
-            logger.info(f"Orden cancelada: {order_id}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error cancelando orden: {e}")
-            return False
-    
-    async def get_order_status(self, order_id: str, symbol: str) -> Optional[Dict]:
-        """
-        Obtiene el estado de una orden
-        
-        Args:
-            order_id: ID de la orden
-            symbol: Símbolo del activo
-        
-        Returns:
-            Estado de la orden
-        """
-        try:
-            if not self.rest_client:
-                return None
-            
-            order = self.rest_client.fetch_order(order_id, symbol)
-            return order
-            
-        except Exception as e:
-            logger.error(f"Error obteniendo estado de orden: {e}")
-            return None
-    
-    async def start_websocket(
-        self,
-        symbol: str,
-        callback: Callable,
-        topics: List[str] = None
-    ) -> bool:
-        """
-        Inicia conexión WebSocket para datos en tiempo real
-        
-        Args:
-            symbol: Símbolo del activo
-            callback: Función callback para procesar datos
-            topics: Lista de topics a suscribir
-        
-        Returns:
-            True si se inició exitosamente
-        """
-        try:
-            if symbol in self.ws_connections:
-                logger.warning(f"WebSocket ya activo para {symbol}")
-                return True
-            
-            # Topics por defecto
-            if topics is None:
-                topics = ['ticker', 'kline']
-            
-            # URL del WebSocket
-            ws_url = self._get_websocket_url()
-            
-            # Crear conexión
-            websocket = await websockets.connect(ws_url)
-            self.ws_connections[symbol] = websocket
-            self.ws_callbacks[symbol] = callback
-            self.reconnect_attempts[symbol] = 0
-            
-            # Suscribir a topics
-            await self._subscribe_to_topics(symbol, topics)
-            
-            # Iniciar loop de escucha
-            asyncio.create_task(self._websocket_listener(symbol))
-            
-            logger.info(f"WebSocket iniciado para {symbol} - Topics: {topics}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error iniciando WebSocket: {e}")
-            return False
-    
-    def _get_websocket_url(self) -> str:
-        """Obtiene la URL del WebSocket según el modo"""
-        if self.trading_mode in ['paper_trading', 'backtesting']:
-            # Sandbox/testnet
-            return "wss://ws-sandbox.bitget.com/spot/v1/stream"
-        else:
-            # Live
-            if self.is_futures:
-                return "wss://ws.bitget.com/spot/v1/stream"
+            url = f"{self.base_url}{endpoint}"
+            if method.upper() == 'GET':
+                response = await self.rest_client.fetch(url, method=method, headers=headers, params=params)
             else:
-                return "wss://ws.bitget.com/spot/v1/stream"
-    
-    async def _subscribe_to_topics(self, symbol: str, topics: List[str]):
-        """Suscribe a topics específicos"""
-        try:
-            websocket = self.ws_connections[symbol]
+                response = await self.rest_client.fetch(url, method=method, headers=headers, body=json.dumps(params))
             
-            for topic in topics:
-                if topic == 'ticker':
-                    message = {
-                        "op": "subscribe",
-                        "args": [{"instType": "SPOT", "channel": "ticker", "instId": symbol}]
-                    }
-                elif topic == 'kline':
-                    message = {
-                        "op": "subscribe",
-                        "args": [{"instType": "SPOT", "channel": "candle1m", "instId": symbol}]
-                    }
-                else:
-                    continue
-                
-                await websocket.send(json.dumps(message))
-                logger.info(f"Suscrito a {topic} para {symbol}")
-                
+            self.requests_made += 1
+            return response
         except Exception as e:
-            logger.error(f"Error suscribiendo a topics: {e}")
+            self.requests_failed += 1
+            logger.error(f"Error en solicitud firmada: {e}")
+            return {'error': str(e)}
     
-    async def _websocket_listener(self, symbol: str):
-        """Loop principal del WebSocket"""
+    async def fetch_ticker(self, symbol: str) -> Dict:
+        """Obtiene el ticker del símbolo especificado"""
         try:
-            websocket = self.ws_connections[symbol]
-            callback = self.ws_callbacks[symbol]
+            # Verificar cache en Redis
+            if self.redis_client:
+                cache_key = f"ticker_{symbol}"
+                cached_ticker = self.redis_client.get(cache_key)
+                if cached_ticker:
+                    self.cache_hits += 1
+                    return json.loads(cached_ticker)
             
-            while True:
-                try:
-                    # Recibir mensaje
-                    message = await websocket.recv()
-                    data = json.loads(message)
-                    
-                    # Procesar con callback
-                    if callback:
-                        await callback(symbol, data)
-                    
-                except websockets.exceptions.ConnectionClosed:
-                    logger.warning(f"WebSocket cerrado para {symbol}")
-                    break
-                except Exception as e:
-                    logger.error(f"Error en WebSocket listener: {e}")
-                    break
-                    
+            ticker = await self.rest_client.fetch_ticker(symbol)
+            self.requests_made += 1
+            
+            # Guardar en cache
+            if self.redis_client:
+                self.redis_client.setex(cache_key, 30, json.dumps(ticker))
+            
+            return ticker
         except Exception as e:
-            logger.error(f"Error en WebSocket listener: {e}")
-        finally:
-            # Limpiar conexión
-            if symbol in self.ws_connections:
-                del self.ws_connections[symbol]
-            if symbol in self.ws_callbacks:
-                del self.ws_callbacks[symbol]
-            
-            # Intentar reconexión
-            await self._attempt_reconnection(symbol)
+            self.requests_failed += 1
+            logger.error(f"Error obteniendo ticker para {symbol}: {e}")
+            return {'error': str(e)}
     
-    async def _attempt_reconnection(self, symbol: str):
-        """Intenta reconectar WebSocket"""
+    async def fetch_balance(self) -> Dict:
+        """Obtiene el balance de la cuenta"""
         try:
-            attempts = self.reconnect_attempts.get(symbol, 0)
-            
-            if attempts >= self.max_reconnect_attempts:
-                logger.error(f"Max intentos de reconexión alcanzados para {symbol}")
-                return
-            
-            # Incrementar contador
-            self.reconnect_attempts[symbol] = attempts + 1
-            
-            # Esperar antes de reconectar
-            wait_time = min(2 ** attempts, 30)  # Backoff exponencial
-            logger.info(f"Reconectando {symbol} en {wait_time}s (intento {attempts + 1})")
-            await asyncio.sleep(wait_time)
-            
-            # Intentar reconectar
-            callback = self.ws_callbacks.get(symbol)
-            if callback:
-                await self.start_websocket(symbol, callback)
-            
+            if self.trading_mode == 'paper_trading':
+                return {'USDT': {'free': 10000.0, 'used': 0.0, 'total': 10000.0}}
+            return await self.rest_client.fetch_balance()
         except Exception as e:
-            logger.error(f"Error en reconexión: {e}")
+            logger.error(f"Error obteniendo balance: {e}")
+            return {'error': str(e)}
     
-    async def stop_websocket(self, symbol: str) -> bool:
-        """
-        Detiene la conexión WebSocket
-        
-        Args:
-            symbol: Símbolo del activo
-        
-        Returns:
-            True si se detuvo exitosamente
-        """
+    async def create_order(self, symbol: str, side: str, order_type: str, amount: float, price: Optional[float] = None, params: Dict = None) -> Dict:
+        """Crea una orden en Bitget"""
         try:
-            if symbol not in self.ws_connections:
-                return True
-            
-            websocket = self.ws_connections[symbol]
-            await websocket.close()
-            
-            # Limpiar
-            del self.ws_connections[symbol]
-            if symbol in self.ws_callbacks:
-                del self.ws_callbacks[symbol]
-            if symbol in self.reconnect_attempts:
-                del self.reconnect_attempts[symbol]
-            
-            logger.info(f"WebSocket detenido para {symbol}")
-            return True
-            
+            params = params or {}
+            if self.is_futures:
+                params['marginMode'] = 'isolated'
+                params['productType'] = 'umcbl'  # USDT-M Futures
+            order = await self.rest_client.create_order(symbol, order_type, side, amount, price, params)
+            self.requests_made += 1
+            return order
         except Exception as e:
-            logger.error(f"Error deteniendo WebSocket: {e}")
-            return False
+            self.requests_failed += 1
+            logger.error(f"Error creando orden para {symbol}: {e}")
+            return {'error': str(e)}
     
-    async def stop_all_websockets(self) -> bool:
-        """Detiene todas las conexiones WebSocket"""
+    async def set_leverage(self, symbol: str, leverage: int) -> Dict:
+        """Configura el apalancamiento para un símbolo"""
         try:
-            symbols = list(self.ws_connections.keys())
-            
-            for symbol in symbols:
-                await self.stop_websocket(symbol)
-            
-            logger.info("Todos los WebSockets detenidos")
-            return True
-            
+            endpoint = '/api/mix/v1/position/setLeverage'
+            params = {
+                'symbol': symbol.replace('/', ''),
+                'marginMode': 'isolated',
+                'leverage': str(leverage)
+            }
+            response = await self._signed_request('POST', endpoint, params)
+            logger.info(f"Leverage configurado para {symbol}: {leverage}x")
+            return response
         except Exception as e:
-            logger.error(f"Error deteniendo WebSockets: {e}")
-            return False
+            logger.error(f"Error configurando leverage para {symbol}: {e}")
+            return {'error': str(e)}
     
-    def get_connection_status(self) -> Dict:
-        """Obtiene el estado de las conexiones"""
-        return {
-            'rest_client': self.rest_client is not None,
-            'ws_connections': list(self.ws_connections.keys()),
-            'reconnect_attempts': dict(self.reconnect_attempts),
-            'trading_mode': self.trading_mode,
-            'is_futures': self.is_futures
-        }
-    
-    # ==================== FUTURES TRADING METHODS ====================
-    
-    async def set_leverage(self, symbol: str, leverage: int) -> bool:
-        """
-        Configura el leverage para un símbolo de futuros
-        
-        Args:
-            symbol: Símbolo del activo
-            leverage: Leverage deseado (1-125)
-        
-        Returns:
-            True si se configuró exitosamente
-        """
+    async def fetch_positions(self, symbol: Optional[str] = None) -> List[Dict]:
+        """Obtiene las posiciones abiertas"""
         try:
-            if not self.rest_client or not self.is_futures:
-                logger.error("Cliente REST no disponible o no es modo futures")
-                return False
-            
-            # Configurar leverage
-            await self.rest_client.set_leverage(leverage, symbol)
-            logger.info(f"Leverage configurado: {symbol} = {leverage}x")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error configurando leverage: {e}")
-            return False
-    
-    async def get_positions(self) -> List[Dict]:
-        """
-        Obtiene posiciones abiertas de futuros
-        
-        Returns:
-            Lista de posiciones abiertas
-        """
-        try:
-            if not self.rest_client or not self.is_futures:
-                return []
-            
-            positions = await self.rest_client.fetch_positions()
-            
-            # Filtrar solo posiciones con tamaño > 0
-            open_positions = []
-            for pos in positions:
-                if pos['contracts'] > 0:
-                    open_positions.append({
-                        'symbol': pos['symbol'],
-                        'side': pos['side'],
-                        'size': pos['contracts'],
-                        'entry_price': pos['entryPrice'],
-                        'mark_price': pos['markPrice'],
-                        'unrealized_pnl': pos['unrealizedPnl'],
-                        'percentage': pos['percentage'],
-                        'leverage': pos['leverage'],
-                        'margin': pos['margin']
-                    })
-            
-            return open_positions
-            
+            endpoint = '/api/mix/v1/position/allPosition'
+            params = {'productType': 'umcbl'} if not symbol else {'symbol': symbol.replace('/', ''), 'productType': 'umcbl'}
+            response = await self._signed_request('GET', endpoint, params)
+            self.requests_made += 1
+            return response.get('data', [])
         except Exception as e:
             logger.error(f"Error obteniendo posiciones: {e}")
             return []
     
-    async def create_futures_order(
-        self,
-        symbol: str,
-        side: str,
-        amount: float,
-        order_type: str = 'market',
-        price: Optional[float] = None,
-        leverage: Optional[int] = None,
-        stop_price: Optional[float] = None,
-        client_order_id: Optional[str] = None
-    ) -> Optional[Dict]:
-        """
-        Crea una orden de futuros
-        
-        Args:
-            symbol: Símbolo del activo
-            side: 'buy' o 'sell'
-            amount: Cantidad
-            order_type: 'market', 'limit', 'stop', 'stop_limit'
-            price: Precio (para órdenes limit)
-            leverage: Leverage a usar
-            stop_price: Precio de stop
-            client_order_id: ID único del cliente
-        
-        Returns:
-            Información de la orden creada
-        """
+    async def start_websocket(self, channels: List[str], callback: Callable, symbol: Optional[str] = None):
+        """Inicia una conexión WebSocket"""
         try:
-            if not self.rest_client or not self.is_futures:
-                logger.error("Cliente REST no disponible o no es modo futures")
-                return None
-            
-            # Configurar leverage si se proporciona
-            if leverage:
-                await self.set_leverage(symbol, leverage)
-            
-            # Preparar parámetros
-            order_params = {
-                'symbol': symbol,
-                'type': order_type,
-                'side': side,
-                'amount': amount,
-            }
-            
-            if order_type in ['limit', 'stop_limit'] and price:
-                order_params['price'] = price
-            
-            if order_type in ['stop', 'stop_limit'] and stop_price:
-                order_params['stopPrice'] = stop_price
-            
-            if client_order_id:
-                order_params['clientOrderId'] = client_order_id
-            
-            # Parámetros específicos de futuros
-            order_params['params'] = {
-                'marginMode': 'isolated',
-                'positionSide': 'long' if side == 'buy' else 'short'
-            }
-            
-            # Crear orden
-            order = await self.rest_client.create_order(**order_params)
-            
-            self.requests_made += 1
-            logger.info(f"Orden de futuros creada: {order.get('id')} - {side} {amount} {symbol}")
-            return order
-            
-        except ccxt.InsufficientFunds as e:
-            logger.error(f"Fondos insuficientes: {e}")
-            self.requests_failed += 1
-            return None
-        except ccxt.InvalidOrder as e:
-            logger.error(f"Orden inválida: {e}")
-            self.requests_failed += 1
-            return None
+            ws_key = f"{symbol or 'global'}_{','.join(channels)}"
+            self.ws_connections[ws_key] = None
+            self.ws_callbacks[ws_key] = callback
+            self.reconnect_attempts[ws_key] = 0
+            asyncio.create_task(self._websocket_listener(ws_key, channels, symbol))
+            logger.info(f"WebSocket iniciado para {ws_key}")
         except Exception as e:
-            logger.error(f"Error creando orden de futuros: {e}")
-            self.requests_failed += 1
-            return None
+            logger.error(f"Error iniciando WebSocket: {e}")
     
-    async def close_position(self, symbol: str, side: str, amount: float) -> Optional[Dict]:
-        """
-        Cierra una posición de futuros
-        
-        Args:
-            symbol: Símbolo del activo
-            side: 'buy' o 'sell' (lado opuesto para cerrar)
-            amount: Cantidad a cerrar
-        
-        Returns:
-            Información de la orden de cierre
-        """
-        try:
-            # Para cerrar una posición, usamos el lado opuesto
-            close_side = 'sell' if side == 'long' else 'buy'
-            
-            order = await self.create_futures_order(
-                symbol=symbol,
-                side=close_side,
-                amount=amount,
-                order_type='market'
-            )
-            
-            if order:
-                logger.info(f"Posición cerrada: {symbol} {side} - {amount}")
-            
-            return order
-            
-        except Exception as e:
-            logger.error(f"Error cerrando posición: {e}")
-            return None
-    
-    async def get_funding_rate(self, symbol: str) -> Optional[Dict]:
-        """
-        Obtiene la tasa de funding para un símbolo
-        
-        Args:
-            symbol: Símbolo del activo
-        
-        Returns:
-            Información de funding rate
-        """
-        try:
-            if not self.rest_client or not self.is_futures:
-                return None
-            
-            # Obtener información de funding
-            funding_info = await self.rest_client.fetch_funding_rate(symbol)
-            
-            return {
-                'symbol': symbol,
-                'funding_rate': funding_info.get('fundingRate', 0),
-                'funding_time': funding_info.get('fundingTime', 0),
-                'next_funding_time': funding_info.get('nextFundingTime', 0)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error obteniendo funding rate: {e}")
-            return None
-    
-    async def get_margin_info(self) -> Optional[Dict]:
-        """
-        Obtiene información de margen de la cuenta
-        
-        Returns:
-            Información de margen
-        """
-        try:
-            if not self.rest_client or not self.is_futures:
-                return None
-            
-            balance = await self.rest_client.fetch_balance()
-            
-            return {
-                'total_balance': balance.get('USDT', {}).get('total', 0),
-                'free_balance': balance.get('USDT', {}).get('free', 0),
-                'used_balance': balance.get('USDT', {}).get('used', 0),
-                'margin_ratio': balance.get('info', {}).get('marginRatio', 0)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error obteniendo información de margen: {e}")
-            return None
-    
-    # ==================== ENHANCED WEBSOCKET METHODS ====================
-    
-    async def start_websocket_streaming(
-        self,
-        symbols: List[str],
-        callback: Callable,
-        topics: List[str] = None
-    ) -> bool:
-        """
-        Inicia streaming WebSocket para múltiples símbolos
-        
-        Args:
-            symbols: Lista de símbolos
-            callback: Función callback para procesar datos
-            topics: Lista de topics a suscribir
-        
-        Returns:
-            True si se inició exitosamente
-        """
-        try:
-            if topics is None:
-                topics = ['kline', 'ticker', 'orderbook']
-            
-            # Crear conexión WebSocket
-            websocket = await websockets.connect(self.ws_url)
-            
-            # Suscribir a todos los símbolos y topics
-            subscriptions = []
-            for symbol in symbols:
-                for topic in topics:
-                    if topic == 'kline':
-                        subscriptions.append({
-                            "instType": "sp",
-                            "channel": "kline.1m",
-                            "instId": symbol
-                        })
-                    elif topic == 'ticker':
-                        subscriptions.append({
-                            "instType": "sp",
-                            "channel": "ticker",
-                            "instId": symbol
-                        })
-                    elif topic == 'orderbook':
-                        subscriptions.append({
-                            "instType": "sp",
-                            "channel": "books",
-                            "instId": symbol
-                        })
-            
-            # Enviar suscripción
-            subscribe_message = {
-                "op": "subscribe",
-                "args": subscriptions
-            }
-            
-            await websocket.send(json.dumps(subscribe_message))
-            
-            # Iniciar listener
-            asyncio.create_task(self._websocket_streaming_listener(websocket, callback))
-            
-            logger.info(f"WebSocket streaming iniciado para {len(symbols)} símbolos")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error iniciando WebSocket streaming: {e}")
-            return False
-    
-    async def _websocket_streaming_listener(self, websocket, callback: Callable):
-        """Listener para WebSocket streaming"""
-        try:
-            while True:
-                try:
-                    message = await websocket.recv()
-                    data = json.loads(message)
+    async def _websocket_listener(self, ws_key: str, channels: List[str], symbol: Optional[str] = None):
+        """Escucha mensajes WebSocket con reconexión automática"""
+        while self.reconnect_attempts[ws_key] < self.max_reconnect_attempts:
+            try:
+                async with websockets.connect(self.ws_url) as websocket:
+                    self.ws_connections[ws_key] = websocket
+                    self.reconnect_attempts[ws_key] = 0
                     
-                    # Procesar con callback
-                    if callback:
-                        await callback(data)
+                    # Suscribirse a canales
+                    subscribe_msg = {
+                        'op': 'subscribe',
+                        'args': [{'instType': 'umcbl', 'channel': ch, 'instId': symbol.replace('/', '') if symbol else 'default'} for ch in channels]
+                    }
+                    await websocket.send(json.dumps(subscribe_msg))
                     
-                    self.websocket_messages += 1
-                    
-                except websockets.exceptions.ConnectionClosed:
-                    logger.warning("WebSocket cerrado")
-                    break
-                except Exception as e:
-                    logger.error(f"Error en WebSocket listener: {e}")
-                    break
-                    
-        except Exception as e:
-            logger.error(f"Error en WebSocket streaming listener: {e}")
-        finally:
-            await websocket.close()
+                    async for message in websocket:
+                        self.websocket_messages += 1
+                        data = json.loads(message)
+                        await self.ws_callbacks[ws_key](data)
+                
+            except Exception as e:
+                self.reconnect_attempts[ws_key] += 1
+                delay = self.reconnect_delay * (2 ** self.reconnect_attempts[ws_key])
+                logger.warning(f"WebSocket {ws_key} desconectado. Reintentando en {delay}s... ({self.reconnect_attempts[ws_key]}/{self.max_reconnect_attempts})")
+                await asyncio.sleep(delay)
+        
+        logger.error(f"WebSocket {ws_key} alcanzó máximo de reintentos")
+        self.ws_connections.pop(ws_key, None)
     
-    # ==================== METRICS AND MONITORING ====================
+    async def stop_all_websockets(self):
+        """Para todas las conexiones WebSocket"""
+        for ws_key, websocket in list(self.ws_connections.items()):
+            if websocket:
+                await websocket.close()
+                self.ws_connections.pop(ws_key, None)
+        logger.info("Todas las conexiones WebSocket cerradas")
     
     def get_performance_metrics(self) -> Dict[str, Any]:
         """Obtiene métricas de performance"""
@@ -833,7 +301,8 @@ class BitgetClient:
             'websocket_messages': self.websocket_messages,
             'success_rate': (self.requests_made - self.requests_failed) / self.requests_made if self.requests_made > 0 else 0,
             'websocket_connections': len(self.ws_connections),
-            'reconnect_attempts': dict(self.reconnect_attempts)
+            'reconnect_attempts': dict(self.reconnect_attempts),
+            'cache_hit_rate': self.cache_hits / (self.cache_hits + self.cache_misses) if (self.cache_hits + self.cache_misses) > 0 else 0
         }
     
     async def health_check(self) -> Dict:
@@ -845,13 +314,13 @@ class BitgetClient:
                 'credentials': bool(self.api_key and self.secret_key),
                 'trading_mode': self.trading_mode,
                 'is_futures': self.is_futures,
+                'position_mode': self.position_mode,
                 'performance_metrics': self.get_performance_metrics()
             }
             
             # Verificar REST API
             if self.rest_client:
                 try:
-                    # Intentar obtener ticker
                     ticker = await self.rest_client.fetch_ticker('BTCUSDT')
                     health_status['rest_api'] = True
                 except Exception as e:
@@ -870,13 +339,11 @@ class BitgetClient:
     async def close(self):
         """Cierra todas las conexiones"""
         try:
-            # Cerrar WebSockets
             await self.stop_all_websockets()
-            
-            # Cerrar cliente REST
             if self.rest_client:
                 await self.rest_client.close()
-            
+            if self.redis_client:
+                self.redis_client.close()
             logger.info("✅ BitgetClient cerrado correctamente")
             
         except Exception as e:

@@ -1,106 +1,171 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script: Analizar y reparar problemas de datos históricos
-Objetivo: Detectar gaps, duplicados y valores inválidos. Reparación básica opcional.
+Script para /analyze_data - Enterprise: Analiza issues (gaps, duplicados).
+Llama core/data/history_analyzer.py.
+Progreso por símbolo.
+Retorna JSON para handlers.py.
 """
 
+import asyncio
 import sys
+import json
 import logging
-from typing import List
-import argparse
 from pathlib import Path
+from dotenv import load_dotenv
+from typing import Dict, List, Any
 
-# Asegurar importaciones desde la raíz del proyecto
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+# Importar ConfigLoader
+from config.config_loader import ConfigLoader
 
-# Configurar codificación UTF-8 para Windows
-if sys.platform.startswith('win'):
-    import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+# Cargar .env
+load_dotenv()
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+# Path al root
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+# Logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.FileHandler('logs/analyze_data.log'), logging.StreamHandler()]
+)
 logger = logging.getLogger(__name__)
 
-
-async def _run(symbols: List[str] = None, auto_repair: bool = True) -> int:
-    try:
-        from core.data.history_analyzer import HistoryAnalyzer
-
-        analyzer = HistoryAnalyzer()
-
-        if symbols is None or len(symbols) == 0:
-            symbols = analyzer.symbols
-
-        logger.info(f"📊 Analizando datos históricos | Símbolos: {len(symbols)}")
-
-        issues = await analyzer.detect_data_issues(symbols)
-        total = issues.get('total_issues', 0) if isinstance(issues, dict) else None
-        
-        # Build report
-        report_lines = []
-        report_lines.append(f"📊 Análisis de datos | Símbolos: {len(symbols)}")
-        report_lines.append(f"🔍 Problemas detectados totales: {total if total is not None else 'N/A'}")
-        
-        # Detalles por símbolo
-        for sym in symbols:
-            report_lines.append("─" * 60)
-            report_lines.append(f"🎯 Símbolo: {sym}")
-            
-            # Obtener detalles específicos del símbolo
+class AnalyzeDataEnterprise:
+    """Análisis enterprise de datos"""
+    
+    def __init__(self, progress_id: str = None, auto_repair: bool = True):
+        self.progress_id = progress_id
+        self.auto_repair = auto_repair
+        self.config_loader = ConfigLoader("config/user_settings.yaml")
+        self.config = self.config_loader.load_config()
+        self.analyzer = None
+        self._init_progress_file()
+    
+    def _init_progress_file(self):
+        if self.progress_id:
+            progress_path = Path("data/tmp") / f"{self.progress_id}.json"
+            Path("data/tmp").mkdir(exist_ok=True)
+            with open(progress_path, 'w') as f:
+                json.dump({"progress": 0, "bar": "░░░░░░░░░░", "current_symbol": "Iniciando", "status": "starting"}, f)
+    
+    def _update_progress(self, progress: int, current_symbol: str, status: str = "Analizando"):
+        if self.progress_id:
+            progress_path = Path("data/tmp") / f"{self.progress_id}.json"
+            bar_length = 10
+            filled = int(progress / 100 * bar_length)
+            bar = "█" * filled + "░" * (bar_length - filled)
+            data = {"progress": progress, "bar": bar, "current_symbol": current_symbol, "status": status}
+            with open(progress_path, 'w') as f:
+                json.dump(data, f)
+    
+    async def initialize(self) -> bool:
+        max_retries = 3
+        for attempt in range(max_retries):
             try:
-                symbol_issues = issues.get('symbols', {}).get(sym, {}) if isinstance(issues, dict) else {}
-                gaps = symbol_issues.get('gaps', 0)
-                duplicates = symbol_issues.get('duplicates', 0)
-                invalid_ohlcv = symbol_issues.get('invalid_ohlcv', 0)
+                from core.data.history_analyzer import HistoryAnalyzer
                 
-                if gaps > 0 or duplicates > 0 or invalid_ohlcv > 0:
-                    report_lines.append(f"• Gaps detectados: {gaps}")
-                    report_lines.append(f"• Duplicados: {duplicates}")
-                    report_lines.append(f"• Valores inválidos: {invalid_ohlcv}")
-                else:
-                    report_lines.append("• ✅ Sin problemas detectados")
-                    
+                self.analyzer = HistoryAnalyzer()
+                
+                self._update_progress(10, "Inicializando analyzer", "Configurando core/")
+                logger.info("✅ Analyzer inicializado")
+                return True
             except Exception as e:
-                report_lines.append(f"• ❌ Error analizando: {e}")
-
-        # Mensaje de reparación separado
-        if auto_repair:
-            logger.info("🔧 Iniciando reparación básica (duplicados + gaps)")
-            repair = await analyzer.repair_data_issues(symbols=symbols, repair_duplicates=True, fill_gaps=True)
+                logger.warning(f"⚠️ Retry {attempt + 1}: {e}")
+                await asyncio.sleep(2 ** attempt)
+        return False
+    
+    async def execute(self) -> Dict[str, Any]:
+        try:
+            self._update_progress(0, "Iniciando análisis", "starting")
+            logger.info("🚀 Análisis enterprise iniciado")
             
-            # Separar el mensaje de reparación
-            report_lines.append("─" * 60)
-            report_lines.append("🔧 RESULTADO DE REPARACIÓN")
-            report_lines.append(
-                f"✅ Reparación: exito={repair.get('successful_repairs', 0)} | "
-                f"fallos={repair.get('failed_repairs', 0)} | total={repair.get('total_repairs', 0)}"
-            )
+            if not await self.initialize():
+                return {"status": "error", "message": "Error inicializando analyzer"}
+            
+            symbols = self.config.get("trading_settings", {}).get("symbols", [])
+            timeframes = self.config.get("trading_settings", {}).get("timeframes", ["1m", "5m", "15m", "1h", "4h", "1d"])
+            
+            if not symbols or not timeframes:
+                return {"status": "error", "message": "No config"}
+            
+            self._update_progress(20, f"Analizando {len(symbols)} símbolos", "Detectando issues")
+            logger.info(f"Símbolos: {symbols} | TFs: {timeframes}")
+            
+            total_steps = len(symbols)
+            step = 0
+            issues_by_symbol = {}
+            reports_by_symbol = []
+            total_issues = 0
+            
+            for symbol in symbols:
+                self._update_progress(30 + (step / total_steps * 50), symbol, "Analizando símbolo")
+                try:
+                    # Detectar issues via analyzer
+                    issues = await self.analyzer.detect_data_issues([symbol], timeframes=timeframes)
+                    sym_issues = issues.get("symbols", {}).get(symbol, {})
+                    total_issues += sym_issues.get("total_issues", 0)
+                    
+                    # Reparar si auto_repair
+                    if self.auto_repair:
+                        repair = await self.analyzer.repair_data_issues(
+                            [symbol], repair_duplicates=True, fill_gaps=True, timeframes=timeframes
+                        )
+                        sym_issues["repairs"] = repair.get("successful_repairs", 0)
+                    
+                    issues_by_symbol[symbol] = sym_issues
+                    sym_report = self._generate_symbol_report(symbol, sym_issues)
+                    reports_by_symbol.append(sym_report)
+                    step += 1
+                except Exception as e:
+                    logger.error(f"❌ {symbol}: {e}")
+                    issues_by_symbol[symbol] = {"total_issues": 0, "status": "error"}
+                    step += 1
+            
+            self._update_progress(100, "Completado", "completed")
+            
+            return {
+                "status": "success",
+                "report": reports_by_symbol,
+                "total_issues": total_issues,
+                "issues_by_symbol": issues_by_symbol
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error análisis: {e}")
+            self._update_progress(0, "Error", "error")
+            return {"status": "error", "message": str(e)}
+    
+    def _generate_symbol_report(self, symbol: str, issues: Dict) -> str:
+        gaps = issues.get("gaps", 0)
+        duplicates = issues.get("duplicates", 0)
+        invalid = issues.get("invalid_ohlcv", 0)
+        repairs = issues.get("repairs", 0)
+        report = f"""
+<b>🔍 {symbol}:</b>
+• Gaps: {gaps}
+• Duplicados: {duplicates}
+• Inválidos: {invalid}
+• Reparados: {repairs}
+• Estado: {'✅ Limpio' if issues.get("total_issues", 0) == 0 else '⚠️ Issues encontrados'}
+        """
+        return report.strip()
 
-        report_lines.append("─" * 60)
-        report_lines.append("✅ Análisis completado")
-        print("\n".join(report_lines))
-        return 0
+async def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--progress_id", required=True)
+    parser.add_argument("--no-repair", action="store_true")
+    args = parser.parse_args()
+    
+    script = AnalyzeDataEnterprise(progress_id=args.progress_id, auto_repair=not args.no_repair)
+    result = await script.execute()
+    
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    
+    if result.get("status") != "success":
+        sys.exit(1)
 
-    except Exception as e:
-        logger.error(f"❌ Error analizando datos: {e}")
-        return 2
-
-
-def main(argv: List[str]) -> int:
-    parser = argparse.ArgumentParser(description="Analizar y reparar datos históricos")
-    parser.add_argument('--symbols', type=str, help='Lista de símbolos separados por coma (opcional)')
-    parser.add_argument('--no-repair', action='store_true', help='Solo analizar, no reparar')
-    args = parser.parse_args(argv)
-
-    symbols = [s.strip().upper() for s in args.symbols.split(',')] if args.symbols else None
-    auto_repair = not args.no_repair
-    import asyncio
-    return asyncio.run(_run(symbols=symbols, auto_repair=auto_repair))
-
-
-if __name__ == '__main__':
-    sys.exit(main(sys.argv[1:]))
-
-
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -2,7 +2,7 @@
 """
 trading/order_manager.py
 Sistema de gestión de órdenes para trading
-Ubicación: C:\\TradingBot_v10\\trading\\order_manager.py
+Ubicación: C:\\TradingBot_v10\\core\\trading\\order_manager.py
 
 Funcionalidades:
 - Ejecución de órdenes en modo paper y live

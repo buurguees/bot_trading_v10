@@ -2,7 +2,7 @@
 """
 data/collector.py - VERSIÓN PROFESIONAL MEJORADA
 Recolector de datos de mercado desde Bitget API
-Ubicación: C:\TradingBot_v10\data\collector.py
+Ubicación: C:\\TradingBot_v10\\data\\collector.py
 
 MEJORAS PRINCIPALES:
 - Gestión robusta de timestamps (milisegundos/segundos)
@@ -850,8 +850,18 @@ class BitgetDataCollector:
     def _get_symbols_from_config(self) -> List[str]:
         """Obtiene símbolos desde la configuración del usuario"""
         try:
-            symbols = user_config.get_symbols()
-            return [self._normalize_symbol(symbol) for symbol in symbols]
+            # Obtener símbolos desde la configuración
+            symbols_cfg = user_config.get_value(['trading_settings', 'symbols'], [])
+            if not symbols_cfg:
+                # Fallback a configuración alternativa
+                symbols_cfg = user_config.get_value(['multi_symbol_settings', 'symbols'], {})
+                if isinstance(symbols_cfg, dict):
+                    symbols_cfg = [sym for sym, cfg in symbols_cfg.items() if cfg.get('enabled', True)]
+            
+            if not symbols_cfg:
+                symbols_cfg = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+            
+            return [self._normalize_symbol(symbol) for symbol in symbols_cfg]
         except Exception as e:
             logger.error(f"Error obteniendo símbolos de configuración: {e}")
             return ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']

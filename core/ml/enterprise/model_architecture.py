@@ -23,6 +23,9 @@ import math
 import yaml
 from pathlib import Path
 
+# Importar ConfigLoader
+from config.config_loader import ConfigLoader
+
 class MultiHeadAttention(nn.Module):
     """Mecanismo de atención multi-cabeza para series temporales"""
     

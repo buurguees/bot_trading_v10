@@ -1,125 +1,202 @@
-# Configuración de Datos - Bot Trading v10 Enterprise
-# ==================================================
+# Ruta: config/data_config.yaml
+# data_config.yaml - Configuración de gestión de datos
+# Ubicación: config/data_config.yaml
 
-# Configuración de base de datos
-database:
-  primary: "sqlite"
-  sqlite:
-    path: "data/trading_bot.db"
-    per_symbol: true
-    compression: true
-    vacuum_frequency: "weekly"
-  
-  redis:
-    enabled: true
-    url: "redis://localhost:6379"
-    db: 0
-    max_connections: 10
-    timeout: 5
-  
-  timescaledb:
-    enabled: false
-    url: "postgresql://user:password@localhost:5432/trading_bot"
-    max_connections: 20
-
-# Configuración de datos históricos
-historical_data:
-  enabled: true
-  years: 1
-  timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
-  symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT", "AVAXUSDT", "TONUSDT", "XRPUSDT", "LINKUSDT"]
-  
-  storage:
-    format: "sqlite"
-    structure: "symbol_based"
-    database_per_symbol: true
-    compression_enabled: true
-    compression_days: 180
-  
-  verification:
-    auto_verify_coverage: true
-    min_coverage_days: 365
-    download_missing: true
-    verification_interval_hours: 24
+version: "1.0"
 
 # Configuración de datos en tiempo real
 real_time_data:
   enabled: true
-  symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT", "AVAXUSDT", "TONUSDT", "XRPUSDT", "LINKUSDT"]
+  symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT"]
   timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
-  data_types: ["kline", "ticker", "orderbook"]
+  data_types: ["tick", "ohlcv", "volume", "orderbook", "trades"]
   
+  # Configuración de recolección
   collection:
-    interval: 1  # segundos
+    method: "websocket"  # websocket, rest, hybrid
+    frequency: 1000  # ms
+    buffer_size: 10000
     batch_size: 100
-    buffer_size: 1000
-    flush_interval: 10  # segundos
+    timeout: 30  # seconds
+    
+  # Configuración de almacenamiento
+  storage:
+    primary: "redis"  # redis, memory, file
+    secondary: "sqlite"  # sqlite, timescaledb, file
+    compression: true
+    encryption: false
+
+# Configuración de datos históricos
+historical_data:
+  enabled: true
+  years: 2
+  timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
+  symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT"]
+  
+  # Configuración de almacenamiento
+  storage:
+    format: "parquet"  # parquet, csv, hdf5
+    compression: "snappy"
+    partitioning: "symbol,timeframe"
+    
+  # Configuración de verificación
+  verification:
+    download_missing: true
+    min_coverage_days: 30
+    max_gap_minutes: 60
+    validate_continuity: true
+    
+  # Configuración de base de datos por símbolo
+  database_per_symbol: true
+  symbol_db_path: "data/symbols/{symbol}/trading_bot_{symbol}.db"
+
+# Configuración de base de datos
+database:
+  # SQLite
+  sqlite:
+    enabled: true
+    path: "data/trading_bot.db"
+    per_symbol: true
+    journal_mode: "WAL"
+    synchronous: "NORMAL"
+    cache_size: 10000
+    temp_store: "MEMORY"
+    
+  # Redis
+  redis:
+    enabled: true
+    url: "redis://localhost:6379"
+    db: 0
+    password: ""
+    max_connections: 10
+    socket_timeout: 5
+    socket_connect_timeout: 5
+    retry_on_timeout: true
+    
+  # TimescaleDB
+  timescaledb:
+    enabled: false
+    url: "postgresql://user:password@localhost:5432/trading_bot"
+    ssl_mode: "prefer"
+    max_connections: 5
+    connection_timeout: 30
+    command_timeout: 60
 
 # Configuración de alineación temporal
 alignment:
   enabled: true
   base_timeframe: "5m"
   tolerance_minutes: 1
-  min_data_coverage: 0.95
   max_gap_minutes: 60
-  auto_align_on_startup: true
   
   # Configuración por timeframe
   timeframe_config:
     "1m":
-      priority: 1
-      buffer_size: 1000
-      flush_interval_ms: 60000
-      required_for_trading: true
+      tolerance_seconds: 30
+      max_gap_seconds: 300
+      
     "5m":
-      priority: 1
-      buffer_size: 200
-      flush_interval_ms: 300000
-      required_for_trading: true
-      base_for_alignment: true
+      tolerance_seconds: 60
+      max_gap_seconds: 600
+      
     "15m":
-      priority: 2
-      buffer_size: 100
-      flush_interval_ms: 900000
-      required_for_trading: true
+      tolerance_seconds: 120
+      max_gap_seconds: 900
+      
     "1h":
-      priority: 2
-      buffer_size: 24
-      flush_interval_ms: 3600000
-      required_for_ml: true
+      tolerance_minutes: 2
+      max_gap_minutes: 30
+      
     "4h":
-      priority: 3
-      buffer_size: 6
-      flush_interval_ms: 14400000
-      required_for_ml: true
+      tolerance_minutes: 5
+      max_gap_minutes: 60
+      
     "1d":
-      priority: 3
-      buffer_size: 1
-      flush_interval_ms: 86400000
-      required_for_ml: true
+      tolerance_minutes: 10
+      max_gap_minutes: 240
 
 # Configuración de limpieza de datos
 data_cleanup:
   enabled: true
-  remove_duplicates: true
-  fill_gaps: true
-  max_gap_minutes: 60
-  outlier_threshold: 3.0
-  min_volume_threshold: 0.0
+  frequency: "daily"
+  time: "03:00"
+  
+  # Configuración de limpieza
+  cleanup_rules:
+    - type: "duplicate_removal"
+      enabled: true
+      threshold: 0.001  # 0.1%
+      
+    - type: "outlier_removal"
+      enabled: true
+      method: "iqr"
+      factor: 3.0
+      
+    - type: "gap_filling"
+      enabled: true
+      max_gap_minutes: 60
+      method: "linear_interpolation"
+      
+    - type: "noise_reduction"
+      enabled: true
+      window_size: 5
+      method: "moving_average"
 
 # Configuración de backup
 backup:
   enabled: true
   frequency: "daily"
+  time: "02:00"
   retention_days: 30
-  compression: true
-  include_logs: true
-  include_models: true
-  include_strategies: true
+  
+  # Configuración de backup
+  backup_config:
+    - type: "database"
+      source: "data/trading_bot.db"
+      destination: "backups/database/"
+      compression: true
+      
+    - type: "logs"
+      source: "logs/"
+      destination: "backups/logs/"
+      compression: true
+      
+    - type: "models"
+      source: "agents/"
+      destination: "backups/models/"
+      compression: true
+      
+    - type: "config"
+      source: "config/"
+      destination: "backups/config/"
+      compression: false
 
-# Configuración de migración
-migration:
+# Configuración de monitoreo de datos
+monitoring:
   enabled: true
-  auto_migrate: true
-  backup_legacy: true
-  validate_after_migration: true
+  
+  # Métricas de calidad
+  quality_metrics:
+    - "completeness"
+    - "accuracy"
+    - "consistency"
+    - "timeliness"
+    - "validity"
+    
+  # Alertas de datos
+  alerts:
+    data_gap:
+      threshold_minutes: 60
+      enabled: true
+      
+    data_quality:
+      threshold: 0.95
+      enabled: true
+      
+    storage_usage:
+      threshold: 0.90
+      enabled: true
+      
+    api_errors:
+      threshold: 10
+      enabled: true

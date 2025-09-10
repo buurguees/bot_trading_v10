@@ -1,483 +1,654 @@
 # Ruta: core/security/audit_logger.py
-# audit_logger.py - Logger de auditoría enterprise
-# Ubicación: C:\TradingBot_v10\security\audit_logger.py
+# audit_logger.py - Sistema de auditoría enterprise
+# Ubicación: core/security/audit_logger.py
 
-import json
+"""
+Sistema de Auditoría Enterprise
+Registra y monitorea eventos de seguridad y trading
+
+Características principales:
+- Logging de eventos de auditoría
+- Encriptación de datos sensibles
+- Detección de anomalías
+- Retención de logs (7 años)
+- Integración con alertas
+- Compliance GDPR/MiFID II
+"""
+
 import logging
-import os
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any, Union
-from pathlib import Path
+import json
+import hashlib
+import hmac
+import base64
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass, asdict
+from datetime import datetime, timedelta
 from enum import Enum
+import os
+import asyncio
+from pathlib import Path
+import redis
+from control.telegram_bot import telegram_bot
+from core.config.config_loader import config_loader
 
-from config.enterprise_config import EnterpriseConfigManager
-
-# Configurar logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class AuditEventType(Enum):
     """Tipos de eventos de auditoría"""
-    AUTHENTICATION = "authentication"
-    AUTHORIZATION = "authorization"
+    LOGIN = "login"
+    LOGOUT = "logout"
+    TRADE_EXECUTED = "trade_executed"
+    TRADE_CANCELLED = "trade_cancelled"
+    POSITION_OPENED = "position_opened"
+    POSITION_CLOSED = "position_closed"
+    CONFIG_CHANGED = "config_changed"
+    RISK_LIMIT_EXCEEDED = "risk_limit_exceeded"
+    ANOMALY_DETECTED = "anomaly_detected"
     DATA_ACCESS = "data_access"
-    CONFIGURATION = "configuration"
-    TRADING = "trading"
-    SECURITY = "security"
+    SYSTEM_ERROR = "system_error"
+    SECURITY_VIOLATION = "security_violation"
 
 class AuditSeverity(Enum):
-    """Niveles de severidad de auditoría"""
+    """Niveles de severidad"""
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
+@dataclass
+class AuditEvent:
+    """Evento de auditoría"""
+    event_id: str
+    event_type: AuditEventType
+    severity: AuditSeverity
+    timestamp: datetime
+    user_id: Optional[str]
+    session_id: Optional[str]
+    source_ip: Optional[str]
+    description: str
+    details: Dict[str, Any]
+    risk_score: float
+    encrypted: bool
+
+@dataclass
+class AnomalyDetection:
+    """Detección de anomalías"""
+    anomaly_id: str
+    anomaly_type: str
+    severity: AuditSeverity
+    timestamp: datetime
+    description: str
+    details: Dict[str, Any]
+    risk_score: float
+    resolved: bool
+
 class AuditLogger:
-    """Logger de auditoría enterprise"""
+    """Sistema de auditoría enterprise"""
     
     def __init__(self):
-        """Inicializar el logger de auditoría"""
-        self.config_manager = EnterpriseConfigManager()
-        self.config = self.config_manager.load_config()
-        self.security_config = self.config.get_security_config()
-        self.audit_config = self.security_config.get("audit", {})
+        self.config_loader = config_loader
+        self.redis_client = None
+        self.encryption_key = None
+        self.audit_events = []
+        self.anomalies = []
+        self.retention_days = 2555  # 7 años
         
         # Configuración de auditoría
-        self.enabled = self.audit_config.get("enabled", True)
-        self.logging_config = self.audit_config.get("logging", {})
-        self.events_config = self.audit_config.get("events", {})
-        
-        # Configuración de archivos
-        self.log_path = self.logging_config.get("path", "logs/enterprise/security/audit.log")
-        self.log_format = self.logging_config.get("format", "json")
-        self.rotation_config = self.logging_config.get("rotation", {})
-        
-        # Configuración de rotación
-        self.max_size_mb = self.rotation_config.get("max_size_mb", 50)
-        self.max_files = self.rotation_config.get("max_files", 100)
-        self.compression = self.rotation_config.get("compression", True)
-        
-        # Eventos a auditar
-        self.audit_events = self._load_audit_events()
-        
-        # Configurar logger
-        self._setup_logger()
+        self.audit_config = {}
+        self.anomaly_patterns = {}
+        self.risk_thresholds = {}
         
         # Métricas
-        self.metrics = {
-            "events_logged_total": 0,
-            "events_by_type": {},
-            "events_by_severity": {},
-            "events_failed": 0,
-            "last_event_time": None,
-            "errors_total": 0
-        }
+        self.total_events = 0
+        self.total_anomalies = 0
+        self.encryption_enabled = True
         
         logger.info("AuditLogger inicializado")
     
-    def _load_audit_events(self) -> Dict[str, List[str]]:
-        """Cargar eventos a auditar"""
+    async def initialize(self):
+        """Inicializa el sistema de auditoría"""
         try:
-            events = {}
+            # Inicializar configuraciones
+            await self.config_loader.initialize()
             
-            for event_type, event_list in self.events_config.items():
-                if isinstance(event_list, list):
-                    events[event_type] = event_list
-                else:
-                    events[event_type] = []
+            # Cargar configuración de seguridad
+            security_config = self.config_loader.get_security_settings()
+            self.audit_config = security_config.get('audit', {})
+            self.anomaly_patterns = security_config.get('anomaly_detection', {}).get('patterns', {})
+            self.risk_thresholds = security_config.get('risk_management', {}).get('thresholds', {})
             
-            return events
+            # Configurar encriptación
+            await self._setup_encryption()
+            
+            # Configurar Redis
+            await self._setup_redis()
+            
+            # Configurar directorio de logs
+            await self._setup_log_directory()
+            
+            logger.info("AuditLogger inicializado exitosamente")
             
         except Exception as e:
-            logger.error(f"Error cargando eventos de auditoría: {e}")
-            return {}
-    
-    def _setup_logger(self):
-        """Configurar logger de auditoría"""
-        try:
-            # Crear directorio de logs si no existe
-            log_dir = Path(self.log_path).parent
-            log_dir.mkdir(parents=True, exist_ok=True)
-            
-            # Configurar logger
-            self.audit_logger = logging.getLogger("audit")
-            self.audit_logger.setLevel(logging.INFO)
-            
-            # Evitar duplicación de handlers
-            if not self.audit_logger.handlers:
-                # Handler de archivo con rotación
-                from logging.handlers import RotatingFileHandler
-                
-                file_handler = RotatingFileHandler(
-                    self.log_path,
-                    maxBytes=self.max_size_mb * 1024 * 1024,
-                    backupCount=self.max_files,
-                    encoding='utf-8'
-                )
-                
-                # Formato de log
-                if self.log_format == "json":
-                    formatter = logging.Formatter('%(message)s')
-                else:
-                    formatter = logging.Formatter(
-                        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-                    )
-                
-                file_handler.setFormatter(formatter)
-                self.audit_logger.addHandler(file_handler)
-                
-                # Evitar propagación al logger raíz
-                self.audit_logger.propagate = False
-            
-            logger.info(f"Logger de auditoría configurado: {self.log_path}")
-            
-        except Exception as e:
-            logger.error(f"Error configurando logger de auditoría: {e}")
+            logger.error(f"Error inicializando AuditLogger: {e}")
             raise
     
-    def log_event(self, 
-                  event_type: AuditEventType,
-                  event_name: str,
-                  user_id: Optional[str] = None,
-                  session_id: Optional[str] = None,
-                  severity: AuditSeverity = AuditSeverity.MEDIUM,
-                  description: str = "",
-                  metadata: Optional[Dict[str, Any]] = None,
-                  ip_address: Optional[str] = None,
-                  user_agent: Optional[str] = None):
-        """Registrar evento de auditoría"""
+    async def _setup_encryption(self):
+        """Configura encriptación para datos sensibles"""
         try:
-            if not self.enabled:
-                return
+            encryption_config = self.audit_config.get('encryption', {})
             
-            # Verificar si el evento debe ser auditado
-            if not self._should_audit_event(event_type, event_name):
-                return
+            if encryption_config.get('enabled', True):
+                # Obtener clave de encriptación
+                self.encryption_key = os.getenv('AUDIT_ENCRYPTION_KEY')
+                if not self.encryption_key:
+                    # Generar clave temporal (en producción debe ser persistente)
+                    self.encryption_key = self._generate_encryption_key()
+                    logger.warning("Usando clave de encriptación temporal")
+                
+                self.encryption_enabled = True
+                logger.info("Encriptación de auditoría habilitada")
+            else:
+                self.encryption_enabled = False
+                logger.info("Encriptación de auditoría deshabilitada")
+                
+        except Exception as e:
+            logger.error(f"Error configurando encriptación: {e}")
+            self.encryption_enabled = False
+    
+    async def _setup_redis(self):
+        """Configura Redis para cache de auditoría"""
+        try:
+            redis_url = self.config_loader.get_infrastructure_settings().get('redis', {}).get('url', 'redis://localhost:6379')
+            self.redis_client = redis.Redis.from_url(redis_url)
+            await self.redis_client.ping()
+            logger.info("Conexión a Redis establecida para auditoría")
+        except Exception as e:
+            logger.warning(f"No se pudo conectar a Redis: {e}")
+            self.redis_client = None
+    
+    async def _setup_log_directory(self):
+        """Configura directorio de logs de auditoría"""
+        try:
+            log_dir = Path("logs/enterprise/security/audit")
+            log_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Crear subdirectorios por año
+            current_year = datetime.now().year
+            year_dir = log_dir / str(current_year)
+            year_dir.mkdir(exist_ok=True)
+            
+            logger.info(f"Directorio de auditoría configurado: {log_dir}")
+            
+        except Exception as e:
+            logger.error(f"Error configurando directorio de auditoría: {e}")
+    
+    def _generate_encryption_key(self) -> str:
+        """Genera clave de encriptación"""
+        import secrets
+        return secrets.token_hex(32)
+    
+    def _encrypt_data(self, data: str) -> str:
+        """Encripta datos sensibles"""
+        try:
+            if not self.encryption_enabled or not self.encryption_key:
+                return data
+            
+            # Usar HMAC para encriptación simple
+            key = self.encryption_key.encode()
+            encrypted = hmac.new(key, data.encode(), hashlib.sha256).hexdigest()
+            return base64.b64encode(encrypted.encode()).decode()
+            
+        except Exception as e:
+            logger.error(f"Error encriptando datos: {e}")
+            return data
+    
+    def _decrypt_data(self, encrypted_data: str) -> str:
+        """Desencripta datos (implementación simplificada)"""
+        try:
+            if not self.encryption_enabled or not self.encryption_key:
+                return encrypted_data
+            
+            # En un sistema real, esto desencriptaría los datos
+            # Por ahora, retornamos los datos tal como están
+            return encrypted_data
+            
+        except Exception as e:
+            logger.error(f"Error desencriptando datos: {e}")
+            return encrypted_data
+    
+    async def log_event(self, 
+                       event_type: AuditEventType,
+                       description: str,
+                       details: Dict[str, Any] = None,
+                       user_id: str = None,
+                       session_id: str = None,
+                       source_ip: str = None,
+                       severity: AuditSeverity = AuditSeverity.MEDIUM) -> str:
+        """Registra un evento de auditoría"""
+        try:
+            # Generar ID único del evento
+            event_id = self._generate_event_id()
+            
+            # Calcular score de riesgo
+            risk_score = self._calculate_risk_score(event_type, details, severity)
+            
+            # Encriptar datos sensibles si es necesario
+            encrypted_details = details.copy() if details else {}
+            if self.encryption_enabled and self._contains_sensitive_data(details):
+                for key, value in encrypted_details.items():
+                    if isinstance(value, str) and self._is_sensitive_field(key):
+                        encrypted_details[key] = self._encrypt_data(str(value))
             
             # Crear evento de auditoría
-            audit_event = {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "event_type": event_type.value,
-                "event_name": event_name,
-                "user_id": user_id,
-                "session_id": session_id,
-                "severity": severity.value,
-                "description": description,
-                "metadata": metadata or {},
-                "ip_address": ip_address,
-                "user_agent": user_agent,
-                "source": "trading_bot_enterprise"
-            }
+            event = AuditEvent(
+                event_id=event_id,
+                event_type=event_type,
+                severity=severity,
+                timestamp=datetime.now(),
+                user_id=user_id,
+                session_id=session_id,
+                source_ip=source_ip,
+                description=description,
+                details=encrypted_details or {},
+                risk_score=risk_score,
+                encrypted=self.encryption_enabled
+            )
             
-            # Registrar evento
-            if self.log_format == "json":
-                self.audit_logger.info(json.dumps(audit_event, ensure_ascii=False))
-            else:
-                self.audit_logger.info(f"{event_type.value}:{event_name} - {description}")
+            # Guardar evento
+            await self._save_audit_event(event)
             
-            # Actualizar métricas
-            self._update_metrics(event_type, severity)
+            # Verificar anomalías
+            await self._check_anomalies(event)
             
-            logger.debug(f"Evento de auditoría registrado: {event_name}")
+            # Enviar alertas si es necesario
+            if severity in [AuditSeverity.HIGH, AuditSeverity.CRITICAL]:
+                await self._send_alert(event)
+            
+            self.total_events += 1
+            logger.info(f"Evento de auditoría registrado: {event_id}")
+            
+            return event_id
             
         except Exception as e:
             logger.error(f"Error registrando evento de auditoría: {e}")
-            self.metrics["events_failed"] += 1
-            self.metrics["errors_total"] += 1
+            return None
     
-    def _should_audit_event(self, event_type: AuditEventType, event_name: str) -> bool:
-        """Verificar si un evento debe ser auditado"""
+    def _generate_event_id(self) -> str:
+        """Genera ID único para evento"""
+        import uuid
+        return str(uuid.uuid4())
+    
+    def _calculate_risk_score(self, 
+                            event_type: AuditEventType, 
+                            details: Dict[str, Any], 
+                            severity: AuditSeverity) -> float:
+        """Calcula score de riesgo del evento"""
         try:
-            event_type_str = event_type.value
-            if event_type_str in self.audit_events:
-                return event_name in self.audit_events[event_type_str]
+            base_score = 0.0
+            
+            # Score base por tipo de evento
+            risk_scores = {
+                AuditEventType.LOGIN: 0.1,
+                AuditEventType.LOGOUT: 0.1,
+                AuditEventType.TRADE_EXECUTED: 0.3,
+                AuditEventType.TRADE_CANCELLED: 0.2,
+                AuditEventType.POSITION_OPENED: 0.4,
+                AuditEventType.POSITION_CLOSED: 0.3,
+                AuditEventType.CONFIG_CHANGED: 0.5,
+                AuditEventType.RISK_LIMIT_EXCEEDED: 0.8,
+                AuditEventType.ANOMALY_DETECTED: 0.7,
+                AuditEventType.DATA_ACCESS: 0.2,
+                AuditEventType.SYSTEM_ERROR: 0.6,
+                AuditEventType.SECURITY_VIOLATION: 0.9
+            }
+            
+            base_score = risk_scores.get(event_type, 0.5)
+            
+            # Ajustar por severidad
+            severity_multipliers = {
+                AuditSeverity.LOW: 0.5,
+                AuditSeverity.MEDIUM: 1.0,
+                AuditSeverity.HIGH: 1.5,
+                AuditSeverity.CRITICAL: 2.0
+            }
+            
+            base_score *= severity_multipliers.get(severity, 1.0)
+            
+            # Ajustar por detalles específicos
+            if details:
+                # Penalizar por montos altos
+                if 'amount' in details and isinstance(details['amount'], (int, float)):
+                    if details['amount'] > 100000:  # > $100k
+                        base_score += 0.2
+                
+                # Penalizar por múltiples intentos
+                if 'attempts' in details and isinstance(details['attempts'], int):
+                    if details['attempts'] > 5:
+                        base_score += 0.3
+            
+            return min(1.0, base_score)
+            
+        except Exception as e:
+            logger.error(f"Error calculando risk score: {e}")
+            return 0.5
+    
+    def _contains_sensitive_data(self, details: Dict[str, Any]) -> bool:
+        """Verifica si los detalles contienen datos sensibles"""
+        if not details:
+            return False
+        
+        sensitive_fields = ['password', 'api_key', 'secret', 'token', 'private_key']
+        return any(field in str(details).lower() for field in sensitive_fields)
+    
+    def _is_sensitive_field(self, field_name: str) -> bool:
+        """Verifica si un campo es sensible"""
+        sensitive_fields = ['password', 'api_key', 'secret', 'token', 'private_key', 'passphrase']
+        return any(field in field_name.lower() for field in sensitive_fields)
+    
+    async def _save_audit_event(self, event: AuditEvent):
+        """Guarda evento de auditoría"""
+        try:
+            # Agregar a lista en memoria
+            self.audit_events.append(event)
+            
+            # Guardar en archivo
+            await self._write_to_file(event)
+            
+            # Cachear en Redis
+            if self.redis_client:
+                cache_key = f"audit_event:{event.event_id}"
+                event_data = asdict(event)
+                event_data['timestamp'] = event.timestamp.isoformat()
+                self.redis_client.setex(cache_key, 3600, json.dumps(event_data, default=str))
+            
+            # Limpiar eventos antiguos
+            await self._cleanup_old_events()
+            
+        except Exception as e:
+            logger.error(f"Error guardando evento de auditoría: {e}")
+    
+    async def _write_to_file(self, event: AuditEvent):
+        """Escribe evento a archivo de log"""
+        try:
+            log_dir = Path("logs/enterprise/security/audit")
+            year = event.timestamp.year
+            month = event.timestamp.month
+            day = event.timestamp.day
+            
+            # Crear estructura de directorios
+            date_dir = log_dir / str(year) / f"{month:02d}"
+            date_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Archivo de log por día
+            log_file = date_dir / f"audit_{year}{month:02d}{day:02d}.log"
+            
+            # Formatear evento
+            event_data = {
+                'event_id': event.event_id,
+                'event_type': event.event_type.value,
+                'severity': event.severity.value,
+                'timestamp': event.timestamp.isoformat(),
+                'user_id': event.user_id,
+                'session_id': event.session_id,
+                'source_ip': event.source_ip,
+                'description': event.description,
+                'details': event.details,
+                'risk_score': event.risk_score,
+                'encrypted': event.encrypted
+            }
+            
+            # Escribir a archivo
+            with open(log_file, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(event_data, ensure_ascii=False) + '\n')
+            
+        except Exception as e:
+            logger.error(f"Error escribiendo evento a archivo: {e}")
+    
+    async def _check_anomalies(self, event: AuditEvent):
+        """Verifica anomalías en el evento"""
+        try:
+            # Verificar patrones de anomalías
+            for pattern_name, pattern_config in self.anomaly_patterns.items():
+                if await self._matches_pattern(event, pattern_config):
+                    await self._create_anomaly(event, pattern_name, pattern_config)
+            
+        except Exception as e:
+            logger.error(f"Error verificando anomalías: {e}")
+    
+    async def _matches_pattern(self, event: AuditEvent, pattern_config: Dict[str, Any]) -> bool:
+        """Verifica si un evento coincide con un patrón de anomalía"""
+        try:
+            # Verificar tipo de evento
+            if 'event_types' in pattern_config:
+                if event.event_type.value not in pattern_config['event_types']:
+                    return False
+            
+            # Verificar severidad
+            if 'min_severity' in pattern_config:
+                severity_levels = ['low', 'medium', 'high', 'critical']
+                event_severity_level = severity_levels.index(event.severity.value)
+                min_severity_level = severity_levels.index(pattern_config['min_severity'])
+                if event_severity_level < min_severity_level:
+                    return False
+            
+            # Verificar score de riesgo
+            if 'min_risk_score' in pattern_config:
+                if event.risk_score < pattern_config['min_risk_score']:
+                    return False
+            
+            # Verificar frecuencia (simplificado)
+            if 'max_frequency_per_hour' in pattern_config:
+                recent_events = [
+                    e for e in self.audit_events
+                    if e.event_type == event.event_type
+                    and e.timestamp > datetime.now() - timedelta(hours=1)
+                ]
+                if len(recent_events) >= pattern_config['max_frequency_per_hour']:
+                    return True
+            
             return False
             
         except Exception as e:
-            logger.error(f"Error verificando evento de auditoría: {e}")
+            logger.error(f"Error verificando patrón de anomalía: {e}")
             return False
     
-    def _update_metrics(self, event_type: AuditEventType, severity: AuditSeverity):
-        """Actualizar métricas de auditoría"""
+    async def _create_anomaly(self, event: AuditEvent, pattern_name: str, pattern_config: Dict[str, Any]):
+        """Crea una anomalía detectada"""
         try:
-            self.metrics["events_logged_total"] += 1
-            self.metrics["last_event_time"] = datetime.now(timezone.utc)
+            anomaly_id = self._generate_event_id()
             
-            # Contar por tipo
-            event_type_str = event_type.value
-            if event_type_str not in self.metrics["events_by_type"]:
-                self.metrics["events_by_type"][event_type_str] = 0
-            self.metrics["events_by_type"][event_type_str] += 1
+            anomaly = AnomalyDetection(
+                anomaly_id=anomaly_id,
+                anomaly_type=pattern_name,
+                severity=event.severity,
+                timestamp=datetime.now(),
+                description=f"Anomalía detectada: {pattern_name}",
+                details={
+                    'trigger_event_id': event.event_id,
+                    'pattern_config': pattern_config,
+                    'event_details': event.details
+                },
+                risk_score=event.risk_score,
+                resolved=False
+            )
             
-            # Contar por severidad
-            severity_str = severity.value
-            if severity_str not in self.metrics["events_by_severity"]:
-                self.metrics["events_by_severity"][severity_str] = 0
-            self.metrics["events_by_severity"][severity_str] += 1
+            self.anomalies.append(anomaly)
+            self.total_anomalies += 1
+            
+            # Enviar alerta de anomalía
+            await self._send_anomaly_alert(anomaly)
+            
+            logger.warning(f"Anomalía detectada: {anomaly_id}")
             
         except Exception as e:
-            logger.error(f"Error actualizando métricas de auditoría: {e}")
+            logger.error(f"Error creando anomalía: {e}")
     
-    def log_authentication(self, event_name: str, user_id: str, success: bool, 
-                          ip_address: Optional[str] = None, metadata: Optional[Dict] = None):
-        """Registrar evento de autenticación"""
-        severity = AuditSeverity.HIGH if not success else AuditSeverity.MEDIUM
-        description = f"Autenticación {'exitosa' if success else 'fallida'} para usuario {user_id}"
-        
-        self.log_event(
-            event_type=AuditEventType.AUTHENTICATION,
-            event_name=event_name,
-            user_id=user_id,
-            severity=severity,
-            description=description,
-            metadata=metadata,
-            ip_address=ip_address
-        )
+    async def _send_alert(self, event: AuditEvent):
+        """Envía alerta de evento crítico"""
+        try:
+            message = f"🚨 **Alerta de Auditoría**\n\n"
+            message += f"**Tipo:** {event.event_type.value}\n"
+            message += f"**Severidad:** {event.severity.value}\n"
+            message += f"**Descripción:** {event.description}\n"
+            message += f"**Score de Riesgo:** {event.risk_score:.2f}\n"
+            message += f"**Timestamp:** {event.timestamp.isoformat()}\n"
+            
+            if event.user_id:
+                message += f"**Usuario:** {event.user_id}\n"
+            
+            if event.source_ip:
+                message += f"**IP:** {event.source_ip}\n"
+            
+            await telegram_bot.send_message(message)
+            
+        except Exception as e:
+            logger.error(f"Error enviando alerta: {e}")
     
-    def log_authorization(self, event_name: str, user_id: str, resource: str, 
-                         granted: bool, ip_address: Optional[str] = None, metadata: Optional[Dict] = None):
-        """Registrar evento de autorización"""
-        severity = AuditSeverity.HIGH if not granted else AuditSeverity.MEDIUM
-        description = f"Acceso {'otorgado' if granted else 'denegado'} a {resource} para usuario {user_id}"
-        
-        self.log_event(
-            event_type=AuditEventType.AUTHORIZATION,
-            event_name=event_name,
-            user_id=user_id,
-            severity=severity,
-            description=description,
-            metadata=dict(metadata or {}, resource=resource, granted=granted),
-            ip_address=ip_address
-        )
+    async def _send_anomaly_alert(self, anomaly: AnomalyDetection):
+        """Envía alerta de anomalía"""
+        try:
+            message = f"⚠️ **Anomalía Detectada**\n\n"
+            message += f"**Tipo:** {anomaly.anomaly_type}\n"
+            message += f"**Severidad:** {anomaly.severity.value}\n"
+            message += f"**Descripción:** {anomaly.description}\n"
+            message += f"**Score de Riesgo:** {anomaly.risk_score:.2f}\n"
+            message += f"**Timestamp:** {anomaly.timestamp.isoformat()}\n"
+            
+            await telegram_bot.send_message(message)
+            
+        except Exception as e:
+            logger.error(f"Error enviando alerta de anomalía: {e}")
     
-    def log_data_access(self, event_name: str, user_id: str, data_type: str, 
-                       operation: str, ip_address: Optional[str] = None, metadata: Optional[Dict] = None):
-        """Registrar evento de acceso a datos"""
-        description = f"Acceso a datos {data_type} - Operación: {operation} por usuario {user_id}"
-        
-        self.log_event(
-            event_type=AuditEventType.DATA_ACCESS,
-            event_name=event_name,
-            user_id=user_id,
-            severity=AuditSeverity.MEDIUM,
-            description=description,
-            metadata=dict(metadata or {}, data_type=data_type, operation=operation),
-            ip_address=ip_address
-        )
-    
-    def log_configuration(self, event_name: str, user_id: str, config_type: str, 
-                         old_value: Any, new_value: Any, ip_address: Optional[str] = None, metadata: Optional[Dict] = None):
-        """Registrar evento de configuración"""
-        description = f"Configuración {config_type} modificada por usuario {user_id}"
-        
-        self.log_event(
-            event_type=AuditEventType.CONFIGURATION,
-            event_name=event_name,
-            user_id=user_id,
-            severity=AuditSeverity.HIGH,
-            description=description,
-            metadata=dict(metadata or {}, config_type=config_type, old_value=str(old_value), new_value=str(new_value)),
-            ip_address=ip_address
-        )
-    
-    def log_trading(self, event_name: str, user_id: str, symbol: str, 
-                   action: str, amount: float, price: float, ip_address: Optional[str] = None, metadata: Optional[Dict] = None):
-        """Registrar evento de trading"""
-        description = f"Operación de trading: {action} {amount} {symbol} a {price} por usuario {user_id}"
-        
-        self.log_event(
-            event_type=AuditEventType.TRADING,
-            event_name=event_name,
-            user_id=user_id,
-            severity=AuditSeverity.HIGH,
-            description=description,
-            metadata={**dict(metadata or {}), "symbol": symbol, "action": action, "amount": amount, "price": price},
-            ip_address=ip_address
-        )
-    
-    def log_security(self, event_name: str, user_id: Optional[str] = None, 
-                    severity: AuditSeverity = AuditSeverity.HIGH, description: str = "", 
-                    ip_address: Optional[str] = None, metadata: Optional[Dict] = None):
-        """Registrar evento de seguridad"""
-        self.log_event(
-            event_type=AuditEventType.SECURITY,
-            event_name=event_name,
-            user_id=user_id,
-            severity=severity,
-            description=description,
-            metadata=metadata,
-            ip_address=ip_address
-        )
+    async def _cleanup_old_events(self):
+        """Limpia eventos antiguos según retención"""
+        try:
+            cutoff_date = datetime.now() - timedelta(days=self.retention_days)
+            
+            # Limpiar eventos en memoria
+            self.audit_events = [
+                event for event in self.audit_events
+                if event.timestamp > cutoff_date
+            ]
+            
+            # Limpiar anomalías resueltas antiguas
+            self.anomalies = [
+                anomaly for anomaly in self.anomalies
+                if not anomaly.resolved or anomaly.timestamp > cutoff_date
+            ]
+            
+        except Exception as e:
+            logger.error(f"Error limpiando eventos antiguos: {e}")
     
     def get_audit_events(self, 
-                        event_type: Optional[AuditEventType] = None,
-                        user_id: Optional[str] = None,
-                        start_time: Optional[datetime] = None,
-                        end_time: Optional[datetime] = None,
-                        limit: int = 1000) -> List[Dict[str, Any]]:
-        """Obtener eventos de auditoría"""
+                        event_type: AuditEventType = None,
+                        severity: AuditSeverity = None,
+                        limit: int = 100) -> List[Dict[str, Any]]:
+        """Obtiene eventos de auditoría"""
         try:
-            events = []
+            events = self.audit_events.copy()
             
-            # Leer archivo de log
-            if not Path(self.log_path).exists():
-                return events
+            # Filtrar por tipo
+            if event_type:
+                events = [e for e in events if e.event_type == event_type]
             
-            with open(self.log_path, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
+            # Filtrar por severidad
+            if severity:
+                events = [e for e in events if e.severity == severity]
             
-            # Procesar líneas (últimas N líneas)
-            lines_to_process = lines[-limit:] if len(lines) > limit else lines
+            # Ordenar por timestamp (más recientes primero)
+            events.sort(key=lambda x: x.timestamp, reverse=True)
             
-            for line in lines_to_process:
-                try:
-                    if self.log_format == "json":
-                        event = json.loads(line.strip())
-                    else:
-                        # Parsear formato de texto
-                        event = self._parse_text_log_line(line.strip())
-                    
-                    # Filtrar eventos
-                    if self._filter_event(event, event_type, user_id, start_time, end_time):
-                        events.append(event)
-                        
-                except json.JSONDecodeError:
-                    continue
-                except Exception as e:
-                    logger.error(f"Error parseando línea de log: {e}")
-                    continue
+            # Limitar resultados
+            events = events[:limit]
             
-            return events
+            # Convertir a diccionarios
+            return [asdict(event) for event in events]
             
         except Exception as e:
             logger.error(f"Error obteniendo eventos de auditoría: {e}")
             return []
     
-    def _parse_text_log_line(self, line: str) -> Dict[str, Any]:
-        """Parsear línea de log en formato de texto"""
+    def get_anomalies(self, resolved: bool = None, limit: int = 50) -> List[Dict[str, Any]]:
+        """Obtiene anomalías detectadas"""
         try:
-            # Formato: timestamp - logger - level - message
-            parts = line.split(" - ", 3)
-            if len(parts) >= 4:
-                return {
-                    "timestamp": parts[0],
-                    "logger": parts[1],
-                    "level": parts[2],
-                    "message": parts[3]
-                }
-            else:
-                return {"message": line}
-                
+            anomalies = self.anomalies.copy()
+            
+            # Filtrar por estado de resolución
+            if resolved is not None:
+                anomalies = [a for a in anomalies if a.resolved == resolved]
+            
+            # Ordenar por timestamp (más recientes primero)
+            anomalies.sort(key=lambda x: x.timestamp, reverse=True)
+            
+            # Limitar resultados
+            anomalies = anomalies[:limit]
+            
+            # Convertir a diccionarios
+            return [asdict(anomaly) for anomaly in anomalies]
+            
         except Exception as e:
-            logger.error(f"Error parseando línea de texto: {e}")
-            return {"message": line}
+            logger.error(f"Error obteniendo anomalías: {e}")
+            return []
     
-    def _filter_event(self, event: Dict[str, Any], event_type: Optional[AuditEventType], 
-                     user_id: Optional[str], start_time: Optional[datetime], end_time: Optional[datetime]) -> bool:
-        """Filtrar evento según criterios"""
+    def get_audit_summary(self) -> Dict[str, Any]:
+        """Obtiene resumen de auditoría"""
         try:
-            # Filtrar por tipo de evento
-            if event_type and event.get("event_type") != event_type.value:
-                return False
+            total_events = len(self.audit_events)
+            total_anomalies = len(self.anomalies)
+            unresolved_anomalies = len([a for a in self.anomalies if not a.resolved])
             
-            # Filtrar por usuario
-            if user_id and event.get("user_id") != user_id:
-                return False
+            # Eventos por tipo
+            events_by_type = {}
+            for event in self.audit_events:
+                event_type = event.event_type.value
+                events_by_type[event_type] = events_by_type.get(event_type, 0) + 1
             
-            # Filtrar por tiempo
-            if start_time or end_time:
-                event_time_str = event.get("timestamp")
-                if event_time_str:
-                    try:
-                        event_time = datetime.fromisoformat(event_time_str.replace('Z', '+00:00'))
-                        
-                        if start_time and event_time < start_time:
-                            return False
-                        
-                        if end_time and event_time > end_time:
-                            return False
-                    except ValueError:
-                        return False
+            # Eventos por severidad
+            events_by_severity = {}
+            for event in self.audit_events:
+                severity = event.severity.value
+                events_by_severity[severity] = events_by_severity.get(severity, 0) + 1
             
-            return True
+            return {
+                'total_events': total_events,
+                'total_anomalies': total_anomalies,
+                'unresolved_anomalies': unresolved_anomalies,
+                'events_by_type': events_by_type,
+                'events_by_severity': events_by_severity,
+                'encryption_enabled': self.encryption_enabled,
+                'retention_days': self.retention_days
+            }
             
         except Exception as e:
-            logger.error(f"Error filtrando evento: {e}")
+            logger.error(f"Error obteniendo resumen de auditoría: {e}")
+            return {}
+    
+    async def resolve_anomaly(self, anomaly_id: str) -> bool:
+        """Marca una anomalía como resuelta"""
+        try:
+            for anomaly in self.anomalies:
+                if anomaly.anomaly_id == anomaly_id:
+                    anomaly.resolved = True
+                    logger.info(f"Anomalía resuelta: {anomaly_id}")
+                    return True
+            
+            logger.warning(f"Anomalía no encontrada: {anomaly_id}")
+            return False
+            
+        except Exception as e:
+            logger.error(f"Error resolviendo anomalía: {e}")
             return False
     
-    def get_metrics(self) -> Dict[str, Any]:
-        """Obtener métricas del logger de auditoría"""
-        return self.metrics.copy()
-    
-    def get_status(self) -> Dict[str, Any]:
-        """Obtener estado del logger de auditoría"""
-        return {
-            "enabled": self.enabled,
-            "log_path": self.log_path,
-            "log_format": self.log_format,
-            "max_size_mb": self.max_size_mb,
-            "max_files": self.max_files,
-            "compression": self.compression,
-            "audit_events": self.audit_events,
-            "metrics": self.get_metrics()
-        }
-    
-    def health_check(self) -> bool:
-        """Verificar salud del logger de auditoría"""
+    async def cleanup(self):
+        """Limpia recursos del sistema de auditoría"""
         try:
-            # Verificar que el directorio de logs existe
-            log_dir = Path(self.log_path).parent
-            if not log_dir.exists():
-                return False
+            if self.redis_client:
+                self.redis_client.close()
             
-            # Verificar que el logger está configurado
-            if not hasattr(self, 'audit_logger'):
-                return False
-            
-            # Test de logging
-            self.log_security(
-                "health_check",
-                description="Health check del logger de auditoría",
-                severity=AuditSeverity.LOW
-            )
-            
-            return True
+            logger.info("AuditLogger limpiado")
             
         except Exception as e:
-            logger.error(f"Health check falló: {e}")
-            return False
+            logger.error(f"Error limpiando AuditLogger: {e}")
 
-# Función de conveniencia para crear logger
-def create_audit_logger() -> AuditLogger:
-    """Crear instancia del logger de auditoría"""
-    return AuditLogger()
-
-if __name__ == "__main__":
-    # Test del logger de auditoría
-    def test_audit_logger():
-        logger = AuditLogger()
-        
-        # Test de health check
-        health = logger.health_check()
-        print(f"Health check: {health}")
-        
-        # Test de eventos de auditoría
-        logger.log_authentication("login_attempt", "user123", True, "192.168.1.100")
-        logger.log_authorization("access_granted", "user123", "trading_data", True, "192.168.1.100")
-        logger.log_data_access("data_read", "user123", "market_data", "read", "192.168.1.100")
-        logger.log_configuration("config_change", "user123", "trading_params", "old_value", "new_value", "192.168.1.100")
-        logger.log_trading("order_placed", "user123", "BTCUSDT", "buy", 0.1, 50000.0, "192.168.1.100")
-        logger.log_security("security_alert", "user123", AuditSeverity.HIGH, "Intento de acceso no autorizado", "192.168.1.100")
-        
-        # Obtener eventos
-        events = logger.get_audit_events(limit=10)
-        print(f"Eventos obtenidos: {len(events)}")
-        
-        # Mostrar métricas
-        print("\n=== MÉTRICAS DEL LOGGER DE AUDITORÍA ===")
-        metrics = logger.get_metrics()
-        for key, value in metrics.items():
-            print(f"{key}: {value}")
-    
-    # Ejecutar test
-    test_audit_logger()
+# Instancia global
+audit_logger = AuditLogger()

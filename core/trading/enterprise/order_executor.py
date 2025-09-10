@@ -1,6 +1,6 @@
 # Ruta: core/trading/enterprise/order_executor.py
 # order_executor.py - Ejecutor de órdenes con múltiples tipos
-# Ubicación: C:\TradingBot_v10\trading\enterprise\order_executor.py
+# Ubicación: C:\TradingBot_v10\core\trading\enterprise\order_executor.py
 
 """
 Ejecutor de órdenes enterprise con soporte para múltiples tipos de orden.

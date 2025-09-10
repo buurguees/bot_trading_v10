@@ -1,121 +1,150 @@
-# Configuración de Seguridad - Bot Trading v10 Enterprise
-# =======================================================
+# Ruta: config/security_config.yaml
+# security_config.yaml - Configuración de seguridad enterprise
+# Ubicación: config/security_config.yaml
 
-# Configuración general de seguridad
-security:
-  enabled: true
-  encryption_enabled: true
-  audit_logging: true
-  compliance_mode: true
+version: "1.0"
 
 # Configuración de encriptación
 encryption:
+  enabled: true
   algorithm: "AES-256-GCM"
-  key_rotation_days: 30
-  key_storage: "environment"  # environment, file, vault
-  
-  # Variables de entorno para claves
+  key_storage: "environment"  # environment, vault
   environment_vars:
-    encryption_key: "ENCRYPTION_KEY"
-    api_key_encryption: "API_KEY_ENCRYPTION_KEY"
+    - "ENCRYPTION_KEY"
+    - "API_KEY_ENCRYPTION_KEY"
+    - "DATABASE_ENCRYPTION_KEY"
+    
+  # Configuración de claves
+  key_rotation:
+    enabled: true
+    rotation_interval: "90 days"
+    key_length: 256
+    
+  # Configuración de Vault (si se usa)
+  vault:
+    enabled: false
+    url: "http://localhost:8200"
+    token: ""  # Configurar en .env
+    mount_point: "secret"
+    path: "trading_bot"
 
 # Configuración de autorización
 authorization:
   enabled: true
   
   # Chat IDs autorizados para Telegram
-  authorized_chat_ids:
-    - "937027893"
+  authorized_chat_ids: []  # Lista de chat IDs autorizados
   
-  # Rate limiting
+  # Configuración de rate limiting
   rate_limiting:
     enabled: true
-    max_requests_per_minute: 30
-    burst_limit: 10
-    window_size: 60  # segundos
-  
-  # Timeout de comandos
-  command_timeout: 60  # segundos
-  max_concurrent_commands: 5
+    max_requests_per_minute: 20
+    max_requests_per_hour: 100
+    block_duration: 300  # seconds
+    whitelist: []  # IPs o chat IDs exentos
+    
+  # Configuración de comandos
+  command_timeout: 60  # seconds
+  max_command_duration: 300  # seconds
+  require_confirmation: true
+  confirmation_timeout: 30  # seconds
 
 # Configuración de auditoría
 audit:
   enabled: true
   log_all_commands: true
-  log_all_actions: true
-  retention_days: 30
-  
-  # Eventos a auditar
   events:
-    - "command_executed"
-    - "trading_action"
-    - "configuration_change"
-    - "error_occurred"
-    - "security_violation"
+    - "login"
+    - "logout"
+    - "trade_executed"
+    - "trade_cancelled"
+    - "position_opened"
+    - "position_closed"
+    - "config_changed"
+    - "risk_limit_exceeded"
+    - "anomaly_detected"
     - "data_access"
-    - "model_update"
+    - "system_error"
+    - "security_violation"
+    
+  # Configuración de logs de auditoría
+  log_format: "%(asctime)s - AUDIT - %(levelname)s - %(message)s"
+  log_file: "logs/audit.log"
+  retention_days: 2555  # 7 años para compliance
   
-  # Formato de logs de auditoría
-  log_format: "json"
-  include_user_info: true
-  include_ip_address: true
-  include_timestamp: true
+  # Configuración de eventos críticos
+  critical_events:
+    - "security_violation"
+    - "unauthorized_access"
+    - "data_breach"
+    - "system_compromise"
+    
+  # Notificaciones de auditoría
+  notifications:
+    telegram: true
+    email: false
+    webhook: false
 
 # Configuración de cumplimiento
 compliance:
   mifid2_enabled: true
   gdpr_enabled: true
   data_retention_years: 7
-  immutable_logs: true
+  audit_logging: true
   
-  # Configuración de reportes de cumplimiento
-  reporting:
-    enabled: true
-    frequency: "daily"
-    include_trade_data: true
-    include_risk_metrics: true
-    include_audit_trail: true
+  # Configuración de MiFID II
+  mifid2:
+    transaction_reporting: true
+    best_execution: true
+    client_categorization: true
+    product_governance: true
+    
+  # Configuración de GDPR
+  gdpr:
+    data_minimization: true
+    purpose_limitation: true
+    storage_limitation: true
+    data_portability: true
+    right_to_erasure: true
+    
+  # Configuración de retención de datos
+  data_retention:
+    trading_data: "7 years"
+    audit_logs: "7 years"
+    personal_data: "3 years"
+    system_logs: "1 year"
 
 # Configuración de validación de datos
 data_validation:
   enabled: true
+  schema_validation: true
+  range_checks: true
+  anomaly_detection: true
   
-  # Validación de entrada
-  input_validation:
+  # Configuración de validación
+  validation_rules:
+    price_range:
+      min: 0.000001
+      max: 1000000
+      
+    volume_range:
+      min: 0
+      max: 1000000000
+      
+    leverage_range:
+      min: 1
+      max: 125
+      
+    confidence_range:
+      min: 0.0
+      max: 1.0
+      
+  # Configuración de detección de anomalías
+  anomaly_detection:
     enabled: true
-    max_string_length: 1000
-    allowed_characters: "a-zA-Z0-9._-@"
-    sanitize_input: true
-  
-  # Validación de comandos
-  command_validation:
-    enabled: true
-    allowed_commands: [
-      "start", "help", "status", "metrics", "positions", "balance",
-      "health", "train_hist", "train_live", "start_trading", "stop_trading",
-      "emergency_stop", "settings", "verify_historical_data",
-      "download_historical_data", "historical_data_report"
-    ]
-    max_arguments: 10
-    argument_validation: true
-
-# Configuración de logging de seguridad
-security_logging:
-  enabled: true
-  level: "INFO"
-  file: "core/logs/security.log"
-  max_size: "10MB"
-  backup_count: 10
-  
-  # Eventos de seguridad a registrar
-  events:
-    - "authentication_attempt"
-    - "authorization_failure"
-    - "command_execution"
-    - "data_access"
-    - "configuration_change"
-    - "error_occurred"
-    - "security_violation"
+    threshold: 3.0  # desviaciones estándar
+    window_size: 100
+    methods: ["statistical", "machine_learning"]
 
 # Configuración de alertas de seguridad
 security_alerts:
@@ -123,40 +152,45 @@ security_alerts:
   
   # Canales de alerta
   channels:
-    - "telegram"
-    - "console"
-    - "log_file"
-  
-  # Eventos que generan alertas
+    telegram:
+      enabled: true
+      priority: "high"
+      
+    email:
+      enabled: false
+      priority: "medium"
+      
+    webhook:
+      enabled: false
+      url: ""
+      priority: "low"
+      
+  # Eventos de alerta
   events:
-    - "unauthorized_access"
-    - "rate_limit_exceeded"
-    - "command_timeout"
-    - "security_violation"
-    - "data_breach_attempt"
-    - "configuration_tampering"
-  
-  # Configuración de alertas
-  alert_config:
-    cooldown_seconds: 300
-    max_alerts_per_hour: 10
-    escalation_enabled: true
-
-# Configuración de backup de seguridad
-security_backup:
-  enabled: true
-  frequency: "daily"
-  retention_days: 30
-  encryption: true
-  compression: true
-  
-  # Archivos críticos a respaldar
-  critical_files:
-    - "config/user_settings.yaml"
-    - "config/security_config.yaml"
-    - "core/logs/security.log"
-    - "core/logs/audit.log"
-    - ".env"
+    unauthorized_access:
+      enabled: true
+      threshold: 1
+      cooldown: 300  # seconds
+      
+    rate_limit_exceeded:
+      enabled: true
+      threshold: 10
+      cooldown: 60
+      
+    suspicious_activity:
+      enabled: true
+      threshold: 5
+      cooldown: 180
+      
+    data_breach:
+      enabled: true
+      threshold: 1
+      cooldown: 0
+      
+    system_compromise:
+      enabled: true
+      threshold: 1
+      cooldown: 0
 
 # Configuración de monitoreo de seguridad
 security_monitoring:
@@ -164,15 +198,62 @@ security_monitoring:
   
   # Métricas de seguridad
   metrics:
-    failed_attempts: true
-    successful_commands: true
-    rate_limit_hits: true
-    security_violations: true
-    data_access_patterns: true
+    - "failed_login_attempts"
+    - "unauthorized_access_attempts"
+    - "rate_limit_hits"
+    - "suspicious_commands"
+    - "data_access_violations"
+    - "encryption_failures"
+    
+  # Configuración de monitoreo
+  monitoring:
+    real_time: true
+    alert_threshold: 5
+    cooldown_period: 300  # seconds
+    
+  # Configuración de reportes
+  reporting:
+    daily_summary: true
+    weekly_report: true
+    monthly_audit: true
+    incident_report: true
+
+# Configuración de sesiones
+sessions:
+  enabled: true
+  timeout: 3600  # seconds
+  max_concurrent: 10
+  session_encryption: true
   
-  # Alertas automáticas
-  auto_alerts:
-    multiple_failures: true
-    unusual_patterns: true
-    high_frequency_commands: true
-    data_access_anomalies: true
+  # Configuración de cookies
+  cookies:
+    secure: true
+    http_only: true
+    same_site: "strict"
+    max_age: 3600  # seconds
+    
+  # Configuración de tokens
+  tokens:
+    jwt_enabled: false
+    token_expiry: 3600  # seconds
+    refresh_token_expiry: 86400  # seconds
+
+# Configuración de red
+network:
+  timeout: 30  # seconds
+  retry_attempts: 3
+  retry_delay: 1  # seconds
+  max_connections: 10
+  
+  # Configuración de SSL/TLS
+  ssl:
+    enabled: true
+    verify_certificates: true
+    min_version: "TLSv1.2"
+    
+  # Configuración de firewall
+  firewall:
+    enabled: false
+    allowed_ips: []
+    blocked_ips: []
+    rate_limit: 100  # requests per minute

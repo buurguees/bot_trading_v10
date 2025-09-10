@@ -12,10 +12,13 @@ Mejoras:
 """
 
 import logging
-from typing import Dict, Optional
+import numpy as np
+import pandas as pd
+from typing import Dict, Optional, List, Tuple
 from dataclasses import dataclass
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from decimal import Decimal, ROUND_DOWN, ROUND_HALF_UP, getcontext
+from scipy import stats
 
 from config.config_loader import user_config
 from core.data.database import db_manager
@@ -347,6 +350,244 @@ class RiskManager:
             risk_percentage=0.0,
             trailing_config=None,
         )
+
+    def calculate_var(self, returns: List[float], confidence_level: float = 0.95) -> float:
+        """
+        Calcula Value at Risk (VaR) usando el método histórico
+        
+        Args:
+            returns: Lista de retornos históricos
+            confidence_level: Nivel de confianza (0.95 = 95%)
+            
+        Returns:
+            VaR como porcentaje negativo
+        """
+        try:
+            if not returns or len(returns) < 30:
+                logger.warning("Datos insuficientes para calcular VaR")
+                return -0.05  # 5% por defecto
+            
+            returns_array = np.array(returns)
+            var_percentile = (1 - confidence_level) * 100
+            var_value = np.percentile(returns_array, var_percentile)
+            
+            logger.info(f"VaR {confidence_level*100}%: {var_value:.4f}")
+            return float(var_value)
+            
+        except Exception as e:
+            logger.error(f"Error calculando VaR: {e}")
+            return -0.05
+
+    def calculate_cvar(self, returns: List[float], confidence_level: float = 0.95) -> float:
+        """
+        Calcula Conditional Value at Risk (CVaR) o Expected Shortfall
+        
+        Args:
+            returns: Lista de retornos históricos
+            confidence_level: Nivel de confianza (0.95 = 95%)
+            
+        Returns:
+            CVaR como porcentaje negativo
+        """
+        try:
+            if not returns or len(returns) < 30:
+                logger.warning("Datos insuficientes para calcular CVaR")
+                return -0.08  # 8% por defecto
+            
+            returns_array = np.array(returns)
+            var_value = self.calculate_var(returns, confidence_level)
+            
+            # CVaR es el promedio de retornos peores que VaR
+            tail_returns = returns_array[returns_array <= var_value]
+            cvar_value = np.mean(tail_returns) if len(tail_returns) > 0 else var_value
+            
+            logger.info(f"CVaR {confidence_level*100}%: {cvar_value:.4f}")
+            return float(cvar_value)
+            
+        except Exception as e:
+            logger.error(f"Error calculando CVaR: {e}")
+            return -0.08
+
+    def calculate_portfolio_var(self, positions: Dict[str, Dict], confidence_level: float = 0.95) -> Dict[str, float]:
+        """
+        Calcula VaR del portafolio considerando correlaciones
+        
+        Args:
+            positions: Dict con posiciones {symbol: {size, price, side}}
+            confidence_level: Nivel de confianza
+            
+        Returns:
+            Dict con VaR individual y del portafolio
+        """
+        try:
+            if not positions:
+                return {"portfolio_var": 0.0, "individual_var": {}}
+            
+            # Obtener retornos históricos para cada símbolo
+            returns_data = {}
+            for symbol in positions.keys():
+                try:
+                    # Obtener datos históricos de los últimos 30 días
+                    end_date = datetime.now()
+                    start_date = end_date - timedelta(days=30)
+                    
+                    historical_data = db_manager.get_historical_data(
+                        symbol=symbol,
+                        start_date=start_date,
+                        end_date=end_date,
+                        timeframe='1h'
+                    )
+                    
+                    if historical_data and len(historical_data) > 24:  # Al menos 1 día de datos
+                        df = pd.DataFrame(historical_data)
+                        if 'close' in df.columns:
+                            returns = df['close'].pct_change().dropna().tolist()
+                            returns_data[symbol] = returns
+                            
+                except Exception as e:
+                    logger.warning(f"Error obteniendo datos para {symbol}: {e}")
+                    continue
+            
+            if not returns_data:
+                logger.warning("No hay datos suficientes para calcular VaR del portafolio")
+                return {"portfolio_var": 0.0, "individual_var": {}}
+            
+            # Calcular VaR individual
+            individual_var = {}
+            for symbol, returns in returns_data.items():
+                individual_var[symbol] = self.calculate_var(returns, confidence_level)
+            
+            # Calcular VaR del portafolio usando matriz de correlación
+            if len(returns_data) > 1:
+                # Crear DataFrame con retornos de todos los símbolos
+                max_length = min(len(returns) for returns in returns_data.values())
+                aligned_returns = {}
+                for symbol, returns in returns_data.items():
+                    aligned_returns[symbol] = returns[-max_length:]
+                
+                returns_df = pd.DataFrame(aligned_returns)
+                correlation_matrix = returns_df.corr()
+                
+                # Calcular pesos del portafolio
+                total_value = sum(pos['size'] * pos['price'] for pos in positions.values())
+                weights = {}
+                for symbol, pos in positions.items():
+                    if symbol in returns_data:
+                        weights[symbol] = (pos['size'] * pos['price']) / total_value
+                
+                # Calcular VaR del portafolio
+                portfolio_variance = 0.0
+                for i, (symbol1, weight1) in enumerate(weights.items()):
+                    for j, (symbol2, weight2) in enumerate(weights.items()):
+                        if symbol1 in correlation_matrix.columns and symbol2 in correlation_matrix.columns:
+                            corr = correlation_matrix.loc[symbol1, symbol2]
+                            var1 = individual_var.get(symbol1, 0)
+                            var2 = individual_var.get(symbol2, 0)
+                            portfolio_variance += weight1 * weight2 * var1 * var2 * corr
+                
+                portfolio_var = np.sqrt(portfolio_variance)
+            else:
+                # Un solo símbolo
+                symbol = list(returns_data.keys())[0]
+                portfolio_var = individual_var.get(symbol, 0)
+            
+            logger.info(f"VaR del portafolio {confidence_level*100}%: {portfolio_var:.4f}")
+            return {
+                "portfolio_var": float(portfolio_var),
+                "individual_var": individual_var
+            }
+            
+        except Exception as e:
+            logger.error(f"Error calculando VaR del portafolio: {e}")
+            return {"portfolio_var": 0.0, "individual_var": {}}
+
+    def calculate_stress_test(self, positions: Dict[str, Dict], stress_scenarios: List[float] = None) -> Dict[str, float]:
+        """
+        Realiza stress test del portafolio con diferentes escenarios de mercado
+        
+        Args:
+            positions: Dict con posiciones {symbol: {size, price, side}}
+            stress_scenarios: Lista de shocks de mercado (por defecto: -5%, -10%, -20%)
+            
+        Returns:
+            Dict con resultados del stress test
+        """
+        try:
+            if stress_scenarios is None:
+                stress_scenarios = [-0.05, -0.10, -0.20]  # -5%, -10%, -20%
+            
+            stress_results = {}
+            total_portfolio_value = sum(pos['size'] * pos['price'] for pos in positions.values())
+            
+            for scenario in stress_scenarios:
+                scenario_loss = 0.0
+                for symbol, pos in positions.items():
+                    # Calcular pérdida para cada posición
+                    position_value = pos['size'] * pos['price']
+                    if pos['side'].upper() in ['BUY', 'LONG']:
+                        # Posición larga: pérdida si el precio baja
+                        loss = position_value * abs(scenario)
+                    else:
+                        # Posición corta: pérdida si el precio sube
+                        loss = position_value * abs(scenario)
+                    
+                    scenario_loss += loss
+                
+                # Calcular pérdida como porcentaje del portafolio
+                loss_percentage = (scenario_loss / total_portfolio_value) * 100 if total_portfolio_value > 0 else 0
+                stress_results[f"shock_{int(scenario*100)}%"] = {
+                    "absolute_loss": scenario_loss,
+                    "percentage_loss": loss_percentage
+                }
+            
+            logger.info(f"Stress test completado: {stress_results}")
+            return stress_results
+            
+        except Exception as e:
+            logger.error(f"Error en stress test: {e}")
+            return {}
+
+    def get_risk_metrics(self, positions: Dict[str, Dict]) -> Dict[str, float]:
+        """
+        Obtiene métricas de riesgo consolidadas
+        
+        Args:
+            positions: Dict con posiciones actuales
+            
+        Returns:
+            Dict con todas las métricas de riesgo
+        """
+        try:
+            metrics = {}
+            
+            # VaR y CVaR del portafolio
+            var_results = self.calculate_portfolio_var(positions, 0.95)
+            metrics.update(var_results)
+            
+            # Stress test
+            stress_results = self.calculate_stress_test(positions)
+            metrics["stress_test"] = stress_results
+            
+            # Métricas adicionales
+            total_exposure = sum(pos['size'] * pos['price'] for pos in positions.values())
+            metrics["total_exposure"] = total_exposure
+            
+            # Diversificación (número de símbolos únicos)
+            unique_symbols = len(set(pos.get('symbol', '') for pos in positions.values()))
+            metrics["diversification"] = unique_symbols
+            
+            # Concentración máxima (símbolo con mayor exposición)
+            if positions:
+                max_exposure = max(pos['size'] * pos['price'] for pos in positions.values())
+                max_concentration = (max_exposure / total_exposure) * 100 if total_exposure > 0 else 0
+                metrics["max_concentration"] = max_concentration
+            
+            logger.info(f"Métricas de riesgo calculadas: {metrics}")
+            return metrics
+            
+        except Exception as e:
+            logger.error(f"Error calculando métricas de riesgo: {e}")
+            return {}
 
 
 # Instancia global

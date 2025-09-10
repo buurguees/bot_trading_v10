@@ -32,6 +32,9 @@ import numpy as np
 import yaml
 from threading import Barrier, Lock
 
+# Importar ConfigLoader
+from config.config_loader import ConfigLoader
+
 logger = logging.getLogger(__name__)
 
 class TrainMode(Enum):

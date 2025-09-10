@@ -1,242 +1,206 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script para el comando /download_data
-Descarga datos históricos, los alinea y los guarda
+Script para /download_data - Enterprise: Descarga, alinea y guarda datos históricos.
+Llama core/data/collector.py y core/data/database.py.
+Actualiza progreso por símbolo/TF.
+Retorna JSON para handlers.py.
 """
 
 import asyncio
 import sys
+import json
 import logging
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
+from typing import Dict, List, Any
 
-# Cargar variables de entorno
+# Importar ConfigLoader
+from config.config_loader import ConfigLoader
+
+# Cargar .env
 load_dotenv()
 
-# Agregar directorios al path
+# Path al root
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from core.data.collector import BitgetDataCollector
-from core.data.database import db_manager
-from core.data.temporal_alignment import TemporalAlignment
-from config.config_loader import ConfigLoader
-import pandas as pd
-
-# Configurar logging
-logging.basicConfig(level=logging.INFO)
+# Logging enterprise
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(f'logs/download_data.log'),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
 
-class DownloadDataScript:
-    """Script para descarga y alineación de datos"""
+class DownloadDataEnterprise:
+    """Gestión enterprise de descarga de datos"""
     
-    def __init__(self):
+    def __init__(self, progress_id: str = None):
+        self.progress_id = progress_id
         self.config_loader = ConfigLoader("config/user_settings.yaml")
         self.config = self.config_loader.load_config()
         self.collector = None
-        self.aligner = None
-        
-    async def initialize(self):
-        """Inicializar componentes"""
-        try:
-            # Inicializar collector
-            self.collector = BitgetDataCollector()
-            await asyncio.sleep(2)  # Esperar inicialización
-            
-            # Inicializar alineador temporal
-            self.aligner = TemporalAlignment()
-            
-            logger.info("✅ Componentes inicializados correctamente")
-            return True
-            
-        except Exception as e:
-            logger.error(f"❌ Error inicializando componentes: {e}")
-            return False
+        self.db_manager = None
+        self.session_id = f"download_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        self._init_progress_file()
     
-    async def execute(self, args=None):
-        """Ejecutar descarga de datos"""
+    def _init_progress_file(self):
+        """Inicializa progreso"""
+        if self.progress_id:
+            progress_path = Path("data/tmp") / f"{self.progress_id}.json"
+            Path("data/tmp").mkdir(exist_ok=True)
+            with open(progress_path, 'w') as f:
+                json.dump({"progress": 0, "bar": "░░░░░░░░░░", "current_symbol": "Iniciando", "status": "starting"}, f)
+    
+    def _update_progress(self, progress: int, current_symbol: str, status: str = "En curso"):
+        """Actualiza progreso JSON"""
+        if self.progress_id:
+            progress_path = Path("data/tmp") / f"{self.progress_id}.json"
+            bar_length = 10
+            filled = int(progress / 100 * bar_length)
+            bar = "█" * filled + "░" * (bar_length - filled)
+            data = {"progress": progress, "bar": bar, "current_symbol": current_symbol, "status": status}
+            with open(progress_path, 'w') as f:
+                json.dump(data, f)
+            logger.debug(f"Progreso: {progress}% - {current_symbol}")
+    
+    async def initialize(self) -> bool:
+        """Inicializa core/ con retry"""
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                from core.data.collector import BitgetDataCollector
+                from core.data.database import db_manager
+                
+                self.collector = BitgetDataCollector()
+                self.db_manager = db_manager
+                
+                self._update_progress(10, "Inicializando collector y DB", "Configurando core/")
+                logger.info("✅ Core/ inicializado (retry {}/{})".format(attempt + 1, max_retries))
+                return True
+            except Exception as e:
+                logger.warning(f"⚠️ Error en intento {attempt + 1}: {e}")
+                await asyncio.sleep(2 ** attempt)
+        
+        return False
+    
+    async def execute(self) -> Dict[str, Any]:
+        """Ejecución enterprise con progreso por símbolo/TF"""
         try:
-            logger.info("🚀 Iniciando descarga de datos...")
+            self._update_progress(0, "Iniciando descarga", "starting")
+            logger.info("🚀 Descarga enterprise iniciada")
             
-            # Inicializar componentes
             if not await self.initialize():
-                return {"status": "error", "message": "Error inicializando componentes"}
+                return {"status": "error", "message": "Error inicializando core/data/"}
             
-            # Obtener configuración
-            symbols = self.config.get("trading_settings", {}).get("timeframes", {}).get("symbols", [])
-            timeframes = self.config.get("trading_settings", {}).get("timeframes", {}).get("timeframes", [])
+            symbols = self.config.get("trading_settings", {}).get("symbols", [])
+            timeframes = self.config.get("trading_settings", {}).get("timeframes", ["1m", "5m", "15m", "1h", "4h", "1d"])
+            years = self.config.get("data_collection", {}).get("historical", {}).get("years", 1)
             
             if not symbols or not timeframes:
-                logger.error("❌ Configuración de símbolos o timeframes no encontrada")
-                return {"status": "error", "message": "Configuración no encontrada"}
+                return {"status": "error", "message": "No symbols/timeframes en config"}
             
-            logger.info(f"📊 Símbolos: {symbols}")
-            logger.info(f"📊 Timeframes: {timeframes}")
+            self._update_progress(20, f"Descargando {len(symbols)} símbolos", "Cargando datos")
+            logger.info(f"Símbolos: {symbols} | TFs: {timeframes} | Años: {years}")
             
-            # Procesar cada símbolo
-            results = {}
+            total_steps = len(symbols) * len(timeframes)
+            step = 0
+            download_results = {}
+            reports_by_symbol = []  # Para delays en handlers
+            
             for symbol in symbols:
-                logger.info(f"🔄 Procesando {symbol}...")
-                
+                self._update_progress(30 + (step / total_steps * 40), symbol, "Descargando símbolo")
                 symbol_results = {}
-                for timeframe in timeframes:
-                    try:
-                        logger.info(f"  📈 Descargando {symbol} - {timeframe}")
-                        
-                        # Verificar si ya existen datos
-                        existing_count = db_manager.get_market_data_count_fast(symbol)
-                        if existing_count > 0:
-                            logger.info(f"  ✅ {symbol} ya tiene {existing_count} registros")
-                            symbol_results[timeframe] = {"status": "exists", "count": existing_count}
-                            continue
-                        
-                        # Descargar datos históricos
-                        data = await self.collector.fetch_historical_data_extended(
-                            symbol=symbol,
-                            timeframe=timeframe,
-                            years=1
-                        )
-                        
-                        if not data.empty:
-                            # Guardar datos
-                            saved_count = await self.collector.save_historical_data(data)
-                            symbol_results[timeframe] = {"status": "downloaded", "count": saved_count}
-                            logger.info(f"  ✅ {symbol} - {timeframe}: {saved_count} registros descargados")
-                        else:
-                            symbol_results[timeframe] = {"status": "no_data", "count": 0}
-                            logger.warning(f"  ⚠️ {symbol} - {timeframe}: Sin datos disponibles")
-                            
-                    except Exception as e:
-                        logger.error(f"  ❌ Error procesando {symbol} - {timeframe}: {e}")
-                        symbol_results[timeframe] = {"status": "error", "count": 0, "error": str(e)}
-                        continue
                 
-                results[symbol] = symbol_results
+                for tf in timeframes:
+                    try:
+                        # Descargar via core/data/collector.py
+                        data = await self.collector.download_historical_data(symbol, tf, days_back=years * 365)
+                        if data and data.get("success"):
+                            count = data.get("records", 0)
+                            symbol_results[tf] = {"status": "downloaded", "count": count}
+                            # Guardar via core/data/database.py
+                            session_saved = self.db_manager.store_historical_data(data["data"], symbol, tf, self.session_id)
+                            if session_saved:
+                                logger.info(f"✅ {symbol} {tf}: {count} registros guardados")
+                            step += 1
+                        else:
+                            symbol_results[tf] = {"status": "error", "count": 0}
+                            logger.warning(f"⚠️ Error descargando {symbol} {tf}")
+                            step += 1
+                    except Exception as e:
+                        logger.error(f"❌ Error {symbol} {tf}: {e}")
+                        symbol_results[tf] = {"status": "error", "count": 0}
+                        step += 1
+                
+                download_results[symbol] = symbol_results
+                # Reporte por símbolo
+                sym_report = self._generate_symbol_report(symbol, symbol_results)
+                reports_by_symbol.append(sym_report)
             
-            # Realizar alineación temporal
-            logger.info("🔄 Iniciando alineación temporal...")
-            alignment_results = await self._perform_temporal_alignment(symbols, timeframes)
+            self._update_progress(100, "Completado", "completed")
             
-            # Generar reporte final
-            report = self._generate_report(results, alignment_results)
+            # Log en DB
+            self.db_manager.log_download_session(self.session_id, symbols, timeframes, download_results)
             
             return {
                 "status": "success",
-                "message": "Descarga completada",
-                "results": results,
-                "alignment": alignment_results,
-                "report": report
+                "report": reports_by_symbol,  # Lista para delays
+                "session_id": self.session_id,
+                "total_downloaded": sum(sum(r["count"] for r in sym_results.values()) for sym_results in download_results.values())
             }
             
         except Exception as e:
-            logger.error(f"❌ Error en descarga de datos: {e}")
+            logger.error(f"❌ Error descarga enterprise: {e}")
+            self._update_progress(0, "Error", "error")
             return {"status": "error", "message": str(e)}
     
-    async def _perform_temporal_alignment(self, symbols, timeframes):
-        """Realizar alineación temporal de los datos"""
-        try:
-            alignment_results = {}
-            
-            for timeframe in timeframes:
-                logger.info(f"🔄 Alineando {timeframe}...")
-                
-                try:
-                    # Obtener datos de todos los símbolos para este timeframe
-                    symbol_data = {}
-                    for symbol in symbols:
-                        db_path = f"data/{symbol}/{symbol}_{timeframe}.db"
-                        if Path(db_path).exists():
-                            import sqlite3
-                            with sqlite3.connect(db_path) as conn:
-                                df = pd.read_sql_query(
-                                    "SELECT * FROM market_data ORDER BY timestamp", 
-                                    conn, 
-                                    index_col='timestamp',
-                                    parse_dates=['timestamp']
-                                )
-                                if not df.empty:
-                                    symbol_data[symbol] = df
-                    
-                    if symbol_data:
-                        # Alinear datos
-                        aligned_data = self.aligner.align_symbol_data(symbol_data, None, timeframe)
-                        
-                        if aligned_data:
-                            # Guardar datos alineados
-                            session_id = f"download_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                            success = db_manager.store_aligned_data(aligned_data, timeframe, session_id)
-                            
-                            if success:
-                                alignment_results[timeframe] = len(aligned_data)
-                                logger.info(f"✅ Alineación {timeframe} completada: {len(aligned_data)} períodos")
-                            else:
-                                logger.error(f"❌ Error guardando alineación {timeframe}")
-                        else:
-                            logger.warning(f"⚠️ No se pudo alinear {timeframe}")
-                    else:
-                        logger.warning(f"⚠️ No hay datos para alinear {timeframe}")
-                        
-                except Exception as e:
-                    logger.error(f"❌ Error alineando {timeframe}: {e}")
-                    continue
-            
-            return alignment_results
-            
-        except Exception as e:
-            logger.error(f"❌ Error en alineación temporal: {e}")
-            return {}
+    def _generate_symbol_report(self, symbol: str, results: Dict) -> str:
+        """Reporte detallado por símbolo"""
+        downloaded = sum(r["count"] for r in results.values() if r["status"] == "downloaded")
+        errors = sum(1 for r in results.values() if r["status"] == "error")
+        report = f"""
+<b>📥 {symbol}:</b>
+• Descargados: {downloaded:,} registros total
+• Errores: {errors}/{len(results)}
+• Detalles por TF:
+"""
+        for tf, res in results.items():
+            status_emoji = "✅" if res["status"] == "downloaded" else "❌"
+            report += f"  • {tf}: {res['count']:,} {status_emoji}\n"
+        return report.strip()
     
-    def _generate_report(self, results, alignment_results):
-        """Generar reporte final"""
-        try:
-            total_downloaded = 0
-            total_existing = 0
-            total_errors = 0
-            
-            for symbol, symbol_results in results.items():
-                for timeframe, result in symbol_results.items():
-                    if result["status"] == "downloaded":
-                        total_downloaded += result["count"]
-                    elif result["status"] == "exists":
-                        total_existing += result["count"]
-                    elif result["status"] == "error":
-                        total_errors += 1
-            
-            total_aligned = sum(alignment_results.values()) if alignment_results else 0
-            
-            report = f"""
-📊 <b>Reporte de Descarga de Datos</b>
+    def _generate_report(self, results: Dict, session_id: str) -> str:
+        """Reporte global (usado si no por símbolo)"""
+        total_downloaded = sum(sum(r["count"] for r in sym_results.values()) for sym_results in results.values())
+        total_errors = sum(len([r for r in sym_results.values() if r["status"] == "error"]) for sym_results in results.values())
+        report = f"""
+📊 <b>Reporte Global de Descarga</b>
 
-📈 <b>Estadísticas Generales:</b>
-• Registros descargados: {total_downloaded:,}
-• Registros existentes: {total_existing:,}
-• Errores encontrados: {total_errors}
-• Períodos alineados: {total_aligned:,}
-
-🔄 <b>Alineación Temporal:</b>
-• Timeframes procesados: {len(alignment_results)}
-• Alineación exitosa: {len([k for k, v in alignment_results.items() if v > 0])}
-
-✅ <b>Estado:</b> Proceso completado
-            """
-            
-            return report.strip()
-            
-        except Exception as e:
-            logger.error(f"❌ Error generando reporte: {e}")
-            return "❌ Error generando reporte"
+📈 Total descargado: {total_downloaded:,} registros
+❌ Errores: {total_errors}
+🆔 Sesión: {session_id}
+✅ Estado: Completado enterprise
+        """
+        return report.strip()
 
 async def main():
-    """Función principal"""
-    script = DownloadDataScript()
+    """Entrada: Parse --progress_id"""
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--progress_id", required=True)
+    args = parser.parse_args()
+    
+    script = DownloadDataEnterprise(progress_id=args.progress_id)
     result = await script.execute()
     
-    if result["status"] == "success":
-        print("✅ Descarga completada exitosamente")
-        print(result["report"])
-    else:
-        print(f"❌ Error: {result['message']}")
+    print(json.dumps(result, ensure_ascii=False, indent=2))  # Para handlers
+    
+    if result.get("status") != "success":
         sys.exit(1)
 
 if __name__ == "__main__":

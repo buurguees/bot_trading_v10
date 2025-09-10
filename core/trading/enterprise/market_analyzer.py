@@ -1,6 +1,6 @@
 # Ruta: core/trading/enterprise/market_analyzer.py
 # market_analyzer.py - Analizador de mercado en tiempo real
-# Ubicación: C:\TradingBot_v10\trading\enterprise\market_analyzer.py
+# Ubicación: C:\TradingBot_v10\core\trading\enterprise\market_analyzer.py
 
 """
 Analizador de mercado en tiempo real para trading enterprise.
@@ -11,11 +11,13 @@ Características principales:
 - Análisis de correlación entre activos
 - Detección de tendencias y reversiones
 - Análisis de volumen y liquidez
-- Alertas de condiciones anómalas
+- Alertas de condiciones anómalas via Telegram
+- Redis caching para análisis
 """
 
 import asyncio
 import logging
+import time
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
@@ -24,6 +26,13 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 import json
 from pathlib import Path
+import redis
+try:
+    import talib
+except ImportError:
+    talib = None
+from core.data.database import db_manager
+from control.telegram_bot import telegram_bot
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +87,7 @@ class SymbolAnalysis:
     bollinger_position: float
     trend_strength: float
     support_resistance: Dict[str, float]
+    ichimoku_signal: str  # Añadido para Ichimoku Cloud
 
 class MarketAnalyzer:
     """
@@ -92,101 +102,69 @@ class MarketAnalyzer:
             config: Configuración del sistema
         """
         self.config = config
-        
-        # Símbolos a analizar
-        self.symbols = [s['symbol'] for s in config.trading.symbols.primary]
-        
-        # Historial de análisis
+        self.symbols = config.trading.symbols
         self.analysis_history: List[MarketAnalysis] = []
-        self.symbol_analysis_history: Dict[str, List[SymbolAnalysis]] = {}
-        
-        # Configuración de análisis
-        self.analysis_config = {
-            'volatility_thresholds': {
-                'extreme': 0.10,  # 10%
-                'high': 0.05,     # 5%
-                'low': 0.01       # 1%
-            },
-            'volume_thresholds': {
-                'high': 2.0,      # 2x volumen promedio
-                'low': 0.5        # 0.5x volumen promedio
-            },
-            'correlation_thresholds': {
-                'high': 0.8,      # 80% correlación
-                'low': 0.3        # 30% correlación
-            },
-            'trend_thresholds': {
-                'strong': 0.7,    # 70% fuerza de tendencia
-                'weak': 0.3       # 30% fuerza de tendencia
-            }
-        }
-        
-        # Cache de datos
-        self.price_cache: Dict[str, List[float]] = {}
-        self.volume_cache: Dict[str, List[float]] = {}
-        self.correlation_cache: Dict[str, Dict[str, float]] = {}
-        
-        # Métricas de performance
+        self.symbol_analysis_history: Dict[str, List[SymbolAnalysis]] = {s: [] for s in self.symbols}
         self.total_analyses = 0
-        self.avg_analysis_time = 0.0
         self.alert_count = 0
+        self.avg_analysis_time = 0.0
         
-        logger.info("MarketAnalyzer inicializado")
+        # Redis para caching
+        self.redis_client = None
+        self._setup_redis()
+        
+        logger.info(f"MarketAnalyzer inicializado para símbolos: {self.symbols}")
+    
+    def _setup_redis(self):
+        """Configura Redis para caching de análisis"""
+        try:
+            redis_url = self.config.get('redis_url', 'redis://localhost:6379')
+            self.redis_client = redis.Redis.from_url(redis_url)
+            logger.info("Conexión a Redis establecida para caching")
+        except Exception as e:
+            logger.error(f"Error conectando a Redis: {e}")
+            self.redis_client = None
     
     async def analyze_market(self) -> MarketAnalysis:
-        """
-        Analiza las condiciones generales del mercado
-        
-        Returns:
-            Análisis completo del mercado
-        """
-        start_time = datetime.now()
-        
+        """Realiza análisis completo del mercado"""
         try:
-            self.total_analyses += 1
+            start_time = time.time()
+            analysis_timestamp = datetime.now()
+            symbol_analyses = {}
             
-            # Obtener datos de todos los símbolos
-            symbol_data = await self._get_symbol_data()
+            # Analizar cada símbolo
+            for symbol in self.symbols:
+                analysis = await self.analyze_symbol(symbol)
+                symbol_analyses[symbol] = analysis
+                self.symbol_analysis_history[symbol].append(analysis)
             
-            # Analizar volatilidad general
-            volatility = await self._analyze_volatility(symbol_data)
-            
-            # Analizar tendencias
-            trend_direction = await self._analyze_trends(symbol_data)
-            
-            # Analizar volumen
-            volume_ratio = await self._analyze_volume(symbol_data)
-            
-            # Analizar correlaciones
-            correlation_matrix = await self._analyze_correlations(symbol_data)
-            
-            # Calcular liquidez
-            liquidity_score = await self._calculate_liquidity_score(symbol_data)
-            
-            # Calcular momentum
-            momentum_score = await self._calculate_momentum_score(symbol_data)
-            
-            # Calcular riesgo
-            risk_score = await self._calculate_risk_score(volatility, correlation_matrix, liquidity_score)
+            # Calcular volatilidad del mercado
+            volatilities = [a.volatility_24h for a in symbol_analyses.values()]
+            market_volatility = np.mean(volatilities) if volatilities else 0.0
             
             # Determinar condición del mercado
-            condition = await self._determine_market_condition(
-                volatility, trend_direction, volume_ratio, risk_score
-            )
+            condition = self._determine_market_condition(market_volatility, symbol_analyses)
             
-            # Generar alertas
-            alerts = await self._generate_alerts(volatility, correlation_matrix, volume_ratio, risk_score)
+            # Calcular correlaciones
+            correlation_matrix = await self._calculate_correlation_matrix(symbol_analyses)
             
-            # Generar recomendaciones
-            recommendations = await self._generate_recommendations(condition, risk_score, alerts)
+            # Calcular momentum y liquidez
+            momentum_score = np.mean([a.trend_strength for a in symbol_analyses.values()]) if symbol_analyses else 0.0
+            liquidity_score = np.mean([a.volume_ratio for a in symbol_analyses.values()]) if symbol_analyses else 0.0
             
-            # Crear análisis
+            # Calcular riesgo
+            risk_score = self._calculate_risk_score(symbol_analyses, market_volatility)
+            
+            # Generar alertas y recomendaciones
+            alerts = self._generate_alerts(market_volatility, symbol_analyses)
+            recommendations = self._generate_recommendations(condition, symbol_analyses)
+            
             analysis = MarketAnalysis(
-                timestamp=start_time,
+                timestamp=analysis_timestamp,
                 condition=condition,
-                volatility=volatility,
-                trend_direction=trend_direction,
-                volume_ratio=volume_ratio,
+                volatility=market_volatility,
+                trend_direction=self._determine_trend_direction(symbol_analyses),
+                volume_ratio=liquidity_score,
                 correlation_matrix=correlation_matrix,
                 liquidity_score=liquidity_score,
                 momentum_score=momentum_score,
@@ -195,558 +173,245 @@ class MarketAnalyzer:
                 recommendations=recommendations
             )
             
-            # Agregar al historial
+            # Cachear análisis en Redis
+            if self.redis_client:
+                cache_key = f"market_analysis_{analysis_timestamp.isoformat()}"
+                self.redis_client.setex(cache_key, 300, json.dumps(asdict(analysis)))
+            
             self.analysis_history.append(analysis)
-            self._cleanup_history()
+            self.total_analyses += 1
+            self.avg_analysis_time = ((self.avg_analysis_time * (self.total_analyses - 1)) + (time.time() - start_time)) / self.total_analyses
             
-            # Actualizar métricas
-            analysis_time = (datetime.now() - start_time).total_seconds()
-            self.avg_analysis_time = (self.avg_analysis_time * (self.total_analyses - 1) + analysis_time) / self.total_analyses
-            
+            # Enviar alertas via Telegram
             if alerts:
                 self.alert_count += len(alerts)
-            
-            logger.debug(f"Análisis de mercado completado en {analysis_time:.3f}s")
+                for alert in alerts:
+                    await telegram_bot.send_message(f"⚠️ Alerta de Mercado: {alert}")
             
             return analysis
             
         except Exception as e:
-            logger.error(f"Error analizando mercado: {e}")
-            # Retornar análisis por defecto en caso de error
+            logger.error(f"Error en análisis de mercado: {e}")
             return MarketAnalysis(
-                timestamp=start_time,
+                timestamp=datetime.now(),
                 condition=MarketCondition.NORMAL,
-                volatility=0.02,
+                volatility=0.0,
                 trend_direction=TrendDirection.NEUTRAL,
-                volume_ratio=1.0,
+                volume_ratio=0.0,
                 correlation_matrix={},
-                liquidity_score=0.5,
+                liquidity_score=0.0,
                 momentum_score=0.0,
-                risk_score=0.5,
-                alerts=["Error en análisis de mercado"],
-                recommendations=["Verificar conectividad de datos"]
+                risk_score=0.0,
+                alerts=[f"Error en análisis: {str(e)}"],
+                recommendations=[]
             )
     
-    async def analyze_symbol(self, symbol: str) -> Optional[SymbolAnalysis]:
-        """
-        Analiza un símbolo específico
-        
-        Args:
-            symbol: Símbolo a analizar
-            
-        Returns:
-            Análisis del símbolo
-        """
+    async def analyze_symbol(self, symbol: str) -> SymbolAnalysis:
+        """Analiza un símbolo específico"""
         try:
-            # Obtener datos del símbolo
-            symbol_data = await self._get_symbol_data(symbol)
-            if not symbol_data:
-                return None
+            # Verificar cache en Redis
+            if self.redis_client:
+                cache_key = f"symbol_analysis_{symbol}"
+                cached_analysis = self.redis_client.get(cache_key)
+                if cached_analysis:
+                    return SymbolAnalysis(**json.loads(cached_analysis))
             
-            # Calcular cambios de precio
-            price_changes = await self._calculate_price_changes(symbol_data)
+            # Obtener datos históricos
+            data = await db_manager.get_recent_market_data(symbol, timeframe='1h', limit=100)
+            df = pd.DataFrame(data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
             
-            # Calcular volatilidad
-            volatility = await self._calculate_symbol_volatility(symbol_data)
+            # Calcular métricas
+            price_change_1h = (df['close'].iloc[-1] / df['close'].iloc[-2] - 1) * 100 if len(df) >= 2 else 0.0
+            price_change_4h = (df['close'].iloc[-1] / df['close'].iloc[-5] - 1) * 100 if len(df) >= 5 else 0.0
+            price_change_24h = (df['close'].iloc[-1] / df['close'].iloc[-25] - 1) * 100 if len(df) >= 25 else 0.0
+            volatility_24h = np.std(df['close'].pct_change().dropna()) * np.sqrt(24) if len(df) > 1 else 0.0
+            volume_24h = df['volume'].iloc[-25:].sum() if len(df) >= 25 else 0.0
+            volume_ratio = volume_24h / df['volume'].iloc[-50:-25].sum() if len(df) >= 50 else 1.0
             
-            # Calcular volumen
-            volume_metrics = await self._calculate_volume_metrics(symbol_data)
+            # Indicadores técnicos
+            rsi = talib.RSI(df['close'], timeperiod=14)[-1] if len(df) >= 14 else 50.0
+            macd, signal, _ = talib.MACD(df['close'], fastperiod=12, slowperiod=26, signalperiod=9)
+            macd_signal = 'BUY' if macd[-1] > signal[-1] else 'SELL' if macd[-1] < signal[-1] else 'NEUTRAL'
+            bb_upper, bb_middle, bb_lower = talib.BBANDS(df['close'], timeperiod=20)
+            bollinger_position = (df['close'].iloc[-1] - bb_lower[-1]) / (bb_upper[-1] - bb_lower[-1]) if bb_upper[-1] != bb_lower[-1] else 0.5
             
-            # Calcular indicadores técnicos
-            technical_indicators = await self._calculate_technical_indicators(symbol_data)
+            # Ichimoku Cloud
+            tenkan_sen = talib.MAX(df['high'], timeperiod=9)[-1] + talib.MIN(df['low'], timeperiod=9)[-1] / 2
+            kijun_sen = talib.MAX(df['high'], timeperiod=26)[-1] + talib.MIN(df['low'], timeperiod=26)[-1] / 2
+            ichimoku_signal = 'BUY' if df['close'].iloc[-1] > max(tenkan_sen, kijun_sen) else 'SELL' if df['close'].iloc[-1] < min(tenkan_sen, kijun_sen) else 'NEUTRAL'
             
-            # Calcular soporte y resistencia
-            support_resistance = await self._calculate_support_resistance(symbol_data)
+            # Soporte y resistencia
+            support_resistance = self._calculate_support_resistance(df)
+            trend_strength = self._calculate_trend_strength(df)
             
-            # Calcular fuerza de tendencia
-            trend_strength = await self._calculate_trend_strength(symbol_data)
-            
-            # Crear análisis
             analysis = SymbolAnalysis(
                 symbol=symbol,
-                price_change_1h=price_changes['1h'],
-                price_change_4h=price_changes['4h'],
-                price_change_24h=price_changes['24h'],
-                volatility_24h=volatility,
-                volume_24h=volume_metrics['volume_24h'],
-                volume_ratio=volume_metrics['volume_ratio'],
-                rsi=technical_indicators['rsi'],
-                macd_signal=technical_indicators['macd_signal'],
-                bollinger_position=technical_indicators['bollinger_position'],
+                price_change_1h=price_change_1h,
+                price_change_4h=price_change_4h,
+                price_change_24h=price_change_24h,
+                volatility_24h=volatility_24h,
+                volume_24h=volume_24h,
+                volume_ratio=volume_ratio,
+                rsi=rsi,
+                macd_signal=macd_signal,
+                bollinger_position=bollinger_position,
                 trend_strength=trend_strength,
-                support_resistance=support_resistance
+                support_resistance=support_resistance,
+                ichimoku_signal=ichimoku_signal
             )
             
-            # Agregar al historial del símbolo
-            if symbol not in self.symbol_analysis_history:
-                self.symbol_analysis_history[symbol] = []
-            self.symbol_analysis_history[symbol].append(analysis)
-            
-            # Limpiar historial del símbolo
-            if len(self.symbol_analysis_history[symbol]) > 1000:
-                self.symbol_analysis_history[symbol] = self.symbol_analysis_history[symbol][-500:]
+            # Cachear análisis
+            if self.redis_client:
+                self.redis_client.setex(cache_key, 300, json.dumps(asdict(analysis)))
             
             return analysis
             
         except Exception as e:
             logger.error(f"Error analizando símbolo {symbol}: {e}")
-            return None
+            return SymbolAnalysis(
+                symbol=symbol,
+                price_change_1h=0.0,
+                price_change_4h=0.0,
+                price_change_24h=0.0,
+                volatility_24h=0.0,
+                volume_24h=0.0,
+                volume_ratio=1.0,
+                rsi=50.0,
+                macd_signal='NEUTRAL',
+                bollinger_position=0.5,
+                trend_strength=0.0,
+                support_resistance={'support': 0.0, 'resistance': 0.0},
+                ichimoku_signal='NEUTRAL'
+            )
     
-    async def _get_symbol_data(self, symbol: Optional[str] = None) -> Dict[str, Any]:
-        """Obtiene datos de los símbolos"""
+    def _determine_market_condition(self, volatility: float, symbol_analyses: Dict[str, SymbolAnalysis]) -> MarketCondition:
+        """Determina la condición del mercado"""
+        if volatility > 0.05:
+            return MarketCondition.EXTREME_VOLATILITY
+        elif volatility > 0.03:
+            return MarketCondition.HIGH_VOLATILITY
+        elif volatility < 0.01:
+            return MarketCondition.LOW_VOLATILITY
+        elif any(a.price_change_24h > 5.0 for a in symbol_analyses.values()):
+            return MarketCondition.BREAKOUT
+        elif any(a.rsi > 70 or a.rsi < 30 for a in symbol_analyses.values()):
+            return MarketCondition.REVERSAL
+        return MarketCondition.NORMAL
+    
+    def _determine_trend_direction(self, symbol_analyses: Dict[str, SymbolAnalysis]) -> TrendDirection:
+        """Determina la dirección de la tendencia del mercado"""
+        avg_trend = np.mean([a.trend_strength for a in symbol_analyses.values()]) if symbol_analyses else 0.0
+        if avg_trend > 0.7:
+            return TrendDirection.STRONG_UP
+        elif avg_trend > 0.3:
+            return TrendDirection.WEAK_UP
+        elif avg_trend < -0.7:
+            return TrendDirection.STRONG_DOWN
+        elif avg_trend < -0.3:
+            return TrendDirection.WEAK_DOWN
+        return TrendDirection.NEUTRAL
+    
+    async def _calculate_correlation_matrix(self, symbol_analyses: Dict[str, SymbolAnalysis]) -> Dict[str, Dict[str, float]]:
+        """Calcula la matriz de correlación entre símbolos"""
         try:
-            if symbol:
-                # Obtener datos de un símbolo específico
-                # En un sistema real, esto vendría del data collector
-                return await self._simulate_symbol_data(symbol)
-            else:
-                # Obtener datos de todos los símbolos
-                data = {}
-                for sym in self.symbols:
-                    data[sym] = await self._simulate_symbol_data(sym)
-                return data
-                
+            # Obtener datos históricos para correlación
+            data = {}
+            for symbol in self.symbols:
+                df = pd.DataFrame(
+                    await db_manager.get_recent_market_data(symbol, timeframe='1h', limit=100),
+                    columns=['timestamp', 'open', 'high', 'low', 'close', 'volume']
+                )
+                data[symbol] = df['close'].pct_change().dropna()
+            
+            # Calcular matriz de correlación
+            df_all = pd.DataFrame(data)
+            corr_matrix = df_all.corr().to_dict()
+            return corr_matrix
         except Exception as e:
-            logger.error(f"Error obteniendo datos de símbolos: {e}")
+            logger.error(f"Error calculando matriz de correlación: {e}")
             return {}
     
-    async def _simulate_symbol_data(self, symbol: str) -> Dict[str, Any]:
-        """Simula datos de un símbolo (para testing)"""
+    def _calculate_risk_score(self, symbol_analyses: Dict[str, SymbolAnalysis], market_volatility: float) -> float:
+        """Calcula el puntaje de riesgo del mercado"""
         try:
-            # Generar datos simulados
-            base_price = 50000 if 'BTC' in symbol else 3000 if 'ETH' in symbol else 1.0
-            
-            # Generar precios con tendencia y ruido
-            trend = np.random.normal(0, 0.001)  # Tendencia suave
-            noise = np.random.normal(0, 0.02)   # Ruido del 2%
-            price_change = trend + noise
-            
-            current_price = base_price * (1 + price_change)
-            
-            # Generar datos OHLCV
-            high = current_price * (1 + abs(np.random.normal(0, 0.01)))
-            low = current_price * (1 - abs(np.random.normal(0, 0.01)))
-            volume = np.random.uniform(1000, 10000)
-            
-            return {
-                'symbol': symbol,
-                'price': current_price,
-                'high': high,
-                'low': low,
-                'volume': volume,
-                'timestamp': datetime.now()
-            }
-            
+            risk_factors = [
+                market_volatility * 100,  # Normalizar volatilidad
+                sum(1 for a in symbol_analyses.values() if a.rsi > 70 or a.rsi < 30) / len(symbol_analyses),  # Sobrecompra/sobreventa
+                max(abs(a.price_change_24h) for a in symbol_analyses.values()) if symbol_analyses else 0.0  # Movimientos extremos
+            ]
+            return np.mean(risk_factors) if risk_factors else 0.0
         except Exception as e:
-            logger.error(f"Error simulando datos para {symbol}: {e}")
-            return {}
-    
-    async def _analyze_volatility(self, symbol_data: Dict[str, Any]) -> float:
-        """Analiza la volatilidad general del mercado"""
-        try:
-            volatilities = []
-            
-            for symbol, data in symbol_data.items():
-                if 'price' in data:
-                    # Calcular volatilidad basada en cambio de precio
-                    price_change = abs(data.get('price_change', 0.02))
-                    volatilities.append(price_change)
-            
-            if volatilities:
-                return np.mean(volatilities)
-            else:
-                return 0.02  # 2% por defecto
-                
-        except Exception as e:
-            logger.error(f"Error analizando volatilidad: {e}")
-            return 0.02
-    
-    async def _analyze_trends(self, symbol_data: Dict[str, Any]) -> TrendDirection:
-        """Analiza las tendencias del mercado"""
-        try:
-            trend_scores = []
-            
-            for symbol, data in symbol_data.items():
-                if 'price_change' in data:
-                    trend_scores.append(data['price_change'])
-            
-            if trend_scores:
-                avg_trend = np.mean(trend_scores)
-                trend_strength = abs(avg_trend)
-                
-                if trend_strength > self.analysis_config['trend_thresholds']['strong']:
-                    if avg_trend > 0:
-                        return TrendDirection.STRONG_UP
-                    else:
-                        return TrendDirection.STRONG_DOWN
-                elif trend_strength > self.analysis_config['trend_thresholds']['weak']:
-                    if avg_trend > 0:
-                        return TrendDirection.WEAK_UP
-                    else:
-                        return TrendDirection.WEAK_DOWN
-                else:
-                    return TrendDirection.NEUTRAL
-            else:
-                return TrendDirection.NEUTRAL
-                
-        except Exception as e:
-            logger.error(f"Error analizando tendencias: {e}")
-            return TrendDirection.NEUTRAL
-    
-    async def _analyze_volume(self, symbol_data: Dict[str, Any]) -> float:
-        """Analiza el volumen del mercado"""
-        try:
-            volume_ratios = []
-            
-            for symbol, data in symbol_data.items():
-                if 'volume' in data:
-                    # Simular ratio de volumen
-                    volume_ratio = np.random.uniform(0.5, 2.0)
-                    volume_ratios.append(volume_ratio)
-            
-            if volume_ratios:
-                return np.mean(volume_ratios)
-            else:
-                return 1.0  # Volumen normal
-                
-        except Exception as e:
-            logger.error(f"Error analizando volumen: {e}")
-            return 1.0
-    
-    async def _analyze_correlations(self, symbol_data: Dict[str, Any]) -> Dict[str, Dict[str, float]]:
-        """Analiza correlaciones entre símbolos"""
-        try:
-            correlation_matrix = {}
-            
-            symbols = list(symbol_data.keys())
-            
-            for i, symbol1 in enumerate(symbols):
-                correlation_matrix[symbol1] = {}
-                
-                for j, symbol2 in enumerate(symbols):
-                    if i == j:
-                        correlation_matrix[symbol1][symbol2] = 1.0
-                    else:
-                        # Simular correlación
-                        correlation = np.random.uniform(0.2, 0.8)
-                        correlation_matrix[symbol1][symbol2] = correlation
-            
-            return correlation_matrix
-            
-        except Exception as e:
-            logger.error(f"Error analizando correlaciones: {e}")
-            return {}
-    
-    async def _calculate_liquidity_score(self, symbol_data: Dict[str, Any]) -> float:
-        """Calcula el score de liquidez del mercado"""
-        try:
-            liquidity_scores = []
-            
-            for symbol, data in symbol_data.items():
-                if 'volume' in data:
-                    # Score de liquidez basado en volumen
-                    volume = data['volume']
-                    liquidity_score = min(volume / 5000, 1.0)  # Normalizar
-                    liquidity_scores.append(liquidity_score)
-            
-            if liquidity_scores:
-                return np.mean(liquidity_scores)
-            else:
-                return 0.5  # Liquidez media
-                
-        except Exception as e:
-            logger.error(f"Error calculando liquidez: {e}")
-            return 0.5
-    
-    async def _calculate_momentum_score(self, symbol_data: Dict[str, Any]) -> float:
-        """Calcula el score de momentum del mercado"""
-        try:
-            momentum_scores = []
-            
-            for symbol, data in symbol_data.items():
-                if 'price_change' in data:
-                    # Score de momentum basado en cambio de precio
-                    price_change = data['price_change']
-                    momentum_score = np.tanh(price_change * 10)  # Normalizar entre -1 y 1
-                    momentum_scores.append(momentum_score)
-            
-            if momentum_scores:
-                return np.mean(momentum_scores)
-            else:
-                return 0.0  # Momentum neutro
-                
-        except Exception as e:
-            logger.error(f"Error calculando momentum: {e}")
+            logger.error(f"Error calculando puntaje de riesgo: {e}")
             return 0.0
     
-    async def _calculate_risk_score(
-        self,
-        volatility: float,
-        correlation_matrix: Dict[str, Dict[str, float]],
-        liquidity_score: float
-    ) -> float:
-        """Calcula el score de riesgo del mercado"""
-        try:
-            # Riesgo por volatilidad
-            volatility_risk = min(volatility / 0.1, 1.0)  # Normalizar
-            
-            # Riesgo por correlación (alta correlación = mayor riesgo)
-            avg_correlation = 0.0
-            correlation_count = 0
-            
-            for symbol1, correlations in correlation_matrix.items():
-                for symbol2, correlation in correlations.items():
-                    if symbol1 != symbol2:
-                        avg_correlation += correlation
-                        correlation_count += 1
-            
-            if correlation_count > 0:
-                avg_correlation /= correlation_count
-                correlation_risk = avg_correlation
-            else:
-                correlation_risk = 0.5
-            
-            # Riesgo por liquidez (baja liquidez = mayor riesgo)
-            liquidity_risk = 1.0 - liquidity_score
-            
-            # Score de riesgo combinado
-            risk_score = (volatility_risk * 0.4 + correlation_risk * 0.3 + liquidity_risk * 0.3)
-            
-            return min(risk_score, 1.0)
-            
-        except Exception as e:
-            logger.error(f"Error calculando score de riesgo: {e}")
-            return 0.5
+    def _generate_alerts(self, market_volatility: float, symbol_analyses: Dict[str, SymbolAnalysis]) -> List[str]:
+        """Genera alertas basadas en condiciones del mercado"""
+        alerts = []
+        if market_volatility > 0.05:
+            alerts.append("Volatilidad extrema detectada")
+        for symbol, analysis in symbol_analyses.items():
+            if analysis.rsi > 80:
+                alerts.append(f"Sobrecompra en {symbol}: RSI = {analysis.rsi:.2f}")
+            elif analysis.rsi < 20:
+                alerts.append(f"Sobreventa en {symbol}: RSI = {analysis.rsi:.2f}")
+            if abs(analysis.price_change_24h) > 10:
+                alerts.append(f"Movimiento extremo en {symbol}: {analysis.price_change_24h:.2f}% en 24h")
+        return alerts
     
-    async def _determine_market_condition(
-        self,
-        volatility: float,
-        trend_direction: TrendDirection,
-        volume_ratio: float,
-        risk_score: float
-    ) -> MarketCondition:
-        """Determina la condición general del mercado"""
-        try:
-            # Condición por volatilidad
-            if volatility > self.analysis_config['volatility_thresholds']['extreme']:
-                return MarketCondition.EXTREME_VOLATILITY
-            elif volatility > self.analysis_config['volatility_thresholds']['high']:
-                return MarketCondition.HIGH_VOLATILITY
-            elif volatility < self.analysis_config['volatility_thresholds']['low']:
-                return MarketCondition.LOW_VOLATILITY
-            
-            # Condición por tendencia
-            if trend_direction == TrendDirection.STRONG_UP:
-                return MarketCondition.TRENDING_UP
-            elif trend_direction == TrendDirection.STRONG_DOWN:
-                return MarketCondition.TRENDING_DOWN
-            elif trend_direction == TrendDirection.NEUTRAL:
-                return MarketCondition.SIDEWAYS
-            
-            # Condición por volumen
-            if volume_ratio > self.analysis_config['volume_thresholds']['high']:
-                return MarketCondition.BREAKOUT
-            elif volume_ratio < self.analysis_config['volume_thresholds']['low']:
-                return MarketCondition.STABLE
-            
-            # Condición por riesgo
-            if risk_score > 0.8:
-                return MarketCondition.EXTREME_VOLATILITY
-            elif risk_score < 0.2:
-                return MarketCondition.STABLE
-            
-            return MarketCondition.NORMAL
-            
-        except Exception as e:
-            logger.error(f"Error determinando condición del mercado: {e}")
-            return MarketCondition.NORMAL
+    def _generate_recommendations(self, condition: MarketCondition, symbol_analyses: Dict[str, SymbolAnalysis]) -> List[str]:
+        """Genera recomendaciones basadas en condiciones del mercado"""
+        recommendations = []
+        if condition == MarketCondition.EXTREME_VOLATILITY:
+            recommendations.append("Reducir leverage y tamaño de posiciones")
+        elif condition == MarketCondition.BREAKOUT:
+            recommendations.append("Considerar entradas en dirección de la tendencia")
+        elif condition == MarketCondition.REVERSAL:
+            recommendations.append("Evaluar oportunidades de reversión")
+        for symbol, analysis in symbol_analyses.items():
+            if analysis.ichimoku_signal == 'BUY':
+                recommendations.append(f"Posible entrada LONG en {symbol} (Ichimoku)")
+            elif analysis.ichimoku_signal == 'SELL':
+                recommendations.append(f"Posible entrada SHORT en {symbol} (Ichimoku)")
+        return recommendations
     
-    async def _generate_alerts(
-        self,
-        volatility: float,
-        correlation_matrix: Dict[str, Dict[str, float]],
-        volume_ratio: float,
-        risk_score: float
-    ) -> List[str]:
-        """Genera alertas basadas en el análisis"""
-        try:
-            alerts = []
-            
-            # Alerta por volatilidad extrema
-            if volatility > self.analysis_config['volatility_thresholds']['extreme']:
-                alerts.append(f"Volatilidad extrema detectada: {volatility:.2%}")
-            
-            # Alerta por alta correlación
-            high_correlations = 0
-            for symbol1, correlations in correlation_matrix.items():
-                for symbol2, correlation in correlations.items():
-                    if symbol1 != symbol2 and correlation > self.analysis_config['correlation_thresholds']['high']:
-                        high_correlations += 1
-            
-            if high_correlations > 3:
-                alerts.append(f"Alta correlación entre activos: {high_correlations} pares")
-            
-            # Alerta por volumen anómalo
-            if volume_ratio > self.analysis_config['volume_thresholds']['high']:
-                alerts.append(f"Volumen anómalamente alto: {volume_ratio:.1f}x")
-            elif volume_ratio < self.analysis_config['volume_thresholds']['low']:
-                alerts.append(f"Volumen anómalamente bajo: {volume_ratio:.1f}x")
-            
-            # Alerta por alto riesgo
-            if risk_score > 0.8:
-                alerts.append(f"Alto riesgo de mercado: {risk_score:.2f}")
-            
-            return alerts
-            
-        except Exception as e:
-            logger.error(f"Error generando alertas: {e}")
-            return []
-    
-    async def _generate_recommendations(
-        self,
-        condition: MarketCondition,
-        risk_score: float,
-        alerts: List[str]
-    ) -> List[str]:
-        """Genera recomendaciones basadas en el análisis"""
-        try:
-            recommendations = []
-            
-            # Recomendaciones por condición del mercado
-            if condition == MarketCondition.EXTREME_VOLATILITY:
-                recommendations.append("Reducir tamaño de posiciones")
-                recommendations.append("Aumentar stop losses")
-                recommendations.append("Evitar nuevas posiciones")
-            
-            elif condition == MarketCondition.HIGH_VOLATILITY:
-                recommendations.append("Usar leverage conservador")
-                recommendations.append("Monitorear posiciones de cerca")
-            
-            elif condition == MarketCondition.TRENDING_UP:
-                recommendations.append("Considerar posiciones long")
-                recommendations.append("Aprovechar momentum alcista")
-            
-            elif condition == MarketCondition.TRENDING_DOWN:
-                recommendations.append("Considerar posiciones short")
-                recommendations.append("Cuidado con reversiones")
-            
-            elif condition == MarketCondition.SIDEWAYS:
-                recommendations.append("Estrategias de range trading")
-                recommendations.append("Evitar breakout trades")
-            
-            # Recomendaciones por riesgo
-            if risk_score > 0.7:
-                recommendations.append("Reducir exposición total")
-                recommendations.append("Aumentar diversificación")
-            
-            elif risk_score < 0.3:
-                recommendations.append("Condiciones favorables para trading")
-                recommendations.append("Considerar aumentar exposición")
-            
-            return recommendations
-            
-        except Exception as e:
-            logger.error(f"Error generando recomendaciones: {e}")
-            return []
-    
-    # Métodos auxiliares para análisis de símbolos
-    async def _calculate_price_changes(self, symbol_data: Dict[str, Any]) -> Dict[str, float]:
-        """Calcula cambios de precio en diferentes timeframes"""
-        try:
-            # Simular cambios de precio
-            return {
-                '1h': np.random.normal(0, 0.01),   # 1% cambio promedio
-                '4h': np.random.normal(0, 0.02),   # 2% cambio promedio
-                '24h': np.random.normal(0, 0.05)   # 5% cambio promedio
-            }
-        except Exception as e:
-            logger.error(f"Error calculando cambios de precio: {e}")
-            return {'1h': 0.0, '4h': 0.0, '24h': 0.0}
-    
-    async def _calculate_symbol_volatility(self, symbol_data: Dict[str, Any]) -> float:
-        """Calcula la volatilidad de un símbolo"""
-        try:
-            # Simular volatilidad
-            return abs(np.random.normal(0, 0.02))  # 2% volatilidad promedio
-        except Exception as e:
-            logger.error(f"Error calculando volatilidad del símbolo: {e}")
-            return 0.02
-    
-    async def _calculate_volume_metrics(self, symbol_data: Dict[str, Any]) -> Dict[str, float]:
-        """Calcula métricas de volumen"""
-        try:
-            volume = symbol_data.get('volume', 1000)
-            return {
-                'volume_24h': volume,
-                'volume_ratio': np.random.uniform(0.5, 2.0)
-            }
-        except Exception as e:
-            logger.error(f"Error calculando métricas de volumen: {e}")
-            return {'volume_24h': 1000, 'volume_ratio': 1.0}
-    
-    async def _calculate_technical_indicators(self, symbol_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Calcula indicadores técnicos"""
-        try:
-            return {
-                'rsi': np.random.uniform(20, 80),
-                'macd_signal': 'bullish' if np.random.random() > 0.5 else 'bearish',
-                'bollinger_position': np.random.uniform(0, 1)
-            }
-        except Exception as e:
-            logger.error(f"Error calculando indicadores técnicos: {e}")
-            return {'rsi': 50, 'macd_signal': 'neutral', 'bollinger_position': 0.5}
-    
-    async def _calculate_support_resistance(self, symbol_data: Dict[str, Any]) -> Dict[str, float]:
+    def _calculate_support_resistance(self, df: pd.DataFrame) -> Dict[str, float]:
         """Calcula niveles de soporte y resistencia"""
         try:
-            price = symbol_data.get('price', 100)
+            highs = df['high'].rolling(window=20).max()
+            lows = df['low'].rolling(window=20).min()
             return {
-                'support_1': price * 0.95,
-                'support_2': price * 0.90,
-                'resistance_1': price * 1.05,
-                'resistance_2': price * 1.10
+                'support': lows.iloc[-1] if not np.isnan(lows.iloc[-1]) else 0.0,
+                'resistance': highs.iloc[-1] if not np.isnan(highs.iloc[-1]) else 0.0
             }
         except Exception as e:
-            logger.error(f"Error calculando soporte y resistencia: {e}")
-            return {'support_1': 0, 'support_2': 0, 'resistance_1': 0, 'resistance_2': 0}
+            logger.error(f"Error calculando soporte/resistencia: {e}")
+            return {'support': 0.0, 'resistance': 0.0}
     
-    async def _calculate_trend_strength(self, symbol_data: Dict[str, Any]) -> float:
-        """Calcula la fuerza de la tendencia"""
+    def _calculate_trend_strength(self, df: pd.DataFrame) -> float:
+        """Calcula la fuerza de la tendencia usando ADX"""
         try:
-            # Simular fuerza de tendencia
-            return np.random.uniform(0, 1)
+            adx = talib.ADX(df['high'], df['low'], df['close'], timeperiod=14)
+            return adx[-1] / 100 if not np.isnan(adx[-1]) else 0.0
         except Exception as e:
             logger.error(f"Error calculando fuerza de tendencia: {e}")
-            return 0.5
+            return 0.0
     
-    def _cleanup_history(self):
-        """Limpia el historial de análisis"""
+    async def get_market_summary(self) -> Dict[str, Any]:
+        """Obtiene un resumen del análisis del mercado"""
         try:
-            # Mantener solo los últimos 1000 análisis
-            if len(self.analysis_history) > 1000:
-                self.analysis_history = self.analysis_history[-500:]
-        except Exception as e:
-            logger.error(f"Error limpiando historial: {e}")
-    
-    def get_market_summary(self) -> Dict[str, Any]:
-        """Obtiene resumen del estado del mercado"""
-        try:
-            if not self.analysis_history:
-                return {'status': 'no_data'}
-            
-            latest_analysis = self.analysis_history[-1]
-            
+            latest_analysis = self.analysis_history[-1] if self.analysis_history else await self.analyze_market()
             return {
+                'status': 'success',
                 'timestamp': latest_analysis.timestamp.isoformat(),
-                'condition': latest_analysis.condition.value,
+                'market_condition': latest_analysis.condition.value,
                 'volatility': latest_analysis.volatility,
                 'trend_direction': latest_analysis.trend_direction.value,
                 'volume_ratio': latest_analysis.volume_ratio,
                 'liquidity_score': latest_analysis.liquidity_score,
                 'momentum_score': latest_analysis.momentum_score,
                 'risk_score': latest_analysis.risk_score,
-                'alerts_count': len(latest_analysis.alerts),
-                'recommendations_count': len(latest_analysis.recommendations)
+                'alerts': latest_analysis.alerts,
+                'recommendations': latest_analysis.recommendations
             }
             
         except Exception as e:
@@ -764,7 +429,8 @@ class MarketAnalyzer:
                 'symbol_analyses': {
                     symbol: len(analyses) 
                     for symbol, analyses in self.symbol_analysis_history.items()
-                }
+                },
+                'cache_hit_rate': self.cache_hits / (self.cache_hits + self.cache_misses) if (self.cache_hits + self.cache_misses) > 0 else 0
             }
             
         except Exception as e:
@@ -780,7 +446,6 @@ class MarketAnalyzer:
             output_path = Path("logs/enterprise/trading/market_analysis") / output_file
             output_path.parent.mkdir(parents=True, exist_ok=True)
             
-            # Preparar datos para exportación
             export_data = {
                 'market_analysis_history': [asdict(analysis) for analysis in self.analysis_history],
                 'symbol_analysis_history': {
@@ -791,7 +456,6 @@ class MarketAnalyzer:
                 'export_timestamp': datetime.now().isoformat()
             }
             
-            # Guardar archivo
             with open(output_path, 'w') as f:
                 json.dump(export_data, f, indent=2, ensure_ascii=False, default=str)
             

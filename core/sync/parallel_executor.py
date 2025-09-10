@@ -11,13 +11,23 @@ from typing import Dict, List, Any, Optional, Callable
 from dataclasses import dataclass, asdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
+import numpy as np
 from datetime import datetime, timezone
 import json
 import psutil
 import threading
 from queue import Queue, Empty
+import redis
+from prometheus_client import Counter, Gauge, Histogram
+from control.telegram_bot import telegram_bot
 
 logger = logging.getLogger(__name__)
+
+# Prometheus metrics
+execution_cycles_total = Counter('execution_cycles_total', 'Total execution cycles', ['symbol', 'timeframe'])
+execution_time_histogram = Histogram('execution_cycle_time_seconds', 'Execution cycle time', ['symbol', 'timeframe'])
+pnl_gauge = Gauge('execution_pnl', 'PnL per cycle', ['symbol', 'timeframe'])
+trades_total = Counter('execution_trades_total', 'Total trades executed', ['symbol', 'timeframe'])
 
 @dataclass
 class ExecutionMetrics:
@@ -36,6 +46,7 @@ class ExecutionMetrics:
     cpu_usage_avg: float
     api_calls_made: int
     api_errors: int
+    cache_hit_rate: float
 
 @dataclass
 class CycleResult:
@@ -61,16 +72,30 @@ class ParallelExecutor:
         self.delay_ms = delay_ms
         self.execution_queue = Queue()
         self.results_queue = Queue()
-        self.metrics = ExecutionMetrics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        self.metrics = ExecutionMetrics(0, 0, 0, 0, 0, 0, float('inf'), 0, 0, 0, 0, 0, 0, 0, 0)
         self.running = False
         self.performance_monitor = None
         self.lock = threading.Lock()
-        
-        # Propiedades para monitoreo de progreso
         self.total_tasks = 0
         self.current_progress = 0
         self.progress_lock = threading.Lock()
+        self.redis_client = None
+        self.cache_hits = 0
+        self.cache_misses = 0
+        self._setup_redis()
         
+        logger.info(f"ParallelExecutor inicializado con {max_workers} workers, delay {delay_ms}ms")
+    
+    def _setup_redis(self):
+        """Configura Redis para caching de resultados"""
+        try:
+            redis_url = 'redis://localhost:6379'
+            self.redis_client = redis.Redis.from_url(redis_url)
+            logger.info("Conexión a Redis establecida para caching")
+        except Exception as e:
+            logger.error(f"Error conectando a Redis: {e}")
+            self.redis_client = None
+    
     async def execute_agents_parallel(self, 
                                     timeline: pd.DataFrame, 
                                     symbols: List[str], 
@@ -81,318 +106,187 @@ class ParallelExecutor:
         
         Args:
             timeline: Timeline maestro con timestamps
-            symbols: Lista de símbolos a procesar
+            symbols: Lista de símbolos
             timeframes: Lista de timeframes
-            agent_function: Función del agente a ejecutar
+            agent_function: Función de agente a ejecutar
             
         Returns:
-            Dict con resultados de ejecución
+            Dict con resultados y métricas
         """
-        start_time = time.time()
-        logger.info(f"🚀 Iniciando ejecución paralela enterprise")
-        logger.info(f"📊 Símbolos: {len(symbols)}, Timeframes: {len(timeframes)}")
-        logger.info(f"⏱️ Delay entre operaciones: {self.delay_ms}ms")
-        
         try:
-            # Inicializar métricas
-            self.metrics = ExecutionMetrics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
             self.running = True
+            self.total_tasks = len(symbols) * len(timeframes)
+            self.current_progress = 0
+            results = []
             
-            # Iniciar monitor de rendimiento
+            # Iniciar monitoreo de rendimiento
             self.performance_monitor = threading.Thread(target=self._monitor_performance)
             self.performance_monitor.start()
             
-            # Crear tareas de ejecución
-            execution_tasks = []
-            cycle_results = []
-            
-            # Procesar cada timestamp del timeline
-            for idx, row in timeline.iterrows():
-                timestamp = row['timestamp'] if 'timestamp' in row else idx
-                
-                # Crear tareas para cada combinación símbolo-timeframe
+            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                futures = []
                 for symbol in symbols:
                     for timeframe in timeframes:
-                        task = {
-                            'cycle_id': f"{symbol}_{timeframe}_{timestamp}",
-                            'timestamp': timestamp,
-                            'symbol': symbol,
-                            'timeframe': timeframe,
-                            'agent_function': agent_function
-                        }
-                        execution_tasks.append(task)
-            
-            logger.info(f"📋 Creadas {len(execution_tasks)} tareas de ejecución")
-            
-            # Configurar progreso
-            with self.progress_lock:
-                self.total_tasks = len(execution_tasks)
-                self.current_progress = 0
-            
-            # Ejecutar tareas en paralelo con control de concurrencia
-            cycle_results = await self._execute_tasks_with_delay(execution_tasks)
-            
-            # Calcular métricas finales
-            self.metrics.total_execution_time = time.time() - start_time
-            self.metrics.total_cycles = len(cycle_results)
-            self.metrics.successful_cycles = sum(1 for r in cycle_results if r.status == 'success')
-            self.metrics.failed_cycles = self.metrics.total_cycles - self.metrics.successful_cycles
-            
-            # Calcular métricas de trading
-            self._calculate_trading_metrics(cycle_results)
-            
-            # Detener monitor de rendimiento
-            self.running = False
-            if self.performance_monitor:
-                self.performance_monitor.join(timeout=1)
-            
-            result = {
-                'status': 'success',
-                'execution_metrics': asdict(self.metrics),
-                'cycle_results': [asdict(r) for r in cycle_results],
-                'summary': self._generate_execution_summary(cycle_results),
-                'recommendations': self._generate_recommendations(),
-                'timestamp': datetime.now().isoformat()
-            }
-            
-            logger.info(f"✅ Ejecución paralela completada en {self.metrics.total_execution_time:.2f}s")
-            logger.info(f"📊 Ciclos exitosos: {self.metrics.successful_cycles}/{self.metrics.total_cycles}")
-            
-            return result
-            
-        except Exception as e:
-            logger.error(f"❌ Error en ejecución paralela: {e}")
-            self.running = False
-            return {
-                'status': 'error',
-                'message': str(e),
-                'execution_metrics': asdict(self.metrics),
-                'cycle_results': [],
-                'summary': {},
-                'recommendations': ["❌ Error crítico en ejecución"]
-            }
-    
-    async def _execute_tasks_with_delay(self, tasks: List[Dict[str, Any]]) -> List[CycleResult]:
-        """Ejecuta tareas con delay controlado entre operaciones"""
-        try:
-            cycle_results = []
-            completed_tasks = 0
-            
-            # Usar ThreadPoolExecutor para control de concurrencia
-            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-                # Crear futures para todas las tareas
-                future_to_task = {}
+                        # Verificar cache
+                        if self.redis_client:
+                            cache_key = f"cycle_result_{symbol}_{timeframe}_{timeline['timestamp'].iloc[-1]}"
+                            cached_result = self.redis_client.get(cache_key)
+                            if cached_result:
+                                self.cache_hits += 1
+                                results.append(CycleResult(**json.loads(cached_result)))
+                                continue
+                            self.cache_misses += 1
+                        
+                        futures.append(executor.submit(self._execute_cycle, symbol, timeframe, timeline, agent_function))
+                        await asyncio.sleep(self.delay_ms / 1000.0)
                 
-                for task in tasks:
-                    future = executor.submit(self._execute_single_cycle, task)
-                    future_to_task[future] = task
-                
-                # Procesar resultados con delay
-                for future in as_completed(future_to_task):
-                    task = future_to_task[future]
-                    
+                for future in as_completed(futures):
                     try:
                         result = future.result()
-                        cycle_results.append(result)
-                        completed_tasks += 1
+                        results.append(result)
+                        self.results_queue.put(result)
                         
-                        # Actualizar progreso para monitoreo
+                        # Actualizar métricas Prometheus
+                        execution_cycles_total.labels(symbol=result.symbol, timeframe=result.timeframe).inc()
+                        execution_time_histogram.labels(symbol=result.symbol, timeframe=result.timeframe).observe(result.execution_time)
+                        pnl_gauge.labels(symbol=result.symbol, timeframe=result.timeframe).set(result.pnl)
+                        trades_total.labels(symbol=result.symbol, timeframe=result.timeframe).inc(result.trades_count)
+                        
+                        # Cachear resultado
+                        if self.redis_client:
+                            cache_key = f"cycle_result_{result.symbol}_{result.timeframe}_{result.timestamp}"
+                            self.redis_client.setex(cache_key, 3600, json.dumps(asdict(result)))
+                        
                         with self.progress_lock:
-                            self.current_progress = completed_tasks
-                        
-                        # Log de progreso
-                        if completed_tasks % 10 == 0:
-                            logger.info(f"📈 Progreso: {completed_tasks}/{len(tasks)} tareas completadas")
-                        
-                        # Delay de 100ms para evitar conflictos con API
-                        await asyncio.sleep(self.delay_ms / 1000.0)
-                        
+                            self.current_progress += 1
+                            progress_pct = (self.current_progress / self.total_tasks) * 100
+                            logger.info(f"Progreso: {progress_pct:.1f}% ({self.current_progress}/{self.total_tasks})")
+                    
                     except Exception as e:
-                        logger.error(f"❌ Error en tarea {task['cycle_id']}: {e}")
-                        cycle_results.append(CycleResult(
-                            cycle_id=task['cycle_id'],
-                            timestamp=task['timestamp'],
-                            symbol=task['symbol'],
-                            timeframe=task['timeframe'],
-                            execution_time=0,
-                            pnl=0,
-                            trades_count=0,
-                            win_rate=0,
-                            strategy_used='error',
-                            status='error',
-                            error_message=str(e)
-                        ))
+                        logger.error(f"Error en ciclo: {e}")
+                        self.metrics.failed_cycles += 1
+                        self.metrics.api_errors += 1
+                
+                await self._update_metrics(results)
             
-            return cycle_results
+            # Enviar recomendaciones via Telegram
+            recommendations = self._generate_recommendations()
+            for rec in recommendations:
+                await telegram_bot.send_message(f"📊 Recomendación: {rec}")
+            
+            return await self._generate_summary(results)
             
         except Exception as e:
-            logger.error(f"Error ejecutando tareas con delay: {e}")
-            return []
+            logger.error(f"Error en ejecución paralela: {e}")
+            self.metrics.failed_cycles += 1
+            return {'status': 'error', 'message': str(e)}
+        finally:
+            self.running = False
     
-    def _execute_single_cycle(self, task: Dict[str, Any]) -> CycleResult:
-        """Ejecuta un solo ciclo de trading"""
-        start_time = time.time()
-        
+    def _execute_cycle(self, symbol: str, timeframe: str, timeline: pd.DataFrame, agent_function: Callable) -> CycleResult:
+        """Ejecuta un ciclo de trading para un símbolo y timeframe"""
         try:
-            cycle_id = task['cycle_id']
-            timestamp = task['timestamp']
-            symbol = task['symbol']
-            timeframe = task['timeframe']
-            agent_function = task.get('agent_function')
+            start_time = time.time()
+            cycle_id = f"{symbol}_{timeframe}_{int(time.time())}"
             
-            # Simular ejecución del agente (placeholder)
-            # En implementación real, aquí se llamaría a la función del agente
-            if agent_function:
-                result = agent_function(symbol, timeframe, timestamp)
-            else:
-                # Simulación básica para testing
-                result = self._simulate_agent_execution(symbol, timeframe, timestamp)
+            # Ejecutar agente
+            result = agent_function(symbol, timeframe, timeline) if agent_function else {'pnl': 0, 'trades': 0, 'win_rate': 0, 'strategy': 'default'}
             
             execution_time = time.time() - start_time
+            status = 'success' if result.get('success', True) else 'failed'
             
-            return CycleResult(
+            cycle_result = CycleResult(
                 cycle_id=cycle_id,
-                timestamp=timestamp,
+                timestamp=int(time.time()),
                 symbol=symbol,
                 timeframe=timeframe,
                 execution_time=execution_time,
                 pnl=result.get('pnl', 0.0),
-                trades_count=result.get('trades_count', 0),
+                trades_count=result.get('trades', 0),
                 win_rate=result.get('win_rate', 0.0),
-                strategy_used=result.get('strategy_used', 'default'),
-                status='success',
+                strategy_used=result.get('strategy', 'default'),
+                status=status,
+                error_message=result.get('error', None),
                 metadata=result.get('metadata', {})
             )
             
-        except Exception as e:
-            execution_time = time.time() - start_time
-            logger.error(f"Error ejecutando ciclo {task['cycle_id']}: {e}")
+            with self.lock:
+                self.metrics.total_cycles += 1
+                if status == 'success':
+                    self.metrics.successful_cycles += 1
+                else:
+                    self.metrics.failed_cycles += 1
+                self.metrics.total_execution_time += execution_time
+                self.metrics.avg_cycle_time = self.metrics.total_execution_time / self.metrics.total_cycles
+                self.metrics.max_cycle_time = max(self.metrics.max_cycle_time, execution_time)
+                self.metrics.min_cycle_time = min(self.metrics.min_cycle_time, execution_time)
+                self.metrics.total_trades += result.get('trades', 0)
+                self.metrics.total_pnl += result.get('pnl', 0.0)
+                self.metrics.win_rate = (self.metrics.total_trades / self.metrics.successful_cycles) if self.metrics.successful_cycles > 0 else 0.0
+                self.metrics.api_calls_made += result.get('api_calls', 0)
+                self.metrics.api_errors += 1 if result.get('error') else 0
             
+            return cycle_result
+            
+        except Exception as e:
+            logger.error(f"Error ejecutando ciclo {symbol}/{timeframe}: {e}")
             return CycleResult(
-                cycle_id=task['cycle_id'],
-                timestamp=task['timestamp'],
-                symbol=task['symbol'],
-                timeframe=task['timeframe'],
-                execution_time=execution_time,
+                cycle_id=cycle_id,
+                timestamp=int(time.time()),
+                symbol=symbol,
+                timeframe=timeframe,
+                execution_time=time.time() - start_time,
                 pnl=0.0,
                 trades_count=0,
                 win_rate=0.0,
-                strategy_used='error',
-                status='error',
+                strategy_used='default',
+                status='failed',
                 error_message=str(e)
             )
     
-    def _simulate_agent_execution(self, symbol: str, timeframe: str, timestamp: int) -> Dict[str, Any]:
-        """Simula ejecución de agente para testing"""
-        import random
-        
-        # Simulación básica de resultados
-        pnl = random.uniform(-100, 200)
-        trades_count = random.randint(0, 5)
-        win_rate = random.uniform(0.3, 0.8)
-        
-        return {
-            'pnl': pnl,
-            'trades_count': trades_count,
-            'win_rate': win_rate,
-            'strategy_used': f'strategy_{random.randint(1, 3)}',
-            'metadata': {
-                'confidence': random.uniform(0.5, 0.95),
-                'market_condition': random.choice(['bull', 'bear', 'sideways']),
-                'volatility': random.uniform(0.1, 0.5)
-            }
-        }
-    
-    def _calculate_trading_metrics(self, cycle_results: List[CycleResult]):
-        """Calcula métricas de trading"""
-        try:
-            if not cycle_results:
-                return
-            
-            # Métricas de tiempo
-            execution_times = [r.execution_time for r in cycle_results if r.status == 'success']
-            if execution_times:
-                self.metrics.avg_cycle_time = sum(execution_times) / len(execution_times)
-                self.metrics.max_cycle_time = max(execution_times)
-                self.metrics.min_cycle_time = min(execution_times)
-            
-            # Métricas de trading
-            successful_results = [r for r in cycle_results if r.status == 'success']
-            if successful_results:
-                self.metrics.total_trades = sum(r.trades_count for r in successful_results)
-                self.metrics.total_pnl = sum(r.pnl for r in successful_results)
-                
-                # Calcular win rate general
-                winning_cycles = sum(1 for r in successful_results if r.pnl > 0)
-                self.metrics.win_rate = (winning_cycles / len(successful_results) * 100) if successful_results else 0
-            
-        except Exception as e:
-            logger.error(f"Error calculando métricas de trading: {e}")
-    
     def _monitor_performance(self):
-        """Monitor de rendimiento en tiempo real"""
-        try:
-            cpu_usage = []
-            memory_usage = []
-            
-            while self.running:
-                try:
-                    # Monitorear CPU y memoria
-                    cpu_percent = psutil.cpu_percent(interval=1)
-                    memory_info = psutil.virtual_memory()
-                    
-                    cpu_usage.append(cpu_percent)
-                    memory_usage.append(memory_info.used / (1024 * 1024))  # MB
-                    
-                    # Actualizar métricas
-                    with self.lock:
-                        if cpu_usage:
-                            self.metrics.cpu_usage_avg = sum(cpu_usage) / len(cpu_usage)
-                        if memory_usage:
-                            self.metrics.memory_peak_mb = max(memory_usage)
-                    
-                    time.sleep(1)  # Monitorear cada segundo
-                    
-                except Exception as e:
-                    logger.debug(f"Error en monitor de rendimiento: {e}")
-                    break
-                    
-        except Exception as e:
-            logger.error(f"Error en monitor de rendimiento: {e}")
+        """Monitorea uso de recursos"""
+        cpu_usages = []
+        memory_peak = 0
+        while self.running:
+            try:
+                cpu_usage = psutil.cpu_percent(interval=1)
+                memory_usage = psutil.Process().memory_info().rss / 1024 / 1024  # MB
+                cpu_usages.append(cpu_usage)
+                memory_peak = max(memory_peak, memory_usage)
+                
+                with self.lock:
+                    self.metrics.cpu_usage_avg = np.mean(cpu_usages) if cpu_usages else 0
+                    self.metrics.memory_peak_mb = memory_peak
+                
+                time.sleep(1)
+            except Exception as e:
+                logger.error(f"Error en monitoreo de rendimiento: {e}")
     
-    def _generate_execution_summary(self, cycle_results: List[CycleResult]) -> Dict[str, Any]:
+    async def _update_metrics(self, results: List[CycleResult]):
+        """Actualiza métricas basadas en resultados"""
+        with self.lock:
+            self.metrics.cache_hit_rate = self.cache_hits / (self.cache_hits + self.cache_misses) if (self.cache_hits + self.cache_misses) > 0 else 0
+    
+    async def _generate_summary(self, results: List[CycleResult]) -> Dict[str, Any]:
         """Genera resumen de ejecución"""
         try:
-            successful_results = [r for r in cycle_results if r.status == 'success']
+            if not results:
+                return {'status': 'no_results', 'results': []}
             
-            if not successful_results:
-                return {
-                    'total_cycles': len(cycle_results),
-                    'successful_cycles': 0,
-                    'success_rate': 0,
-                    'total_pnl': 0,
-                    'total_trades': 0,
-                    'avg_pnl_per_cycle': 0,
-                    'best_cycle': None,
-                    'worst_cycle': None
-                }
-            
-            # Calcular métricas
-            total_pnl = sum(r.pnl for r in successful_results)
-            total_trades = sum(r.trades_count for r in successful_results)
-            avg_pnl_per_cycle = total_pnl / len(successful_results)
-            
-            # Encontrar mejor y peor ciclo
-            best_cycle = max(successful_results, key=lambda x: x.pnl)
-            worst_cycle = min(successful_results, key=lambda x: x.pnl)
+            best_cycle = max(results, key=lambda x: x.pnl)
+            worst_cycle = min(results, key=lambda x: x.pnl)
             
             return {
-                'total_cycles': len(cycle_results),
-                'successful_cycles': len(successful_results),
-                'success_rate': len(successful_results) / len(cycle_results) * 100,
-                'total_pnl': total_pnl,
-                'total_trades': total_trades,
-                'avg_pnl_per_cycle': avg_pnl_per_cycle,
+                'status': 'success',
+                'total_cycles': len(results),
+                'successful_cycles': sum(1 for r in results if r.status == 'success'),
+                'failed_cycles': sum(1 for r in results if r.status == 'failed'),
+                'total_pnl': sum(r.pnl for r in results),
+                'total_trades': sum(r.trades_count for r in results),
+                'avg_execution_time': np.mean([r.execution_time for r in results]) if results else 0,
+                'win_rate': np.mean([r.win_rate for r in results if r.trades_count > 0]) if any(r.trades_count > 0 for r in results) else 0,
+                'metrics': asdict(self.metrics),
                 'best_cycle': {
                     'cycle_id': best_cycle.cycle_id,
                     'symbol': best_cycle.symbol,
@@ -411,29 +305,25 @@ class ParallelExecutor:
             
         except Exception as e:
             logger.error(f"Error generando resumen: {e}")
-            return {}
+            return {'status': 'error', 'message': str(e)}
     
     def _generate_recommendations(self) -> List[str]:
         """Genera recomendaciones basadas en métricas"""
         try:
             recommendations = []
             
-            # Recomendaciones basadas en éxito
             if self.metrics.successful_cycles < self.metrics.total_cycles * 0.8:
                 recommendations.append("🔧 Revisar configuración de agentes - tasa de éxito baja")
             
-            # Recomendaciones basadas en rendimiento
             if self.metrics.avg_cycle_time > 5.0:
                 recommendations.append("⚡ Optimizar agentes - tiempo de ejecución alto")
             
-            # Recomendaciones basadas en trading
             if self.metrics.win_rate < 50:
                 recommendations.append("📊 Revisar estrategias - win rate bajo")
             
             if self.metrics.total_pnl < 0:
                 recommendations.append("⚠️ Revisar parámetros de trading - PnL negativo")
             
-            # Recomendaciones basadas en recursos
             if self.metrics.memory_peak_mb > 1000:
                 recommendations.append("💾 Considerar optimización de memoria")
             

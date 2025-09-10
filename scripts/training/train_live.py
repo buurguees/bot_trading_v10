@@ -37,10 +37,12 @@ import pandas as pd
 import numpy as np
 import yaml
 from concurrent.futures import ThreadPoolExecutor
-import threading
 from threading import Barrier
 import websockets
 import aiohttp
+
+# Importar ConfigLoader
+from config.config_loader import ConfigLoader
 
 # Agregar directorio raíz al path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

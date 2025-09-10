@@ -26,6 +26,9 @@ import yaml
 # Importar el nuevo sistema de datos
 from core.data.historical_data_adapter import get_historical_data
 
+# Importar ConfigLoader
+from config.config_loader import ConfigLoader
+
 logger = logging.getLogger(__name__)
 
 class TradingDataset(Dataset):
@@ -199,8 +202,10 @@ class TradingDataModule(pl.LightningDataModule):
             end_date = datetime.now()
             start_date = end_date - timedelta(days=30)
             
-            # Intentar cargar desde diferentes timeframes
-            timeframes = ['1h', '4h', '1d']
+            # Leer timeframes desde configuración
+            config_loader = ConfigLoader("config/data_config.yaml")
+            data_config = config_loader.load_config()
+            timeframes = data_config.get('historical_data', {}).get('timeframes', ['1h', '4h', '1d'])
             
             for timeframe in timeframes:
                 try:

@@ -4,6 +4,7 @@ Trading Signal Definitions
 =========================
 
 Definiciones de señales de trading para evitar importaciones circulares.
+Ubicación: C:\\TradingBot_v10\\core\\trading\\enterprise\\trading_signal.py
 """
 
 from dataclasses import dataclass
