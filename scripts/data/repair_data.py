@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from typing import Dict, List, Any
 
 # Importar ConfigLoader
-from config.config_loader import ConfigLoader
+from core.config.config_loader import ConfigLoader
 
 # Cargar .env
 load_dotenv()

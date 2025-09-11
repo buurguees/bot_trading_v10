@@ -35,7 +35,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-from config.config_loader import user_config
+from core.config.config_loader import user_config
 
 logger = logging.getLogger(__name__)
 

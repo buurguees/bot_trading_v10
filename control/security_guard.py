@@ -527,3 +527,6 @@ class SecurityGuard:
 
 # Instancia global
 security_guard = SecurityGuard()
+
+# Alias para compatibilidad retro (algunos módulos importan TelegramSecurity)
+TelegramSecurity = SecurityGuard

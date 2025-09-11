@@ -1051,7 +1051,7 @@ class DatabaseManager:
         """Crea backup optimizado con compresión opcional"""
         try:
             if backup_path is None:
-                from config.config_loader import ConfigLoader
+                from core.config.config_loader import ConfigLoader
                 config_loader = ConfigLoader()
                 BACKUPS_DIR = config_loader.get_config_value('backups_dir', 'data/backups')
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

@@ -24,7 +24,7 @@ from prometheus_client import Counter, Gauge, Histogram
 from prometheus_client.core import CollectorRegistry
 
 from core.trading.bitget_client import bitget_client
-from config.config_loader import user_config
+from core.config.config_loader import ConfigLoader
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class PerformanceMonitor:
     """Monitor de performance enterprise en tiempo real"""
     
     def __init__(self, config_path: str = "config/user_settings.yaml"):
-        self.config = user_config.get_value(['performance_monitoring'], {})
+        self.config = ConfigLoader().get_main_config().get('performance_monitoring', {})
         self.bitget_client = bitget_client
         
         # Métricas de Prometheus

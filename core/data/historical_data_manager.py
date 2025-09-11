@@ -28,11 +28,11 @@ from .collector import (
 )
 from .history_analyzer import HistoryAnalyzer
 from .history_downloader import HistoryDownloader
-from config.config_loader import user_config
+from core.config.config_loader import ConfigLoader
 from .database import db_manager
 from .symbol_database_manager import symbol_db_manager
 from .historical_data_adapter import get_historical_data
-from config.unified_config import unified_config
+from core.config.unified_config import unified_config
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class HistoricalDataManager:
             config = {**default_config, **historical_config}
             
             # Obtener símbolos desde configuración
-            symbols_config = user_config.get_value(['multi_symbol_settings', 'symbols'], {})
+            symbols_config = ConfigLoader().get_main_config().get('multi_symbol_settings', {}).get('symbols', {})
             config['symbols'] = [symbol for symbol, settings in symbols_config.items() 
                                if settings.get('enabled', True)]
             

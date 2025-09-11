@@ -34,7 +34,7 @@ from data.collector import (
 )
 from data.database import db_manager
 from data.preprocessor import data_preprocessor, analyze_feature_correlation, get_feature_statistics
-from config.config_loader import user_config
+from core.config.config_loader import user_config
 
 # Configurar logging
 logging.basicConfig(

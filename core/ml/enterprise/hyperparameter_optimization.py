@@ -42,7 +42,7 @@ import mlflow.optuna
 import redis
 
 # Importar ConfigLoader
-from config.config_loader import ConfigLoader
+from core.config.config_loader import ConfigLoader
 
 logger = logging.getLogger(__name__)
 

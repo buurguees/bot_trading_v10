@@ -27,7 +27,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Imports del sistema
 from trading.enterprise.futures_engine import EnterpriseFuturesEngine
-from config.enterprise_config import EnterpriseConfigManager
+from core.config.unified_config import unified_config
 
 # Configurar logging
 logging.basicConfig(

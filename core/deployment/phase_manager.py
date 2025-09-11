@@ -27,7 +27,7 @@ from pathlib import Path
 from enum import Enum
 from dataclasses import dataclass
 
-from config.enterprise_config import EnterpriseConfigManager
+from core.config.unified_config import unified_config
 
 logger = logging.getLogger(__name__)
 

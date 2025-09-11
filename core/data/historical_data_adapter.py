@@ -29,7 +29,7 @@ from .symbol_database_manager import (
     get_latest_ohlcv_data
 )
 from .database import db_manager as legacy_db_manager
-from config.config_loader import user_config
+from core.config.config_loader import ConfigLoader
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +53,10 @@ class HistoricalDataAdapter:
             return {
                 'migration_enabled': True,
                 'auto_migrate': True,
-                'symbols': user_config.get_value(['data_collection', 'real_time', 'symbols'], []),
-                'timeframes': user_config.get_value(['data_collection', 'historical', 'timeframes'], []),
-                'years': user_config.get_value(['data_collection', 'historical', 'years'], 1),
-                'min_coverage_days': user_config.get_value(['data_collection', 'historical', 'min_coverage_days'], 365)
+                'symbols': ConfigLoader().get_main_config().get('data_collection', {}).get('real_time', {}).get('symbols', []),
+                'timeframes': ConfigLoader().get_main_config().get('data_collection', {}).get('historical', {}).get('timeframes', []),
+                'years': ConfigLoader().get_main_config().get('data_collection', {}).get('historical', {}).get('years', 1),
+                'min_coverage_days': ConfigLoader().get_main_config().get('data_collection', {}).get('historical', {}).get('min_coverage_days', 365)
             }
         except Exception as e:
             logger.error(f"Error cargando configuración: {e}")

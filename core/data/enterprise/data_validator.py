@@ -8,7 +8,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 
-from config.enterprise_config import get_enterprise_config
+from core.config.unified_config import unified_config
 from .stream_collector import MarketTick
 
 # Configurar logging

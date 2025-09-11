@@ -20,7 +20,7 @@ from datetime import datetime, date, timedelta
 from decimal import Decimal, ROUND_DOWN, ROUND_HALF_UP, getcontext
 from scipy import stats
 
-from config.config_loader import user_config
+from core.config.config_loader import ConfigLoader
 from core.data.database import db_manager
 
 logger = logging.getLogger(__name__)
@@ -44,14 +44,14 @@ class RiskManager:
     """Gestor de riesgo para operaciones de trading"""
 
     def __init__(self):
-        self.config = user_config
+        self.config = ConfigLoader().get_main_config()
 
-        self.risk_config = self.config.get_value(["risk_management"], {})
-        self.trading_config = self.config.get_value(["trading"], {})
+        self.risk_config = self.config.get('risk_management', {})
+        self.trading_config = self.config.get('trading', {})
         self.symbol = self.trading_config.get("symbol", "BTCUSDT")
 
         # Símbolo / filtros
-        sym_cfg = self.config.get_value(["symbols", self.symbol], {})
+        sym_cfg = self.config.get('symbols', {}).get(self.symbol, {})
         filters = (sym_cfg or {}).get("filters", {})
         self.min_notional = float(filters.get("minNotional", 5.0))
         self.lot_step = float(filters.get("lotStep", 0.0001))

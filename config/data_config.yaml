@@ -26,6 +26,14 @@ real_time_data:
     compression: true
     encryption: false
 
+data_collection:
+  real_time:
+    enabled: true
+    symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT"]
+    timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
+  historical:
+    timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
+    
 # Configuración de datos históricos
 historical_data:
   enabled: true

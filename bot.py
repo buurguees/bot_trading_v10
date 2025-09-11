@@ -16,16 +16,19 @@ load_dotenv()
 sys.path.insert(0, str(Path(__file__).parent))
 
 # Configurar logging
-from logging_config import setup_logging, get_logger
-from config.unified_config import unified_config
+import logging
+from core.config.unified_config import unified_config
 
-setup_logging()
-logger = get_logger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 async def fill_missing_data_to_now():
     """Descarga datos faltantes desde el último timestamp hasta ahora."""
     try:
-        from config.config_loader import ConfigLoader
+        from core.config.config_loader import ConfigLoader
         from core.data.database import db_manager
         from core.data.collector import BitgetDataCollector, download_extensive_historical_data
         from datetime import datetime, timezone
@@ -33,10 +36,15 @@ async def fill_missing_data_to_now():
         
         logger.info("🔄 Descargando datos faltantes hasta ahora...")
         
-        # Cargar configuración
-        config_loader = ConfigLoader("config/user_settings.yaml")
-        config = config_loader.load_config()
-        real_time_config = config.get("data_collection", {}).get("real_time", {})
+        # Cargar configuración unificada (fallback: main.data.real_time -> main.data_collection.real_time -> data.data_collection.real_time)
+        config_loader = ConfigLoader()
+        cfg_main = config_loader.get_main_config()
+        cfg_data = config_loader.get_data_config()
+        real_time_config = (
+            cfg_main.get("data", {}).get("real_time")
+            or cfg_main.get("data_collection", {}).get("real_time")
+            or cfg_data.get("data_collection", {}).get("real_time", {})
+        ) or {}
         symbols = real_time_config.get("symbols", [])
         timeframes = real_time_config.get("timeframes", ["1m"])
 
@@ -116,13 +124,18 @@ async def fill_missing_data_to_now():
 async def start_real_time_collection():
     """Inicia la recolección de datos en tiempo real para todos los símbolos."""
     try:
-        # Cargar configuración de user_settings.yaml
-        from config.config_loader import ConfigLoader
+        # Cargar configuración unificada (fallback: main.data.real_time -> main.data_collection.real_time -> data.data_collection.real_time)
+        from core.config.config_loader import ConfigLoader
         from core.data.database import db_manager
         
-        config_loader = ConfigLoader("config/user_settings.yaml")
-        config = config_loader.load_config()
-        real_time_config = config.get("data_collection", {}).get("real_time", {})
+        config_loader = ConfigLoader()
+        cfg_main = config_loader.get_main_config()
+        cfg_data = config_loader.get_data_config()
+        real_time_config = (
+            cfg_main.get("data", {}).get("real_time")
+            or cfg_main.get("data_collection", {}).get("real_time")
+            or cfg_data.get("data_collection", {}).get("real_time", {})
+        ) or {}
         symbols = real_time_config.get("symbols", [])
         timeframes = real_time_config.get("timeframes", ["1m"])
         data_types = real_time_config.get("data_types", ["kline"])

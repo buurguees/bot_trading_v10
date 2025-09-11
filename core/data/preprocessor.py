@@ -37,7 +37,7 @@ import pickle
 import hashlib
 
 from .database import db_manager
-from config.config_loader import ConfigLoader
+from core.config.config_loader import ConfigLoader
 
 logger = logging.getLogger(__name__)
 
@@ -747,8 +747,8 @@ class DataPreprocessorAdvanced:
         
         # Configuración desde usuario
         config_loader = ConfigLoader()
-        self.ai_settings = config_loader.get_value(['ai_model_settings'], {})
-        self.lookback_window = config_loader.get_value(['ai_model_settings', 'lookback_window'], 60)
+        self.ai_settings = config_loader.get_main_config().get('ai_model_settings', {})
+        self.lookback_window = config_loader.get_main_config().get('ai_model_settings', {}).get('lookback_window', 60)
         
         # Configuración de paralelización
         self.n_jobs = min(4, mp.cpu_count())

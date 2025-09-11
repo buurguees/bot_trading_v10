@@ -7,6 +7,7 @@ No lógica de negocio; delega a scripts/.
 """
 
 import asyncio
+import os
 import subprocess
 import json
 import logging
@@ -14,7 +15,7 @@ import uuid
 from pathlib import Path
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
-from config.config_loader import ConfigLoader
+from core.config.config_loader import ConfigLoader
 
 # Configurar logging enterprise
 logger = logging.getLogger(__name__)
@@ -24,15 +25,24 @@ class Handlers:
     
     def __init__(self, telegram_bot):
         self.telegram_bot = telegram_bot
-        self.config_loader = ConfigLoader("config/user_settings.yaml")
-        self.config = self.config_loader.load_config()
+        self.config_loader = ConfigLoader()
+        self.config = self.config_loader.get_main_config()
         self.long_commands = ['/sync_symbols', '/download_data', '/train_hist', '/repair_data', '/verify_align']  # Comandos con progreso
     
     def _check_authorization(self, update: Update) -> bool:
-        """Validación básica de autorización (chat_id de control/config.yaml)"""
+        """Validación básica de autorización (lee control_config, con fallbacks)"""
         chat_id = str(update.message.chat_id)
-        authorized_id = self.config.get("telegram", {}).get("chat_id", "937027893")  # De config.yaml
-        if chat_id != authorized_id:
+        try:
+            control_cfg = self.config_loader.get_control_config() or {}
+        except Exception:
+            control_cfg = {}
+
+        authorized_id = str(
+            control_cfg.get("telegram", {}).get("chat_id")
+            or self.config.get("telegram", {}).get("chat_id")
+            or (os.getenv("TELEGRAM_CHAT_ID") or os.getenv("CHAT_ID") or "")
+        )
+        if authorized_id and chat_id != authorized_id:
             logger.warning(f"🚫 Acceso no autorizado: {chat_id}")
             return False
         return True

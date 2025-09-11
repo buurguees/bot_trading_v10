@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError
 
-from config.enterprise_config import get_enterprise_config
+from core.config.unified_config import unified_config
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)

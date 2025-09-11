@@ -18,7 +18,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 
-from config.enterprise_config import EnterpriseConfigManager
+from core.config.unified_config import unified_config
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)

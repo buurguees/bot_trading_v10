@@ -13,7 +13,7 @@ from prometheus_client import (
     start_http_server, generate_latest, REGISTRY
 )
 
-from config.enterprise_config import get_enterprise_config
+from core.config.unified_config import unified_config
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)

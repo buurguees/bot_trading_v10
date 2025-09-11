@@ -16,7 +16,7 @@ load_dotenv()
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core.data.database import db_manager
-from config.config_loader import ConfigLoader
+from core.config.config_loader import ConfigLoader
 
 def main():
     """Función principal"""

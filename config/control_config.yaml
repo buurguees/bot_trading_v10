@@ -6,8 +6,8 @@ version: "1.0"
 
 # Configuración de Telegram
 telegram:
-  bot_token: ""  # Configurar en .env
-  chat_id: ""    # Configurar en .env
+  bot_token: "8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8"  # Configurar en .env
+  chat_id: "937027893"    # Configurar en .env
   rate_limit: 10  # messages per minute
   use_emojis: true
   parse_mode: "Markdown"

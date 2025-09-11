@@ -13,7 +13,7 @@ from dataclasses import asdict
 import asyncpg
 from asyncpg import Pool, Connection
 
-from config.enterprise_config import get_enterprise_config
+from core.config.unified_config import unified_config
 from .stream_collector import MarketTick
 
 # Configurar logging

@@ -18,15 +18,15 @@ Submódulos:
 - integration: Utilidades del sistema
 """
 
-# from .config import *  # Comentado temporalmente - no existe el módulo
-from .trading import *
-# from .ml import *  # Temporalmente comentado - legacy movido a _old/
-from .data import *
-from .monitoring import *
-from .security import *
-from .compliance import *
-from .deployment import *
-from .integration import *
+# Evitar imports masivos con efectos secundarios en import-time
+# Los consumidores deben importar explícitamente lo necesario
+# from .trading import *
+# from .data import *
+# from .monitoring import *
+# from .security import *
+# from .compliance import *
+# from .deployment import *
+# from .integration import *
 
 __version__ = '1.0.0'
 __author__ = 'Bot Trading v10 Enterprise'

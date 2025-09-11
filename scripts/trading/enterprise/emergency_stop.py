@@ -27,7 +27,7 @@ from typing import Dict, List, Optional, Any
 from pathlib import Path
 
 from trading.bitget_client import bitget_client
-from config.config_loader import user_config
+from core.config.config_loader import user_config
 
 # Configurar logging
 logger = logging.getLogger(__name__)

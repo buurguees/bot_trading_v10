@@ -34,7 +34,7 @@ from prometheus_client.core import CollectorRegistry
 
 from core.trading.enterprise.futures_engine import EnterpriseFuturesEngine
 from core.trading.bitget_client import bitget_client
-from config.config_loader import ConfigLoader
+from core.config.config_loader import ConfigLoader
 
 # Configurar logging
 logger = logging.getLogger(__name__)
@@ -77,7 +77,7 @@ class TradingMonitor:
     
     def __init__(self, config_path: str = "config/user_settings.yaml"):
         config_loader = ConfigLoader()
-        self.config = config_loader.get_value(['monitoring'], {})
+        self.config = config_loader.get_main_config().get('monitoring', {})
         self.futures_engine = None
         self.bitget_client = bitget_client
         

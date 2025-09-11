@@ -32,13 +32,13 @@ import numpy as np
 import pandas as pd
 import talib
 
-from config.config_loader import user_config
+from core.config.config_loader import ConfigLoader
 from core.data.database import db_manager
 from core.data.preprocessor import data_preprocessor
 from core.data.symbol_database_manager import symbol_db_manager
 from core.data.historical_data_adapter import get_historical_data
-from core.ml.legacy.prediction_engine import prediction_engine
-from core.ml.legacy.confidence_estimator import confidence_estimator
+from core.ml.enterprise.prediction_engine import PredictionEngine
+from core.ml.enterprise.confidence_estimator import ConfidenceEstimator
 from .risk_manager import risk_manager
 
 logger = logging.getLogger(__name__)
@@ -130,7 +130,7 @@ class SignalProcessor:
     """
 
     def __init__(self) -> None:
-        self.config = user_config
+        self.config = ConfigLoader().get_main_config()
         self.signal_config = self.config.get_value(["signal_processing"], {})
         self.trading_config = self.config.get_trading_settings()
 
@@ -172,7 +172,7 @@ class SignalProcessor:
 
         # Timeframes
         self.timeframes: List[str] = ["1m", "5m", "15m", "1h", "4h"]
-        self.primary_timeframe: str = self.config.get_value(["timeframes", "primary"], "1h")
+        self.primary_timeframe: str = self.config.get('timeframes', {}).get('primary', '1h')
 
         # Métricas de tracking
         self.metrics: Dict[str, Any] = {
@@ -844,13 +844,13 @@ class SignalProcessor:
             if features is None or len(features) == 0:
                 return None
 
-            pred = await prediction_engine.predict(symbol, features)
+            pred = await PredictionEngine.predict(symbol, features)
             if not pred:
                 return None
 
             # Calibración de confianza si está disponible
             try:
-                conf_info = confidence_estimator.estimate_confidence(pred, market_context={'volatility': 0.5})
+                conf_info =  ConfidenceEstimator.estimate_confidence(pred, market_context={'volatility': 0.5})
                 if conf_info and "calibrated_confidence" in conf_info:
                     # Mezcla simple: media ponderada con la original (0.6/0.4)
                     pred["confidence"] = float(np.clip(0.6 * float(pred.get("confidence", 0.0)) +

@@ -44,7 +44,7 @@ from .order_executor import OrderExecutor
 from .leverage_calculator import LeverageCalculator
 from .market_analyzer import MarketAnalyzer
 from core.data.enterprise.stream_collector import EnterpriseDataCollector
-from config.enterprise_config import EnterpriseConfigManager
+from core.config.unified_config import unified_config
 
 logger = logging.getLogger(__name__)
 

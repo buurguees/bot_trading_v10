@@ -17,8 +17,7 @@ from dotenv import load_dotenv
 from typing import Dict, List, Any
 
 # Importar ConfigLoader
-from config.config_loader import ConfigLoader
-
+from core.config.config_loader import ConfigLoader
 # Cargar .env
 load_dotenv()
 
@@ -38,7 +37,7 @@ class TrainHistEnterprise:
     
     def __init__(self, progress_id: str = None):
         self.progress_id = progress_id
-        self.config_loader = ConfigLoader("config/user_settings.yaml")
+        self.config_loader = ConfigLoader()
         self.config = self.config_loader.load_config()
         self.executor = None
         self.session_id = f"train_{datetime.now().strftime('%Y%m%d_%H%M%S')}"

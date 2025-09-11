@@ -17,7 +17,7 @@ from typing import Dict, List, Any
 from datetime import datetime, timedelta
 
 # Importar ConfigLoader
-from config.config_loader import ConfigLoader
+from core.config.config_loader import ConfigLoader
 
 # Cargar .env
 load_dotenv()

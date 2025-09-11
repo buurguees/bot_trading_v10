@@ -20,7 +20,7 @@ import asyncio
 import ccxt
 import os
 
-from config.config_loader import user_config
+from core.config.config_loader import ConfigLoader
 from core.data.database import db_manager
 from .risk_manager import RiskDecision
 
@@ -51,7 +51,7 @@ class OrderManager:
     """Gestor de órdenes para trading"""
     
     def __init__(self):
-        self.config = user_config
+        self.config = ConfigLoader().get_main_config()
         self.trading_config = self.config.get_value(['trading'], {})
         self.trading_mode = self.trading_config.get('mode', 'paper_trading')
         

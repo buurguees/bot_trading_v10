@@ -42,7 +42,7 @@ import websockets
 import aiohttp
 
 # Importar ConfigLoader
-from config.config_loader import ConfigLoader
+from core.config.config_loader import ConfigLoader
 
 # Agregar directorio raíz al path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

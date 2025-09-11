@@ -13,7 +13,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Importar ConfigLoader
-from config.config_loader import ConfigLoader
+from core.config.config_loader import ConfigLoader
 
 # Cargar .env
 load_dotenv()
@@ -34,7 +34,7 @@ def main():
     try:
         from core.data.database import db_manager
         from core.data.historical_data_manager import HistoricalDataManager
-        from config.config_loader import ConfigLoader
+        from core.config.config_loader import ConfigLoader
         
         config_loader = ConfigLoader("config/user_settings.yaml")
         config = config_loader.load_config()

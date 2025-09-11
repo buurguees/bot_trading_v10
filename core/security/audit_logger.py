@@ -28,7 +28,7 @@ import os
 import asyncio
 from pathlib import Path
 import redis
-from control.telegram_bot import telegram_bot
+# from control.telegram_bot import telegram_bot  # Eliminado para evitar import circular
 from core.config.config_loader import config_loader
 
 logger = logging.getLogger(__name__)
@@ -160,7 +160,8 @@ class AuditLogger:
         try:
             redis_url = self.config_loader.get_infrastructure_settings().get('redis', {}).get('url', 'redis://localhost:6379')
             self.redis_client = redis.Redis.from_url(redis_url)
-            await self.redis_client.ping()
+            # ping es síncrono en redis-py
+            self.redis_client.ping()
             logger.info("Conexión a Redis establecida para auditoría")
         except Exception as e:
             logger.warning(f"No se pudo conectar a Redis: {e}")
@@ -484,38 +485,26 @@ class AuditLogger:
             logger.error(f"Error creando anomalía: {e}")
     
     async def _send_alert(self, event: AuditEvent):
-        """Envía alerta de evento crítico"""
+        """Envía alerta de evento crítico (adaptado a logging para evitar dependencia)"""
         try:
-            message = f"🚨 **Alerta de Auditoría**\n\n"
-            message += f"**Tipo:** {event.event_type.value}\n"
-            message += f"**Severidad:** {event.severity.value}\n"
-            message += f"**Descripción:** {event.description}\n"
-            message += f"**Score de Riesgo:** {event.risk_score:.2f}\n"
-            message += f"**Timestamp:** {event.timestamp.isoformat()}\n"
-            
-            if event.user_id:
-                message += f"**Usuario:** {event.user_id}\n"
-            
-            if event.source_ip:
-                message += f"**IP:** {event.source_ip}\n"
-            
-            await telegram_bot.send_message(message)
-            
+            message = (
+                f"🚨 [Audit] Tipo: {event.event_type.value} | Sev: {event.severity.value} | "
+                f"Riesgo: {event.risk_score:.2f} | {event.description}"
+            )
+            logger.warning(message)
+            # En producción: inyectar un sender externo para Telegram si está disponible
         except Exception as e:
             logger.error(f"Error enviando alerta: {e}")
     
     async def _send_anomaly_alert(self, anomaly: AnomalyDetection):
-        """Envía alerta de anomalía"""
+        """Envía alerta de anomalía (adaptado a logging para evitar dependencia)"""
         try:
-            message = f"⚠️ **Anomalía Detectada**\n\n"
-            message += f"**Tipo:** {anomaly.anomaly_type}\n"
-            message += f"**Severidad:** {anomaly.severity.value}\n"
-            message += f"**Descripción:** {anomaly.description}\n"
-            message += f"**Score de Riesgo:** {anomaly.risk_score:.2f}\n"
-            message += f"**Timestamp:** {anomaly.timestamp.isoformat()}\n"
-            
-            await telegram_bot.send_message(message)
-            
+            message = (
+                f"⚠️ [Anomalía] Tipo: {anomaly.anomaly_type} | Sev: {anomaly.severity.value} | "
+                f"Riesgo: {anomaly.risk_score:.2f} | {anomaly.description}"
+            )
+            logger.warning(message)
+            # En producción: inyectar un sender externo para Telegram si está disponible
         except Exception as e:
             logger.error(f"Error enviando alerta de anomalía: {e}")
     

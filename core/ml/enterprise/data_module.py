@@ -27,7 +27,7 @@ import yaml
 from core.data.historical_data_adapter import get_historical_data
 
 # Importar ConfigLoader
-from config.config_loader import ConfigLoader
+from core.config.config_loader import ConfigLoader
 
 logger = logging.getLogger(__name__)
 

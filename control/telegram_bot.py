@@ -39,7 +39,7 @@ from cryptography.fernet import Fernet
 
 # Imports locales
 from .handlers import Handlers
-from config.unified_config import unified_config
+from core.config.unified_config import unified_config
 
 logger = logging.getLogger(__name__)
 
@@ -57,11 +57,40 @@ class TelegramBot:
     def __init__(self, config_path: str = 'control/config.yaml'):
         self.config_path = config_path
         self.config = self._load_config()
-        self.bot_token = self._decrypt_token(self.config['telegram']['bot_token'])
-        self.chat_id = self.config['telegram']['chat_id']
-        self.enabled = self.config['telegram']['enabled']
-        self.metrics_interval = self.config['telegram']['metrics_interval']
-        self.alert_thresholds = self.config['telegram']['alert_thresholds']
+        telegram_cfg = self.config.get('telegram', {})
+        # Cargar desde config o .env (admite múltiples nombres de variables)
+        env_bot_token = os.getenv('BOT_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN') or ''
+        env_chat_id = os.getenv('TELEGRAM_CHAT_ID') or os.getenv('CHAT_ID') or ''
+
+        # Prioridad: entorno > config. Además, ignora placeholders tipo "TELEGRAM_BOT_TOKEN"/"TELEGRAM_CHAT_ID"
+        cfg_token = telegram_cfg.get('bot_token', '')
+        cfg_chat = telegram_cfg.get('chat_id', '')
+        if isinstance(cfg_token, str) and cfg_token.strip().upper() == 'TELEGRAM_BOT_TOKEN':
+            cfg_token = ''
+        if isinstance(cfg_chat, str) and cfg_chat.strip().upper() == 'TELEGRAM_CHAT_ID':
+            cfg_chat = ''
+
+        self.bot_token = self._decrypt_token(env_bot_token or cfg_token or '')
+        self.chat_id = (env_chat_id or cfg_chat or '')
+        if isinstance(self.chat_id, str):
+            self.chat_id = self.chat_id.strip()
+        # Si no se especifica enabled, activar automáticamente si hay credenciales
+        enabled_flag = telegram_cfg.get('enabled')
+        if enabled_flag is None:
+            self.enabled = bool(self.bot_token) and bool(self.chat_id)
+        else:
+            self.enabled = bool(enabled_flag) and bool(self.bot_token) and bool(self.chat_id)
+
+        # Logs de diagnóstico
+        if not self.enabled:
+            missing = []
+            if not self.bot_token:
+                missing.append('bot_token')
+            if not self.chat_id:
+                missing.append('chat_id')
+            logger.warning(f"⚠️ Bot deshabilitado. Faltan: {', '.join(missing) if missing else 'habilitar= true'}")
+        self.metrics_interval = telegram_cfg.get('metrics_interval', 60)
+        self.alert_thresholds = telegram_cfg.get('alert_thresholds', {})
         
         # Inicializar componentes
         self.handlers = Handlers(self)
@@ -80,16 +109,43 @@ class TelegramBot:
     def _load_config(self) -> Dict[str, Any]:
         """Carga la configuración desde YAML"""
         try:
-            with open(self.config_path, 'r', encoding='utf-8') as f:
-                config = yaml.safe_load(f)
-            
-            # Validar configuración
-            TelegramConfig(**config['telegram'])
-            return config
+            # 1) Archivo local control/config.yaml
+            if Path(self.config_path).exists():
+                with open(self.config_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f) or {}
+                TelegramConfig(**config.get('telegram', {}))
+                return config
+            # 2) Fallback a config/control_config.yaml
+            alt = Path('config/control_config.yaml')
+            if alt.exists():
+                with open(alt, 'r', encoding='utf-8') as f:
+                    cfg = yaml.safe_load(f) or {}
+                # normalizar al mismo esquema
+                if 'telegram' not in cfg and cfg:
+                    cfg = {'telegram': cfg.get('telegram', cfg)}
+                return cfg
+            # 3) Fallback a unified_config
+            try:
+                uc = unified_config.get_section('control') or {}
+                if uc:
+                    return {'telegram': uc.get('telegram', uc)}
+            except Exception:
+                pass
+            # 4) Fallback final a variables de entorno
+            env_cfg = {
+                'telegram': {
+                    'bot_token': os.getenv('BOT_TOKEN', ''),
+                    'chat_id': os.getenv('TELEGRAM_CHAT_ID', ''),
+                    'enabled': False,
+                    'metrics_interval': int(os.getenv('TELEGRAM_METRICS_INTERVAL', '60')),
+                    'alert_thresholds': {}
+                }
+            }
+            return env_cfg
             
         except FileNotFoundError:
-            logger.error(f"❌ Archivo de configuración no encontrado: {self.config_path}")
-            raise
+            logger.warning(f"⚠️ Config no encontrada: {self.config_path}. Usando fallbacks y deshabilitando Telegram.")
+            return {'telegram': {'bot_token': '', 'chat_id': '', 'enabled': False, 'metrics_interval': 60, 'alert_thresholds': {}}}
         except ValidationError as e:
             logger.error(f"❌ Configuración inválida: {e}")
             raise
@@ -160,91 +216,98 @@ class TelegramBot:
     
     def _setup_handlers(self):
         """Configura los handlers del bot"""
+        def _add(cmd: str, attr: str):
+            if hasattr(self.handlers, attr):
+                self.application.add_handler(CommandHandler(cmd, getattr(self.handlers, attr)))
+
         # Comandos principales
-        self.application.add_handler(CommandHandler("start", self.handlers.start_command))
-        self.application.add_handler(CommandHandler("help", self.handlers.help_command))
-        self.application.add_handler(CommandHandler("status", self.handlers.status_command))
-        self.application.add_handler(CommandHandler("metrics", self.handlers.metrics_command))
-        self.application.add_handler(CommandHandler("positions", self.handlers.positions_command))
-        
-        # Comandos de control
-        self.application.add_handler(CommandHandler("start_trading", self.handlers.start_trading_command))
-        self.application.add_handler(CommandHandler("stop_trading", self.handlers.stop_trading_command))
-        self.application.add_handler(CommandHandler("emergency_stop", self.handlers.emergency_stop_command))
-        
-        # Comandos de información
-        self.application.add_handler(CommandHandler("balance", self.handlers.balance_command))
-        self.application.add_handler(CommandHandler("health", self.handlers.health_command))
-        self.application.add_handler(CommandHandler("settings", self.handlers.settings_command))
-        
-        # Comandos de control avanzado
-        self.application.add_handler(CommandHandler("train", self.handlers.train_command))
-        self.application.add_handler(CommandHandler("stop_training", self.handlers.stop_training_command))
-        self.application.add_handler(CommandHandler("trade", self.handlers.trade_command))
-        self.application.add_handler(CommandHandler("stop_trading", self.handlers.stop_trading_command))
-        self.application.add_handler(CommandHandler("set_mode", self.handlers.set_mode_command))
-        self.application.add_handler(CommandHandler("set_symbols", self.handlers.set_symbols_command))
-        
-        # Comandos de datos históricos
-        self.application.add_handler(CommandHandler("verify_historical_data", self.handlers.verify_historical_data_command))
-        self.application.add_handler(CommandHandler("download_historical_data", self.handlers.download_historical_data_command))
-        self.application.add_handler(CommandHandler("historical_data_report", self.handlers.historical_data_report_command))
-        # Nuevos comandos de datos
-        self.application.add_handler(CommandHandler("verify_align", self.handlers.verify_align_command))
-        self.application.add_handler(CommandHandler("sync_symbols", self.handlers.sync_symbols_command))
-        
-        self.application.add_handler(CommandHandler("shutdown", self.handlers.shutdown_command))
-        
-        # Comandos de Agentes y ML
-        self.application.add_handler(CommandHandler("agents", self.handlers.agents_command))
-        self.application.add_handler(CommandHandler("agent_status", self.handlers.agent_status_command))
-        self.application.add_handler(CommandHandler("retrain", self.handlers.retrain_command))
-        self.application.add_handler(CommandHandler("model_info", self.handlers.model_info_command))
-        self.application.add_handler(CommandHandler("training_status", self.handlers.training_status_command))
-        
-        # Comandos de Entrenamiento Avanzado
-        self.application.add_handler(CommandHandler("train_hist", self.handlers.train_hist_command))
-        self.application.add_handler(CommandHandler("train_live", self.handlers.train_live_command))
-        self.application.add_handler(CommandHandler("stop_train", self.handlers.stop_train_command))
-        
-        # Comandos de Datos y Análisis
-        self.application.add_handler(CommandHandler("download_data", self.handlers.download_data_command))
-        self.application.add_handler(CommandHandler("analyze_data", self.handlers.analyze_data_command))
-        self.application.add_handler(CommandHandler("align_data", self.handlers.align_data_command))
-        self.application.add_handler(CommandHandler("data_status", self.handlers.data_status_command))
-        self.application.add_handler(CommandHandler("backtest", self.handlers.backtest_command))
-        
-        # Comandos de Historial
-        self.application.add_handler(CommandHandler("download_history", self.handlers.download_history_command))
-        self.application.add_handler(CommandHandler("inspect_history", self.handlers.inspect_history_command))
-        self.application.add_handler(CommandHandler("repair_history", self.handlers.repair_history_command))
-        
-        # Comandos de Trading Avanzado
-        self.application.add_handler(CommandHandler("close_position", self.handlers.close_position_command))
-        
-        # Comandos de Reportes
-        self.application.add_handler(CommandHandler("performance_report", self.handlers.performance_report_command))
-        self.application.add_handler(CommandHandler("agent_analysis", self.handlers.agent_analysis_command))
-        self.application.add_handler(CommandHandler("risk_report", self.handlers.risk_report_command))
-        self.application.add_handler(CommandHandler("trades_history", self.handlers.trades_history_command))
-        
-        # Comandos de Mantenimiento
-        self.application.add_handler(CommandHandler("restart_system", self.handlers.restart_system_command))
-        self.application.add_handler(CommandHandler("clear_cache", self.handlers.clear_cache_command))
-        self.application.add_handler(CommandHandler("update_models", self.handlers.update_models_command))
-        
-        # Comandos de Configuración Adicional
-        self.application.add_handler(CommandHandler("set_leverage", self.handlers.set_leverage_command))
-        
-        # Comandos adicionales de comandos_telegram.md
-        self.application.add_handler(CommandHandler("reload_config", self.handlers.reload_config_command))
-        self.application.add_handler(CommandHandler("reset_agent", self.handlers.reset_agent_command))
-        self.application.add_handler(CommandHandler("strategies", self.handlers.strategies_command))
-        
-        # Handler para mensajes de texto
-        self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handlers.echo_command))
-        
-        logger.info("✅ Handlers configurados correctamente")
+        _add("start", "start_command")
+        _add("help", "help_command")
+        _add("status", "status_command")
+        _add("metrics", "metrics_command")
+        _add("positions", "positions_command")
+
+        # Control (solo si existen)
+        _add("start_trading", "start_trading_command")
+        _add("stop_trading", "stop_trading_command")
+        _add("emergency_stop", "emergency_stop_command")
+
+        # Información
+        _add("balance", "balance_command")
+        _add("health", "health_command")
+        _add("settings", "settings_command")
+
+        # Control avanzado
+        _add("train", "train_command")
+        _add("stop_training", "stop_training_command")
+        _add("trade", "trade_command")
+        _add("set_mode", "set_mode_command")
+        _add("set_symbols", "set_symbols_command")
+
+        # Datos históricos
+        _add("verify_historical_data", "verify_historical_data_command")
+        _add("download_historical_data", "download_historical_data_command")
+        _add("historical_data_report", "historical_data_report_command")
+        _add("verify_align", "verify_align_command")
+        _add("sync_symbols", "sync_symbols_command")
+
+        _add("shutdown", "shutdown_command")
+
+        # Agentes y ML
+        _add("agents", "agents_command")
+        _add("agent_status", "agent_status_command")
+        _add("retrain", "retrain_command")
+        _add("model_info", "model_info_command")
+        _add("training_status", "training_status_command")
+
+        # Entrenamiento
+        _add("train_hist", "train_hist_command")
+        _add("train_live", "train_live_command")
+        _add("stop_train", "stop_train_command")
+
+        # Datos y análisis
+        _add("download_data", "download_data_command")
+        _add("analyze_data", "analyze_data_command")
+        _add("align_data", "align_data_command")
+        _add("data_status", "data_status_command")
+        _add("backtest", "backtest_command")
+
+        # Historial
+        _add("download_history", "download_history_command")
+        _add("inspect_history", "inspect_history_command")
+        _add("repair_history", "repair_history_command")
+
+        # Trading avanzado
+        _add("close_position", "close_position_command")
+
+        # Reportes
+        _add("performance_report", "performance_report_command")
+        _add("agent_analysis", "agent_analysis_command")
+        _add("risk_report", "risk_report_command")
+        _add("trades_history", "trades_history_command")
+
+        # Mantenimiento
+        _add("restart_system", "restart_system_command")
+        _add("clear_cache", "clear_cache_command")
+        _add("update_models", "update_models_command")
+
+        # Configuración adicional
+        _add("set_leverage", "set_leverage_command")
+
+        # Extras
+        _add("reload_config", "reload_config_command")
+        _add("reset_agent", "reset_agent_command")
+        _add("strategies", "strategies_command")
+
+        # Handler para mensajes de texto (si existe echo)
+        try:
+            from telegram.ext import MessageHandler, filters
+            if hasattr(self.handlers, 'echo_command'):
+                self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handlers.echo_command))
+        except Exception:
+            pass
+
+        logger.info("✅ Handlers configurados (solo los disponibles)")
     
     async def send_message(self, message: str, parse_mode: str = "HTML") -> bool:
         """Envía un mensaje al chat configurado"""
@@ -372,3 +435,14 @@ if __name__ == "__main__":
     
     # Ejecutar bot
     asyncio.run(start_telegram_bot())
+
+# Objeto de conveniencia para compatibilidad con imports antiguos
+# Algunos módulos realizan: from control.telegram_bot import telegram_bot
+# Exponemos una interfaz mínima diferida.
+class _TelegramBotLazy:
+    async def send_message(self, *args, **kwargs):
+        # Crea una instancia real bajo demanda si se necesita en el futuro
+        logging.getLogger(__name__).warning("telegram_bot (lazy) invocado sin inicialización; mensaje no enviado")
+        return False
+
+telegram_bot = _TelegramBotLazy()

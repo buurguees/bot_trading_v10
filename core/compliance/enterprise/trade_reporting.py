@@ -30,7 +30,7 @@ from pathlib import Path
 from enum import Enum
 
 from core.compliance.enterprise.audit_logger import AuditLogger, EventType
-from config.config_loader import user_config
+from core.config.config_loader import ConfigLoader
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class TradeReporting:
     """Sistema de reportes de trades enterprise"""
     
     def __init__(self, config_path: str = "config/user_settings.yaml"):
-        self.config = user_config.get_value(['compliance', 'trade_reporting'], {})
+        self.config = ConfigLoader().get_main_config().get('compliance', {}).get('trade_reporting', {})
         self.audit_logger = AuditLogger()
         
         # Configuración de reportes

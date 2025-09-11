@@ -13,7 +13,7 @@ from dataclasses import asdict
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
 
-from config.enterprise_config import get_enterprise_config
+from core.config.unified_config import unified_config
 from .stream_collector import MarketTick
 
 # Configurar logging
