@@ -31,14 +31,14 @@ class MetricsSender:
     
     def __init__(self, telegram_bot, config: Dict[str, Any]):
         self.telegram_bot = telegram_bot
-        self.config = config
+        self.config = config or {}
         self.alerting_system = None
         self.data_provider = None
         self.trading_engine = None
         
         # Configuración
-        self.metrics_interval = config.get('metrics_interval', 300)  # 5 minutos por defecto
-        self.alert_thresholds = config.get('alert_thresholds', {})
+        self.metrics_interval = self.config.get('metrics_interval', 300)  # 5 minutos por defecto
+        self.alert_thresholds = self.config.get('alert_thresholds', {})
         self.is_running = False
         
         # Inicializar componentes

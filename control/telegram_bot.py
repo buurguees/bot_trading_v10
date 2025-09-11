@@ -39,7 +39,7 @@ from cryptography.fernet import Fernet
 
 # Imports locales
 from .handlers import Handlers
-from core.config.unified_config import unified_config
+from control.config import control_config
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,8 @@ class TelegramBot:
     
     def __init__(self, config_path: str = 'control/config.yaml'):
         self.config_path = config_path
-        self.config = self._load_config()
+        # Cargar configuración unificada: features/telegram.yaml + env vars
+        self.config = {'telegram': control_config.telegram}
         telegram_cfg = self.config.get('telegram', {})
         # Cargar desde config o .env (admite múltiples nombres de variables)
         env_bot_token = os.getenv('BOT_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN') or ''
@@ -107,51 +108,8 @@ class TelegramBot:
         logger.info("✅ Controlador establecido en TelegramBot")
     
     def _load_config(self) -> Dict[str, Any]:
-        """Carga la configuración desde YAML"""
-        try:
-            # 1) Archivo local control/config.yaml
-            if Path(self.config_path).exists():
-                with open(self.config_path, 'r', encoding='utf-8') as f:
-                    config = yaml.safe_load(f) or {}
-                TelegramConfig(**config.get('telegram', {}))
-                return config
-            # 2) Fallback a config/control_config.yaml
-            alt = Path('config/control_config.yaml')
-            if alt.exists():
-                with open(alt, 'r', encoding='utf-8') as f:
-                    cfg = yaml.safe_load(f) or {}
-                # normalizar al mismo esquema
-                if 'telegram' not in cfg and cfg:
-                    cfg = {'telegram': cfg.get('telegram', cfg)}
-                return cfg
-            # 3) Fallback a unified_config
-            try:
-                uc = unified_config.get_section('control') or {}
-                if uc:
-                    return {'telegram': uc.get('telegram', uc)}
-            except Exception:
-                pass
-            # 4) Fallback final a variables de entorno
-            env_cfg = {
-                'telegram': {
-                    'bot_token': os.getenv('BOT_TOKEN', ''),
-                    'chat_id': os.getenv('TELEGRAM_CHAT_ID', ''),
-                    'enabled': False,
-                    'metrics_interval': int(os.getenv('TELEGRAM_METRICS_INTERVAL', '60')),
-                    'alert_thresholds': {}
-                }
-            }
-            return env_cfg
-            
-        except FileNotFoundError:
-            logger.warning(f"⚠️ Config no encontrada: {self.config_path}. Usando fallbacks y deshabilitando Telegram.")
-            return {'telegram': {'bot_token': '', 'chat_id': '', 'enabled': False, 'metrics_interval': 60, 'alert_thresholds': {}}}
-        except ValidationError as e:
-            logger.error(f"❌ Configuración inválida: {e}")
-            raise
-        except Exception as e:
-            logger.error(f"❌ Error cargando configuración: {e}")
-            raise
+        """Mantenido por compatibilidad (ya no se usa)."""
+        return {'telegram': control_config.telegram}
     
     def _decrypt_token(self, token: str) -> str:
         """Desencripta el token del bot"""
