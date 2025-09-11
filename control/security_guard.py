@@ -22,7 +22,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
 from enum import Enum
 import json
-from core.config.config_loader import config_loader
+from config.unified_config import get_config_manager
 from core.security.audit_logger import audit_logger, AuditEventType, AuditSeverity
 
 logger = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ class SecurityGuard:
     """Guardián de seguridad para comandos"""
     
     def __init__(self):
-        self.config_loader = config_loader
+        self.config = get_config_manager()
         self.audit_logger = audit_logger
         self.control_config = {}
         self.security_config = {}
@@ -93,14 +93,9 @@ class SecurityGuard:
     async def initialize(self):
         """Inicializa el guardián de seguridad"""
         try:
-            # Inicializar configuraciones
-            await self.config_loader.initialize()
-            
-            # Cargar configuración de control
-            self.control_config = self.config_loader.get_control_config()
-            
-            # Cargar configuración de seguridad
-            self.security_config = self.config_loader.get_security_config()
+            # Cargar configuración de control y seguridad desde nuevo manager
+            self.control_config = self.config.get('control', {}) or {}
+            self.security_config = self.config.get('security', {}) or {}
             
             # Configurar autorización
             self.authorized_chat_ids = set(
@@ -108,7 +103,8 @@ class SecurityGuard:
             )
             
             # Configurar rate limiting
-            rate_limiting = self.control_config.get('security', {}).get('rate_limiting', {})
+            rate_limiting = self.control_config.get('security', {}).get('rate_limiting', {}) or \
+                           self.security_config.get('rate_limiting', {})
             self.max_requests_per_minute = rate_limiting.get('max_requests_per_minute', 20)
             self.max_requests_per_hour = rate_limiting.get('max_requests_per_hour', 100)
             self.block_duration = rate_limiting.get('block_duration', 300)

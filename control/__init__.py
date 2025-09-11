@@ -16,7 +16,7 @@ Submódulos:
 from .telegram_bot import TelegramBot
 from .handlers import Handlers
 from .metrics_sender import MetricsSender
-from .security_guard import TelegramSecurity
+from .security_guard import SecurityGuard as TelegramSecurity
 
 __all__ = [
     'TelegramBot',
