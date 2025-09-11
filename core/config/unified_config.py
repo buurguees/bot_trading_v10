@@ -197,12 +197,86 @@ class UnifiedConfigManager:
             
             for config_file in config_files:
                 await self.load_config(config_file)
+
+            # Cargar nuevas rutas unificadas
+            self._load_directory_configs(Path("config/core"), prefix="core/")
+            self._load_directory_configs(Path("config/environments"), prefix="environments/")
+            self._load_directory_configs(Path("config/features"), prefix="features/")
             
             logger.info(f"Cargadas {len(self.configs)} configuraciones")
             
         except Exception as e:
             logger.error(f"Error cargando configuraciones: {e}")
             raise
+
+    def _load_directory_configs(self, directory: Path, prefix: str = "") -> None:
+        """Carga todos los YAML de un directorio y los registra con un alias prefijado"""
+        try:
+            if not directory.exists():
+                return
+            for file in directory.glob("*.yml"):
+                with open(file, 'r', encoding='utf-8') as f:
+                    data = yaml.safe_load(f) or {}
+                self.configs[f"{prefix}{file.name}"] = data
+            for file in directory.glob("*.yaml"):
+                with open(file, 'r', encoding='utf-8') as f:
+                    data = yaml.safe_load(f) or {}
+                self.configs[f"{prefix}{file.name}"] = data
+        except Exception as e:
+            logger.warning(f"No se pudieron cargar configuraciones desde {directory}: {e}")
+
+    def ensure_loaded(self) -> None:
+        """Carga sincrónicamente configuraciones básicas si aún no han sido cargadas.
+        Útil como fallback cuando no se ha inicializado el gestor de forma asíncrona.
+        """
+        try:
+            if self.configs:
+                return
+            # Cargar las mismas listas que en load_all_configs(), de forma síncrona
+            enterprise_config_files = [
+                'data_collection.yaml',
+                'trading.yaml',
+                'portfolio_management.yaml',
+                'futures_config.yaml',
+                'security.yaml',
+                'hyperparameters.yaml',
+                'strategies.yaml',
+                'infrastructure.yaml',
+                'model_architectures.yaml',
+                'risk_management.yaml'
+            ]
+            main_config_files = [
+                'logs_config.yaml',
+                'main_config.yaml',
+                'control_config.yaml',
+                'data_config.yaml',
+                'agents_config.yaml',
+                'logging_config.yaml',
+                'security_config.yaml'
+            ]
+            for config_file in enterprise_config_files + main_config_files:
+                # Resolver ruta
+                if config_file in ['logs_config.yaml', 'main_config.yaml', 'control_config.yaml',
+                                   'data_config.yaml', 'agents_config.yaml', 'logging_config.yaml',
+                                   'security_config.yaml']:
+                    config_path = Path("config") / config_file
+                else:
+                    config_path = self.config_dir / config_file
+                if not config_path.exists():
+                    continue
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    try:
+                        config_data = yaml.safe_load(f)
+                    except Exception:
+                        config_data = {}
+                self.configs[config_file] = config_data or {}
+
+            # Cargar nuevas rutas unificadas
+            self._load_directory_configs(Path("config/core"), prefix="core/")
+            self._load_directory_configs(Path("config/environments"), prefix="environments/")
+            self._load_directory_configs(Path("config/features"), prefix="features/")
+        except Exception as e:
+            logger.warning(f"ensure_loaded() falló: {e}")
     
     async def load_config(self, config_file: str) -> Dict[str, Any]:
         """Carga una configuración específica"""
@@ -614,6 +688,63 @@ class UnifiedConfigManager:
         except Exception as e:
             logger.error(f"Error obteniendo configuraciones para módulo {module}: {e}")
             return {}
+
+    def get(self, key_path: str, default: Any = None) -> Any:
+        """Obtiene un valor usando ruta de claves (notación de puntos) buscando en todas las configuraciones cargadas.
+        Devuelve el primer resultado encontrado.
+        """
+        try:
+            # Búsqueda directa por archivo si la ruta parece incluir nombre de archivo (e.g., data_config.yaml.data_collection)
+            if ":" in key_path or key_path.endswith(".yaml"):
+                # Notación no soportada explícitamente; devolver default para evitar errores
+                return default
+            
+            keys = key_path.split(".") if key_path else []
+            if not keys:
+                return default
+            
+            # Intentar coincidencias conocidas por archivo para acelerar
+            preferred_files = []
+            if keys[0] in {"data_collection", "historical_data", "database", "alignment", "real_time_data"}:
+                preferred_files.append("data_config.yaml")
+            if keys[0] in {"trading", "portfolio_management", "risk_management", "security", "infrastructure"}:
+                # Buscar primero en enterprise
+                preferred_files.extend([
+                    "trading.yaml",
+                    "portfolio_management.yaml",
+                    "risk_management.yaml",
+                    "security.yaml",
+                    "infrastructure.yaml",
+                ])
+            
+            # Lista de archivos a revisar: preferidos primero, luego el resto
+            files_to_search = []
+            files_to_search.extend([f for f in preferred_files if f in self.configs])
+            files_to_search.extend([f for f in self.configs.keys() if f not in files_to_search])
+            
+            for config_file in files_to_search:
+                config_data = self.configs.get(config_file, {})
+                value = self._get_nested_value(config_data, keys)
+                if value is not None:
+                    return value
+            
+            return default
+        except Exception as e:
+            logger.error(f"Error en get('{key_path}'): {e}")
+            return default
+
+    def _get_nested_value(self, config: Dict[str, Any], keys: List[str]) -> Any:
+        """Obtiene valor anidado dado un diccionario y lista de claves."""
+        try:
+            current: Any = config
+            for key in keys:
+                if isinstance(current, dict) and key in current:
+                    current = current[key]
+                else:
+                    return None
+            return current
+        except Exception:
+            return None
     
     def get_validation_status(self) -> Dict[str, Any]:
         """Obtiene el estado de validación de todas las configuraciones"""

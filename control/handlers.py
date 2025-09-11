@@ -28,7 +28,24 @@ class Handlers:
         self.config_loader = ConfigLoader()
         self.config = self.config_loader.get_main_config()
         self.long_commands = ['/sync_symbols', '/download_data', '/train_hist', '/repair_data', '/verify_align']  # Comandos con progreso
+        # Cache para evitar editar mensajes sin cambios
+        self._last_progress_text = {}
     
+    def _resolve_script_path(self, script_name: str) -> str:
+        """Resuelve la ruta real del script según directorios conocidos."""
+        candidate_paths = [
+            f"scripts/{script_name}.py",
+            f"scripts/data/{script_name}.py",
+            f"scripts/system/{script_name}.py",
+            f"scripts/training/{script_name}.py",
+            f"scripts/trading/enterprise/{script_name}.py",
+            f"scripts/deployment/{script_name}.py",
+        ]
+        for p in candidate_paths:
+            if Path(p).exists():
+                return p
+        return ""
+
     def _check_authorization(self, update: Update) -> bool:
         """Validación básica de autorización (lee control_config, con fallbacks)"""
         chat_id = str(update.message.chat_id)
@@ -99,8 +116,14 @@ class Handlers:
         message_id = initial_msg.message_id
         
         try:
+            # Resolver script real
+            script_path = self._resolve_script_path(script_name)
+            if not script_path:
+                await context.bot.send_message(chat_id=chat_id, text=f"❌ Script no encontrado: {script_name}")
+                return
+
             # Ejecutar script con progreso_id como arg
-            cmd = ["python", f"scripts/{script_name}.py", "--progress_id", progress_id] + args
+            cmd = ["python", script_path, "--progress_id", progress_id] + args
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
@@ -151,15 +174,23 @@ class Handlers:
                 if progress_data.get("status") == "completed":
                     break  # Script terminó
                 message = self._format_progress_message(progress_data, progress_id.split('_')[1])  # Extrae comando
-                await context.bot.edit_message_text(
-                    chat_id=chat_id,
-                    message_id=message_id,
-                    text=message,
-                    parse_mode='HTML'
-                )
+                cache_key = (chat_id, message_id)
+                if self._last_progress_text.get(cache_key) != message:
+                    try:
+                        await context.bot.edit_message_text(
+                            chat_id=chat_id,
+                            message_id=message_id,
+                            text=message,
+                            parse_mode='HTML'
+                        )
+                        self._last_progress_text[cache_key] = message
+                    except Exception as e:
+                        # Ignorar "Message is not modified" silenciosamente
+                        if 'Message is not modified' not in str(e):
+                            logger.warning(f"Error actualizando progreso: {e}")
                 await asyncio.sleep(5)  # Check cada 5s
             except Exception as e:
-                logger.warning(f"Error monitoreando progreso: {e}")
+                logger.debug(f"Error monitoreando progreso: {e}")
                 await asyncio.sleep(5)
     
     async def _execute_short_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE, script_name: str, args: list = []):
@@ -170,7 +201,12 @@ class Handlers:
         
         try:
             await update.message.reply_text(f"🔄 Ejecutando {script_name}...")
-            cmd = ["python", f"scripts/{script_name}.py"] + args
+            script_path = self._resolve_script_path(script_name)
+            if not script_path:
+                await update.message.reply_text(f"❌ Script no encontrado: {script_name}")
+                return
+
+            cmd = ["python", script_path] + args
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,

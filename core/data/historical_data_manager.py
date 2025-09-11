@@ -67,8 +67,18 @@ class HistoricalDataManager:
             
             # Obtener símbolos desde configuración
             symbols_config = ConfigLoader().get_main_config().get('multi_symbol_settings', {}).get('symbols', {})
-            config['symbols'] = [symbol for symbol, settings in symbols_config.items() 
+            symbols_from_main = [symbol for symbol, settings in symbols_config.items() 
                                if settings.get('enabled', True)]
+            if symbols_from_main:
+                config['symbols'] = symbols_from_main
+            else:
+                # Fallback a unified_config si no hay símbolos en main
+                try:
+                    from config.unified_config import get_symbols as root_get_symbols
+                    config['symbols'] = root_get_symbols()
+                except Exception:
+                    config['symbols'] = unified_config.get_config('data_config.yaml', 'data_collection.symbols', []) or \
+                                         ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
             
             logger.info(f"Configuración cargada: {config['years']} años, {len(config['symbols'])} símbolos, {len(config['timeframes'])} timeframes")
             return config

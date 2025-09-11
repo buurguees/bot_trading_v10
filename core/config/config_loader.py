@@ -34,6 +34,11 @@ class ConfigLoader:
         self.last_cache_update = {}
         
         logger.info("ConfigLoader inicializado")
+        # Asegurar que haya configuraciones cargadas
+        try:
+            self.unified_config.ensure_loaded()
+        except Exception:
+            pass
     
     async def initialize(self):
         """Inicializa el cargador de configuraciones"""
@@ -100,6 +105,23 @@ class ConfigLoader:
     def get_symbols(self) -> List[str]:
         """Obtiene lista de símbolos de trading"""
         try:
+            # 1) Nueva fuente unificada
+            core_symbols = self.unified_config.get_config('core/symbols.yaml') or {}
+            if core_symbols:
+                # Si el usuario definió grupos activos por referencia
+                user_cfg = self.get_user_settings()
+                groups = user_cfg.get('active_symbol_groups', []) if isinstance(user_cfg, dict) else []
+                if groups:
+                    resolved = []
+                    for g in groups:
+                        resolved.extend(core_symbols.get('active_symbols', {}).get(g, []))
+                    if resolved:
+                        return resolved
+                # Fallback: usar grupo primary si existe
+                primary = core_symbols.get('active_symbols', {}).get('primary', [])
+                if primary:
+                    return primary
+            
             trading_config = self.get_trading_config()
             symbols = trading_config.get('trading.yaml', {}).get('trading', {}).get('symbols', [])
             
@@ -117,6 +139,22 @@ class ConfigLoader:
     def get_timeframes(self) -> List[str]:
         """Obtiene lista de timeframes"""
         try:
+            # 1) Nueva fuente unificada
+            core_symbols = self.unified_config.get_config('core/symbols.yaml') or {}
+            if core_symbols:
+                user_cfg = self.get_user_settings()
+                groups = user_cfg.get('active_timeframes', []) if isinstance(user_cfg, dict) else []
+                if groups:
+                    resolved = []
+                    for g in groups:
+                        resolved.extend(core_symbols.get('timeframes', {}).get(g, []))
+                    if resolved:
+                        return resolved
+                # Fallback: usar real_time
+                rt = core_symbols.get('timeframes', {}).get('real_time', [])
+                if rt:
+                    return rt
+            
             data_config = self.get_data_collection_config()
             timeframes = data_config.get('data_collection.yaml', {}).get('data_collection', {}).get('timeframes', {})
             
@@ -191,6 +229,10 @@ class ConfigLoader:
     
     def get_logs_config(self) -> Dict[str, Any]:
         """Obtiene configuración de logs"""
+        # Preferir logging_config.yaml si existe; fallback a logs_config.yaml legacy
+        logging_cfg = self.get_config('logging_config.yaml')
+        if logging_cfg:
+            return logging_cfg
         return self.get_config('logs_config.yaml', 'logging', {})
     
     def get_main_config(self) -> Dict[str, Any]:
