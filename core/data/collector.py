@@ -37,7 +37,7 @@ import threading
 from itertools import chain
 
 from .database import db_manager, MarketData
-from core.config.config_loader import ConfigLoader
+from config.unified_config import get_config_manager
 
 logger = logging.getLogger(__name__)
 
@@ -851,10 +851,10 @@ class BitgetDataCollector:
         """Obtiene símbolos desde la configuración del usuario"""
         try:
             # Obtener símbolos desde la configuración
-            symbols_cfg = ConfigLoader().get_main_config().get('trading_settings', {}).get('symbols', [])
+            symbols_cfg = get_config_manager().get('trading_settings.symbols', [])
             if not symbols_cfg:
                 # Fallback a configuración alternativa
-                symbols_cfg = ConfigLoader().get_main_config().get('multi_symbol_settings', {}).get('symbols', {})
+                symbols_cfg = get_config_manager().get('multi_symbol_settings.symbols', {})
                 if isinstance(symbols_cfg, dict):
                     symbols_cfg = [sym for sym, cfg in symbols_cfg.items() if cfg.get('enabled', True)]
             

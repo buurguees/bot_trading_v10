@@ -250,10 +250,14 @@ class DatabaseManager:
     
     def __init__(self, db_path: str = None):
         if db_path is None:
-            from pathlib import Path
-            data_dir = Path(__file__).parent.parent.parent.parent / "data"
-            data_dir.mkdir(exist_ok=True)
-            self.db_path = data_dir / "trading_bot.db"
+            # Intentar obtener desde UnifiedConfigManager v2
+            try:
+                from config.unified_config import get_config_manager
+                manager = get_config_manager()
+                configured_path = manager.get('database.path', 'data/trading_bot.db')
+            except Exception:
+                configured_path = 'data/trading_bot.db'
+            self.db_path = Path(configured_path)
         else:
             self.db_path = Path(db_path)
         
@@ -1051,14 +1055,19 @@ class DatabaseManager:
         """Crea backup optimizado con compresión opcional"""
         try:
             if backup_path is None:
-                from core.config.config_loader import ConfigLoader
-                config_loader = ConfigLoader()
-                BACKUPS_DIR = config_loader.get_config_value('backups_dir', 'data/backups')
+                from pathlib import Path
+                try:
+                    from config.unified_config import get_config_manager
+                    manager = get_config_manager()
+                    backups_dir = Path(manager.get('backup.backup_config[0].destination', 'backups/database/'))
+                except Exception:
+                    backups_dir = Path('backups/database/')
+                backups_dir.mkdir(parents=True, exist_ok=True)
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 backup_name = f"trading_bot_backup_{timestamp}"
-                backup_path = BACKUPS_DIR / f"{backup_name}.db"
+                backup_path = backups_dir / f"{backup_name}.db"
                 if compress:
-                    backup_path = BACKUPS_DIR / f"{backup_name}.db.gz"
+                    backup_path = backups_dir / f"{backup_name}.db.gz"
             
             backup_info = {
                 'start_time': datetime.now().isoformat(),
