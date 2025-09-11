@@ -1,95 +1,86 @@
-# 📁 config/ - Configuración del Usuario
+# 📁 config/ - Sistema de Configuración Unificado (v2)
 
-> **Propósito**: Configuración personalizable del usuario y variables de entorno.
+> **Propósito**: Proveer una arquitectura modular, sin duplicaciones y con fuente única de verdad para símbolos, timeframes y objetivos del sistema.
 
-## 🎯 ORGANIZACIÓN DE ARCHIVOS
+## 🎯 Nueva Organización
 
 ```
 config/
-├── user_settings.yaml          # 👤 Configuración personalizable del usuario
-├── .env.example                # 🔐 Variables de entorno (ejemplo)
-└── README.md                   # 📄 Esta documentación
+├── core/                      # Configuraciones centrales (fuente única)
+│   ├── symbols.yaml           # ÚNICA fuente de símbolos y timeframes
+│   ├── training_objectives.yaml  # Objetivos de entrenamiento/negocio
+│   ├── rewards.yaml           # Recompensas y penalizaciones
+│   └── data_sources.yaml      # Fuentes de datos y parámetros de colección
+│
+├── environments/              # Configs por entorno
+│   ├── development.yaml
+│   ├── production.yaml
+│   └── testing.yaml
+│
+├── features/                  # Configs por funcionalidad
+│   ├── ml.yaml
+│   ├── monitoring.yaml
+│   ├── risk_management.yaml
+│   └── telegram.yaml
+│
+├── user_settings.yaml         # Overrides del usuario (referencias a grupos)
+└── README.md
 ```
 
-## 🔧 CONFIGURACIÓN DEL USUARIO
+## 🔧 Puntos Clave
+- **Fuente única de símbolos/timeframes**: `core/symbols.yaml`.
+- **Objetivos unificados**: `core/training_objectives.yaml` (ROI, winrate, drawdown, etc.).
+- **Jerarquía de resolución**: `environments` > `user_settings` > `features` > `core`.
+- **Referencias**: soporta `${training_objectives.financial_targets.balance.initial}`.
+- **Variables de entorno**: se cargan desde `config/.env` o `.env` si existen (opcional).
 
-### **user_settings.yaml**
-Archivo principal de configuración que permite personalizar el bot sin tocar código:
-
+## ✍️ user_settings.yaml (overrides por referencias)
 ```yaml
-# Configuración general del bot
 bot_settings:
   name: "TradingBot_v10_Alex"
-  trading_mode: "aggressive"  # conservative/moderate/aggressive/custom
-  
-# Gestión de capital y riesgo
+
+# Referencias a grupos definidos en core/symbols.yaml
+active_symbol_groups: ["primary"]
+active_timeframes: ["real_time", "analysis"]
+
+# Ejemplo de override directo
 capital_management:
   initial_balance: 1000.0
   max_risk_per_trade: 2.0
   max_daily_loss_pct: 5.0
-
-# Configuración de trading
-trading_settings:
-  symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT"]
-  timeframes: ["1h", "4h", "1d"]
-  
-# Configuración del modelo IA
-ai_model_settings:
-  confidence:
-    min_confidence_to_trade: 65.0
 ```
 
-### **.env.example**
-Variables de entorno para API keys y configuraciones sensibles:
+## 🧠 Unified Config Manager v2
+- Archivo: `config/unified_config.py`
+- Clase principal: `UnifiedConfigManager`
 
-```env
-# API Keys (copiar a .env y configurar)
-BITGET_API_KEY=your_api_key_here
-BITGET_SECRET_KEY=your_secret_key_here
-BITGET_PASSPHRASE=your_passphrase_here
-
-# Telegram Bot
-TELEGRAM_BOT_TOKEN=your_bot_token_here
-TELEGRAM_CHAT_ID=your_chat_id_here
-
-# Base de datos
-DATABASE_URL=sqlite:///data/trading_bot.db
-```
-
-## 🔗 CONEXIÓN CON CORE
-
-Las configuraciones YAML de dominio (trading, riesgo, infraestructura, etc.) se encuentran en:
-- `core/config/enterprise/` - Configuraciones enterprise por dominio
-
-El sistema carga automáticamente:
-1. `config/user_settings.yaml` - Configuración del usuario
-2. `core/config/enterprise/*.yaml` - Configuraciones de dominio
-3. Variables de entorno desde `.env`
-
-## 🚀 USO
-
-### **Para Usuarios**
-1. Editar `config/user_settings.yaml` según tus preferencias
-2. Copiar `.env.example` a `.env` y configurar API keys
-3. Reiniciar el bot para aplicar cambios
-
-### **Para Desarrolladores**
+### Acceso básico
 ```python
-from core.config.enterprise_config import EnterpriseConfigManager
-from core.config.config_loader import ConfigLoader
+from config.unified_config import UnifiedConfigManager
 
-# Cargar configuración
-config_manager = EnterpriseConfigManager('config/user_settings.yaml')
-user_config = config_manager.load_config()
+config = UnifiedConfigManager(environment="development")
 
-# Acceder a valores
-trading_mode = user_config.get('bot_settings.trading_mode')
-initial_balance = user_config.get('capital_management.initial_balance')
+symbols = config.get_symbols()                 # desde core/symbols.yaml
+timeframes = config.get_timeframes()           # desde core/symbols.yaml
+objectives = config.get_training_objectives()  # desde core/training_objectives.yaml
+initial_balance = config.get_initial_balance() # con fallbacks inteligentes
+telegram = config.get_telegram_config()        # features + variables de entorno
 ```
 
-## ⚠️ IMPORTANTE
+### Validación y estado
+```python
+validation = config.validate_trading_config()
+status = config.get_config_status()
+```
 
-- **NUNCA** commitees el archivo `.env` (contiene API keys)
-- **SIEMPRE** usa `.env.example` como plantilla
-- Los cambios en `user_settings.yaml` requieren reinicio del bot
-- Las configuraciones enterprise en `core/config/enterprise/` son para desarrolladores
+## 🚀 Flujo recomendado
+1) Define símbolos/timeframes en `core/symbols.yaml`.
+2) Usa `user_settings.yaml` para indicar grupos activos (`active_symbol_groups`, `active_timeframes`).
+3) Ajusta objetivos en `core/training_objectives.yaml`.
+4) Habilita funcionalidades en `features/*.yaml` (ML, monitoreo, Telegram, riesgo).
+5) Selecciona entorno con `UnifiedConfigManager(environment=...)`.
+
+## ⚠️ Importante
+- No dupliques símbolos/timeframes fuera de `core/symbols.yaml`.
+- No commitees `config/.env` si contiene secretos.
+- Cambios en `user_settings.yaml` pueden requerir reiniciar el bot.
