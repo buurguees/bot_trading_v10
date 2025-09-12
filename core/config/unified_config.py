@@ -30,6 +30,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 @dataclass
 class ConfigValidationResult:

@@ -1240,7 +1240,8 @@ class UnifiedConfig:
                 self._config_cache[str(full_path)] = config
                 return config
         except FileNotFoundError:
-            print(f"⚠️ Archivo de configuración no encontrado: {full_path}")
+            # Silenciar warnings de archivos legacy no encontrados
+            pass
             return {}
         except Exception as e:
             print(f"❌ Error cargando configuración {full_path}: {e}")

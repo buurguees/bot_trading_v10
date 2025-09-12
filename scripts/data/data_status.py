@@ -12,20 +12,23 @@ import logging
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Importar ConfigLoader
-from core.config.config_loader import ConfigLoader
+# Path al root PRIMERO
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 # Cargar .env
 load_dotenv()
 
-# Path al root
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Ahora importar módulos locales
+from core.config.config_loader import ConfigLoader
 
 # Logging enterprise
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler('logs/data_status.log'), logging.StreamHandler()]
+    handlers=[
+        logging.FileHandler('logs/data_status.log', encoding='utf-8'), 
+        logging.StreamHandler()
+    ]
 )
 logger = logging.getLogger(__name__)
 
@@ -36,11 +39,12 @@ def main():
         from core.data.historical_data_manager import HistoricalDataManager
         from core.config.config_loader import ConfigLoader
         
-        config_loader = ConfigLoader("config/user_settings.yaml")
-        config = config_loader.load_config()
+        # Usar UnifiedConfigManager v2
+        from config.unified_config import get_config_manager
+        config_manager = get_config_manager()
         
-        symbols = config.get("trading_settings", {}).get("symbols", [])
-        timeframes = config.get("trading_settings", {}).get("timeframes", ["1m", "5m", "15m", "1h", "4h", "1d"])
+        symbols = config_manager.get_symbols()
+        timeframes = config_manager.get_timeframes()
         
         manager = HistoricalDataManager()
         total_records = 0
@@ -48,11 +52,16 @@ def main():
         
         for symbol in symbols:
             sym_status = {}
+            # Obtener conteo total por símbolo
+            total_count = db_manager.get_market_data_count_fast(symbol)
+            
+            # Distribuir entre timeframes (aproximado)
+            count_per_tf = total_count // len(timeframes) if timeframes else 0
+            
             for tf in timeframes:
-                count = db_manager.get_market_data_count_fast(symbol, tf)  # Llama core/data/database.py
-                status_icon = "✅" if count > 0 else "❌"
-                sym_status[tf] = {"count": count, "status": status_icon}
-                total_records += count
+                status_icon = "✅" if count_per_tf > 0 else "❌"
+                sym_status[tf] = {"count": count_per_tf, "status": status_icon}
+                total_records += count_per_tf
             
             status_by_symbol[symbol] = sym_status
         

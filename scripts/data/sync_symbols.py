@@ -15,14 +15,14 @@ from datetime import datetime
 from dotenv import load_dotenv
 from typing import Dict, List, Any
 
-# Importar ConfigLoader
-from core.config.config_loader import ConfigLoader
+# Path al root PRIMERO
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 # Cargar .env
 load_dotenv()
 
-# Path al root
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Ahora importar módulos locales
+from config.unified_config import get_config_manager
 
 # Logging enterprise a archivo específico
 logging.basicConfig(
@@ -40,8 +40,7 @@ class SyncSymbolsEnterprise:
     
     def __init__(self, progress_id: str = None):
         self.progress_id = progress_id
-        self.config_loader = ConfigLoader("config/user_settings.yaml")
-        self.config = self.config_loader.load_config()
+        self.config = get_config_manager()
         self.synchronizer = None
         self.executor = None
         self.aggregator = None
@@ -109,11 +108,10 @@ class SyncSymbolsEnterprise:
             if not await self.initialize():
                 return {"status": "error", "message": "Error inicializando componentes de core/"}
             
-            # Config de user_settings.yaml
-            sync_config = self.config.get("data_collection", {}).get("sync", {})
-            symbols = sync_config.get("symbols", self.config.get("trading_settings", {}).get("symbols", []))
-            timeframes = sync_config.get("timeframes", self.config.get("trading_settings", {}).get("timeframes", []))
-            max_workers = sync_config.get("max_workers", 4)  # Enterprise: Límite para evitar rate limit
+            # Config desde UnifiedConfigManager
+            symbols = self.config.get_symbols()
+            timeframes = self.config.get_timeframes()
+            max_workers = 4  # Enterprise: Límite para evitar rate limit
             
             if not symbols or not timeframes:
                 return {"status": "error", "message": "No symbols/timeframes en config/user_settings.yaml"}

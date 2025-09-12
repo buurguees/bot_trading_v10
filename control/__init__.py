@@ -14,13 +14,13 @@ Submódulos:
 """
 
 from .telegram_bot import TelegramBot
-from .handlers import Handlers
+from .handlers import TradingBotHandlers
 from .metrics_sender import MetricsSender
 from .security_guard import SecurityGuard as TelegramSecurity
 
 __all__ = [
     'TelegramBot',
-    'Handlers', 
+    'TradingBotHandlers', 
     'MetricsSender',
     'TelegramSecurity'
 ]

@@ -39,7 +39,13 @@ from core.trading.enterprise.position_manager import PositionManager, Position
 from core.trading.enterprise.market_analyzer import MarketAnalyzer, MarketCondition
 from core.sync.parallel_executor import ParallelExecutor, CycleResult
 from core.sync.metrics_aggregator import MetricsAggregator, DailyMetrics
-from core.config.config_loader import config_loader
+# Evitar dependencias fuertes al loader legacy: usar lazy import del unified manager
+def _get_cfg():
+    try:
+        from config.unified_config import get_config_manager
+        return get_config_manager()
+    except Exception:
+        return None
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +119,23 @@ class FuturesExecutionEngine:
     """Motor unificado para ejecución de futuros en Bitget"""
     
     def __init__(self, config: Dict[str, Any] = None, max_workers: int = 4):
-        self.config = config or config_loader.get_trading_config()
+        # Cargar config desde UnifiedConfig v2 si no se pasa explícita
+        if config is None:
+            cfg_mgr = _get_cfg()
+            if cfg_mgr:
+                # Construir dict mínimo esperado por este motor
+                config = {
+                    'trading': {
+                        'symbols': cfg_mgr.get_symbols(),
+                        'timeframes': cfg_mgr.get_timeframes()
+                    },
+                    'risk_management': cfg_mgr.get('features.risk_management', {}),
+                    'exchanges': cfg_mgr.get('core.exchanges', {}),
+                    'execution_delay_ms': int(cfg_mgr.get('features.trading.execution_delay_ms', 100)),
+                }
+            else:
+                config = {}
+        self.config = config
         self.max_workers = max_workers
         self.execution_queue = asyncio.Queue()
         self.results_queue = asyncio.Queue()

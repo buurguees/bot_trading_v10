@@ -15,14 +15,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 from typing import Dict, List, Any
 
-# Importar ConfigLoader
-from core.config.config_loader import ConfigLoader
+# Path al root PRIMERO
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 # Cargar .env
 load_dotenv()
 
-# Path al root
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Ahora importar módulos locales
+from config.unified_config import get_config_manager
 
 # Logging
 logging.basicConfig(
@@ -38,8 +38,7 @@ class AnalyzeDataEnterprise:
     def __init__(self, progress_id: str = None, auto_repair: bool = True):
         self.progress_id = progress_id
         self.auto_repair = auto_repair
-        self.config_loader = ConfigLoader("config/user_settings.yaml")
-        self.config = self.config_loader.load_config()
+        self.config = get_config_manager()
         self.analyzer = None
         self._init_progress_file()
     
@@ -84,8 +83,8 @@ class AnalyzeDataEnterprise:
             if not await self.initialize():
                 return {"status": "error", "message": "Error inicializando analyzer"}
             
-            symbols = self.config.get("trading_settings", {}).get("symbols", [])
-            timeframes = self.config.get("trading_settings", {}).get("timeframes", ["1m", "5m", "15m", "1h", "4h", "1d"])
+            symbols = self.config.get_symbols()
+            timeframes = self.config.get_timeframes()
             
             if not symbols or not timeframes:
                 return {"status": "error", "message": "No config"}

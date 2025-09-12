@@ -22,7 +22,7 @@ class ConfigLoader:
                 from config.unified_config import get_config_manager
                 self._manager = get_config_manager()
             except Exception as e:
-                logger.error(f"No se pudo inicializar UnifiedConfigManager v2: {e}")
+                logger.debug(f"No se pudo inicializar UnifiedConfigManager v2 (se usará fallback): {e}")
                 self._manager = self._create_fallback()
         return self._manager
 
@@ -54,6 +54,7 @@ class ConfigLoader:
 
     # Compatibilidad superficial para llamadas existentes
     def get_main_config(self) -> Dict[str, Any]:
+        # Suprimir avisos legacy: no intentamos leer archivos en config/ raíz
         return {}
 
     def get_control_config(self) -> Dict[str, Any]:

@@ -641,7 +641,8 @@ class DatabaseManager:
                 try:
                     cursor.execute(index_sql)
                 except sqlite3.Error as e:
-                    logger.warning(f"Error creando índice: {e}")
+                    # Reducir ruido: muchos índices dependen de columnas/tablas opcionales
+                    logger.debug(f"Índice no aplicado ({e}). SQL: {index_sql}")
             
             conn.commit()
             logger.info("Índices optimizados creados")

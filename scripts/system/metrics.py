@@ -16,18 +16,15 @@ load_dotenv()
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core.data.database import db_manager
-from core.config.config_loader import ConfigLoader
+from config.unified_config import get_config_manager
 
 def main():
     """Función principal"""
     try:
-        # Cargar configuración
-        config_loader = ConfigLoader("config/user_settings.yaml")
-        config = config_loader.load_config()
-        
-        # Obtener símbolos y timeframes
-        symbols = config.get("trading_settings", {}).get("timeframes", {}).get("symbols", [])
-        timeframes = config.get("trading_settings", {}).get("timeframes", {}).get("timeframes", [])
+        # Cargar configuración unificada v2
+        cfg = get_config_manager()
+        symbols = cfg.get_symbols()
+        timeframes = cfg.get_timeframes()
         
         # Calcular métricas
         total_records = 0

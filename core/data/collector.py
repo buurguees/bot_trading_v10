@@ -37,7 +37,10 @@ import threading
 from itertools import chain
 
 from .database import db_manager, MarketData
-from config.unified_config import get_config_manager
+# Lazy import para evitar posibles circulares
+def _get_cfg():
+    from config.unified_config import get_config_manager
+    return get_config_manager()
 
 logger = logging.getLogger(__name__)
 
@@ -285,6 +288,8 @@ class BitgetDataCollector:
         self.real_time_tasks = {}
         self.stop_collection = False
         self.websocket_connections = {}
+        # Límite de concurrencia para RT para evitar 429
+        self.rt_semaphore = asyncio.Semaphore(3)
         
         logger.info("BitgetDataCollector inicializado con configuración robusta")
     
@@ -331,13 +336,32 @@ class BitgetDataCollector:
                 config['sandbox'] = True
             
             self.exchange = ccxt.bitget(config)
-            
-            # Test de conectividad
-            asyncio.create_task(self._test_connectivity())
+
+            # Test de conectividad (solo si hay loop corriendo)
+            try:
+                asyncio.get_running_loop()
+                asyncio.create_task(self._test_connectivity())
+            except RuntimeError:
+                # No hay loop activo; se puede probar más tarde cuando esté en un contexto async
+                pass
             
         except Exception as e:
             logger.error(f"Error configurando exchange: {e}")
             self.exchange = None
+
+    async def get_server_time(self) -> Optional[str]:
+        """Obtiene hora del servidor como diagnóstico simple."""
+        try:
+            if not self.exchange:
+                return None
+            # CCXT no expone siempre server time; usar markets load como proxy
+            markets = await asyncio.get_event_loop().run_in_executor(None, self.exchange.load_markets)
+            # Usar tiempo local como aproximación
+            from datetime import datetime, timezone
+            return datetime.now(timezone.utc).isoformat()
+        except Exception as e:
+            logger.warning(f"No se pudo obtener hora de servidor: {e}")
+            return None
     
     async def _test_connectivity(self):
         """Test de conectividad básico"""
@@ -375,7 +399,13 @@ class BitgetDataCollector:
         
         for attempt in range(max_retries + 1):
             try:
-                return await self._rate_limited_request(request_func, *args, **kwargs)
+                import inspect
+                if inspect.iscoroutinefunction(request_func):
+                    # Si es async, llamar directamente sin threadpool
+                    return await request_func(*args, **kwargs)
+                else:
+                    # Función síncrona: usar rate limiting + executor
+                    return await self._rate_limited_request(request_func, *args, **kwargs)
                 
             except ccxt.RateLimitExceeded as e:
                 delay = min(self.base_delay * (2 ** attempt), self.max_delay)
@@ -405,6 +435,30 @@ class BitgetDataCollector:
         # Si llegamos aquí, se agotaron los reintentos
         logger.error(f"Máximo de reintentos alcanzado: {last_exception}")
         raise last_exception
+
+    async def _fetch_ohlcv_safe(self, symbol: str, timeframe: str, since_ms: int, until_ms: Optional[int] = None):
+        """Wrapper seguro para fetch_ohlcv con parámetros validados.
+
+        Bitget acepta `since` para especificar el punto de inicio de los datos.
+        """
+        try:
+            if not symbol or not timeframe:
+                raise ValueError("Parámetros inválidos: symbol/timeframe")
+            if since_ms <= 0:
+                raise ValueError(f"Since inválido: {since_ms}")
+
+            # Bitget no soporta endTime como parámetro, solo since
+            # El límite se controla con el chunk_size
+            return await self._rate_limited_request(
+                self.exchange.fetch_ohlcv,
+                symbol,
+                timeframe,
+                since_ms,
+                self.chunk_size
+            )
+        except Exception as e:
+            logger.error(f"Error en _fetch_ohlcv_safe({symbol}, {timeframe}): {e}")
+            return []
     
     def _normalize_symbol(self, symbol: str) -> str:
         """Normaliza el símbolo para Bitget"""
@@ -517,20 +571,29 @@ class BitgetDataCollector:
         try:
             ccxt_symbol = self._symbol_to_ccxt_format(symbol)
             original_symbol = self._normalize_symbol(symbol)
-            
-            since = int(start_date.timestamp() * 1000)
-            until = int(end_date.timestamp() * 1000)
+
+            # Conversión segura a ms y validación de rango
+            try:
+                from core.utils.timestamp_utils import TimestampManager as TS
+                since = TS.to_unix_timestamp_ms(start_date)
+                until = TS.to_unix_timestamp_ms(end_date)
+            except Exception:
+                since = int(start_date.timestamp() * 1000)
+                until = int(end_date.timestamp() * 1000)
+            if since >= until:
+                logger.error(f"Rango de fechas inválido: since({since}) >= until({until})")
+                return pd.DataFrame()
             
             logger.debug(f"Descargando chunk: {symbol} {timeframe} "
                         f"{start_date.strftime('%Y-%m-%d')} a {end_date.strftime('%Y-%m-%d')}")
             
             # Usar fetch_ohlcv con parámetros optimizados para Bitget
             ohlcv = await self._exponential_backoff_retry(
-                self.exchange.fetch_ohlcv,
+                self._fetch_ohlcv_safe,
                 ccxt_symbol,
                 timeframe,
                 since,
-                self.chunk_size
+                until
             )
             
             if not ohlcv:
@@ -543,9 +606,14 @@ class BitgetDataCollector:
                 columns=['timestamp', 'open', 'high', 'low', 'close', 'volume']
             )
             
-            # Normalizar timestamps
-            df['timestamp'] = df['timestamp'].apply(TimestampManager.normalize_timestamp)
-            df['datetime'] = df['timestamp'].apply(TimestampManager.to_datetime)
+            # Normalizar timestamps a ms y datetime UTC
+            try:
+                from core.utils.timestamp_utils import TimestampManager as TS
+                df['timestamp'] = df['timestamp'].apply(TS.normalize_timestamp)
+                df['datetime'] = df['timestamp'].apply(TS.to_datetime)
+            except Exception:
+                df['timestamp'] = df['timestamp'].apply(lambda x: int(x) if x > 1e12 else int(x * 1000))
+                df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)
             df.set_index('datetime', inplace=True)
             df['symbol'] = original_symbol
             
@@ -851,10 +919,10 @@ class BitgetDataCollector:
         """Obtiene símbolos desde la configuración del usuario"""
         try:
             # Obtener símbolos desde la configuración
-            symbols_cfg = get_config_manager().get('trading_settings.symbols', [])
+            symbols_cfg = _get_cfg().get('trading_settings.symbols', [])
             if not symbols_cfg:
                 # Fallback a configuración alternativa
-                symbols_cfg = get_config_manager().get('multi_symbol_settings.symbols', {})
+                symbols_cfg = _get_cfg().get('multi_symbol_settings.symbols', {})
                 if isinstance(symbols_cfg, dict):
                     symbols_cfg = [sym for sym, cfg in symbols_cfg.items() if cfg.get('enabled', True)]
             
@@ -900,26 +968,29 @@ class BitgetDataCollector:
                 return None
             
             if data_type == "kline":
-                # Usar WebSocket para klines en tiempo real
-                uri = "wss://ws.bitget.com/spot/v1/stream"
-                async with websockets.connect(uri) as websocket:
-                    # Suscribirse al canal
-                    subscribe_msg = {
-                        "op": "subscribe",
-                        "args": [f"market.{symbol.lower()}.kline.{timeframe}"]
-                    }
-                    await websocket.send(json.dumps(subscribe_msg))
-                    logger.debug(f"📡 Suscrito a {symbol} {timeframe} kline")
-                    
-                    # Escuchar un mensaje (para tiempo real, en producción sería un loop continuo)
-                    message = await asyncio.wait_for(websocket.recv(), timeout=10.0)
-                    data = json.loads(message)
-                    
-                    if data.get("event") == "subscribe":
-                        logger.debug("Suscripción confirmada")
-                        return self._parse_kline_data(data)
-                    
-                    return self._parse_kline_data(data)
+                # Obtener última vela con backoff para manejar 429
+                ccxt_symbol = self._symbol_to_ccxt_format(symbol)
+                ohlcv = await self._exponential_backoff_retry(
+                    self.exchange.fetch_ohlcv,
+                    ccxt_symbol,
+                    timeframe,
+                    None,
+                    1
+                )
+                if not ohlcv:
+                    return None
+                ts, o, h, l, c, v = ohlcv[-1]
+                return {
+                    "timestamp": TimestampManager.normalize_timestamp(ts),
+                    "open": float(o),
+                    "high": float(h),
+                    "low": float(l),
+                    "close": float(c),
+                    "volume": float(v),
+                    "symbol": symbol,
+                    "timeframe": timeframe,
+                    "data_type": "kline"
+                }
             
             elif data_type == "ticker":
                 # Usar REST API para ticker
@@ -927,9 +998,10 @@ class BitgetDataCollector:
                     self.exchange.fetch_ticker, 
                     self._symbol_to_ccxt_format(symbol)
                 )
+                ts = ticker.get("timestamp") if isinstance(ticker, dict) else None
                 return {
-                    "timestamp": ticker["timestamp"] / 1000,
-                    "last": ticker["last"],
+                    "timestamp": TimestampManager.normalize_timestamp(ts or time.time()),
+                    "last": ticker.get("last") if isinstance(ticker, dict) else None,
                     "symbol": symbol,
                     "timeframe": timeframe,
                     "data_type": data_type
@@ -941,10 +1013,11 @@ class BitgetDataCollector:
                     self.exchange.fetch_order_book, 
                     self._symbol_to_ccxt_format(symbol)
                 )
+                ts = orderbook.get("timestamp") if isinstance(orderbook, dict) else None
                 return {
-                    "timestamp": orderbook["timestamp"] / 1000,
-                    "bids": orderbook["bids"],
-                    "asks": orderbook["asks"],
+                    "timestamp": TimestampManager.normalize_timestamp(ts or time.time()),
+                    "bids": orderbook.get("bids") if isinstance(orderbook, dict) else [],
+                    "asks": orderbook.get("asks") if isinstance(orderbook, dict) else [],
                     "symbol": symbol,
                     "timeframe": timeframe,
                     "data_type": data_type
@@ -962,16 +1035,27 @@ class BitgetDataCollector:
             return None
     
     def _parse_kline_data(self, data: Dict) -> Dict:
-        """Parsea datos de kline de WebSocket."""
+        """Parsea datos de kline de WebSocket (robusto)."""
         try:
-            kline_data = data.get("data", [{}])[0]
+            items = data.get("data") or data.get("args") or []
+            if not items:
+                return {}
+            kline_data = items[0] if isinstance(items, list) else items
+            ts_raw = kline_data.get("t") or kline_data.get("ts") or kline_data.get("timestamp")
+            o = kline_data.get("o")
+            h = kline_data.get("h")
+            l = kline_data.get("l")
+            c = kline_data.get("c")
+            v = kline_data.get("v")
+            if ts_raw is None or None in (o, h, l, c, v):
+                return {}
             return {
-                "timestamp": TimestampManager.normalize_timestamp(kline_data.get("t")),
-                "open": float(kline_data.get("o", 0)),
-                "high": float(kline_data.get("h", 0)),
-                "low": float(kline_data.get("l", 0)),
-                "close": float(kline_data.get("c", 0)),
-                "volume": float(kline_data.get("v", 0)),
+                "timestamp": TimestampManager.normalize_timestamp(ts_raw),
+                "open": float(o),
+                "high": float(h),
+                "low": float(l),
+                "close": float(c),
+                "volume": float(v),
                 "symbol": kline_data.get("s", ""),
                 "timeframe": kline_data.get("k", ""),
                 "data_type": "kline"
@@ -1012,24 +1096,27 @@ class BitgetDataCollector:
     async def _collect_single_real_time(self, symbol: str, timeframe: str, data_type: str) -> None:
         """Recolecta datos para un símbolo/timeframe específico."""
         try:
-            logger.debug(f"📥 Recolectando {data_type} para {symbol} ({timeframe})...")
-            
-            # Obtener datos en tiempo real
-            data = await self.fetch_real_time_data(symbol, timeframe, data_type)
-            if data:
-                # Crear directorio si no existe
-                from pathlib import Path
-                Path(f"data/{symbol}").mkdir(parents=True, exist_ok=True)
+            # Pequeña espera para desincronizar ráfagas
+            await asyncio.sleep(0.05)
+            async with self.rt_semaphore:
+                logger.debug(f"📥 Recolectando {data_type} para {symbol} ({timeframe})...")
                 
-                # Guardar en la base de datos por símbolo
-                db_path = f"data/{symbol}/{symbol}_{timeframe}.db"
-                success = db_manager.store_real_time_data(data, symbol, timeframe, db_path)
-                if success:
-                    logger.debug(f"✅ Datos guardados para {symbol} ({timeframe}) en {db_path}")
+                # Obtener datos en tiempo real
+                data = await self.fetch_real_time_data(symbol, timeframe, data_type)
+                if data:
+                    # Crear directorio si no existe
+                    from pathlib import Path
+                    Path(f"data/{symbol}").mkdir(parents=True, exist_ok=True)
+                    
+                    # Guardar en la base de datos por símbolo
+                    db_path = f"data/{symbol}/{symbol}_{timeframe}.db"
+                    success = db_manager.store_real_time_data(data, symbol, timeframe, db_path)
+                    if success:
+                        logger.debug(f"✅ Datos guardados para {symbol} ({timeframe}) en {db_path}")
+                    else:
+                        logger.warning(f"⚠️ Error al guardar datos para {symbol} ({timeframe})")
                 else:
-                    logger.warning(f"⚠️ Error al guardar datos para {symbol} ({timeframe})")
-            else:
-                logger.warning(f"⚠️ No se recibieron datos para {symbol} ({timeframe})")
+                    logger.warning(f"⚠️ No se recibieron datos para {symbol} ({timeframe})")
                 
         except Exception as e:
             logger.error(f"❌ Error recolectando datos para {symbol} ({timeframe}): {e}")

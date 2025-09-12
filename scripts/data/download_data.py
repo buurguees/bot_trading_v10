@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from typing import Dict, List, Any
 
 # Importar ConfigLoader
-from core.config.config_loader import ConfigLoader
+from config.unified_config import get_config_manager
 
 # Cargar .env
 load_dotenv()
@@ -41,8 +41,7 @@ class DownloadDataEnterprise:
     
     def __init__(self, progress_id: str = None):
         self.progress_id = progress_id
-        self.config_loader = ConfigLoader("config/user_settings.yaml")
-        self.config = self.config_loader.load_config()
+        self.config = get_config_manager()
         self.collector = None
         self.db_manager = None
         self.session_id = f"download_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -97,9 +96,9 @@ class DownloadDataEnterprise:
             if not await self.initialize():
                 return {"status": "error", "message": "Error inicializando core/data/"}
             
-            symbols = self.config.get("trading_settings", {}).get("symbols", [])
-            timeframes = self.config.get("trading_settings", {}).get("timeframes", ["1m", "5m", "15m", "1h", "4h", "1d"])
-            years = self.config.get("data_collection", {}).get("historical", {}).get("years", 1)
+            symbols = self.config.get_symbols()
+            timeframes = self.config.get_timeframes() or ["1m", "5m", "15m", "1h", "4h", "1d"]
+            years = int(self.config.get("data_sources.data_collection.historical.years", 1))
             
             if not symbols or not timeframes:
                 return {"status": "error", "message": "No symbols/timeframes en config"}

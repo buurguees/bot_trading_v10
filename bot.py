@@ -25,28 +25,92 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Filtro para suprimir avisos legacy de archivos de configuración faltantes
+class _SuppressLegacyConfigWarnings(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        msg = record.getMessage()
+        if msg.startswith("⚠️ Archivo de configuración no encontrado:"):
+            return False
+        return True
+
+# Aplicar filtro al root logger
+_root_logger = logging.getLogger()
+_root_logger.addFilter(_SuppressLegacyConfigWarnings())
+
+# ============================================================================
+# CONFIGURACIÓN WINDOWS - Solución para Error [Errno 22] Invalid argument
+# ============================================================================
+import os as _os
+import sys as _sys
+if _sys.platform == "win32":
+    _os.environ['PYTHONIOENCODING'] = 'utf-8'
+    _os.environ['TZ'] = 'UTC'
+    try:
+        import codecs as _codecs
+        _sys.stdout = _codecs.getwriter('utf-8')(_sys.stdout.buffer, 'strict')
+        _sys.stderr = _codecs.getwriter('utf-8')(_sys.stderr.buffer, 'strict')
+    except Exception:
+        pass
+
+# ============================================================================
+# FUNCIONES DE DESCARGA SEGURA/DIAGNÓSTICO
+# ============================================================================
+async def fill_missing_data_to_now_debug():
+    """Versión de diagnóstico que saltea descarga automática"""
+    logger.info("🔧 Modo diagnóstico: descarga automática desactivada")
+    logger.info("Usa /safe_download para descarga segura manual")
+    return
+
+async def fill_missing_data_to_now_safe():
+    """Versión segura con manejo de errores y límites"""
+    try:
+        logger.info("🔄 Iniciando descarga segura de datos faltantes...")
+        from core.data.collector import BitgetDataCollector
+        from datetime import datetime, timedelta, timezone
+        collector = BitgetDataCollector()
+        end_time = datetime.now(timezone.utc)
+        start_time = end_time - timedelta(days=7)
+        # Símbolos/timeframes reducidos para evitar 429
+        from config.unified_config import get_config_manager
+        cfg = get_config_manager()
+        symbols = (cfg.get_symbols() or ['BTCUSDT'])[:2]
+        timeframes = ['1h', '4h']
+        class P:
+            downloaded_periods = 0
+            total_records = 0
+            errors = 0
+        for sym in symbols:
+            for tf in timeframes:
+                try:
+                    df = await collector.fetch_historical_data_chunk(sym, tf, start_time, end_time, P())
+                    if df is not None and not df.empty:
+                        from core.data.collector import data_collector
+                        saved = await data_collector.save_historical_data(df)
+                        logger.info(f"✅ {sym}-{tf}: {saved} registros guardados")
+                    await asyncio.sleep(1.0)
+                except Exception as e:
+                    logger.warning(f"⚠️ Error en descarga segura {sym}-{tf}: {e}")
+        logger.info("✅ Descarga segura completada")
+    except Exception as e:
+        logger.error(f"❌ Error en descarga segura: {e}")
+        await fill_missing_data_to_now_debug()
+
 async def fill_missing_data_to_now():
     """Descarga datos faltantes desde el último timestamp hasta ahora."""
     try:
-        from core.config.config_loader import ConfigLoader
+        from config.unified_config import get_config_manager
         from core.data.database import db_manager
         from core.data.collector import BitgetDataCollector, download_extensive_historical_data
-        from datetime import datetime, timezone
+        from datetime import datetime, timezone, timedelta
+        from core.utils.timestamp_utils import TimestampManager as TS
         import pandas as pd
         
         logger.info("🔄 Descargando datos faltantes hasta ahora...")
         
-        # Cargar configuración unificada (fallback: main.data.real_time -> main.data_collection.real_time -> data.data_collection.real_time)
-        config_loader = ConfigLoader()
-        cfg_main = config_loader.get_main_config()
-        cfg_data = config_loader.get_data_config()
-        real_time_config = (
-            cfg_main.get("data", {}).get("real_time")
-            or cfg_main.get("data_collection", {}).get("real_time")
-            or cfg_data.get("data_collection", {}).get("real_time", {})
-        ) or {}
-        symbols = real_time_config.get("symbols", [])
-        timeframes = real_time_config.get("timeframes", ["1m"])
+        # Configuración unificada v2
+        cfg = get_config_manager()
+        symbols = cfg.get_symbols()
+        timeframes = cfg.get_timeframes() or ["1m"]
 
         if not symbols:
             logger.warning("⚠️ No hay símbolos configurados para descarga.")
@@ -55,6 +119,13 @@ async def fill_missing_data_to_now():
         collector = BitgetDataCollector()
         now = datetime.now(timezone.utc)
         
+        # Mapa de duración de vela en segundos para filtrar ventanas muy pequeñas
+        tf_seconds = {
+            '1m': 60, '5m': 300, '15m': 900, '30m': 1800,
+            '1h': 3600, '2h': 7200, '4h': 14400, '6h': 21600,
+            '8h': 28800, '12h': 43200, '1d': 86400
+        }
+
         for symbol in symbols:
             for timeframe in timeframes:
                 try:
@@ -63,14 +134,19 @@ async def fill_missing_data_to_now():
                     
                     if last_timestamp:
                         # Calcular tiempo faltante
-                        last_dt = datetime.fromtimestamp(last_timestamp, tz=timezone.utc)
+                        # Asegurar conversión segura a UTC y evitar since >= until
+                        last_dt = datetime.fromtimestamp(int(last_timestamp), tz=timezone.utc)
+                        if last_dt >= now:
+                            last_dt = now - timedelta(minutes=5)
                         time_diff = now - last_dt
                         
-                        # Solo descargar si faltan más de 5 minutos Y menos de 1 día (evitar descargas masivas)
-                        if 300 < time_diff.total_seconds() < 86400:  # Entre 5 minutos y 1 día
+                        # Ventana mínima: al menos 2 velas del timeframe y <= 1 día
+                        min_window = tf_seconds.get(timeframe, 300) * 2
+                        if min_window < time_diff.total_seconds() < 86400:
                             logger.info(f"📥 Descargando datos faltantes para {symbol} ({timeframe}) desde {last_dt}")
                             
                             # Descargar datos faltantes
+                            # Usar rango con normalización a ms dentro del collector
                             missing_data = await download_extensive_historical_data(
                                 symbols=[symbol],
                                 timeframes=[timeframe],
@@ -85,9 +161,11 @@ async def fill_missing_data_to_now():
                                 
                                 if not timeframe_data.empty:
                                     # Guardar datos faltantes
-                                    db_path = f"data/{symbol}/{symbol}_{timeframe}.db"
+                                    # Path configurable desde config
+                                    data_dir = cfg.get('data_sources.storage_dir', 'data')
+                                    db_path = f"{data_dir}/{symbol}/{symbol}_{timeframe}.db"
                                     from pathlib import Path
-                                    Path(f"data/{symbol}").mkdir(parents=True, exist_ok=True)
+                                    Path(f"{data_dir}/{symbol}").mkdir(parents=True, exist_ok=True)
                                     
                                     success = db_manager.store_historical_data(
                                         timeframe_data, 
@@ -124,23 +202,16 @@ async def fill_missing_data_to_now():
 async def start_real_time_collection():
     """Inicia la recolección de datos en tiempo real para todos los símbolos."""
     try:
-        # Cargar configuración unificada (fallback: main.data.real_time -> main.data_collection.real_time -> data.data_collection.real_time)
-        from core.config.config_loader import ConfigLoader
+        # Cargar configuración unificada v2
+        from config.unified_config import get_config_manager
         from core.data.database import db_manager
-        
-        config_loader = ConfigLoader()
-        cfg_main = config_loader.get_main_config()
-        cfg_data = config_loader.get_data_config()
-        real_time_config = (
-            cfg_main.get("data", {}).get("real_time")
-            or cfg_main.get("data_collection", {}).get("real_time")
-            or cfg_data.get("data_collection", {}).get("real_time", {})
-        ) or {}
-        symbols = real_time_config.get("symbols", [])
-        timeframes = real_time_config.get("timeframes", ["1m"])
-        data_types = real_time_config.get("data_types", ["kline"])
+        cfg = get_config_manager()
+        symbols = cfg.get_symbols()
+        timeframes = cfg.get_timeframes() or ["1m"]
+        rt_enabled = cfg.get("data_sources.real_time.enabled", True)
+        data_types = cfg.get("data_sources.real_time.data_types", ["kline"]) or ["kline"]
 
-        if not symbols or not real_time_config.get("enabled", False):
+        if not symbols or not rt_enabled:
             logger.warning("⚠️ Recolección en tiempo real deshabilitada o sin símbolos configurados.")
             return
 
@@ -192,9 +263,13 @@ async def main():
         
         logger.info("✅ Módulos importados correctamente")
         
-        # Crear bot de Telegram
-        telegram_bot = TelegramBot()
-        logger.info("✅ Bot de Telegram creado")
+        # Crear bot de Telegram con configuración real
+        try:
+            telegram_bot = TelegramBot.from_env()
+            logger.info("✅ Bot de Telegram creado")
+        except Exception as e:
+            logger.error(f"❌ Error creando bot de Telegram: {e}")
+            return
         
         # Enviar mensaje de inicio
         try:
@@ -208,9 +283,13 @@ async def main():
         except Exception as e:
             logger.warning(f"⚠️ No se pudo enviar mensaje de inicio: {e}")
         
-        # 3. Llenar datos faltantes hasta ahora
-        logger.info("🔄 Llenando datos faltantes hasta ahora...")
-        await fill_missing_data_to_now()
+        # 3. Llenar datos faltantes hasta ahora (MODO SEGURO)
+        logger.info("🔄 Llenando datos faltantes hasta ahora (modo seguro)...")
+        try:
+            await fill_missing_data_to_now_safe()
+        except Exception as e:
+            logger.error(f"❌ Error en descarga segura, activando modo diagnóstico: {e}")
+            await fill_missing_data_to_now_debug()
         
         # 4. Iniciar recolección en tiempo real en una tarea separada
         logger.info("🔄 Iniciando recolección de datos en tiempo real...")
