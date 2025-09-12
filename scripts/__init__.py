@@ -15,9 +15,9 @@ Submódulos:
 """
 
 # from .history import *  # Movido a _old/
-from .trading import *
-from .training import *
-from .deployment import *
+# from .trading import *  # Comentado temporalmente para evitar errores
+# from .training import *  # Comentado temporalmente para evitar errores
+# from .deployment import *  # Comentado temporalmente para evitar errores
 # from .maintenance import *  # Movido a _old/
 
 __version__ = '1.0.0'

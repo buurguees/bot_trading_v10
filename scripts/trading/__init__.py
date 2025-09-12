@@ -11,13 +11,11 @@ Scripts disponibles:
 - enterprise: Scripts enterprise (live, paper, emergency)
 """
 
-from .run_enterprise_trading import *
-from .run_enterprise_monitoring import *
+# from .run_enterprise_trading import *  # Archivo no existe
+# from .run_enterprise_monitoring import *  # Archivo no existe
 from .enterprise import *
 
 __all__ = [
-    'run_enterprise_trading',
-    'run_enterprise_monitoring',
     'enterprise'
 ]
 

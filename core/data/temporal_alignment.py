@@ -121,6 +121,10 @@ class TemporalAlignment:
                 # Para timeframes menores, incluir todos los días
                 date_range = pd.date_range(start=start_date, end=end_date, freq=f'{minutes}min')
             
+            # Asegurar que la timeline tenga timezone UTC
+            if date_range.tz is None:
+                date_range = date_range.tz_localize('UTC')
+            
             # Filtrar horarios de trading (24/7 para crypto)
             # Mantener todos los horarios para criptomonedas
             
@@ -163,6 +167,18 @@ class TemporalAlignment:
                 # Convertir índice a datetime si es necesario
                 if not isinstance(df.index, pd.DatetimeIndex):
                     df.index = pd.to_datetime(df.index, unit='s')
+                
+                # Asegurar que ambos índices tengan la misma timezone
+                if df.index.tz is not None and master_timeline.tz is None:
+                    # Si los datos tienen timezone pero la timeline no, convertir timeline a UTC
+                    master_timeline = master_timeline.tz_localize('UTC')
+                elif df.index.tz is None and master_timeline.tz is not None:
+                    # Si la timeline tiene timezone pero los datos no, convertir datos a UTC
+                    df.index = df.index.tz_localize('UTC')
+                elif df.index.tz is not None and master_timeline.tz is not None:
+                    # Si ambos tienen timezone, asegurar que sean la misma
+                    if df.index.tz != master_timeline.tz:
+                        df.index = df.index.tz_convert(master_timeline.tz)
                 
                 # Reindexar a la línea de tiempo maestra
                 df_aligned = df.reindex(master_timeline, method='ffill')

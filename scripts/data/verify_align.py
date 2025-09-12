@@ -1,57 +1,57 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script para /verify_align - Enterprise: Verifica y alinea temporalmente.
+Script para alineación automática de timeframes al iniciar el bot.
+Verifica y alinea temporalmente, guarda en aligned_market_data.
 Llama core/data/temporal_alignment.py y core/data/database.py.
-Progreso por símbolo/TF.
-Retorna JSON para handlers.py.
+Retorna JSON para bot.py.
 """
 
 import asyncio
 import sys
 import json
 import logging
+import pandas as pd
 from pathlib import Path
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 from typing import Dict, List, Any
-from datetime import datetime, timedelta
 
-# Importar ConfigLoader
-from core.config.config_loader import ConfigLoader
+# Path al root
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 # Cargar .env
 load_dotenv()
 
-# Path al root
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Importar configuración
+from config.unified_config import get_config_manager
 
 # Logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler('logs/verify_align.log'), logging.StreamHandler()]
+    handlers=[logging.FileHandler('logs/verify_align.log', encoding='utf-8'), logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
 class VerifyAlignEnterprise:
     """Verificación y alineación enterprise"""
-    
+
     def __init__(self, progress_id: str = None):
         self.progress_id = progress_id
-        self.config_loader = ConfigLoader("config/user_settings.yaml")
-        self.config = self.config_loader.load_config()
+        self.config = get_config_manager()
         self.aligner = None
         self.db = None
         self.session_id = f"align_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self._init_progress_file()
-    
+
     def _init_progress_file(self):
         if self.progress_id:
             progress_path = Path("data/tmp") / f"{self.progress_id}.json"
             Path("data/tmp").mkdir(exist_ok=True)
-            with open(progress_path, 'w') as f:
+            with open(progress_path, 'w', encoding='utf-8') as f:
                 json.dump({"progress": 0, "bar": "░░░░░░░░░░", "current_symbol": "Iniciando", "status": "starting"}, f)
-    
+
     def _update_progress(self, progress: int, current_symbol: str, status: str = "Verificando"):
         if self.progress_id:
             progress_path = Path("data/tmp") / f"{self.progress_id}.json"
@@ -59,119 +59,136 @@ class VerifyAlignEnterprise:
             filled = int(progress / 100 * bar_length)
             bar = "█" * filled + "░" * (bar_length - filled)
             data = {"progress": progress, "bar": bar, "current_symbol": current_symbol, "status": status}
-            with open(progress_path, 'w') as f:
+            with open(progress_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f)
-    
+
     async def initialize(self) -> bool:
         max_retries = 3
         for attempt in range(max_retries):
             try:
                 from core.data.temporal_alignment import TemporalAlignment
                 from core.data.database import db_manager
-                from core.data.historical_data_adapter import get_historical_data
-                
                 self.aligner = TemporalAlignment()
                 self.db = db_manager
-                self.get_data = get_historical_data  # Para cargar datos
-                
-                self._update_progress(10, "Inicializando aligner y DB", "Configurando core/")
-                logger.info("✅ Core/ inicializado")
+                self._update_progress(10, "Inicializando aligner", "Configurando core/")
+                logger.info("✅ Aligner y DB inicializados")
                 return True
             except Exception as e:
-                logger.warning(f"⚠️ Retry {attempt + 1}: {e}")
+                logger.error(f"❌ Error inicializando (intento {attempt+1}/{max_retries}): {e}")
+                if attempt == max_retries - 1:
+                    return False
                 await asyncio.sleep(2 ** attempt)
         return False
-    
-    async def execute(self) -> Dict[str, Any]:
+
+    async def execute(self, symbols: List[str] = None, timeframes: List[str] = None) -> Dict:
+        """Ejecuta alineación de timeframes por símbolo"""
         try:
-            self._update_progress(0, "Iniciando verificación", "starting")
-            logger.info("🚀 Verificación/alineación enterprise iniciada")
-            
             if not await self.initialize():
-                return {"status": "error", "message": "Error inicializando core/data/"}
-            
-            symbols = self.config.get("trading_settings", {}).get("symbols", [])
-            timeframes = self.config.get("trading_settings", {}).get("timeframes", ["1m", "5m", "15m", "1h", "4h", "1d"])
-            years = self.config.get("data_collection", {}).get("historical", {}).get("years", 1)
-            
-            if not symbols or not timeframes:
-                return {"status": "error", "message": "No config"}
-            
-            self._update_progress(20, f"Verificando {len(symbols)} símbolos", "Cargando datos")
-            logger.info(f"Símbolos: {symbols} | TFs: {timeframes} | Años: {years}")
-            
-            total_steps = len(symbols) * len(timeframes)
-            step = 0
+                return {"status": "error", "message": "No se pudo inicializar aligner o DB"}
+
+            symbols = symbols or self.config.get_symbols() or ['BTCUSDT']
+            timeframes = timeframes or self.config.get_timeframes() or ['1m', '5m', '15m', '1h', '4h', '1d']
+            start_date = datetime(2024, 9, 1, tzinfo=timezone.utc)
+            end_date = datetime.now(timezone.utc)
+
             align_results = {}
             reports_by_symbol = []
-            
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=years * 365)
-            
+            total_symbols = len(symbols)
+            step = 0
+
             for symbol in symbols:
-                self._update_progress(30 + (step / total_steps * 40), symbol, "Verificando símbolo")
+                self._update_progress(int((step / total_symbols) * 90) + 10, symbol)
                 sym_align = {}
-                start_dt, end_dt = None, None
                 total_records = 0
-                
-                for tf in timeframes:
-                    try:
-                        # Cargar datos via core/data/historical_data_adapter.py
-                        df = self.get_data(symbol=symbol, timeframe=tf, start=start_date, end=end_date)
-                        if df is not None and not df.empty:
-                            # Alinear via core/data/temporal_alignment.py
-                            aligned_df = await self.aligner.align_temporal_data(df, tf)
-                            if aligned_df is not None:
-                                count = len(aligned_df)
-                                sym_align[tf] = {"aligned": count, "status": "success"}
-                                total_records += count
+                start_dt = start_date.strftime('%Y-%m-%d')
+                end_dt = end_date.strftime('%Y-%m-%d')
+                try:
+                    for tf in timeframes:
+                        try:
+                            data = self.db.get_historical_data(symbol, tf, start_date, end_date)
+                            if data and len(data) > 0:
+                                # Convertir DataFrame a formato esperado por align_symbol_data
+                                df = pd.DataFrame(data)
                                 
-                                # Actualizar rangos
-                                if start_dt is None:
-                                    start_dt = aligned_df.index.min()
-                                    end_dt = aligned_df.index.max()
+                                # Verificar que tenemos las columnas necesarias
+                                if 'timestamp' not in df.columns:
+                                    logger.error(f"❌ {symbol} {tf}: No timestamp column found")
+                                    sym_align[tf] = {"aligned": 0, "status": "no_timestamp"}
+                                    continue
+                                
+                                # Convertir timestamp a datetime y establecer como índice
+                                df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s')
+                                df = df.set_index('timestamp')
+                                
+                                # Crear timeline maestra para este timeframe
+                                master_timeline = self.aligner.create_master_timeline(tf, start_date, end_date)
+                                
+                                # Alinear datos del símbolo
+                                symbol_data = {symbol: df}
+                                aligned_data = self.aligner.align_symbol_data(symbol_data, master_timeline, tf)
+                                
+                                if symbol in aligned_data and not aligned_data[symbol].empty:
+                                    # Convertir de vuelta a formato de lista para almacenar
+                                    aligned_df = aligned_data[symbol].reset_index()
+                                    
+                                    # El índice se convierte en una columna con el nombre del índice original
+                                    # Necesitamos renombrar la columna del índice a 'timestamp'
+                                    # Cuando se hace reset_index(), la columna del índice se llama 'index'
+                                    if 'index' in aligned_df.columns:
+                                        aligned_df = aligned_df.rename(columns={'index': 'timestamp'})
+                                    elif 'timestamp' in aligned_df.columns:
+                                        # Ya tiene la columna timestamp
+                                        pass
+                                    else:
+                                        # Buscar la columna que contiene timestamps
+                                        for col in aligned_df.columns:
+                                            if aligned_df[col].dtype.name.startswith('datetime'):
+                                                aligned_df = aligned_df.rename(columns={col: 'timestamp'})
+                                                break
+                                    
+                                    # Convertir timestamp a segundos
+                                    if 'timestamp' in aligned_df.columns:
+                                        aligned_df['timestamp'] = aligned_df['timestamp'].astype('int64') // 10**9  # Convertir a segundos
+                                    
+                                    aligned_list = aligned_df.to_dict('records')
+                                    
+                                    self.db.store_aligned_data(symbol, tf, aligned_list, self.session_id)
+                                    total_records += len(aligned_list)
+                                    sym_align[tf] = {"aligned": len(aligned_list), "status": "success"}
                                 else:
-                                    start_dt = min(start_dt, aligned_df.index.min())
-                                    end_dt = max(end_dt, aligned_df.index.max())
-                                
-                                # Guardar via DB
-                                self.db.store_aligned_data({symbol: aligned_df}, tf, self.session_id)
-                                step += 1
+                                    sym_align[tf] = {"aligned": 0, "status": "no_aligned_data"}
                             else:
                                 sym_align[tf] = {"aligned": 0, "status": "no_data"}
-                                step += 1
-                        else:
-                            sym_align[tf] = {"aligned": 0, "status": "empty"}
-                            step += 1
-                    except Exception as e:
-                        logger.error(f"❌ {symbol} {tf}: {e}")
-                        sym_align[tf] = {"aligned": 0, "status": "error"}
-                        step += 1
-                
-                align_results[symbol] = sym_align
-                if total_records > 0:
+                        except Exception as e:
+                            logger.error(f"❌ {symbol} {tf}: {e}")
+                            import traceback
+                            logger.error(f"❌ {symbol} {tf} traceback: {traceback.format_exc()}")
+                            sym_align[tf] = {"aligned": 0, "status": "error"}
+                    align_results[symbol] = sym_align
                     sym_report = self._generate_symbol_report(symbol, sym_align, start_dt, end_dt, total_records)
-                else:
-                    sym_report = f"<b>{symbol}:</b>\n• ❌ Sin datos para alinear"
-                reports_by_symbol.append(sym_report)
-            
+                    reports_by_symbol.append(sym_report)
+                    step += 1
+                except Exception as e:
+                    logger.error(f"❌ {symbol}: {e}")
+                    align_results[symbol] = {"status": "error"}
+                    reports_by_symbol.append(f"<b>{symbol}:</b>\n• ❌ Error: {str(e)}")
+                    step += 1
+
             self._update_progress(100, "Completado", "completed")
-            
             self.db.log_alignment_session(self.session_id, symbols, timeframes, align_results)
-            
             return {
                 "status": "success",
                 "report": reports_by_symbol,
                 "session_id": self.session_id,
                 "total_aligned": sum(sum(r["aligned"] for r in sym_align.values()) for sym_align in align_results.values())
             }
-            
+
         except Exception as e:
             logger.error(f"❌ Error alineación: {e}")
             self._update_progress(0, "Error", "error")
             return {"status": "error", "message": str(e)}
-    
-    def _generate_symbol_report(self, symbol: str, aligns: Dict, start_dt, end_dt, total: int) -> str:
+
+    def _generate_symbol_report(self, symbol: str, aligns: Dict, start_dt: str, end_dt: str, total: int) -> str:
         aligned_total = sum(r["aligned"] for r in aligns.values())
         errors = sum(1 for r in aligns.values() if r["status"] == "error")
         report = f"""

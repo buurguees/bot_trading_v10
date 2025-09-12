@@ -1,218 +1,184 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script para /sync_symbols - Enterprise: Sincroniza timestamps, ejecuta paralelo, actualiza progreso.
+Script para sincronización automática de timestamps al iniciar el bot.
+Crea un reloj de sincronización histórico desde 01/09/2024.
 Llama core/sync/* y core/data/database.py.
-Retorna JSON para handlers.py.
+Retorna JSON para bot.py.
 """
 
 import asyncio
 import sys
+import os
 import json
 import logging
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
+import pandas as pd
+import sqlite3
 
-# Path al root PRIMERO
+# Path al root
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+os.chdir(str(Path(__file__).parent.parent.parent))
 
 # Cargar .env
 load_dotenv()
 
-# Ahora importar módulos locales
+# Importar módulos locales
 from config.unified_config import get_config_manager
 
-# Logging enterprise a archivo específico
+# Configurar encoding para Windows
+if sys.platform == "win32":
+    import io
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    except AttributeError:
+        # Si ya está configurado, no hacer nada
+        pass
+
+# Logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(f'logs/sync_symbols.log'),
+        logging.FileHandler('logs/sync_symbols.log', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
 
 class SyncSymbolsEnterprise:
-    """Gestión enterprise de sincronización de símbolos"""
-    
+    """Sincronización enterprise de timestamps para agentes paralelos"""
+
     def __init__(self, progress_id: str = None):
         self.progress_id = progress_id
         self.config = get_config_manager()
-        self.synchronizer = None
-        self.executor = None
-        self.aggregator = None
         self.session_id = f"sync_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        self.master_timeline = None
+        self.sync_quality = 0.0
         self._init_progress_file()
-    
+
     def _init_progress_file(self):
-        """Inicializa archivo de progreso"""
         if self.progress_id:
             progress_path = Path("data/tmp") / f"{self.progress_id}.json"
-            Path("data/tmp").mkdir(exist_ok=True)
-            with open(progress_path, 'w') as f:
+            Path("data/tmp").mkdir(exist_ok=True, parents=True)
+            with open(progress_path, 'w', encoding='utf-8') as f:
                 json.dump({"progress": 0, "bar": "░░░░░░░░░░", "current_symbol": "Iniciando", "status": "starting"}, f)
-    
+
     def _update_progress(self, progress: int, current_symbol: str, status: str = "En curso"):
-        """Actualiza progreso en JSON temporal"""
         if self.progress_id:
             progress_path = Path("data/tmp") / f"{self.progress_id}.json"
             bar_length = 10
             filled = int(progress / 100 * bar_length)
             bar = "█" * filled + "░" * (bar_length - filled)
-            data = {
-                "progress": progress,
-                "bar": bar,
-                "current_symbol": current_symbol,
-                "status": status
-            }
-            with open(progress_path, 'w') as f:
+            data = {"progress": progress, "bar": bar, "current_symbol": current_symbol, "status": status}
+            with open(progress_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f)
-            logger.debug(f"Progreso actualizado: {progress}% - {current_symbol}")
-    
-    async def initialize(self) -> bool:
-        """Inicializa componentes de core/ con retry enterprise"""
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                from core.sync.symbol_synchronizer import SymbolSynchronizer
-                from core.sync.parallel_executor import ParallelExecutor
-                from core.sync.metrics_aggregator import MetricsAggregator
-                from core.data.database import db_manager
-                
-                self.synchronizer = SymbolSynchronizer()
-                self.executor = ParallelExecutor()
-                self.aggregator = MetricsAggregator()
-                
-                self._update_progress(10, "Inicializando componentes", "Configurando core/")
-                logger.info("✅ Componentes de core/ inicializados (retry {}/{})".format(attempt + 1, max_retries))
-                return True
-            except ImportError as e:
-                logger.warning(f"⚠️ Import error en intento {attempt + 1}: {e}")
-                await asyncio.sleep(2 ** attempt)  # Backoff exponencial
-            except Exception as e:
-                logger.error(f"❌ Error inicializando en intento {attempt + 1}: {e}")
-                await asyncio.sleep(2 ** attempt)
-        
-        logger.error("❌ Fallo después de {} retries".format(max_retries))
-        return False
-    
-    async def execute(self) -> Dict[str, Any]:
-        """Ejecución enterprise con progreso detallado"""
+
+    async def execute(self, symbols: List[str] = None, timeframes: List[str] = None) -> Dict:
+        """Ejecuta sincronización de timestamps"""
         try:
-            self._update_progress(0, "Iniciando sincronización", "starting")
-            logger.info("🚀 Iniciando sincronización enterprise...")
-            
-            if not await self.initialize():
-                return {"status": "error", "message": "Error inicializando componentes de core/"}
-            
-            # Config desde UnifiedConfigManager
-            symbols = self.config.get_symbols()
-            timeframes = self.config.get_timeframes()
-            max_workers = 4  # Enterprise: Límite para evitar rate limit
-            
-            if not symbols or not timeframes:
-                return {"status": "error", "message": "No symbols/timeframes en config/user_settings.yaml"}
-            
-            self._update_progress(20, f"Procesando {len(symbols)} símbolos", "Cargando datos")
-            logger.info(f"📊 Símbolos: {symbols} | Timeframes: {timeframes} | Workers: {max_workers}")
-            
-            # Sincronizar timestamps via core/sync/
-            sync_results = await self.synchronizer.synchronize_symbols(symbols, timeframes)
-            self._update_progress(40, "Sincronizando timestamps", "Alineando datos")
-            
-            if not sync_results.get("success"):
-                return {"status": "error", "message": f"Error en sincronización: {sync_results.get('error', 'Desconocido')}"}
-            
-            # Ejecutar paralelo via core/sync/parallel_executor.py
-            execution_result = await self.executor.execute_parallel(symbols, timeframes, max_workers=max_workers)
-            self._update_progress(70, "Ejecutando paralelo", "Procesando trades")
-            
-            # Agregar métricas via core/sync/metrics_aggregator.py
-            metrics_result = await self.aggregator.aggregate_metrics(execution_result["results"])
-            self._update_progress(90, "Agregando métricas", "Calculando PnL/Win Rate")
-            
-            # Guardar en DB via core/data/database.py
             from core.data.database import db_manager
-            session_saved = db_manager.log_sync_session(
-                self.session_id, symbols, timeframes, execution_result, metrics_result
-            )
-            if not session_saved:
-                logger.warning("⚠️ No se pudo guardar sesión en DB")
-            
+            symbols = symbols or self.config.get_symbols() or ['BTCUSDT']
+            timeframes = timeframes or self.config.get_timeframes() or ['1m', '5m', '15m', '1h', '4h', '1d']
+            start_date = datetime(2024, 9, 1, tzinfo=timezone.utc)
+            end_date = datetime.now(timezone.utc)
+
+            self._update_progress(10, "Inicializando sincronización")
+            total_symbols = len(symbols)
+            step = 0
+            master_timeline = {'total_points': 0, 'start_date': start_date.isoformat(), 'end_date': end_date.isoformat(), 'symbol_data_info': {}}
+            sync_data = {}
+
+            for symbol in symbols:
+                self._update_progress(int((step / total_symbols) * 90) + 10, symbol)
+                try:
+                    data = db_manager.get_historical_data(symbol, timeframes[0], start_date, end_date)
+                    if data and len(data) > 0:
+                        # Los timestamps ya están en segundos en la base de datos
+                        timestamps = [d['timestamp'] for d in data]
+                        sync_data[symbol] = timestamps
+                        master_timeline['symbol_data_info'][symbol] = {'count': len(timestamps)}
+                    step += 1
+                except Exception as e:
+                    logger.error(f"❌ {symbol}: {e}")
+                    step += 1
+
+            # Crear timeline maestro
+            if sync_data:
+                common_timestamps = set(sync_data[symbols[0]])
+                for symbol in symbols[1:]:
+                    if symbol in sync_data:
+                        common_timestamps.intersection_update(sync_data[symbol])
+                master_timeline['total_points'] = len(common_timestamps)
+                if sync_data:
+                    min_timestamps = min(len(sync_data[s]) for s in sync_data)
+                    master_timeline['sync_quality'] = (len(common_timestamps) / min_timestamps) * 100 if min_timestamps > 0 else 0
+                else:
+                    master_timeline['sync_quality'] = 0
+
+                # Guardar timeline maestro
+                Path("data/sync").mkdir(exist_ok=True, parents=True)
+                with open("data/sync/master_timeline.json", 'w', encoding='utf-8') as f:
+                    json.dump({'timestamps': list(common_timestamps)}, f)
+
             self._update_progress(100, "Completado", "completed")
-            
-            # Generar reporte detallado por símbolo
-            report = self._generate_report(execution_result, metrics_result, self.session_id)
-            reports_by_symbol = self._split_report_by_symbol(report, symbols)  # Lista de reportes por símbolo
-            
+            report = self._generate_sync_report(master_timeline, master_timeline.get('sync_quality', 0), symbols, timeframes)
             return {
                 "status": "success",
-                "report": reports_by_symbol,  # Lista para delays en handlers
+                "report": report,
                 "session_id": self.session_id,
-                "execution_results": execution_result["results"],
-                "metrics": metrics_result["metrics"]
+                "sync_quality": master_timeline.get('sync_quality', 0)
             }
-            
+
         except Exception as e:
-            logger.error(f"❌ Error en sincronización enterprise: {e}")
+            logger.error(f"❌ Error sincronización: {e}")
             self._update_progress(0, "Error", "error")
             return {"status": "error", "message": str(e)}
-    
-    def _generate_report(self, execution_result: Dict, metrics_result: Dict, session_id: str) -> str:
-        """Reporte enterprise detallado"""
-        results = execution_result["results"]
-        metrics = metrics_result["metrics"]
-        
-        total_cycles = len(results)
-        successful_cycles = len([r for r in results if r.get("status") == "success"])
-        total_pnl = sum(r.get("pnl", 0) for r in results)
-        total_trades = sum(r.get("trades_count", 0) for r in results)
-        avg_win_rate = sum(r.get("win_rate", 0) for r in results if r.get("win_rate")) / max(1, successful_cycles)
-        
-        initial_balance = self.config.get("capital_management", {}).get("initial_balance", 1000.0)
-        final_balance = initial_balance + total_pnl
-        growth_pct = (total_pnl / initial_balance) * 100
-        
+
+    def _generate_sync_report(self, master_timeline: Dict[str, Any], sync_quality: float, symbols: List[str], timeframes: List[str]) -> str:
+        total_points = master_timeline['total_points']
+        start_date = master_timeline['start_date'][:10]
+        end_date = master_timeline['end_date'][:10]
+        timeline_quality = master_timeline.get('sync_quality', 0)
+        symbol_stats = [f"• {symbol}: {master_timeline['symbol_data_info'].get(symbol, {}).get('count', 0):,} timestamps" for symbol in symbols]
         report = f"""
-🔄 <b>Reporte Enterprise de Sincronización</b>
-
-📊 <b>Estadísticas Globales:</b>
-• Ciclos: {total_cycles:,} | Exitosos: {successful_cycles:,} ({(successful_cycles/total_cycles*100):.1f}%)
-• PnL Total: ${total_pnl:+,.2f} | Trades: {total_trades:,}
-• Win Rate Promedio: {avg_win_rate:.1f}%
-• Balance Final: ${final_balance:,.2f} (Crecimiento: {growth_pct:+.1f}%)
-
-🎯 <b>Métricas Detalladas:</b>
-• Mejor Estrategia: {metrics.get('best_strategy', 'N/A')} (PnL: ${metrics.get('best_pnl', 0):+.2f})
-• Peor Estrategia: {metrics.get('worst_strategy', 'N/A')} (PnL: ${metrics.get('worst_pnl', 0):+.2f})
-• Sharpe Ratio Promedio: {metrics.get('avg_sharpe', 0):.2f}
-
-🆔 <b>Sesión:</b> {session_id} | <b>Estado:</b> Completado
-        """
+🔄 <b>Reporte de Sincronización de Timestamps</b>
+📊 <b>Timeline Maestro:</b>
+• Puntos de sincronización: {total_points:,}
+• Período: {start_date} → {end_date}
+• Calidad del timeline: {timeline_quality:.1f}%
+• Calidad de sincronización: {sync_quality:.1f}%
+🎯 <b>Configuración para Agentes:</b>
+• Símbolos sincronizados: {len(symbols)}
+• Timeframes: {', '.join(timeframes)}
+• Archivo de sync: data/sync/master_timeline.json
+📈 <b>Estadísticas por Símbolo:</b>
+{chr(10).join(symbol_stats)}
+✅ <b>Estado:</b> Los agentes pueden trabajar en paralelo con timestamps sincronizados
+🆔 <b>Sesión:</b> {self.session_id}
+"""
         return report.strip()
-    
-    def _split_report_by_symbol(self, report: str, symbols: List[str]) -> List[str]:
-        """Divide reporte en bloques por símbolo para delays en Telegram"""
-        # Simula división (en producción, genera por símbolo en execute)
-        return [f"<b>{symbol}:</b>\n{report.splitlines()[i:i+5]}\n" for i, symbol in enumerate(symbols)]
 
 async def main():
-    """Entrada principal - Parse args para progress_id"""
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--progress_id", required=True, help="ID para progreso")
+    parser.add_argument("--progress_id", required=True)
     args = parser.parse_args()
     
     script = SyncSymbolsEnterprise(progress_id=args.progress_id)
-    result = await script.execute()
-    
-    # Retornar JSON a stdout para handlers.py
-    print(json.dumps(result, ensure_ascii=False, indent=2))
-    
-    if result.get("status") != "success":
+    try:
+        result = await script.execute()
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if result.get("status") != "success":
+            sys.exit(1)
+    except Exception as e:
+        logger.error(f"❌ Error en main: {e}")
+        error_result = {"status": "error", "message": str(e)}
+        print(json.dumps(error_result, ensure_ascii=False, indent=2))
         sys.exit(1)
 
 if __name__ == "__main__":
