@@ -437,12 +437,18 @@ class UnifiedConfigManager:
                 if symbols:
                     return symbols
             
-            # 3. Fallback: usar todos los símbolos primary
+            # 3. Fallback: usar TODOS los símbolos (primary + secondary + experimental)
             symbols_config = self.core_configs.get("symbols", {})
-            primary_symbols = symbols_config.get("active_symbols", {}).get("primary", [])
+            active_symbols = symbols_config.get("active_symbols", {})
             
-            if primary_symbols:
-                return primary_symbols
+            # Combinar todos los grupos de símbolos
+            all_symbols = []
+            for group in ["primary", "secondary", "experimental"]:
+                if group in active_symbols:
+                    all_symbols.extend(active_symbols[group])
+            
+            if all_symbols:
+                return all_symbols
             
             # 4. Fallback final
             return ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT"]
@@ -478,14 +484,18 @@ class UnifiedConfigManager:
                 if timeframes:
                     return timeframes
             
-            # 3. Fallback: usar timeframes por defecto
+            # 3. Fallback: usar TODOS los timeframes (real_time + analysis + strategic)
             tf_config = self.core_configs.get("symbols", {})
-            real_time = tf_config.get("timeframes", {}).get("real_time", [])
-            analysis = tf_config.get("timeframes", {}).get("analysis", [])
+            timeframes_config = tf_config.get("timeframes", {})
             
-            timeframes = real_time + analysis
-            if timeframes:
-                return timeframes
+            # Combinar todos los grupos de timeframes
+            all_timeframes = []
+            for group in ["real_time", "analysis", "strategic"]:
+                if group in timeframes_config:
+                    all_timeframes.extend(timeframes_config[group])
+            
+            if all_timeframes:
+                return all_timeframes
             
             # 4. Fallback final
             return ["1m", "5m", "15m", "1h", "4h", "1d"]

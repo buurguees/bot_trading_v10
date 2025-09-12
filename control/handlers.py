@@ -1,41 +1,25 @@
-# control/handlers.py - VERSIÓN CORREGIDA QUE FUNCIONA
+# control/handlers.py - RECTIFICADO PARA /download_data
 
 import asyncio
 import logging
+import subprocess
+import json
+import uuid
+from pathlib import Path
 from typing import Dict, Any
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 
-# IMPORTACIONES DIRECTAS DE LOS MÓDULOS CORE REALES
-from core.data.collector import BitgetDataCollector
-from core.data.database import DatabaseManager
-from core.data.history_downloader import HistoryDownloader
-from core.data.history_analyzer import HistoryAnalyzer
-from config.unified_config import get_config_manager
-
-# Training engine opcional
-try:
-    from core.ml.enterprise.training_engine import TrainingEngine
-except ImportError:
-    TrainingEngine = None
-
 logger = logging.getLogger(__name__)
 
 class TradingBotHandlers:
-    """Handlers de comandos para Telegram que REALMENTE funcionan"""
+    """Handlers de comandos para Telegram que delegan a scripts/"""
     
-    def __init__(self, authorized_users: list = None):
+    def __init__(self, authorized_users: list = None, collection_ready: asyncio.Event = None):
         self.authorized_users = authorized_users or []
+        self.collection_ready = collection_ready
         
-        # INICIALIZAR COMPONENTES REALES
-        self.config_manager = get_config_manager()
-        self.db_manager = DatabaseManager()
-        self.data_collector = BitgetDataCollector()
-        self.history_downloader = HistoryDownloader()
-        self.history_analyzer = HistoryAnalyzer()
-        self.training_engine = TrainingEngine() if TrainingEngine else None
-        
-        logger.info("✅ Handlers inicializados con componentes reales")
+        logger.info("✅ Handlers inicializados para delegación a scripts")
     
     def _check_authorization(self, update: Update) -> bool:
         """Verificar autorización del usuario"""
@@ -44,572 +28,250 @@ class TradingBotHandlers:
         user_id = update.effective_user.id
         return user_id in self.authorized_users
     
-    async def _send_progress_update(self, update: Update, message: str):
-        """Enviar actualización de progreso"""
+    async def _monitor_progress(self, update: Update, progress_id: str):
+        """Monitorea archivo de progreso y envía actualizaciones a Telegram"""
+        progress_path = Path("data/tmp") / f"{progress_id}.json"
+        last_progress = -1
         try:
-            await update.message.reply_text(message, parse_mode='HTML')
+            while True:
+                if progress_path.exists():
+                    with open(progress_path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    progress = data.get("progress", 0)
+                    if progress != last_progress:
+                        message = f"📥 Progreso: {progress}% - {data.get('current_symbol', 'N/A')} - {data.get('bar', '░░░░░░░░░░')}\nEstado: {data.get('status', 'En curso')}"
+                        await update.message.reply_text(message, parse_mode='HTML')
+                        last_progress = progress
+                    if data.get("status") in ["completed", "error"]:
+                        break
+                await asyncio.sleep(5)
         except Exception as e:
-            logger.error(f"Error enviando progreso: {e}")
+            logger.error(f"Error monitoreando progreso {progress_id}: {e}")
+            await update.message.reply_text(f"❌ Error monitoreando progreso: {str(e)}", parse_mode='HTML')
     
-    # ===== COMANDOS QUE REALMENTE FUNCIONAN =====
+    async def data_status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Muestra el estado de los datos almacenados"""
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
+            return
+        
+        try:
+            from core.data.database import db_manager
+            from config.unified_config import get_config_manager
+            
+            cfg = get_config_manager()
+            symbols = cfg.get_symbols()
+            timeframes = cfg.get_timeframes() or ["1m", "5m", "15m", "1h", "4h"]
+            
+            report = "📊 <b>Estado de Datos Históricos</b>\n\n"
+            total_records = 0
+            
+            for symbol in symbols[:5]:  # Mostrar solo los primeros 5 símbolos
+                report += f"<b>🔸 {symbol}:</b>\n"
+                symbol_total = 0
+                
+                for tf in timeframes:
+                    try:
+                        db_path = f"data/{symbol}/trading_bot.db"
+                        if Path(db_path).exists():
+                            # Contar registros
+                            with db_manager._get_connection(db_path) as conn:
+                                cursor = conn.cursor()
+                                cursor.execute(
+                                    "SELECT COUNT(*) FROM market_data WHERE symbol = ? AND timeframe = ?",
+                                    (symbol, tf)
+                                )
+                                count = cursor.fetchone()[0]
+                                symbol_total += count
+                                
+                                # Obtener rango de fechas
+                                cursor.execute(
+                                    "SELECT MIN(timestamp), MAX(timestamp) FROM market_data WHERE symbol = ? AND timeframe = ?",
+                                    (symbol, tf)
+                                )
+                                min_ts, max_ts = cursor.fetchone()
+                                
+                                if min_ts and max_ts:
+                                    min_date = datetime.fromtimestamp(min_ts).strftime('%Y-%m-%d %H:%M')
+                                    max_date = datetime.fromtimestamp(max_ts).strftime('%Y-%m-%d %H:%M')
+                                    report += f"  • {tf}: {count:,} registros ({min_date} - {max_date})\n"
+                                else:
+                                    report += f"  • {tf}: 0 registros\n"
+                        else:
+                            report += f"  • {tf}: Sin datos\n"
+                    except Exception as e:
+                        report += f"  • {tf}: Error ({str(e)[:30]}...)\n"
+                
+                total_records += symbol_total
+                report += f"  <b>Total {symbol}:</b> {symbol_total:,} registros\n\n"
+            
+            report += f"<b>📈 Total General:</b> {total_records:,} registros"
+            
+            await update.message.reply_text(report, parse_mode='HTML')
+            logger.info(f"📊 Estado de datos consultado: {total_records:,} registros totales")
+            
+        except Exception as e:
+            logger.error(f"❌ Error en data_status: {e}")
+            await update.message.reply_text(f"❌ Error obteniendo estado: {str(e)}", parse_mode='HTML')
+
+    async def download_data_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Ejecuta /download_data y monitorea progreso"""
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
+            return
+        
+        progress_id = str(uuid.uuid4())
+        await update.message.reply_text(f"🚀 Iniciando descarga de datos históricos...\n🆔 Progreso ID: {progress_id}", parse_mode='HTML')
+        logger.info(f"🚀 Ejecutando /download_data con progress_id: {progress_id}")
+        
+        # Ejecutar script en background con encoding UTF-8
+        process = subprocess.Popen(
+            ['python', 'scripts/data/download_data.py', '--progress_id', progress_id],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace'
+        )
+        
+        # Monitorear progreso
+        monitor_task = asyncio.create_task(self._monitor_progress(update, progress_id))
+        
+        # Esperar a que el proceso termine
+        stdout, stderr = process.communicate()
+        await monitor_task
+        
+        # Procesar resultado
+        try:
+            # Decodificar stdout con encoding UTF-8
+            if stdout:
+                stdout_utf8 = stdout.encode('utf-8', errors='replace').decode('utf-8')
+                result = json.loads(stdout_utf8)
+            else:
+                result = {"status": "error", "message": stderr}
+                
+            if result.get("status") == "success":
+                report = "\n\n".join(result.get("report", ["Sin reporte"]))
+                message = f"✅ <b>Descarga Completada</b>\nTotal registros: {result.get('total_downloaded', 0):,}\nSesión: {result.get('session_id', 'N/A')}\n\n{report}"
+            else:
+                message = f"❌ <b>Error en Descarga</b>\nMensaje: {result.get('message', 'Error desconocido')}"
+            await update.message.reply_text(message, parse_mode='HTML')
+            logger.info(f"✅ /download_data completado: {result.get('status')}")
+        except Exception as e:
+            logger.error(f"Error procesando resultado de /download_data: {e}")
+            await update.message.reply_text(f"❌ Error procesando resultado: {str(e)}", parse_mode='HTML')
     
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Comando de inicio mejorado"""
+        """Comando de inicio con wait para ready"""
         if not self._check_authorization(update):
-            await update.message.reply_text("❌ Acceso no autorizado.")
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
             return
         
-        welcome = """
-🤖 <b>Bot Trading v10 Enterprise</b>
-
-🔥 Sistema activo y componentes conectados.
-📊 Comandos funcionando con módulos reales.
-
-<b>Comandos que REALMENTE funcionan:</b>
-/status - Estado del sistema
-/download_data - Descarga datos reales
-/analyze_data - Análisis real de datos
-/train_model - Entrenamiento real
-/help - Lista completa
-        """
-        await update.message.reply_text(welcome, parse_mode='HTML')
+        await update.message.reply_text("🤖 <b>Bot Trading v10 Enterprise</b>\n\n🔄 Conectando con exchange mientras se descargan datos...", parse_mode='HTML')
+        
+        if self.collection_ready:
+            await self.collection_ready.wait()
+        
+        commands_message = (
+            "🚀 <b>Sistema Completamente Operativo</b>\n\n"
+            "<b>📊 Comandos Operativos:</b>\n"
+            "/download_data\n"
+            "/data_status\n"
+            "/analyze_data\n"
+            "/verify_align\n"
+            "/repair_history\n"
+            "/sync_symbols\n"
+            "/train_hist\n"
+            "/train_live\n"
+            "/status\n"
+            "/health\n\n"
+            "💡 Usa /help para detalles."
+        )
+        await update.message.reply_text(commands_message, parse_mode='HTML')
     
-    async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Estado real del sistema"""
+    async def data_status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not self._check_authorization(update):
-            await update.message.reply_text("❌ Acceso no autorizado.")
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
             return
-        
-        try:
-            await update.message.reply_text("🔄 Verificando estado del sistema...")
-            
-            # VERIFICAR COMPONENTES REALES
-            db_status = await self._check_database_status()
-            config_status = await self._check_config_status()
-            data_status = await self._check_data_status()
-            
-            status_message = f"""
-📊 <b>Estado del Sistema</b>
-
-🗄️ <b>Base de Datos:</b> {db_status['status']}
-- Conexión: {db_status['connection']}
-- Registros: {db_status['records']}
-
-⚙️ <b>Configuración:</b> {config_status['status']}
-- Símbolos: {config_status['symbols']}
-- Timeframes: {config_status['timeframes']}
-
-📈 <b>Datos:</b> {data_status['status']}
-- Últimos datos: {data_status['last_update']}
-- Cobertura: {data_status['coverage']}
-
-✅ <b>Sistema operativo y listo</b>
-            """
-            
-            await update.message.reply_text(status_message, parse_mode='HTML')
-            
-        except Exception as e:
-            await update.message.reply_text(f"❌ Error verificando estado: {str(e)}")
-            logger.error(f"Error en status_command: {e}")
-    
-    async def download_data_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Descarga INTELIGENTE de datos históricos con análisis y reparación automática"""
-        if not self._check_authorization(update):
-            await update.message.reply_text("❌ Acceso no autorizado.")
-            return
-        
-        try:
-            await update.message.reply_text("🚀 <b>Iniciando proceso inteligente de datos</b>\n\n📋 <b>Fases:</b>\n1️⃣ Análisis de historial existente\n2️⃣ Detección de problemas\n3️⃣ Reparación automática\n4️⃣ Descarga de datos faltantes", parse_mode='HTML')
-            
-            # CONFIGURACIÓN
-            symbols = ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT"]
-            timeframes = ["1h", "4h", "1d"]
-            days_back = 365
-            
-            # FASE 1: ANÁLISIS DE HISTORIAL EXISTENTE
-            await update.message.reply_text("🔍 <b>FASE 1: Analizando historial existente...</b>", parse_mode='HTML')
-            
-            analysis_result = await self.history_analyzer.analyze_data_coverage(symbols)
-            
-            if not analysis_result or 'symbols_analyzed' not in analysis_result:
-                await update.message.reply_text("❌ Error en análisis inicial")
-                return
-            
-            # Mostrar resumen del análisis
-            coverage_summary = analysis_result.get('coverage_summary', {})
-            total_symbols = analysis_result.get('symbols_analyzed', 0)
-            complete_coverage = coverage_summary.get('complete_coverage', 0)
-            partial_coverage = coverage_summary.get('partial_coverage', 0)
-            no_data = coverage_summary.get('no_data', 0)
-            errors = coverage_summary.get('errors', 0)
-            
-            analysis_report = f"""
-📊 <b>Análisis de Historial Completado</b>
-
-📈 <b>Estado por Símbolo:</b>
-• Cobertura completa: {complete_coverage}/{total_symbols}
-• Cobertura parcial: {partial_coverage}/{total_symbols}
-• Sin datos: {no_data}/{total_symbols}
-• Con errores: {errors}/{total_symbols}
-
-📋 <b>Detalles por Símbolo:</b>
-            """
-            
-            symbol_details = analysis_result.get('symbol_details', {})
-            for symbol, data in symbol_details.items():
-                if isinstance(data, dict) and 'coverage_percentage' in data:
-                    coverage = data.get('coverage_percentage', 0)
-                    records = data.get('record_count', 0)
-                    status = data.get('status', 'UNKNOWN')
-                    analysis_report += f"\n• {symbol}: {coverage:.1f}% ({records} registros) - {status}"
-                else:
-                    analysis_report += f"\n• {symbol}: Error en análisis"
-            
-            await update.message.reply_text(analysis_report, parse_mode='HTML')
-            
-            # FASE 2: DETECCIÓN DE PROBLEMAS
-            await update.message.reply_text("🔍 <b>FASE 2: Detectando problemas en los datos...</b>", parse_mode='HTML')
-            
-            issues_result = await self.history_analyzer.detect_data_issues(symbols)
-            
-            if issues_result and 'total_issues' in issues_result:
-                total_issues = issues_result.get('total_issues', 0)
-                critical_issues = issues_result.get('critical_issues', [])
-                warnings = issues_result.get('warnings', [])
-                
-                issues_report = f"""
-⚠️ <b>Problemas Detectados</b>
-
-🔢 <b>Resumen:</b>
-• Total de problemas: {total_issues}
-• Críticos: {len(critical_issues)}
-• Advertencias: {len(warnings)}
-                """
-                
-                if critical_issues:
-                    issues_report += "\n🚨 <b>Problemas Críticos:</b>"
-                    for issue in critical_issues[:5]:  # Mostrar máximo 5
-                        issues_report += f"\n• {issue}"
-                
-                if warnings:
-                    issues_report += "\n⚠️ <b>Advertencias:</b>"
-                    for warning in warnings[:3]:  # Mostrar máximo 3
-                        issues_report += f"\n• {warning}"
-                
-                await update.message.reply_text(issues_report, parse_mode='HTML')
-                
-                # FASE 3: REPARACIÓN AUTOMÁTICA
-                if total_issues > 0:
-                    await update.message.reply_text("🔧 <b>FASE 3: Reparando problemas automáticamente...</b>", parse_mode='HTML')
-                    
-                    repair_result = await self.history_analyzer.repair_data_issues(
-                        symbols=symbols,
-                        repair_duplicates=True,
-                        fill_gaps=True
-                    )
-                    
-                    if repair_result and 'symbols_processed' in repair_result:
-                        total_repairs = repair_result.get('total_repairs', 0)
-                        successful_repairs = repair_result.get('successful_repairs', 0)
-                        failed_repairs = repair_result.get('failed_repairs', 0)
-                        
-                        repair_report = f"""
-🔧 <b>Reparación Completada</b>
-
-✅ <b>Resultados:</b>
-• Símbolos procesados: {repair_result.get('symbols_processed', 0)}
-• Reparaciones totales: {total_repairs}
-• Exitosas: {successful_repairs}
-• Fallidas: {failed_repairs}
-                        """
-                        
-                        if successful_repairs > 0:
-                            repair_report += "\n🎯 <b>Datos reparados exitosamente</b>"
-                        else:
-                            repair_report += "\n⚠️ <b>No se realizaron reparaciones</b>"
-                        
-                        await update.message.reply_text(repair_report, parse_mode='HTML')
-                    else:
-                        await update.message.reply_text("❌ Error en proceso de reparación")
-                else:
-                    await update.message.reply_text("✅ <b>No se encontraron problemas que reparar</b>", parse_mode='HTML')
-            
-            # FASE 4: DESCARGAR DATOS FALTANTES
-            await update.message.reply_text("📥 <b>FASE 4: Descargando datos faltantes...</b>", parse_mode='HTML')
-            
-            # Identificar símbolos que necesitan descarga
-            symbols_to_download = []
-            for symbol, data in symbol_details.items():
-                if isinstance(data, dict):
-                    status = data.get('status', 'UNKNOWN')
-                    coverage = data.get('coverage_percentage', 0)
-                    if status == 'NO_DATA' or coverage < 50:  # Menos del 50% de cobertura
-                        symbols_to_download.append(symbol)
-            
-            if symbols_to_download:
-                await update.message.reply_text(f"📥 Descargando datos para: {', '.join(symbols_to_download)}", parse_mode='HTML')
-                
-                    # CALLBACK DE PROGRESO
-                async def progress_callback(progress_obj):
-                    progress_pct = (progress_obj.completed_periods / progress_obj.total_periods) * 100 if progress_obj.total_periods > 0 else 0
-                    progress_msg = f"📥 {progress_obj.symbol} ({progress_obj.timeframe}): {progress_pct:.1f}% - {progress_obj.records_downloaded} registros"
-                    await self._send_progress_update(update, progress_msg)
-                
-                # DESCARGA USANDO EL MÓDULO CORE
-                result = await self.history_downloader.download_historical_data(
-                    symbols=symbols_to_download,
-                    timeframes=timeframes,
-                    days_back=days_back,
-                    progress_callback=progress_callback
-                )
-                
-                # RESULTADO FINAL
-                if result.get('success', False):
-                    final_summary = f"""
-✅ <b>Proceso Completado Exitosamente</b>
-
-📊 <b>Resumen Final:</b>
-• Símbolos analizados: {total_symbols}
-• Problemas detectados: {total_issues if 'total_issues' in locals() else 0}
-• Reparaciones realizadas: {total_repairs if 'total_repairs' in locals() else 0}
-• Símbolos descargados: {len(symbols_to_download)}
-• Registros nuevos: {result.get('total_records', 0)}
-• Tiempo total: {result.get('duration', 0):.2f}s
-
-🎯 <b>Datos listos para trading</b>
-                    """
-                else:
-                    error_msg = result.get('error', 'Error desconocido')
-                    final_summary = f"""
-⚠️ <b>Proceso Completado con Advertencias</b>
-
-✅ <b>Análisis y reparación:</b> Exitoso
-❌ <b>Descarga:</b> {error_msg}
-
-💡 <b>Recomendación:</b> Verificar conexión API y reintentar
-                    """
-                
-                await update.message.reply_text(final_summary, parse_mode='HTML')
-            else:
-                await update.message.reply_text("✅ <b>No se requieren descargas adicionales</b>\n\n🎯 <b>Todos los datos están actualizados</b>", parse_mode='HTML')
-            
-        except Exception as e:
-            await update.message.reply_text(f"❌ Error en proceso de datos: {str(e)}")
-            logger.error(f"Error en download_data_command: {e}")
+        output = await self._execute_script('scripts/data/data_status.py')
+        await update.message.reply_text(output, parse_mode='HTML')
     
     async def analyze_data_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Análisis REAL de datos históricos"""
         if not self._check_authorization(update):
-            await update.message.reply_text("❌ Acceso no autorizado.")
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
             return
-        
-        try:
-            await update.message.reply_text("🔍 Iniciando análisis de datos...")
-            
-            symbols = ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT"]
-            
-            # ANÁLISIS REAL CON EL MÓDULO CORE
-            analysis_result = await self.history_analyzer.analyze_data_coverage(symbols)
-            
-            # Verificar si el análisis fue exitoso
-            if analysis_result and 'symbols_analyzed' in analysis_result:
-                coverage_summary = analysis_result.get('coverage_summary', {})
-                symbol_details = analysis_result.get('symbol_details', {})
-                
-                # Calcular cobertura general
-                total_symbols = analysis_result.get('symbols_analyzed', 0)
-                complete_coverage = coverage_summary.get('complete_coverage', 0)
-                partial_coverage = coverage_summary.get('partial_coverage', 0)
-                overall_coverage = ((complete_coverage + partial_coverage * 0.5) / total_symbols * 100) if total_symbols > 0 else 0
-                
-                report = f"""
-📊 <b>Análisis de Datos Completado</b>
-
-🎯 <b>Cobertura General:</b> {overall_coverage:.1f}%
-
-📈 <b>Por Símbolo:</b>
-                """
-                
-                for symbol, data in symbol_details.items():
-                    if isinstance(data, dict) and 'coverage_percentage' in data:
-                        coverage = data.get('coverage_percentage', 0)
-                        records = data.get('record_count', 0)
-                        status = data.get('status', 'UNKNOWN')
-                        report += f"\n• {symbol}: {coverage:.1f}% ({records} registros) - {status}"
-                    else:
-                        report += f"\n• {symbol}: Error en análisis"
-                
-                # Mostrar problemas detectados
-                critical_issues = analysis_result.get('critical_issues', [])
-                recommendations = analysis_result.get('recommendations', [])
-                
-                if critical_issues:
-                    report += f"""
-
-⚠️ <b>Problemas Críticos:</b>
-                    """
-                    for issue in critical_issues[:5]:  # Mostrar máximo 5
-                        report += f"\n- {issue}"
-                
-                if recommendations:
-                    report += f"""
-
-💡 <b>Recomendaciones:</b>
-                    """
-                    for rec in recommendations[:3]:  # Mostrar máximo 3
-                        report += f"\n- {rec}"
-                
-                if not critical_issues and not recommendations:
-                    report += "\n\n✅ <b>No se encontraron problemas</b>"
-                
-            else:
-                report = f"❌ Error en análisis: No se pudo obtener datos del análisis"
-            
-            await update.message.reply_text(report, parse_mode='HTML')
-            
-        except Exception as e:
-            await update.message.reply_text(f"❌ Error en análisis: {str(e)}")
-            logger.error(f"Error en analyze_data_command: {e}")
+        output = await self._execute_script('scripts/data/analyze_data.py')
+        await update.message.reply_text(output, parse_mode='HTML')
     
-    async def repair_data_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Reparación REAL de datos"""
+    async def verify_align_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not self._check_authorization(update):
-            await update.message.reply_text("❌ Acceso no autorizado.")
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
             return
-        
-        try:
-            await update.message.reply_text("🔧 Iniciando reparación de datos...")
-            
-            symbols = ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT"]
-            
-            # REPARACIÓN REAL CON EL MÓDULO CORE
-            repair_result = await self.history_analyzer.repair_data_issues(
-                symbols=symbols,
-                repair_duplicates=True,
-                fill_gaps=True
-            )
-            
-            # Verificar si la reparación fue exitosa
-            if repair_result and 'symbols_processed' in repair_result:
-                total_repairs = repair_result.get('total_repairs', 0)
-                successful_repairs = repair_result.get('successful_repairs', 0)
-                failed_repairs = repair_result.get('failed_repairs', 0)
-                symbol_results = repair_result.get('symbol_results', {})
-                
-                report = f"""
-🔧 <b>Reparación Completada</b>
-
-✅ <b>Resumen General:</b>
-- Símbolos procesados: {repair_result.get('symbols_processed', 0)}
-- Reparaciones totales: {total_repairs}
-- Exitosas: {successful_repairs}
-- Fallidas: {failed_repairs}
-
-📊 <b>Por Símbolo:</b>
-                """
-                
-                for symbol, result in symbol_results.items():
-                    if isinstance(result, dict):
-                        status = result.get('status', 'UNKNOWN')
-                        repairs_made = result.get('repairs_made', 0)
-                        message = result.get('message', 'Sin mensaje')
-                        report += f"\n• {symbol}: {status} ({repairs_made} reparaciones)"
-                    else:
-                        report += f"\n• {symbol}: Error en reparación"
-                
-                # Mostrar recomendaciones
-                recommendations = repair_result.get('recommendations', [])
-                if recommendations:
-                    report += f"""
-
-💡 <b>Recomendaciones:</b>
-                    """
-                    for rec in recommendations:
-                        report += f"\n- {rec}"
-                
-                if successful_repairs > 0:
-                    report += "\n\n🎯 <b>Datos listos para entrenamiento</b>"
-                else:
-                    report += "\n\n⚠️ <b>No se realizaron reparaciones</b>"
-                
-            else:
-                report = f"❌ Error en reparación: No se pudo obtener datos de la reparación"
-            
-            await update.message.reply_text(report, parse_mode='HTML')
-            
-        except Exception as e:
-            await update.message.reply_text(f"❌ Error en reparación: {str(e)}")
-            logger.error(f"Error en repair_data_command: {e}")
+        output = await self._execute_script('scripts/data/verify_align.py')
+        await update.message.reply_text(output, parse_mode='HTML')
     
-    async def train_model_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Entrenamiento REAL de modelos"""
+    async def repair_history_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not self._check_authorization(update):
-            await update.message.reply_text("❌ Acceso no autorizado.")
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
             return
-        
-        try:
-            if not self.training_engine:
-                await update.message.reply_text("⚠️ Módulo de entrenamiento no disponible. Usando simulación...")
-                
-                # Simulación básica
-                await update.message.reply_text("🤖 Simulando entrenamiento de modelos...")
-                await asyncio.sleep(2)
-                
-                report = """
-🎓 <b>Entrenamiento Simulado Completado</b>
-
-✅ <b>Modelos Simulados:</b>
-• BTCUSDT: Accuracy: 85.2% | Loss: 0.1234 | Épocas: 100
-• ETHUSDT: Accuracy: 82.7% | Loss: 0.1456 | Épocas: 100
-
-🎯 <b>Modelos listos para trading</b>
-⏱️ Tiempo total: 2.0s
-                """
-                await update.message.reply_text(report, parse_mode='HTML')
-                return
-            
-            await update.message.reply_text("🤖 Iniciando entrenamiento de modelos...")
-            
-            symbols = ["BTCUSDT", "ETHUSDT"]  # Empezar con 2 símbolos
-            
-            # CALLBACK DE PROGRESO DE ENTRENAMIENTO
-            async def training_progress_callback(symbol: str, epoch: int, total_epochs: int, 
-                                               loss: float, accuracy: float):
-                progress = (epoch / total_epochs) * 100
-                progress_msg = f"""
-🎓 <b>Entrenando {symbol}</b>
-Época: {epoch}/{total_epochs} ({progress:.1f}%)
-Loss: {loss:.4f} | Accuracy: {accuracy:.2f}%
-                """
-                await self._send_progress_update(update, progress_msg)
-            
-            # ENTRENAMIENTO REAL CON EL MÓDULO CORE
-            training_result = await self.training_engine.train_models(
-                symbols=symbols,
-                progress_callback=training_progress_callback
-            )
-            
-            if training_result['success']:
-                report = f"""
-🎓 <b>Entrenamiento Completado</b>
-
-✅ <b>Modelos Entrenados:</b>
-                """
-                
-                for symbol, model_data in training_result['models'].items():
-                    report += f"""
-• {symbol}:
-  - Accuracy: {model_data['accuracy']:.2f}%
-  - Loss: {model_data['final_loss']:.4f}
-  - Épocas: {model_data['epochs']}
-                    """
-                
-                report += f"""
-
-🎯 <b>Modelos listos para trading</b>
-⏱️ Tiempo total: {training_result['duration']:.2f}s
-                """
-            else:
-                report = f"❌ Error en entrenamiento: {training_result['error']}"
-            
-            await update.message.reply_text(report, parse_mode='HTML')
-            
-        except Exception as e:
-            await update.message.reply_text(f"❌ Error en entrenamiento: {str(e)}")
-            logger.error(f"Error en train_model_command: {e}")
+        output = await self._execute_script('scripts/data/repair_history.py')
+        await update.message.reply_text(output, parse_mode='HTML')
     
-    # ===== MÉTODOS DE VERIFICACIÓN REALES =====
-    
-    async def _check_database_status(self) -> Dict[str, Any]:
-        """Verificar estado real de la base de datos"""
-        try:
-            # Usar el DatabaseManager real
-            connection_ok = await self.db_manager.test_connection()
-            records_count = await self.db_manager.get_total_records()
-            
-            return {
-                'status': '✅ Conectada' if connection_ok else '❌ Error',
-                'connection': 'OK' if connection_ok else 'FAIL',
-                'records': f"{records_count:,}" if records_count else "0"
-            }
-        except Exception as e:
-            return {
-                'status': '❌ Error',
-                'connection': 'FAIL',
-                'records': '0'
-            }
-    
-    async def _check_config_status(self) -> Dict[str, Any]:
-        """Verificar configuración real"""
-        try:
-            symbols = self.config_manager.get_symbols() or ['BTCUSDT']
-            timeframes = self.config_manager.get_timeframes() or ['1h']
-            
-            return {
-                'status': '✅ Cargada',
-                'symbols': ', '.join(symbols),
-                'timeframes': ', '.join(timeframes)
-            }
-        except Exception as e:
-            return {
-                'status': '❌ Error',
-                'symbols': 'No disponible',
-                'timeframes': 'No disponible'
-            }
-    
-    async def _check_data_status(self) -> Dict[str, Any]:
-        """Verificar estado real de los datos"""
-        try:
-            # Usar el data collector real
-            last_update = await self.data_collector.get_last_update()
-            coverage = await self.data_collector.get_data_coverage()
-            
-            return {
-                'status': '✅ Disponibles',
-                'last_update': last_update or 'Nunca',
-                'coverage': f"{coverage:.1f}%" if coverage else "0%"
-            }
-        except Exception as e:
-            return {
-                'status': '❌ Error',
-                'last_update': 'Error',
-                'coverage': '0%'
-            }
-    
-    async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Lista de comandos que realmente funcionan"""
+    async def sync_symbols_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not self._check_authorization(update):
-            await update.message.reply_text("❌ Acceso no autorizado.")
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
             return
-        
-        help_text = """
-<b>🤖 COMANDOS QUE REALMENTE FUNCIONAN</b>
-
-<b>📊 GESTIÓN DE DATOS</b>
-/status - Estado real del sistema
-/download_data - Descarga datos históricos reales
-/analyze_data - Análisis real de datos
-/repair_data - Reparación real de problemas
-
-<b>🤖 MACHINE LEARNING</b>
-/train_model - Entrenamiento real de modelos
-
-<b>ℹ️ INFORMACIÓN</b>
-/help - Esta ayuda
-/start - Reiniciar bot
-
-💡 <b>Nota:</b> Todos los comandos usan módulos core/ reales
-        """
-        await update.message.reply_text(help_text, parse_mode='HTML')
+        output = await self._execute_script('scripts/data/sync_symbols.py')
+        await update.message.reply_text(output, parse_mode='HTML')
+    
+    async def train_hist_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
+            return
+        output = await self._execute_script('scripts/training/train_hist.py')
+        await update.message.reply_text(output, parse_mode='HTML')
+    
+    async def train_live_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
+            return
+        output = await self._execute_script('scripts/training/train_live.py')
+        await update.message.reply_text(output, parse_mode='HTML')
+    
+    async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
+            return
+        output = await self._execute_script('scripts/data/status.py')
+        await update.message.reply_text(output, parse_mode='HTML')
+    
+    async def health_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not self._check_authorization(update):
+            await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
+            return
+        output = await self._execute_script('scripts/data/health.py')
+        await update.message.reply_text(output, parse_mode='HTML')
+    
+    async def _execute_script(self, script_path: str) -> str:
+        """Ejecuta script y captura output"""
+        try:
+            result = subprocess.run(['python', script_path], capture_output=True, text=True, timeout=300)
+            if result.returncode != 0:
+                return f"Error en script: {result.stderr}"
+            return result.stdout
+        except subprocess.TimeoutExpired:
+            return "Timeout ejecutando script"
+        except Exception as e:
+            return f"Error ejecutando script: {str(e)}"
     
     def register_handlers(self, application):
         """Registrar todos los handlers"""
         application.add_handler(CommandHandler("start", self.start_command))
-        application.add_handler(CommandHandler("help", self.help_command))
-        application.add_handler(CommandHandler("status", self.status_command))
         application.add_handler(CommandHandler("download_data", self.download_data_command))
+        application.add_handler(CommandHandler("data_status", self.data_status_command))
         application.add_handler(CommandHandler("analyze_data", self.analyze_data_command))
-        application.add_handler(CommandHandler("repair_data", self.repair_data_command))
-        application.add_handler(CommandHandler("train_model", self.train_model_command))
+        application.add_handler(CommandHandler("verify_align", self.verify_align_command))
+        application.add_handler(CommandHandler("repair_history", self.repair_history_command))
+        application.add_handler(CommandHandler("sync_symbols", self.sync_symbols_command))
+        application.add_handler(CommandHandler("train_hist", self.train_hist_command))
+        application.add_handler(CommandHandler("train_live", self.train_live_command))
+        application.add_handler(CommandHandler("status", self.status_command))
+        application.add_handler(CommandHandler("health", self.health_command))
         
-        logger.info("✅ Todos los handlers registrados")
+        logger.info("✅ Todos los handlers registrados para delegación")

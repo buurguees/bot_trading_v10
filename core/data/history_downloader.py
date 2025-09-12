@@ -26,7 +26,7 @@ import yaml
 from dataclasses import dataclass
 
 # Imports locales
-from .collector import data_collector, collect_and_save_historical_data
+from .collector import BitgetDataCollector
 from .enterprise.database import TimescaleDBManager
 from .database import DatabaseManager
 
@@ -63,9 +63,11 @@ class HistoryDownloader:
     
     def __init__(self, config_path: str = "config/user_settings.yaml"):
         self.config_path = config_path
-        self.config = self._load_config()
-        self.symbols = self.config.get('data_collection', {}).get('real_time', {}).get('symbols', [])
-        self.timeframes = self.config.get('data_collection', {}).get('real_time', {}).get('timeframes', [])
+        # Usar UnifiedConfigManager para cargar configuración
+        from config.unified_config import get_config_manager
+        self.config_manager = get_config_manager()
+        self.symbols = self.config_manager.get_symbols() or []
+        self.timeframes = self.config_manager.get_timeframes() or []
         
         # Inicializar gestores de datos
         self.db_manager = DatabaseManager()

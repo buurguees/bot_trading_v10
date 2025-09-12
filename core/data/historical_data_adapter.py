@@ -48,15 +48,18 @@ class HistoricalDataAdapter:
         logger.info("HistoricalDataAdapter inicializado")
     
     def _load_config(self) -> Dict[str, Any]:
-        """Carga configuración desde user_settings.yaml"""
+        """Carga configuración usando UnifiedConfigManager"""
         try:
+            from config.unified_config import get_config_manager
+            config_manager = get_config_manager()
+            
             return {
                 'migration_enabled': True,
                 'auto_migrate': True,
-                'symbols': ConfigLoader().get_main_config().get('data_collection', {}).get('real_time', {}).get('symbols', []),
-                'timeframes': ConfigLoader().get_main_config().get('data_collection', {}).get('historical', {}).get('timeframes', []),
-                'years': ConfigLoader().get_main_config().get('data_collection', {}).get('historical', {}).get('years', 1),
-                'min_coverage_days': ConfigLoader().get_main_config().get('data_collection', {}).get('historical', {}).get('min_coverage_days', 365)
+                'symbols': config_manager.get_symbols() or [],
+                'timeframes': config_manager.get_timeframes() or [],
+                'years': config_manager.get("data_sources.data_collection.historical.years", 1),
+                'min_coverage_days': config_manager.get("data_sources.data_collection.historical.years", 1) * 365
             }
         except Exception as e:
             logger.error(f"Error cargando configuración: {e}")

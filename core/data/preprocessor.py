@@ -1477,7 +1477,10 @@ def prepare_multi_symbol_training_data(
         Dict con datos de entrenamiento por símbolo
     """
     if symbols is None:
-        symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+        # Usar configuración centralizada
+        from config.unified_config import get_config_manager
+        config_manager = get_config_manager()
+        symbols = config_manager.get_symbols() or ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
     
     logger.info(f"Preparando datos multi-símbolo para {len(symbols)} símbolos")
     

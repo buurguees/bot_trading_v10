@@ -1,0 +1,70 @@
+# Bot Trading v10 Enterprise - Configuración del Usuario
+# =====================================================
+# Este archivo contiene las configuraciones personalizables del usuario
+# que sobrescriben las configuraciones por defecto del sistema.
+
+# Configuración básica del bot
+bot_settings:
+  name: "TradingBot_v10_Enterprise"
+  version: "10.0.0"
+  environment: "development"  # development, production, testing
+
+# Grupos de símbolos activos (referencias a config/core/symbols.yaml)
+# TODOS los grupos para descarga, recolección, análisis y sincronización
+active_symbol_groups: ["primary", "secondary", "experimental"]
+active_timeframes: ["real_time", "analysis", "strategic"]
+
+# Configuración de capital y gestión de riesgo
+capital_management:
+  initial_balance: 1000.0
+  max_risk_per_trade: 2.0
+  max_daily_loss_pct: 5.0
+  max_position_size: 10.0
+
+# Configuración de trading
+trading_settings:
+  mode: "paper"  # paper, live, backtest
+  auto_trading_enabled: false
+  max_concurrent_trades: 3
+  stop_loss_pct: 2.0
+  take_profit_pct: 4.0
+
+# Configuración de datos
+data_settings:
+  symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT"]
+  timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
+  historical_days: 365
+  real_time_enabled: true
+
+# Configuración de ML
+ml_settings:
+  model_type: "transformer"
+  training_enabled: true
+  min_confidence: 65.0
+  retrain_interval_hours: 24
+
+# Configuración de notificaciones
+notifications:
+  telegram_enabled: true
+  email_enabled: false
+  discord_enabled: false
+
+# Configuración de logging
+logging:
+  level: "INFO"
+  file_enabled: true
+  console_enabled: true
+  max_file_size_mb: 100
+
+# Configuración de monitoreo
+monitoring:
+  enabled: true
+  metrics_interval_seconds: 60
+  dashboard_port: 8050
+  prometheus_port: 9090
+
+# Configuración de seguridad
+security:
+  encryption_enabled: true
+  api_key_rotation_days: 30
+  max_failed_attempts: 5

@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 # Configurar logging
 import logging
-from core.config.unified_config import unified_config
+from config.unified_config import get_config_manager
 
 logging.basicConfig(
     level=logging.INFO,
@@ -62,38 +62,90 @@ async def fill_missing_data_to_now_debug():
     return
 
 async def fill_missing_data_to_now_safe():
-    """Versión segura con manejo de errores y límites"""
+    """Versión segura con manejo de errores y límites - solo descarga datos faltantes"""
     try:
         logger.info("🔄 Iniciando descarga segura de datos faltantes...")
         from core.data.collector import BitgetDataCollector
+        from core.data.database import db_manager
         from datetime import datetime, timedelta, timezone
+        import asyncio
+        
         collector = BitgetDataCollector()
-        end_time = datetime.now(timezone.utc)
-        start_time = end_time - timedelta(days=7)
-        # Símbolos/timeframes reducidos para evitar 429
+        
+        # Cargar configuración completa
         from config.unified_config import get_config_manager
         cfg = get_config_manager()
-        symbols = (cfg.get_symbols() or ['BTCUSDT'])[:2]
-        timeframes = ['1h', '4h']
-        class P:
-            downloaded_periods = 0
-            total_records = 0
-            errors = 0
+        symbols = cfg.get_symbols() or ['BTCUSDT']  # Ya usa UnifiedConfigManager
+        timeframes = cfg.get_timeframes() or ['1m', '5m', '15m', '1h', '4h', '1d']
+        
+        logger.info(f"📊 Procesando {len(symbols)} símbolos: {symbols}")
+        logger.info(f"📊 Procesando {len(timeframes)} timeframes: {timeframes}")
+        
+        total_records = 0
+        errors = 0
+        
         for sym in symbols:
             for tf in timeframes:
                 try:
-                    df = await collector.fetch_historical_data_chunk(sym, tf, start_time, end_time, P())
+                    # Verificar último timestamp en la base de datos
+                    db_path = f"data/{sym}/trading_bot.db"
+                    last_timestamp = db_manager.get_last_timestamp(sym, tf, db_path)
+                    
+                    if last_timestamp:
+                        # Convertir a datetime UTC
+                        last_dt = datetime.fromtimestamp(last_timestamp, tz=timezone.utc)
+                        now = datetime.now(timezone.utc)
+                        
+                        # Solo descargar si han pasado más de 2 minutos desde el último dato
+                        time_diff = now - last_dt
+                        if time_diff.total_seconds() < 120:  # 2 minutos
+                            logger.info(f"✅ {sym}-{tf}: Datos recientes (último: {last_dt.strftime('%H:%M:%S')}), saltando descarga")
+                            continue
+                        
+                        # Descargar desde el último timestamp + 1 minuto
+                        start_time = last_dt + timedelta(minutes=1)
+                        end_time = now
+                        logger.info(f"📥 {sym}-{tf}: Descargando desde {start_time.strftime('%H:%M:%S')} hasta {end_time.strftime('%H:%M:%S')}")
+                    else:
+                        # No hay datos, descargar últimos 5 minutos
+                        end_time = datetime.now(timezone.utc)
+                        start_time = end_time - timedelta(minutes=5)
+                        logger.info(f"📥 {sym}-{tf}: Sin datos previos, descargando últimos 5 minutos")
+                    
+                    class P:
+                        def __init__(self):
+                            self.downloaded_periods = 0
+                            self.total_records = 0
+                            self.errors = 0
+                    
+                    df = collector.fetch_historical_data_chunk(sym, tf, start_time, end_time, P())
                     if df is not None and not df.empty:
-                        from core.data.collector import data_collector
-                        saved = await data_collector.save_historical_data(df)
-                        logger.info(f"✅ {sym}-{tf}: {saved} registros guardados")
-                    await asyncio.sleep(1.0)
+                        # Guardar en base de datos
+                        saved = db_manager.store_historical_data(df, sym, tf, db_path)
+                        if saved:
+                            logger.info(f"✅ {sym}-{tf}: {len(df)} registros guardados")
+                            total_records += len(df)
+                        else:
+                            logger.warning(f"⚠️ Error guardando {sym}-{tf}")
+                            errors += 1
+                    else:
+                        logger.info(f"ℹ️ {sym}-{tf}: No hay datos nuevos para descargar")
+                    
+                    await asyncio.sleep(0.5)  # Pausa más corta
+                    
                 except Exception as e:
                     logger.warning(f"⚠️ Error en descarga segura {sym}-{tf}: {e}")
-        logger.info("✅ Descarga segura completada")
+                    errors += 1
+        
+        logger.info(f"✅ Descarga segura completada: {total_records} registros, {errors} errores")
+        
     except Exception as e:
         logger.error(f"❌ Error en descarga segura: {e}")
         await fill_missing_data_to_now_debug()
+    finally:
+        # Cerrar sesión aiohttp
+        if 'collector' in locals() and collector:
+            await collector.close()
 
 async def fill_missing_data_to_now():
     """Descarga datos faltantes desde el último timestamp hasta ahora."""
@@ -154,52 +206,23 @@ async def fill_missing_data_to_now():
                                 end_date=now
                             )
                             
-                            if missing_data and missing_data.get('data') is not None:
-                                # Extraer DataFrame del diccionario anidado
-                                symbol_data = missing_data['data'].get(symbol, {})
-                                timeframe_data = symbol_data.get(timeframe, pd.DataFrame())
-                                
-                                if not timeframe_data.empty:
-                                    # Guardar datos faltantes
-                                    # Path configurable desde config
-                                    data_dir = cfg.get('data_sources.storage_dir', 'data')
-                                    db_path = f"{data_dir}/{symbol}/{symbol}_{timeframe}.db"
-                                    from pathlib import Path
-                                    Path(f"{data_dir}/{symbol}").mkdir(parents=True, exist_ok=True)
-                                    
-                                    success = db_manager.store_historical_data(
-                                        timeframe_data, 
-                                        symbol, 
-                                        timeframe, 
-                                        db_path
-                                    )
+                            if missing_data and missing_data.get('data'):
+                                # Guardar datos descargados
+                                saved = await db_manager.store_aligned_data(missing_data['data'], timeframe, "fill_missing")
+                                if saved:
+                                    logger.info(f"✅ {symbol}-{timeframe}: Guardados {len(missing_data['data'])} registros faltantes")
                                 else:
-                                    success = False
-                                
-                                if success:
-                                    logger.info(f"✅ Datos faltantes guardados para {symbol} ({timeframe})")
-                                else:
-                                    logger.warning(f"⚠️ Error guardando datos faltantes para {symbol} ({timeframe})")
-                            else:
-                                logger.warning(f"⚠️ No se obtuvieron datos faltantes para {symbol} ({timeframe})")
-                        elif time_diff.total_seconds() <= 300:
-                            logger.debug(f"✅ {symbol} ({timeframe}) ya está actualizado (última actualización: {time_diff})")
-                        else:
-                            logger.warning(f"⚠️ {symbol} ({timeframe}) tiene más de 1 día de datos faltantes, saltando descarga automática")
+                                    logger.warning(f"⚠️ Error guardando datos faltantes para {symbol}-{timeframe}")
                     else:
-                        logger.info(f"📥 No hay datos previos para {symbol} ({timeframe}), se descargarán en la verificación histórica")
-                        
+                        logger.warning(f"⚠️ No hay datos previos para {symbol} ({timeframe}), considera descarga completa")
                 except Exception as e:
                     logger.error(f"❌ Error descargando datos faltantes para {symbol} ({timeframe}): {e}")
-                    continue
-        
         logger.info("✅ Descarga de datos faltantes completada")
-        
     except Exception as e:
-        logger.error(f"❌ Error en descarga de datos faltantes: {e}")
+        logger.error(f"❌ Error general en descarga de datos faltantes: {e}")
         raise
 
-async def start_real_time_collection():
+async def start_real_time_collection(collection_ready: asyncio.Event):
     """Inicia la recolección de datos en tiempo real para todos los símbolos."""
     try:
         # Cargar configuración unificada v2
@@ -219,16 +242,44 @@ async def start_real_time_collection():
         from core.data.collector import BitgetDataCollector
         collector = BitgetDataCollector()
         
-        # Usar el nuevo método de recolección
-        await collector.start_real_time_collection(
-            symbols=symbols,
-            timeframes=timeframes,
-            data_types=data_types,
-            interval_seconds=60
-        )
+        # Usar WebSocket para recolección en tiempo real (más eficiente)
+        try:
+            await collector.start_websocket_collection(
+                symbols=symbols,
+                timeframes=timeframes,
+                collection_ready=collection_ready
+            )
+        except Exception as e:
+            logger.warning(f"⚠️ WebSocket falló, usando polling: {e}")
+            # Fallback a polling si WebSocket falla
+            await collector.start_real_time_collection(
+                symbols=symbols,
+                timeframes=timeframes,
+                data_types=data_types,
+                interval_seconds=60,
+                collection_ready=collection_ready
+            )
 
+        # Signal listo después de inicio
+        collection_ready.set()
+        
+        # Mantener la recolección activa indefinidamente
+        try:
+            while True:
+                await asyncio.sleep(60)  # Verificar cada minuto
+        except asyncio.CancelledError:
+            logger.info("🔄 Recolección en tiempo real cancelada")
+        finally:
+            # Cerrar sesión aiohttp al finalizar
+            if 'collector' in locals() and collector:
+                await collector.close()
+                logger.info("✅ Collector cerrado correctamente")
+                
     except Exception as e:
         logger.error(f"❌ Error en la recolección en tiempo real: {e}")
+        # Cerrar collector en caso de error
+        if 'collector' in locals() and collector:
+            await collector.close()
         raise
 
 async def main():
@@ -263,9 +314,12 @@ async def main():
         
         logger.info("✅ Módulos importados correctamente")
         
-        # Crear bot de Telegram con configuración real
+        # Crear event para collector listo
+        collection_ready = asyncio.Event()
+        
+        # Crear bot de Telegram con event
         try:
-            telegram_bot = TelegramBot.from_env()
+            telegram_bot = TelegramBot.from_env(collection_ready=collection_ready)
             logger.info("✅ Bot de Telegram creado")
         except Exception as e:
             logger.error(f"❌ Error creando bot de Telegram: {e}")
@@ -293,41 +347,9 @@ async def main():
         
         # 4. Iniciar recolección en tiempo real en una tarea separada
         logger.info("🔄 Iniciando recolección de datos en tiempo real...")
-        collection_task = asyncio.create_task(start_real_time_collection())
+        collection_task = asyncio.create_task(start_real_time_collection(collection_ready))
         
-        # 5. Enviar mensaje de comandos después de que todo esté listo
-        try:
-            await asyncio.sleep(2)  # Esperar un poco para que la recolección se inicie
-            commands_message = (
-                "🚀 <b>Sistema Completamente Operativo</b>\n\n"
-                "<b>📊 Comandos de Datos (Funcionando)</b>\n"
-                "/download_data — Verificar y descargar histórico\n"
-                "/data_status — Estado de datos y sincronización\n"
-                "/analyze_data — Analizar y reparar datos\n"
-                "/verify_align — Verificar alineación temporal\n"
-                "/repair_history — Reparación completa de datos\n"
-                "/sync_symbols — Sincronización paralela de símbolos\n\n"
-                "<b>🎓 Comandos de Entrenamiento</b>\n"
-                "/train_hist — Entrenamiento histórico paralelo\n"
-                "/train_live — Entrenamiento en tiempo real\n"
-                "/stop_train — Detener entrenamiento\n\n"
-                "<b>🤖 Comandos del Bot</b>\n"
-                "/status — Estado general del sistema\n"
-                "/health — Verificación de salud del bot\n"
-                "/positions — Posiciones abiertas en Bitget\n"
-                "/balance — Balance de la cuenta\n\n"
-                "<b>📈 Comandos de Trading</b>\n"
-                "/start_trading — Iniciar trading automático\n"
-                "/stop_trading — Detener trading\n"
-                "/emergency_stop — Parada de emergencia\n\n"
-                "💡 Usa /help para ver todos los comandos disponibles."
-            )
-            await telegram_bot.send_message(commands_message, parse_mode="HTML")
-            logger.info("📨 Mensaje de comandos enviado a Telegram")
-        except Exception as e:
-            logger.warning(f"⚠️ No se pudo enviar mensaje de comandos: {e}")
-        
-        # 6. Iniciar polling de Telegram
+        # 5. Iniciar polling de Telegram (handlers esperará event internamente)
         logger.info("🔄 Iniciando polling de Telegram...")
         await telegram_bot.start_polling()
         

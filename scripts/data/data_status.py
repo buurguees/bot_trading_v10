@@ -1,105 +1,94 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Script para /data_status - Enterprise: Estado detallado de DB y archivos.
-Llama core/data/database.py y core/data/historical_data_manager.py.
-Retorna JSON para handlers.py.
+Script simple para /data_status - Estado de datos
 """
 
 import sys
 import json
 import logging
 from pathlib import Path
-from dotenv import load_dotenv
+from datetime import datetime
 
-# Path al root PRIMERO
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Path al root
+root_path = str(Path(__file__).parent.parent.parent)
+sys.path.insert(0, root_path)
 
-# Cargar .env
-load_dotenv()
-
-# Ahora importar módulos locales
-from core.config.config_loader import ConfigLoader
-
-# Logging enterprise
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/data_status.log', encoding='utf-8'), 
-        logging.StreamHandler()
-    ]
-)
+# Logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def main():
-    """Ejecución enterprise"""
+    """Estado simple de datos"""
     try:
         from core.data.database import db_manager
-        from core.data.historical_data_manager import HistoricalDataManager
-        from core.config.config_loader import ConfigLoader
-        
-        # Usar UnifiedConfigManager v2
         from config.unified_config import get_config_manager
-        config_manager = get_config_manager()
         
-        symbols = config_manager.get_symbols()
-        timeframes = config_manager.get_timeframes()
+        cfg = get_config_manager()
+        symbols = cfg.get_symbols()
+        timeframes = cfg.get_timeframes() or ["1m", "5m", "15m", "1h", "4h"]
         
-        manager = HistoricalDataManager()
-        total_records = 0
-        status_by_symbol = {}
-        
-        for symbol in symbols:
-            sym_status = {}
-            # Obtener conteo total por símbolo
-            total_count = db_manager.get_market_data_count_fast(symbol)
-            
-            # Distribuir entre timeframes (aproximado)
-            count_per_tf = total_count // len(timeframes) if timeframes else 0
-            
-            for tf in timeframes:
-                status_icon = "✅" if count_per_tf > 0 else "❌"
-                sym_status[tf] = {"count": count_per_tf, "status": status_icon}
-                total_records += count_per_tf
-            
-            status_by_symbol[symbol] = sym_status
-        
-        # Última sync via DB
-        latest_session = db_manager.get_latest_sync_session()
-        
-        report_lines = [f"📊 <b>Estado Enterprise de Datos</b>\n\n<b>Config:</b>\n• Símbolos: {', '.join(symbols)}\n• TFs: {', '.join(timeframes)}\n\n<b>Total Registros:</b> {total_records:,}"]
-        
-        for symbol, sym_status in status_by_symbol.items():
-            report_lines.append(f"\n<b>{symbol}:</b>")
-            for tf, data in sym_status.items():
-                report_lines.append(f"• {tf}: {data['count']:,} {data['status']}")
-        
-        if latest_session:
-            report_lines.append(f"\n<b>Última Sync:</b> {latest_session}")
-        else:
-            report_lines.append("\n<b>Sync:</b> No disponible")
-        
-        status = "✅ Datos OK" if total_records > 0 else "⚠️ Sin datos - Use /download_data"
-        report_lines.append(f"\n<b>Estado:</b> {status}")
-        
-        full_report = "\n".join(report_lines)
-        
-        result = {
+        report = {
             "status": "success",
-            "report": full_report,  # Texto HTML simple
-            "total_records": total_records,
-            "symbols_status": status_by_symbol
+            "data": {},
+            "summary": {
+                "total_symbols": len(symbols),
+                "total_timeframes": len(timeframes),
+                "total_records": 0
+            }
         }
         
-        print(json.dumps(result, ensure_ascii=False, indent=2))
-        logger.info("✅ Estado de datos generado")
+        for symbol in symbols:
+            report["data"][symbol] = {}
+            symbol_total = 0
+            
+            for tf in timeframes:
+                try:
+                    db_path = f"data/{symbol}/trading_bot.db"
+                    if Path(db_path).exists():
+                        with db_manager._get_connection(db_path) as conn:
+                            cursor = conn.cursor()
+                            cursor.execute(
+                                "SELECT COUNT(*) FROM market_data WHERE symbol = ? AND timeframe = ?",
+                                (symbol, tf)
+                            )
+                            count = cursor.fetchone()[0]
+                            symbol_total += count
+                            
+                            # Obtener rango de fechas
+                            cursor.execute(
+                                "SELECT MIN(timestamp), MAX(timestamp) FROM market_data WHERE symbol = ? AND timeframe = ?",
+                                (symbol, tf)
+                            )
+                            min_ts, max_ts = cursor.fetchone()
+                            
+                            report["data"][symbol][tf] = {
+                                "count": count,
+                                "min_timestamp": min_ts,
+                                "max_timestamp": max_ts,
+                                "min_date": datetime.fromtimestamp(min_ts).strftime('%Y-%m-%d %H:%M') if min_ts else None,
+                                "max_date": datetime.fromtimestamp(max_ts).strftime('%Y-%m-%d %H:%M') if max_ts else None
+                            }
+                    else:
+                        report["data"][symbol][tf] = {
+                            "count": 0,
+                            "min_timestamp": None,
+                            "max_timestamp": None,
+                            "min_date": None,
+                            "max_date": None
+                        }
+                except Exception as e:
+                    report["data"][symbol][tf] = {
+                        "count": 0,
+                        "error": str(e)
+                    }
+            
+            report["summary"]["total_records"] += symbol_total
+        
+        print(json.dumps(report, indent=2, ensure_ascii=False))
         
     except Exception as e:
-        logger.error(f"❌ Error: {str(e)}")
-        result = {"status": "error", "message": str(e)}
-        print(json.dumps(result))
-        sys.exit(1)
+        logger.error(f"❌ Error: {e}")
+        print(json.dumps({"status": "error", "message": str(e)}, indent=2, ensure_ascii=False))
 
 if __name__ == "__main__":
     main()

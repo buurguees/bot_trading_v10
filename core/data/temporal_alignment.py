@@ -43,7 +43,10 @@ class AlignmentConfig:
         if self.timeframes is None:
             self.timeframes = ['1m', '5m', '15m', '1h', '4h', '1d']
         if self.required_symbols is None:
-            self.required_symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOGEUSDT', 'AVAXUSDT', 'TONUSDT', 'XRPUSDT', 'LINKUSDT']
+            # Usar configuración centralizada
+            from config.unified_config import get_config_manager
+            config_manager = get_config_manager()
+            self.required_symbols = config_manager.get_symbols() or ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOGEUSDT']
         if self.alignment_tolerance is None:
             self.alignment_tolerance = timedelta(minutes=1)
 
@@ -481,7 +484,7 @@ def create_alignment_config(
     """Crea configuración de alineación con valores por defecto"""
     return AlignmentConfig(
         timeframes=timeframes or ['5m', '15m', '1h', '4h', '1d'],
-        required_symbols=symbols or ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT'],
+        required_symbols=symbols or (get_config_manager().get_symbols() if 'get_config_manager' in globals() else ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']),
         base_timeframe=base_timeframe
     )
 

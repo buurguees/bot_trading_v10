@@ -1,4 +1,4 @@
-# control/telegram_bot.py - VERSIÓN CORREGIDA QUE FUNCIONA
+# control/telegram_bot.py - RECTIFICADO
 
 import os
 import logging
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class TelegramBot:
     """Bot de Telegram que REALMENTE ejecuta comandos"""
     
-    def __init__(self, token: str, chat_id: str, authorized_users: List[int] = None):
+    def __init__(self, token: str, chat_id: str, authorized_users: List[int] = None, collection_ready: asyncio.Event = None):
         if not token:
             raise ValueError("Token de Telegram requerido")
         if not chat_id:
@@ -24,13 +24,14 @@ class TelegramBot:
         self.token = token
         self.chat_id = chat_id
         self.authorized_users = authorized_users or []
+        self.collection_ready = collection_ready
         
         # CREAR BOT Y APPLICATION
         self.bot = Bot(token=token)
         self.application = Application.builder().token(token).build()
         
-        # INICIALIZAR HANDLERS REALES
-        self.handlers = TradingBotHandlers(authorized_users=self.authorized_users)
+        # INICIALIZAR HANDLERS REALES con event
+        self.handlers = TradingBotHandlers(authorized_users=self.authorized_users, collection_ready=collection_ready)
         
         # REGISTRAR HANDLERS
         self._register_handlers()
@@ -64,12 +65,11 @@ class TelegramBot:
         try:
             logger.info("🔄 Iniciando polling de Telegram...")
             
-            # ENVIAR MENSAJE DE INICIO
+            # ENVIAR MENSAJE DE INICIO (conectando)
             await self.send_message(
                 "🚀 <b>Bot Trading v10 Enterprise</b>\n\n"
-                "✅ Sistema iniciado y comandos funcionando\n"
-                "📱 Usa /help para ver comandos disponibles\n"
-                "🔧 Todos los comandos usan módulos core/ reales"
+                "✅ Sistema iniciado\n"
+                "🔄 Conectando con exchange mientras se descargan datos..."
             )
             
             # INICIAR POLLING
@@ -78,6 +78,34 @@ class TelegramBot:
             await self.application.updater.start_polling()
             
             logger.info("✅ Bot de Telegram funcionando correctamente")
+            
+            # Esperar signal y enviar comandos (handlers lo maneja por comando, pero aquí await general si needed)
+            if self.collection_ready:
+                await self.collection_ready.wait()
+                await self.send_message(
+                    "🚀 <b>Sistema Completamente Operativo</b>\n\n"
+                    "<b>📊 Comandos de Datos (Funcionando)</b>\n"
+                    "/download_data — Verificar y descargar histórico\n"
+                    "/data_status — Estado de datos y sincronización\n"
+                    "/analyze_data — Analizar y reparar datos\n"
+                    "/verify_align — Verificar alineación temporal\n"
+                    "/repair_history — Reparación completa de datos\n"
+                    "/sync_symbols — Sincronización paralela de símbolos\n\n"
+                    "<b>🎓 Comandos de Entrenamiento</b>\n"
+                    "/train_hist — Entrenamiento histórico paralelo\n"
+                    "/train_live — Entrenamiento en tiempo real\n"
+                    "/stop_train — Detener entrenamiento\n\n"
+                    "<b>🤖 Comandos del Bot</b>\n"
+                    "/status — Estado general del sistema\n"
+                    "/health — Verificación de salud del bot\n"
+                    "/positions — Posiciones abiertas en Bitget\n"
+                    "/balance — Balance de la cuenta\n\n"
+                    "<b>📈 Comandos de Trading</b>\n"
+                    "/start_trading — Iniciar trading automático\n"
+                    "/stop_trading — Detener trading\n"
+                    "/emergency_stop — Parada de emergencia\n\n"
+                    "💡 Usa /help para ver todos los comandos disponibles."
+                )
             
             # MANTENER VIVO
             try:
@@ -121,7 +149,7 @@ class TelegramBot:
             logger.error(f"❌ Error deteniendo bot: {e}")
     
     @classmethod
-    def from_env(cls, authorized_users: List[int] = None) -> 'TelegramBot':
+    def from_env(cls, authorized_users: List[int] = None, collection_ready: asyncio.Event = None) -> 'TelegramBot':
         """Crear bot desde variables de entorno"""
         token = os.getenv("TELEGRAM_BOT_TOKEN")
         chat_id = os.getenv("TELEGRAM_CHAT_ID")
@@ -131,14 +159,14 @@ class TelegramBot:
         if not chat_id:
             raise ValueError("TELEGRAM_CHAT_ID no configurado en .env")
         
-        return cls(token=token, chat_id=chat_id, authorized_users=authorized_users)
+        return cls(token=token, chat_id=chat_id, authorized_users=authorized_users, collection_ready=collection_ready)
 
 # ===== FUNCIÓN DE UTILIDAD =====
 
-async def create_and_start_telegram_bot(authorized_users: List[int] = None):
+async def create_and_start_telegram_bot(authorized_users: List[int] = None, collection_ready: asyncio.Event = None):
     """Crear e iniciar bot de Telegram desde variables de entorno"""
     try:
-        bot = TelegramBot.from_env(authorized_users=authorized_users)
+        bot = TelegramBot.from_env(authorized_users=authorized_users, collection_ready=collection_ready)
         await bot.start_polling()
         return bot
     except Exception as e:

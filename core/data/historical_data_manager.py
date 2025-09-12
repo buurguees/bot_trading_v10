@@ -20,12 +20,7 @@ from typing import Dict, List, Any, Optional, Tuple
 import pandas as pd
 from pathlib import Path
 
-from .collector import (
-    data_collector, 
-    download_missing_data, 
-    verify_data_integrity,
-    download_multi_timeframe_with_alignment
-)
+from .collector import BitgetDataCollector
 from .history_analyzer import HistoryAnalyzer
 from .history_downloader import HistoryDownloader
 from core.config.config_loader import ConfigLoader
@@ -65,20 +60,11 @@ class HistoricalDataManager:
             # Combinar configuración con defaults
             config = {**default_config, **historical_config}
             
-            # Obtener símbolos desde configuración
-            symbols_config = ConfigLoader().get_main_config().get('multi_symbol_settings', {}).get('symbols', {})
-            symbols_from_main = [symbol for symbol, settings in symbols_config.items() 
-                               if settings.get('enabled', True)]
-            if symbols_from_main:
-                config['symbols'] = symbols_from_main
-            else:
-                # Fallback a unified_config si no hay símbolos en main
-                try:
-                    from config.unified_config import get_symbols as root_get_symbols
-                    config['symbols'] = root_get_symbols()
-                except Exception:
-                    config['symbols'] = unified_config.get_config('data_config.yaml', 'data_collection.symbols', []) or \
-                                         ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT']
+            # Usar UnifiedConfigManager como fuente única de verdad
+            from config.unified_config import get_config_manager
+            config_manager = get_config_manager()
+            config['symbols'] = config_manager.get_symbols() or ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOGEUSDT']
+            config['timeframes'] = config_manager.get_timeframes() or ['1m', '5m', '15m', '1h', '4h', '1d']
             
             logger.info(f"Configuración cargada: {config['years']} años, {len(config['symbols'])} símbolos, {len(config['timeframes'])} timeframes")
             return config
