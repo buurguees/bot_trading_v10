@@ -1,0 +1,22 @@
+{
+  "session_id": "train_20250914_113401",
+  "start_time": "2025-09-14T11:34:01.258193",
+  "end_time": "2025-09-14T11:34:01.516434",
+  "total_cycles": 2,
+  "total_trades": 0,
+  "total_pnl_usdt": 0.0,
+  "best_cycle": {
+    "cycle_id": 0,
+    "pnl": 0.0
+  },
+  "worst_cycle": {
+    "cycle_id": 0,
+    "pnl": 0.0
+  },
+  "agent_performance": {},
+  "config": {
+    "days_back": 1,
+    "cycle_size_hours": 24,
+    "max_concurrent_agents": 8
+  }
+}

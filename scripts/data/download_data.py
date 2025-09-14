@@ -69,13 +69,28 @@ class DownloadDataEnterprise:
 
     def _update_progress(self, progress: int, current_symbol: str, status: str = "En curso"):
         if self.progress_id:
-            progress_path = Path("data/tmp") / f"{self.progress_id}.json"
-            bar_length = 10
-            filled = int(progress / 100 * bar_length)
-            bar = "█" * filled + "░" * (bar_length - filled)
-            data = {"progress": progress, "bar": bar, "current_symbol": current_symbol, "status": status}
-            with open(progress_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f)
+            try:
+                progress_path = Path("data/tmp") / f"{self.progress_id}.json"
+                # Crear directorio si no existe
+                progress_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                bar_length = 10
+                filled = int(progress / 100 * bar_length)
+                bar = "█" * filled + "░" * (bar_length - filled)
+                data = {"progress": progress, "bar": bar, "current_symbol": current_symbol, "status": status}
+                
+                # Escribir de forma segura
+                with open(progress_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f)
+                    f.flush()  # Asegurar que se escriba
+                    
+            except Exception as e:
+                # Si hay error, solo logear, no fallar
+                print(f"⚠️ Error actualizando progreso: {e}")
+
+    def _update_progress_safe(self, progress: int, current_symbol: str, status: str = "En curso"):
+        """Versión segura del método _update_progress"""
+        self._update_progress(progress, current_symbol, status)
 
     async def initialize(self) -> bool:
         max_retries = 3
@@ -85,7 +100,7 @@ class DownloadDataEnterprise:
                 from core.data.database import db_manager
                 self.collector = BitgetDataCollector()
                 self.db_manager = db_manager
-                self._update_progress(10, "Inicializando", "Configurando core/")
+                self._update_progress_safe(10, "Inicializando", "Configurando core/")
                 logger.info("✅ Collector y DB inicializados")
                 return True
             except Exception as e:
@@ -112,7 +127,7 @@ class DownloadDataEnterprise:
             step = 0
 
             for symbol in symbols:
-                self._update_progress(int((step / total_symbols) * 90) + 10, symbol)
+                self._update_progress_safe(int((step / total_symbols) * 90) + 10, symbol)
                 symbol_results = {}
                 for tf in timeframes:
                     try:
@@ -137,7 +152,7 @@ class DownloadDataEnterprise:
                 reports_by_symbol.append(self._generate_symbol_report(symbol, symbol_results))
                 step += 1
 
-            self._update_progress(100, "Completado", "completed")
+            self._update_progress_safe(100, "Completado", "completed")
             self.db_manager.log_download_session(self.session_id, symbols, timeframes, download_results)
             return {
                 "status": "success",
@@ -148,7 +163,7 @@ class DownloadDataEnterprise:
 
         except Exception as e:
             logger.error(f"❌ Error descarga enterprise: {e}")
-            self._update_progress(0, "Error", "error")
+            self._update_progress_safe(0, "Error", "error")
             return {"status": "error", "message": str(e)}
 
     def _generate_symbol_report(self, symbol: str, results: Dict) -> str:

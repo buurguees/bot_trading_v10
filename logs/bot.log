@@ -30250,3 +30250,171 @@ client_session: <aiohttp.client.ClientSession object at 0x0000021C0601BA10>
 2025-09-12 18:16:26,318 - control.telegram_bot - ERROR - ❌ Error deteniendo bot: This Application is not running!
 2025-09-12 18:16:36,226 - asyncio - ERROR - Unclosed client session
 client_session: <aiohttp.client.ClientSession object at 0x000002C1A1337A10>
+2025-09-14 11:35:05,691 - __main__ - INFO - 🤖 Iniciando Bot Trading v10 Enterprise...
+2025-09-14 11:35:05,692 - config.unified_config - INFO - 🔧 Inicializando UnifiedConfigManager v2 - Entorno: development
+2025-09-14 11:35:05,772 - config.unified_config - INFO - 🔍 Validación completada: 10/10 configuraciones válidas
+2025-09-14 11:35:05,772 - config.unified_config - INFO - ✅ UnifiedConfigManager v2 inicializado exitosamente
+2025-09-14 11:35:07,032 - core.security.audit_logger - INFO - AuditLogger inicializado
+2025-09-14 11:35:07,628 - core.security.compliance_checker - INFO - ComplianceChecker inicializado
+2025-09-14 11:35:07,630 - control.security_guard - INFO - SecurityGuard inicializado
+2025-09-14 11:35:09,602 - control.handlers - INFO - ✅ Handlers inicializados para comandos de entrenamiento
+2025-09-14 11:35:09,603 - control.handlers - INFO - ✅ Handlers de entrenamiento y estado registrados
+2025-09-14 11:35:09,603 - control.telegram_bot - INFO - ✅ Handlers registrados correctamente
+2025-09-14 11:35:09,603 - control.telegram_bot - INFO - ✅ TelegramBot inicializado para chat 937027893
+2025-09-14 11:35:09,910 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8/sendMessage "HTTP/1.1 200 OK"
+2025-09-14 11:35:09,911 - __main__ - INFO - 📨 Mensaje de inicio enviado a Telegram
+2025-09-14 11:35:09,911 - __main__ - INFO - 🔍 Analizando datos históricos...
+2025-09-14 11:35:11,439 - core.data.preprocessor - INFO - DataPreprocessorAdvanced inicializado con 4 workers
+2025-09-14 11:35:12,257 - core.data.enterprise.database - INFO - TimescaleDBManager inicializado
+2025-09-14 11:35:12,257 - core.data.history_analyzer - INFO - HistoryAnalyzer inicializado con 9 símbolos
+2025-09-14 11:35:12,267 - core.data.enterprise.database - INFO - TimescaleDBManager inicializado
+2025-09-14 11:35:12,267 - core.data.history_analyzer - INFO - HistoryAnalyzer inicializado con 9 símbolos
+2025-09-14 11:35:12,268 - scripts.data.analyze_data - INFO - ✅ Analyzer inicializado
+2025-09-14 11:35:12,278 - core.data.enterprise.database - INFO - TimescaleDBManager inicializado
+2025-09-14 11:35:12,278 - core.data.history_analyzer - INFO - HistoryAnalyzer inicializado con 9 símbolos
+2025-09-14 11:35:12,279 - scripts.data.analyze_data - INFO - ✅ Analyzer inicializado
+2025-09-14 11:35:12,280 - core.data.history_analyzer - INFO - 🔍 Detectando problemas en datos para 1 símbolos
+2025-09-14 11:35:12,281 - core.data.history_analyzer - INFO - 🔍 Detectando problemas en datos para 1 símbolos
+2025-09-14 11:35:12,281 - core.data.history_analyzer - INFO - 🔍 Detectando problemas en datos para 1 símbolos
+2025-09-14 11:35:12,282 - core.data.history_analyzer - INFO - 🔍 Detectando problemas en datos para 1 símbolos
+2025-09-14 11:35:12,283 - core.data.history_analyzer - INFO - 🔍 Detectando problemas en datos para 1 símbolos
+2025-09-14 11:35:12,283 - core.data.history_analyzer - INFO - 🔍 Detectando problemas en datos para 1 símbolos
+2025-09-14 11:35:12,284 - core.data.history_analyzer - INFO - 🔍 Detectando problemas en datos para 1 símbolos
+2025-09-14 11:35:12,285 - core.data.history_analyzer - INFO - 🔍 Detectando problemas en datos para 1 símbolos
+2025-09-14 11:35:12,285 - core.data.history_analyzer - INFO - 🔍 Detectando problemas en datos para 1 símbolos
+2025-09-14 11:35:12,366 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8/sendMessage "HTTP/1.1 200 OK"
+2025-09-14 11:35:12,367 - __main__ - INFO - 🔄 Descargando y reparando datos históricos...
+2025-09-14 11:35:12,395 - scripts.data.download_data - INFO - ✅ Collector y DB inicializados
+2025-09-14 11:35:12,409 - scripts.data.download_data - INFO - ✅ Collector y DB inicializados
+2025-09-14 11:35:17,452 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para BTCUSDT 1m
+2025-09-14 11:35:17,859 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para BTCUSDT 5m
+2025-09-14 11:35:18,173 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para BTCUSDT 15m
+2025-09-14 11:35:18,472 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para BTCUSDT 1h
+2025-09-14 11:35:18,742 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para BTCUSDT 4h
+2025-09-14 11:35:19,006 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para BTCUSDT 1d
+2025-09-14 11:35:20,569 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ETHUSDT 1m
+2025-09-14 11:35:20,980 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ETHUSDT 5m
+2025-09-14 11:35:21,303 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ETHUSDT 15m
+2025-09-14 11:35:21,576 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ETHUSDT 1h
+2025-09-14 11:35:21,870 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ETHUSDT 4h
+2025-09-14 11:35:22,139 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ETHUSDT 1d
+2025-09-14 11:35:23,319 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SOLUSDT 1m
+2025-09-14 11:35:23,607 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SOLUSDT 5m
+2025-09-14 11:35:23,892 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SOLUSDT 15m
+2025-09-14 11:35:24,165 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SOLUSDT 1h
+2025-09-14 11:35:24,432 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SOLUSDT 4h
+2025-09-14 11:35:24,702 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SOLUSDT 1d
+2025-09-14 11:35:25,748 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ADAUSDT 1m
+2025-09-14 11:35:26,041 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ADAUSDT 5m
+2025-09-14 11:35:26,353 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ADAUSDT 15m
+2025-09-14 11:35:26,616 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ADAUSDT 1h
+2025-09-14 11:35:26,894 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ADAUSDT 4h
+2025-09-14 11:35:27,226 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para ADAUSDT 1d
+2025-09-14 11:35:28,259 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para XRPUSDT 1m
+2025-09-14 11:35:28,559 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para XRPUSDT 5m
+2025-09-14 11:35:28,834 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para XRPUSDT 15m
+2025-09-14 11:35:29,108 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para XRPUSDT 1h
+2025-09-14 11:35:29,392 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para XRPUSDT 4h
+2025-09-14 11:35:29,667 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para XRPUSDT 1d
+2025-09-14 11:35:30,699 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para DOGEUSDT 1m
+2025-09-14 11:35:30,997 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para DOGEUSDT 5m
+2025-09-14 11:35:31,272 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para DOGEUSDT 15m
+2025-09-14 11:35:31,537 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para DOGEUSDT 1h
+2025-09-14 11:35:31,803 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para DOGEUSDT 4h
+2025-09-14 11:35:32,066 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para DOGEUSDT 1d
+2025-09-14 11:35:33,091 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para TRUMPUSDT 1m
+2025-09-14 11:35:33,382 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para TRUMPUSDT 5m
+2025-09-14 11:35:33,658 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para TRUMPUSDT 15m
+2025-09-14 11:35:33,924 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para TRUMPUSDT 1h
+2025-09-14 11:35:34,193 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para TRUMPUSDT 4h
+2025-09-14 11:35:34,460 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para TRUMPUSDT 1d
+2025-09-14 11:35:35,504 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para PEPEUSDT 1m
+2025-09-14 11:35:35,796 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para PEPEUSDT 5m
+2025-09-14 11:35:36,069 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para PEPEUSDT 15m
+2025-09-14 11:35:36,342 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para PEPEUSDT 1h
+2025-09-14 11:35:36,611 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para PEPEUSDT 4h
+2025-09-14 11:35:36,887 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para PEPEUSDT 1d
+2025-09-14 11:35:37,963 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SHIBUSDT 1m
+2025-09-14 11:35:38,259 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SHIBUSDT 5m
+2025-09-14 11:35:38,537 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SHIBUSDT 15m
+2025-09-14 11:35:38,805 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SHIBUSDT 1h
+2025-09-14 11:35:39,069 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SHIBUSDT 4h
+2025-09-14 11:35:39,334 - core.data.database - INFO - ✅ Eliminados 0 registros duplicados para SHIBUSDT 1d
+2025-09-14 11:35:39,335 - core.data.database - INFO - 📥 Sesión de descarga download_20250914_113512: 9 símbolos, 6 timeframes
+2025-09-14 11:35:39,516 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8/sendMessage "HTTP/1.1 200 OK"
+2025-09-14 11:35:39,516 - __main__ - INFO - 🔗 Alineando timeframes...
+2025-09-14 11:35:39,535 - core.data.symbol_database_manager - INFO - SymbolDatabaseManager inicializado en data\historical
+2025-09-14 11:35:39,537 - core.data.symbol_database_manager - INFO - SymbolDatabaseManager inicializado en data\historical
+2025-09-14 11:35:39,538 - core.data.historical_data_adapter - INFO - HistoricalDataAdapter inicializado
+2025-09-14 11:35:39,539 - core.data.temporal_alignment - INFO - TemporalAlignment initialized with 6 timeframes
+2025-09-14 11:35:39,540 - scripts.data.verify_align - INFO - ✅ Aligner y DB inicializados
+2025-09-14 11:35:39,541 - core.data.temporal_alignment - INFO - TemporalAlignment initialized with 6 timeframes
+2025-09-14 11:35:39,541 - scripts.data.verify_align - INFO - ✅ Aligner y DB inicializados
+2025-09-14 11:35:41,943 - core.data.temporal_alignment - INFO - Created master timeline for 1m: 545016 periods
+2025-09-14 11:35:43,453 - core.data.temporal_alignment - INFO - Created master timeline for 5m: 109004 periods
+2025-09-14 11:35:43,908 - core.data.temporal_alignment - INFO - Created master timeline for 15m: 36335 periods
+2025-09-14 11:35:44,033 - core.data.temporal_alignment - INFO - Created master timeline for 1h: 9084 periods
+2025-09-14 11:35:44,070 - core.data.temporal_alignment - INFO - Created master timeline for 4h: 2271 periods
+2025-09-14 11:35:44,085 - core.data.temporal_alignment - INFO - Created master timeline for 1d: 379 periods
+2025-09-14 11:35:46,481 - core.data.temporal_alignment - INFO - Created master timeline for 1m: 545016 periods
+2025-09-14 11:35:47,935 - core.data.temporal_alignment - INFO - Created master timeline for 5m: 109004 periods
+2025-09-14 11:35:48,385 - core.data.temporal_alignment - INFO - Created master timeline for 15m: 36335 periods
+2025-09-14 11:35:48,505 - core.data.temporal_alignment - INFO - Created master timeline for 1h: 9084 periods
+2025-09-14 11:35:48,540 - core.data.temporal_alignment - INFO - Created master timeline for 4h: 2271 periods
+2025-09-14 11:35:48,556 - core.data.temporal_alignment - INFO - Created master timeline for 1d: 379 periods
+2025-09-14 11:35:48,963 - core.data.temporal_alignment - INFO - Created master timeline for 1m: 545016 periods
+2025-09-14 11:35:49,880 - core.data.temporal_alignment - INFO - Created master timeline for 5m: 109004 periods
+2025-09-14 11:35:50,013 - core.data.temporal_alignment - INFO - Created master timeline for 15m: 36335 periods
+2025-09-14 11:35:50,024 - core.data.temporal_alignment - INFO - Created master timeline for 1h: 9084 periods
+2025-09-14 11:35:50,032 - core.data.temporal_alignment - INFO - Created master timeline for 4h: 2271 periods
+2025-09-14 11:35:50,039 - core.data.temporal_alignment - INFO - Created master timeline for 1d: 379 periods
+2025-09-14 11:35:50,433 - core.data.temporal_alignment - INFO - Created master timeline for 1m: 545016 periods
+2025-09-14 11:35:51,356 - core.data.temporal_alignment - INFO - Created master timeline for 5m: 109004 periods
+2025-09-14 11:35:51,485 - core.data.temporal_alignment - INFO - Created master timeline for 15m: 36335 periods
+2025-09-14 11:35:51,496 - core.data.temporal_alignment - INFO - Created master timeline for 1h: 9084 periods
+2025-09-14 11:35:51,503 - core.data.temporal_alignment - INFO - Created master timeline for 4h: 2271 periods
+2025-09-14 11:35:51,510 - core.data.temporal_alignment - INFO - Created master timeline for 1d: 379 periods
+2025-09-14 11:35:51,904 - core.data.temporal_alignment - INFO - Created master timeline for 1m: 545016 periods
+2025-09-14 11:35:52,822 - core.data.temporal_alignment - INFO - Created master timeline for 5m: 109004 periods
+2025-09-14 11:35:52,945 - core.data.temporal_alignment - INFO - Created master timeline for 15m: 36335 periods
+2025-09-14 11:35:52,955 - core.data.temporal_alignment - INFO - Created master timeline for 1h: 9084 periods
+2025-09-14 11:35:52,963 - core.data.temporal_alignment - INFO - Created master timeline for 4h: 2271 periods
+2025-09-14 11:35:52,971 - core.data.temporal_alignment - INFO - Created master timeline for 1d: 379 periods
+2025-09-14 11:35:53,363 - core.data.temporal_alignment - INFO - Created master timeline for 1m: 545016 periods
+2025-09-14 11:35:54,278 - core.data.temporal_alignment - INFO - Created master timeline for 5m: 109004 periods
+2025-09-14 11:35:54,458 - core.data.temporal_alignment - INFO - Created master timeline for 15m: 36335 periods
+2025-09-14 11:35:54,471 - core.data.temporal_alignment - INFO - Created master timeline for 1h: 9084 periods
+2025-09-14 11:35:54,479 - core.data.temporal_alignment - INFO - Created master timeline for 4h: 2271 periods
+2025-09-14 11:35:54,495 - core.data.temporal_alignment - INFO - Created master timeline for 1d: 379 periods
+2025-09-14 11:35:54,798 - core.data.temporal_alignment - INFO - Created master timeline for 1m: 545016 periods
+2025-09-14 11:35:55,433 - core.data.temporal_alignment - INFO - Created master timeline for 5m: 109004 periods
+2025-09-14 11:35:55,514 - core.data.temporal_alignment - INFO - Created master timeline for 15m: 36335 periods
+2025-09-14 11:35:55,524 - core.data.temporal_alignment - INFO - Created master timeline for 1h: 9084 periods
+2025-09-14 11:35:55,531 - core.data.temporal_alignment - INFO - Created master timeline for 4h: 2271 periods
+2025-09-14 11:35:55,538 - core.data.temporal_alignment - INFO - Created master timeline for 1d: 379 periods
+2025-09-14 11:35:55,935 - core.data.temporal_alignment - INFO - Created master timeline for 1m: 545016 periods
+2025-09-14 11:35:56,877 - core.data.temporal_alignment - INFO - Created master timeline for 5m: 109004 periods
+2025-09-14 11:35:57,002 - core.data.temporal_alignment - INFO - Created master timeline for 15m: 36335 periods
+2025-09-14 11:35:57,013 - core.data.temporal_alignment - INFO - Created master timeline for 1h: 9084 periods
+2025-09-14 11:35:57,019 - core.data.temporal_alignment - INFO - Created master timeline for 4h: 2271 periods
+2025-09-14 11:35:57,028 - core.data.temporal_alignment - INFO - Created master timeline for 1d: 379 periods
+2025-09-14 11:35:57,423 - core.data.temporal_alignment - INFO - Created master timeline for 1m: 545016 periods
+2025-09-14 11:35:58,335 - core.data.temporal_alignment - INFO - Created master timeline for 5m: 109004 periods
+2025-09-14 11:35:58,462 - core.data.temporal_alignment - INFO - Created master timeline for 15m: 36335 periods
+2025-09-14 11:35:58,471 - core.data.temporal_alignment - INFO - Created master timeline for 1h: 9084 periods
+2025-09-14 11:35:58,478 - core.data.temporal_alignment - INFO - Created master timeline for 4h: 2271 periods
+2025-09-14 11:35:58,485 - core.data.temporal_alignment - INFO - Created master timeline for 1d: 379 periods
+2025-09-14 11:35:58,492 - core.data.database - INFO - 🔗 Sesión de alineación align_20250914_113539: 9 símbolos, 6 timeframes
+2025-09-14 11:35:58,682 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8/sendMessage "HTTP/1.1 200 OK"
+2025-09-14 11:35:58,683 - __main__ - INFO - ⏰ Sincronizando timestamps...
+2025-09-14 11:36:03,273 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8/sendMessage "HTTP/1.1 200 OK"
+2025-09-14 11:36:03,274 - __main__ - INFO - ✅ Datos históricos procesados, iniciando recolección en tiempo real...
+2025-09-14 11:36:03,410 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8/sendMessage "HTTP/1.1 200 OK"
+2025-09-14 11:36:30,262 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8/sendMessage "HTTP/1.1 200 OK"
+2025-09-14 11:36:39,713 - __main__ - INFO - 🔄 Iniciando polling de Telegram...
+2025-09-14 11:36:39,713 - control.telegram_bot - INFO - 🔄 Iniciando polling de Telegram...
+2025-09-14 11:37:07,812 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8/sendMessage "HTTP/1.1 200 OK"
+2025-09-14 11:38:04,049 - control.telegram_bot - ERROR - ❌ Error en polling: Timed out
+2025-09-14 11:38:04,049 - control.telegram_bot - ERROR - ❌ Error deteniendo bot: This Application is not running!
+2025-09-14 11:38:13,468 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000002243E6B3A10>

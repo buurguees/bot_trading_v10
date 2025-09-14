@@ -1,0 +1,15 @@
+# Configuración específica para pruebas de Telegram
+telegram:
+  bot_token: "8422053215:AAH5hqD8472CCQyDTHfL8Zge9VXZNEJbdd8"
+  chat_id: "937027893"
+  enabled: true
+  rate_limit_delay: 0.1
+  max_message_length: 4096
+  enable_individual_trades: true
+  enable_cycle_summaries: true
+  enable_alerts: true
+
+testing:
+  telegram_test_mode: true
+  verbose_logging: true
+  test_message_prefix: "🧪 TEST: "

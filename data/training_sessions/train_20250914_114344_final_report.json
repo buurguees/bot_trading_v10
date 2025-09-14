@@ -1,0 +1,53 @@
+{
+  "session_id": "train_20250914_114344",
+  "start_time": "2025-09-14T11:43:44.650467",
+  "end_time": "2025-09-14T11:43:49.585346",
+  "total_cycles": 2,
+  "total_trades": 30,
+  "total_pnl_usdt": 1.5048742720199997,
+  "best_cycle": {
+    "cycle_id": 0,
+    "pnl": 1.5048742720199997
+  },
+  "worst_cycle": {
+    "cycle_id": 1,
+    "pnl": 0.0
+  },
+  "agent_performance": {
+    "SOLUSDT": {
+      "total_pnl": 1.4758600000000002,
+      "total_trades": 3,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "DOGEUSDT": {
+      "total_pnl": 0.010090040000000012,
+      "total_trades": 17,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "TRUMPUSDT": {
+      "total_pnl": 0.018923999999999986,
+      "total_trades": 1,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "PEPEUSDT": {
+      "total_pnl": 1.4452000000000008e-07,
+      "total_trades": 6,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "SHIBUSDT": {
+      "total_pnl": 8.750000000000009e-08,
+      "total_trades": 3,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    }
+  },
+  "config": {
+    "days_back": 1,
+    "cycle_size_hours": 24,
+    "max_concurrent_agents": 8
+  }
+}

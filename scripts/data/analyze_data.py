@@ -52,13 +52,28 @@ class AnalyzeDataEnterprise:
 
     def _update_progress(self, progress: int, current_symbol: str, status: str = "Analizando"):
         if self.progress_id:
-            progress_path = Path("data/tmp") / f"{self.progress_id}.json"
-            bar_length = 10
-            filled = int(progress / 100 * bar_length)
-            bar = "█" * filled + "░" * (bar_length - filled)
-            data = {"progress": progress, "bar": bar, "current_symbol": current_symbol, "status": status}
-            with open(progress_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f)
+            try:
+                progress_path = Path("data/tmp") / f"{self.progress_id}.json"
+                # Crear directorio si no existe
+                progress_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                bar_length = 10
+                filled = int(progress / 100 * bar_length)
+                bar = "█" * filled + "░" * (bar_length - filled)
+                data = {"progress": progress, "bar": bar, "current_symbol": current_symbol, "status": status}
+                
+                # Escribir de forma segura
+                with open(progress_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f)
+                    f.flush()  # Asegurar que se escriba
+                    
+            except Exception as e:
+                # Si hay error, solo logear, no fallar
+                print(f"⚠️ Error actualizando progreso: {e}")
+
+    def _update_progress_safe(self, progress: int, current_symbol: str, status: str = "Analizando"):
+        """Versión segura del método _update_progress"""
+        self._update_progress(progress, current_symbol, status)
 
     async def initialize(self) -> bool:
         max_retries = 3
@@ -66,7 +81,7 @@ class AnalyzeDataEnterprise:
             try:
                 from core.data.history_analyzer import HistoryAnalyzer
                 self.analyzer = HistoryAnalyzer()
-                self._update_progress(10, "Inicializando analyzer", "Configurando core/")
+                self._update_progress_safe(10, "Inicializando analyzer", "Configurando core/")
                 logger.info("✅ Analyzer inicializado")
                 return True
             except Exception as e:
@@ -95,7 +110,7 @@ class AnalyzeDataEnterprise:
             step = 0
 
             for symbol in symbols:
-                self._update_progress(int((step / total_symbols) * 90) + 10, symbol)
+                self._update_progress_safe(int((step / total_symbols) * 90) + 10, symbol)
                 try:
                     issues = await self.analyzer.detect_data_issues([symbol])
                     sym_issues = issues.get("symbol_issues", {}).get(symbol, {})
@@ -110,7 +125,7 @@ class AnalyzeDataEnterprise:
                     reports_by_symbol.append(f"<b>{symbol}:</b>\n• ❌ Error: {str(e)}")
                     step += 1
 
-            self._update_progress(100, "Completado", "completed")
+            self._update_progress_safe(100, "Completado", "completed")
             return {
                 "status": "success",
                 "report": reports_by_symbol,
@@ -120,7 +135,7 @@ class AnalyzeDataEnterprise:
 
         except Exception as e:
             logger.error(f"❌ Error análisis: {e}")
-            self._update_progress(0, "Error", "error")
+            self._update_progress_safe(0, "Error", "error")
             return {"status": "error", "message": str(e)}
 
     def _generate_symbol_report(self, symbol: str, issues: Dict) -> str:

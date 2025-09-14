@@ -9,12 +9,55 @@ from telegram import Bot
 
 # IMPORTAR LOS HANDLERS CORREGIDOS
 from control.handlers import TradingBotHandlers
+from control.message_queue import TelegramMessageQueue
 
 logger = logging.getLogger(__name__)
 
 class TelegramBot:
     """Bot de Telegram que REALMENTE ejecuta comandos"""
     
+
+    async def start_polling_improved(self):
+        """Versión mejorada del polling con manejo de errores"""
+        try:
+            logger.info("🔄 Iniciando polling de Telegram (versión mejorada)...")
+            
+            # ENVIAR MENSAJE DE INICIO
+            try:
+                await self.send_message(
+                    "🚀 <b>Bot Trading v10 Enterprise</b>\n\n"
+                    "✅ Sistema iniciado\n"
+                    "🔄 Conectando con exchange..."
+                )
+            except Exception as e:
+                logger.warning(f"⚠️ No se pudo enviar mensaje de inicio: {e}")
+            
+            # INICIAR POLLING CON MANEJO DE TIMEOUT
+            await self.application.initialize()
+            await self.application.start()
+            
+            # Configurar polling con timeout más corto
+            await self.application.updater.start_polling(
+                timeout=30,
+                drop_pending_updates=True,  # Ignorar actualizaciones pendientes
+                allowed_updates=["message", "callback_query"]
+            )
+            
+            logger.info("✅ Bot de Telegram funcionando correctamente")
+            
+            # Mantener el bot activo
+            while True:
+                await asyncio.sleep(1)
+                
+        except asyncio.TimeoutError:
+            logger.warning("⚠️ Timeout en polling, reintentando...")
+            await asyncio.sleep(5)
+            await self.start_polling_improved()
+            
+        except Exception as e:
+            logger.error(f"❌ Error en polling: {e}")
+            logger.warning("⚠️ Continuando sin Telegram")
+
     def __init__(self, token: str, chat_id: str, authorized_users: List[int] = None, collection_ready: asyncio.Event = None):
         if not token:
             raise ValueError("Token de Telegram requerido")
@@ -33,6 +76,9 @@ class TelegramBot:
         # INICIALIZAR HANDLERS REALES con event
         self.handlers = TradingBotHandlers(authorized_users=self.authorized_users, collection_ready=collection_ready)
         
+        # INICIALIZAR COLA DE MENSAJES
+        self.message_queue = TelegramMessageQueue(self, max_queue_size=50, base_delay=3.0)
+        
         # REGISTRAR HANDLERS
         self._register_handlers()
         
@@ -47,18 +93,35 @@ class TelegramBot:
             logger.error(f"❌ Error registrando handlers: {e}")
             raise
     
-    async def send_message(self, message: str, parse_mode: str = "HTML"):
-        """Enviar mensaje al chat configurado"""
+    async def send_message(self, message: str, parse_mode: str = "HTML", priority: int = 1):
+        """Enviar mensaje usando cola inteligente con control de flood"""
         try:
-            await self.bot.send_message(
+            await self.message_queue.add_message(message, parse_mode, priority)
+            logger.debug(f"📝 Mensaje agregado a cola (prioridad {priority}): {message[:50]}...")
+        except Exception as e:
+            logger.error(f"❌ Error agregando mensaje a cola: {e}")
+    
+    async def send_message_immediate(self, message: str, parse_mode: str = "HTML"):
+        """Enviar mensaje inmediatamente (para casos críticos)"""
+        try:
+            # Crear una nueva instancia del bot para evitar problemas de I/O
+            temp_bot = Bot(token=self.token)
+            
+            await temp_bot.send_message(
                 chat_id=self.chat_id,
                 text=message,
                 parse_mode=parse_mode
             )
-            logger.debug(f"✅ Mensaje enviado: {message[:50]}...")
+            
+            # Cerrar la sesión del bot temporal
+            await temp_bot.close()
+            
+            logger.debug(f"✅ Mensaje enviado inmediatamente: {message[:50]}...")
+            
         except Exception as e:
-            logger.error(f"❌ Error enviando mensaje: {e}")
-            raise
+            logger.error(f"❌ Error enviando mensaje inmediato: {e}")
+            # Si falla el envío inmediato, agregar a cola
+            await self.send_message(message, parse_mode, priority=1)
     
     async def start_polling(self):
         """Iniciar polling del bot con manejo robusto de errores"""
@@ -82,10 +145,6 @@ class TelegramBot:
             # Configurar polling con timeout más largo y manejo de errores
             await self.application.updater.start_polling(
                 timeout=60,  # 60 segundos de timeout
-                read_timeout=60,
-                write_timeout=60,
-                connect_timeout=60,
-                pool_timeout=60,
                 drop_pending_updates=True  # Ignorar actualizaciones pendientes
             )
             
