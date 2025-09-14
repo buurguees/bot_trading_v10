@@ -390,24 +390,22 @@ class EnhancedTradingBot:
             }
     
     async def _run_enhanced_training(self, days_back: int):
-        """Ejecuta el entrenamiento mejorado"""
+        """Ejecuta el entrenamiento mejorado con datos reales"""
         try:
-            self.logger.info(f"🚀 Ejecutando entrenamiento mejorado ({days_back} días)")
+            self.logger.info(f"🚀 Ejecutando entrenamiento mejorado con DATOS REALES ({days_back} días)")
             
-            # Usar el sistema de entrenamiento mejorado
-            from scripts.training.integrate_enhanced_system import run_enhanced_historical_training
+            # Usar el sistema de entrenamiento histórico real
+            from scripts.training.train_historical import TrainHistoricalEnterprise
             
-            # Obtener credenciales de Telegram
-            bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
-            chat_id = os.getenv('TELEGRAM_CHAT_ID')
+            # Crear entrenador con datos reales
+            progress_id = f"enhanced_train_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            trainer = TrainHistoricalEnterprise(progress_id, training_mode='fast')
             
-            # Ejecutar entrenamiento
-            results = await run_enhanced_historical_training(
-                days_back=days_back,
-                telegram_enabled=bool(self.telegram_reporter),
-                bot_token=bot_token,
-                chat_id=chat_id
-            )
+            # Inicializar el entrenador
+            await trainer.initialize()
+            
+            # Ejecutar entrenamiento con datos reales
+            results = await trainer.execute()
             
             # Procesar resultados
             if 'error' in results:

@@ -1,0 +1,77 @@
+{
+  "session_id": "train_20250914_144716",
+  "start_time": "2025-09-14T14:47:16.121965",
+  "end_time": "2025-09-14T14:47:47.490364",
+  "total_cycles": 8,
+  "total_trades": 204,
+  "total_pnl_usdt": 318.3132919704795,
+  "best_cycle": {
+    "cycle_id": 1,
+    "pnl": 245.6659588498395
+  },
+  "worst_cycle": {
+    "cycle_id": 7,
+    "pnl": 0.0
+  },
+  "agent_performance": {
+    "BTCUSDT": {
+      "total_pnl": 225.98221999999953,
+      "total_trades": 1,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "ETHUSDT": {
+      "total_pnl": 81.67958000000007,
+      "total_trades": 9,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "SOLUSDT": {
+      "total_pnl": 10.341680000000013,
+      "total_trades": 23,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "ADAUSDT": {
+      "total_pnl": 0.03622720000000006,
+      "total_trades": 20,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "XRPUSDT": {
+      "total_pnl": 0.06006760000000009,
+      "total_trades": 10,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "DOGEUSDT": {
+      "total_pnl": 0.03128342000000003,
+      "total_trades": 58,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "TRUMPUSDT": {
+      "total_pnl": 0.18223200000000034,
+      "total_trades": 10,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "PEPEUSDT": {
+      "total_pnl": 1.169840000000001e-06,
+      "total_trades": 52,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    },
+    "SHIBUSDT": {
+      "total_pnl": 5.806400000000004e-07,
+      "total_trades": 21,
+      "win_rate": 100.0,
+      "avg_quality": 93.5
+    }
+  },
+  "config": {
+    "days_back": 7,
+    "cycle_size_hours": 24,
+    "max_concurrent_agents": 8
+  }
+}

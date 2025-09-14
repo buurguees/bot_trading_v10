@@ -207,8 +207,13 @@ class OptimizedTrainingPipeline:
                 self.session.completed_cycles = cycle_id + 1
                 progress_pct = (self.session.completed_cycles / self.session.total_cycles) * 100
                 
-                if cycle_id % 10 == 0:  # Log cada 10 ciclos
+                # Log cada 10 ciclos
+                if cycle_id % 10 == 0:
                     self.logger.info(f"📊 Progreso: {cycle_id + 1}/{self.session.total_cycles} ({progress_pct:.1f}%)")
+                
+                # Enviar reporte de progreso cada 10%
+                if int(progress_pct) % 10 == 0 and progress_pct > 0:
+                    await self._send_progress_report(cycle_id, progress_pct, cycle_result)
             
             # 5. Generar reporte final
             final_report = await self._generate_final_report(cycle_results)
@@ -760,6 +765,66 @@ class OptimizedTrainingPipeline:
             
         except Exception as e:
             self.logger.error(f"❌ Error manejando error de entrenamiento: {e}")
+    
+    async def _send_progress_report(self, cycle_id: int, progress_pct: float, cycle_result: CycleData):
+        """Envía reporte de progreso cada 10%"""
+        try:
+            if not self.telegram_reporter:
+                return
+            
+            # Calcular tiempo estimado restante
+            cycles_remaining = self.session.total_cycles - self.session.completed_cycles
+            avg_cycle_time = getattr(self.session, 'total_cycle_time', 0) / max(self.session.completed_cycles, 1)
+            estimated_time_remaining = cycles_remaining * avg_cycle_time
+            
+            # Formatear tiempo
+            hours = int(estimated_time_remaining // 3600)
+            minutes = int((estimated_time_remaining % 3600) // 60)
+            time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
+            
+            # Crear barra de progreso
+            bar_length = 20
+            filled = int(progress_pct / 100 * bar_length)
+            bar = "█" * filled + "░" * (bar_length - filled)
+            
+            # Obtener métricas del ciclo si está disponible
+            pnl_info = ""
+            trades_info = ""
+            if cycle_result and cycle_result.portfolio_metrics:
+                pnl = cycle_result.portfolio_metrics.total_pnl_usdt
+                trades = cycle_result.portfolio_metrics.total_trades
+                pnl_emoji = "📈" if pnl > 0 else "📉" if pnl < 0 else "➡️"
+                pnl_info = f"{pnl_emoji} PnL: {pnl:+.2f} USDT"
+                trades_info = f"🎯 Trades: {trades}"
+            
+            # Crear mensaje de progreso
+            message = f"""
+🔄 <b>PROGRESO DEL ENTRENAMIENTO</b>
+
+📊 <b>Progreso:</b> {progress_pct:.0f}% {bar}
+⏱️ <b>Ciclo:</b> {cycle_id + 1}/{self.session.total_cycles}
+⏰ <b>Tiempo restante:</b> ~{time_str}
+
+{trades_info}
+{pnl_info}
+
+💾 <b>Memoria:</b> {self.memory_monitor.get_memory_usage():.1f} MB
+🔄 <b>Velocidad:</b> {avg_cycle_time:.1f}s/ciclo
+
+⏰ <b>Tiempo:</b> {datetime.now().strftime('%d/%m %H:%M:%S')}
+            """.strip()
+            
+            # Enviar mensaje
+            await self.telegram_reporter.send_performance_alert(
+                "PROGRESO",
+                message,
+                "INFO"
+            )
+            
+            self.logger.info(f"📱 Reporte de progreso enviado: {progress_pct:.0f}%")
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error enviando reporte de progreso: {e}")
 
 class MemoryMonitor:
     """Monitor de memoria para el pipeline"""

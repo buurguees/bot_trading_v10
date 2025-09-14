@@ -223,13 +223,13 @@ class TelegramTradeReporter:
             agent_section = "📊 **PERFORMANCE POR AGENTE:**\n"
             for symbol, metrics in agent_summaries.items():
                 pnl_emoji = "📈" if metrics['pnl'] > 0 else "📉"
-                quality_emoji = self._get_quality_emoji(metrics['avg_quality'])
+                quality_emoji = self._get_quality_emoji(metrics.get('avg_quality_score', 5.0))
                 
                 agent_section += f"""
 **{symbol}:** {pnl_emoji} {quality_emoji}
-├ PnL: {metrics['pnl']:+.2f} USDT ({metrics['pnl_pct']:+.1f}%)
+├ PnL: {metrics['pnl']:+.2f} USDT
 ├ Trades: {metrics['trades']} (WR: {metrics['win_rate']:.0%})
-└ DD: {metrics['drawdown']:.1f}%
+└ DD: {metrics.get('drawdown', 0.0):.1f}%
                 """.strip() + "\n"
             
             # Construir mensaje completo

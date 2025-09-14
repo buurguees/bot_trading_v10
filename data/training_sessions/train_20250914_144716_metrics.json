@@ -1,0 +1,96 @@
+{
+  "initial_capital": 1000.0,
+  "metrics_history": [
+    {
+      "cycle_id": 0,
+      "timestamp": "2025-09-14T14:47:17.585736",
+      "total_pnl_usdt": 2.165383810780002,
+      "portfolio_return_pct": 0.21653838107800022,
+      "sharpe_ratio": 437788616236990.06,
+      "max_drawdown_pct": 0.0,
+      "win_rate": 1.0,
+      "correlation_avg": NaN,
+      "diversification_score": 0.04686585846477764,
+      "total_trades": 26,
+      "avg_quality_score": 93.5
+    },
+    {
+      "cycle_id": 1,
+      "timestamp": "2025-09-14T14:47:21.571202",
+      "total_pnl_usdt": 245.6659588498395,
+      "portfolio_return_pct": 24.56659588498395,
+      "sharpe_ratio": 436755453414900.1,
+      "max_drawdown_pct": 0.0,
+      "win_rate": 1.0,
+      "correlation_avg": NaN,
+      "diversification_score": 0.14870186981561073,
+      "total_trades": 34,
+      "avg_quality_score": 93.5
+    },
+    {
+      "cycle_id": 2,
+      "timestamp": "2025-09-14T14:47:26.433969",
+      "total_pnl_usdt": 1.3483026419400033,
+      "portfolio_return_pct": 0.13483026419400032,
+      "sharpe_ratio": 500561041647899.75,
+      "max_drawdown_pct": 0.0,
+      "win_rate": 1.0,
+      "correlation_avg": NaN,
+      "diversification_score": 0.030822887163799217,
+      "total_trades": 8,
+      "avg_quality_score": 93.5
+    },
+    {
+      "cycle_id": 3,
+      "timestamp": "2025-09-14T14:47:28.418912",
+      "total_pnl_usdt": 9.261627868480033,
+      "portfolio_return_pct": 0.9261627868480035,
+      "sharpe_ratio": 503508289691060.7,
+      "max_drawdown_pct": 0.0,
+      "win_rate": 1.0,
+      "correlation_avg": NaN,
+      "diversification_score": 0.09317706004640802,
+      "total_trades": 13,
+      "avg_quality_score": 93.5
+    },
+    {
+      "cycle_id": 4,
+      "timestamp": "2025-09-14T14:47:31.250585",
+      "total_pnl_usdt": 29.866426787879966,
+      "portfolio_return_pct": 2.9866426787879967,
+      "sharpe_ratio": 441392051409799.4,
+      "max_drawdown_pct": 0.0,
+      "win_rate": 1.0,
+      "correlation_avg": NaN,
+      "diversification_score": 0.1708030044458123,
+      "total_trades": 23,
+      "avg_quality_score": 93.5
+    },
+    {
+      "cycle_id": 5,
+      "timestamp": "2025-09-14T14:47:35.156982",
+      "total_pnl_usdt": 28.50131835954002,
+      "portfolio_return_pct": 2.8501318359540018,
+      "sharpe_ratio": 450779446540844.0,
+      "max_drawdown_pct": 0.0,
+      "win_rate": 1.0,
+      "correlation_avg": NaN,
+      "diversification_score": 0.009500609037103813,
+      "total_trades": 71,
+      "avg_quality_score": 93.5
+    },
+    {
+      "cycle_id": 6,
+      "timestamp": "2025-09-14T14:47:44.214931",
+      "total_pnl_usdt": 1.5042736520199997,
+      "portfolio_return_pct": 0.15042736520199998,
+      "sharpe_ratio": 469546210479660.94,
+      "max_drawdown_pct": 0.0,
+      "win_rate": 1.0,
+      "correlation_avg": NaN,
+      "diversification_score": 0.03722240313989622,
+      "total_trades": 29,
+      "avg_quality_score": 93.5
+    }
+  ]
+}
