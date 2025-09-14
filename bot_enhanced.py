@@ -604,16 +604,14 @@ class EnhancedTradingBot:
             except Exception as e:
                 self.logger.warning(f"⚠️ No se pudo enviar mensaje de comandos: {e}")
 
-            # 8. Iniciar polling de Telegram
+            # 8. Iniciar polling de Telegram EN PARALELO
             self.logger.info("🔄 Iniciando polling de Telegram...")
-            try:
-                await self.telegram_bot.start_polling()
-            except Exception as e:
-                self.logger.error(f"❌ Error en polling de Telegram: {e}")
-                self.logger.warning("⚠️ Continuando sin Telegram - el bot funcionará sin interfaz de chat")
-
-            # Esperar a que la tarea de recolección termine
-            await collection_task
+            
+            # Crear tarea para polling de Telegram
+            telegram_task = asyncio.create_task(self._start_telegram_polling())
+            
+            # Esperar a que ambas tareas terminen
+            await asyncio.gather(collection_task, telegram_task)
                 
         except KeyboardInterrupt:
             self.logger.info("⚠️ Bot detenido por el usuario")
@@ -621,6 +619,14 @@ class EnhancedTradingBot:
             self.logger.error(f"❌ Error crítico: {e}")
             import traceback
             traceback.print_exc()
+    
+    async def _start_telegram_polling(self):
+        """Inicia el polling de Telegram en una tarea separada"""
+        try:
+            await self.telegram_bot.start_polling()
+        except Exception as e:
+            self.logger.error(f"❌ Error en polling de Telegram: {e}")
+            self.logger.warning("⚠️ Continuando sin Telegram - el bot funcionará sin interfaz de chat")
     
     async def _start_real_time_collection(self, collection_ready: asyncio.Event):
         """Inicia la recolección en tiempo real (igual que en bot.py original)"""
