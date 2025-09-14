@@ -11,11 +11,12 @@ Scripts disponibles:
 - state_manager: Gestión de estado del entrenamiento
 """
 
-# from .train_historical import *  # Archivo no existe
+from .train_historical import *
 from .train_live import *
 from .state_manager import *
 
 __all__ = [
+    'train_historical',
     'train_live',
     'state_manager'
 ]

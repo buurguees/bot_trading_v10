@@ -214,6 +214,7 @@ async def main():
             await telegram_bot.start_polling()
         except Exception as e:
             logger.error(f"❌ Error en polling de Telegram: {e}")
+            logger.warning("⚠️ Continuando sin Telegram - el bot funcionará sin interfaz de chat")
             # Continuar sin Telegram si hay problemas de conexión
 
         # Esperar a que la tarea de recolección termine

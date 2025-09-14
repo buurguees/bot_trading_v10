@@ -61,66 +61,84 @@ class TelegramBot:
             raise
     
     async def start_polling(self):
-        """Iniciar polling del bot"""
+        """Iniciar polling del bot con manejo robusto de errores"""
         try:
             logger.info("🔄 Iniciando polling de Telegram...")
             
             # ENVIAR MENSAJE DE INICIO (conectando)
-            await self.send_message(
-                "🚀 <b>Bot Trading v10 Enterprise</b>\n\n"
-                "✅ Sistema iniciado\n"
-                "🔄 Conectando con exchange mientras se descargan datos..."
-            )
+            try:
+                await self.send_message(
+                    "🚀 <b>Bot Trading v10 Enterprise</b>\n\n"
+                    "✅ Sistema iniciado\n"
+                    "🔄 Conectando con exchange mientras se descargan datos..."
+                )
+            except Exception as e:
+                logger.warning(f"⚠️ No se pudo enviar mensaje inicial: {e}")
             
-            # INICIAR POLLING
+            # INICIAR POLLING CON MANEJO DE TIMEOUT
             await self.application.initialize()
             await self.application.start()
-            await self.application.updater.start_polling()
+            
+            # Configurar polling con timeout más largo y manejo de errores
+            await self.application.updater.start_polling(
+                timeout=60,  # 60 segundos de timeout
+                read_timeout=60,
+                write_timeout=60,
+                connect_timeout=60,
+                pool_timeout=60,
+                drop_pending_updates=True  # Ignorar actualizaciones pendientes
+            )
             
             logger.info("✅ Bot de Telegram funcionando correctamente")
             
-            # Esperar signal y enviar comandos (handlers lo maneja por comando, pero aquí await general si needed)
+            # Esperar signal y enviar comandos
             if self.collection_ready:
-                await self.collection_ready.wait()
-                await self.send_message(
-                    "🚀 <b>Sistema Completamente Operativo</b>\n\n"
-                    "<b>📊 Comandos de Datos (Funcionando)</b>\n"
-                    "/download_data — Verificar y descargar histórico\n"
-                    "/data_status — Estado de datos y sincronización\n"
-                    "/analyze_data — Analizar y reparar datos\n"
-                    "/verify_align — Verificar alineación temporal\n"
-                    "/repair_history — Reparación completa de datos\n"
-                    "/sync_symbols — Sincronización paralela de símbolos\n\n"
-                    "<b>🎓 Comandos de Entrenamiento</b>\n"
-                    "/train_hist — Entrenamiento histórico paralelo\n"
-                    "/train_live — Entrenamiento en tiempo real\n"
-                    "/stop_train — Detener entrenamiento\n\n"
-                    "<b>🤖 Comandos del Bot</b>\n"
-                    "/status — Estado general del sistema\n"
-                    "/health — Verificación de salud del bot\n"
-                    "/positions — Posiciones abiertas en Bitget\n"
-                    "/balance — Balance de la cuenta\n\n"
-                    "<b>📈 Comandos de Trading</b>\n"
-                    "/start_trading — Iniciar trading automático\n"
-                    "/stop_trading — Detener trading\n"
-                    "/emergency_stop — Parada de emergencia\n\n"
-                    "💡 Usa /help para ver todos los comandos disponibles."
-                )
+                try:
+                    await self.collection_ready.wait()
+                    await self.send_message(
+                        "🚀 <b>Sistema Completamente Operativo</b>\n\n"
+                        "<b>📊 Comandos de Datos (Funcionando)</b>\n"
+                        "/download_data — Verificar y descargar histórico\n"
+                        "/data_status — Estado de datos y sincronización\n"
+                        "/analyze_data — Analizar y reparar datos\n"
+                        "/verify_align — Verificar alineación temporal\n"
+                        "/repair_history — Reparación completa de datos\n"
+                        "/sync_symbols — Sincronización paralela de símbolos\n\n"
+                        "<b>🎓 Comandos de Entrenamiento</b>\n"
+                        "/train_hist — Entrenamiento histórico paralelo\n"
+                        "/train_live — Entrenamiento en tiempo real\n"
+                        "/stop_train — Detener entrenamiento\n\n"
+                        "<b>🤖 Comandos del Bot</b>\n"
+                        "/status — Estado general del sistema\n"
+                        "/health — Verificación de salud del bot\n"
+                        "/positions — Posiciones abiertas en Bitget\n"
+                        "/balance — Balance de la cuenta\n\n"
+                        "<b>📈 Comandos de Trading</b>\n"
+                        "/start_trading — Iniciar trading automático\n"
+                        "/stop_trading — Detener trading\n"
+                        "/emergency_stop — Parada de emergencia\n\n"
+                        "💡 Usa /help para ver todos los comandos disponibles."
+                    )
+                except Exception as e:
+                    logger.warning(f"⚠️ No se pudo enviar mensaje de comandos: {e}")
             
-            # MANTENER VIVO
+            # MANTENER VIVO CON MANEJO DE ERRORES
             try:
                 while True:
                     await asyncio.sleep(1)
             except KeyboardInterrupt:
                 logger.info("⚠️ Deteniendo bot por interrupción de usuario...")
+            except Exception as e:
+                logger.error(f"❌ Error en bucle principal: {e}")
                 
         except Exception as e:
             logger.error(f"❌ Error en polling: {e}")
-            raise
+            # No hacer raise para evitar que el bot se detenga completamente
         finally:
-            # LIMPIAR RECURSOS
+            # LIMPIAR RECURSOS DE FORMA SEGURA
             try:
-                await self.application.updater.stop()
+                if hasattr(self.application, 'updater') and self.application.updater.running:
+                    await self.application.updater.stop()
                 await self.application.stop()
                 await self.application.shutdown()
                 logger.info("✅ Bot detenido correctamente")
