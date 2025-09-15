@@ -1,0 +1,23 @@
+{
+  "session_id": "train_hist_20250915_154552",
+  "updated_at": "2025-09-15T15:45:53.809229",
+  "symbol": "ADAUSDT",
+  "total_trades": 0,
+  "win_rate": 0.0,
+  "pnl_pct": 0.0,
+  "avg_leverage_used": null,
+  "top_strategies": [
+    [
+      "RSI_Divergence",
+      95
+    ],
+    [
+      "MA_Crossover",
+      12
+    ],
+    [
+      "Bollinger_Bounce",
+      98
+    ]
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "session_id": "train_hist_20250915_125236",
+  "global_performance": {
+    "total_balance": 10748.761858217582,
+    "avg_balance_per_agent": 1343.5952322771977,
+    "total_pnl": 2748.761858217582,
+    "avg_pnl_per_agent": 343.59523227719774,
+    "avg_pnl_pct": 34.35952322771978,
+    "total_trades": 2537,
+    "total_long_trades": 1540,
+    "total_short_trades": 997,
+    "winning_trades": 1736,
+    "losing_trades": 801,
+    "global_win_rate": 68.42727631060306,
+    "max_drawdown": 22.648559989325335,
+    "best_performer": {
+      "symbol": "PEPEUSDT",
+      "pnl_pct": 64.74561854756051
+    },
+    "worst_performer": {
+      "symbol": "ADAUSDT",
+      "pnl_pct": 12.483439418739456
+    },
+    "active_agents": 8
+  },
+  "symbol_performance": {
+    "BTCUSDT": {
+      "balance": 1366.8276379527979,
+      "pnl": 366.82763795279794,
+      "pnl_pct": 36.6827637952798,
+      "trades": 382,
+      "win_rate": 64.65968586387434,
+      "sharpe_ratio": 0,
+      "max_drawdown": 17.62289324582693,
+      "avg_leverage_used": null
+    },
+    "ETHUSDT": {
+      "balance": 1135.5376156530506,
+      "pnl": 135.5376156530507,
+      "pnl_pct": 13.55376156530507,
+      "trades": 166,
+      "win_rate": 60.8433734939759,
+      "sharpe_ratio": 0,
+      "max_drawdown": 6.520573399153093,
+      "avg_leverage_used": null
+    },
+    "SOLUSDT": {
+      "balance": 1245.796951883517,
+      "pnl": 245.79695188351715,
+      "pnl_pct": 24.579695188351714,
+      "trades": 325,
+      "win_rate": 62.153846153846146,
+      "sharpe_ratio": 0,
+      "max_drawdown": 12.868443928911509,
+      "avg_leverage_used": null
+    },
+    "ADAUSDT": {
+      "balance": 1124.8343941873945,
+      "pnl": 124.83439418739455,
+      "pnl_pct": 12.483439418739456,
+      "trades": 415,
+      "win_rate": 60.0,
+      "sharpe_ratio": 0,
+      "max_drawdown": 8.350712028116135,
+      "avg_leverage_used": null
+    },
+    "XRPUSDT": {
+      "balance": 1318.1253191760911,
+      "pnl": 318.12531917609124,
+      "pnl_pct": 31.81253191760912,
+      "trades": 212,
+      "win_rate": 60.37735849056604,
+      "sharpe_ratio": 0,
+      "max_drawdown": 5.9300255974306015,
+      "avg_leverage_used": null
+    },
+    "DOGEUSDT": {
+      "balance": 1400.8948267815956,
+      "pnl": 400.89482678159555,
+      "pnl_pct": 40.089482678159555,
+      "trades": 120,
+      "win_rate": 70.83333333333334,
+      "sharpe_ratio": 0,
+      "max_drawdown": 22.648559989325335,
+      "avg_leverage_used": null
+    },
+    "PEPEUSDT": {
+      "balance": 1647.4561854756053,
+      "pnl": 647.4561854756051,
+      "pnl_pct": 64.74561854756051,
+      "trades": 425,
+      "win_rate": 77.88235294117646,
+      "sharpe_ratio": 0,
+      "max_drawdown": 19.08602861568968,
+      "avg_leverage_used": null
+    },
+    "SHIBUSDT": {
+      "balance": 1509.2889271075296,
+      "pnl": 509.2889271075295,
+      "pnl_pct": 50.928892710752955,
+      "trades": 492,
+      "win_rate": 79.8780487804878,
+      "sharpe_ratio": 0,
+      "max_drawdown": 7.0207615333794715,
+      "avg_leverage_used": null
+    }
+  },
+  "telegram_summary": "\ud83c\udfaf <b>Entrenamiento Hist\u00f3rico Completado</b>\n\n\ud83d\udcca <b>Resumen Global:</b>\n\u2022 Duraci\u00f3n: 0.1 minutos\n\u2022 Agentes: 8\n\u2022 Total Trades: 2,537  (L:1,540 / S:997)\n\n\ud83d\udcb0 <b>Performance Agregada:</b>\n\u2022 PnL Promedio: $+343.60 (+34.36%)\n\u2022 Win Rate Global: 68.4%\n\u2022 Max Drawdown: 22.65%\n\n\ud83d\udca1 <b>Rentabilidad (\u00faltimo ciclo):</b> RENTABLE  (PnL\u0304 +20.76, WR\u0304 65.2%)\n\n\n\ud83d\udcc8 <b>Performance por S\u00edmbolo (ordenado):</b>\n1. <b>PEPEUSDT</b>: +64.75% (425 trades, 77.9% WR)\n2. <b>SHIBUSDT</b>: +50.93% (492 trades, 79.9% WR)\n3. <b>DOGEUSDT</b>: +40.09% (120 trades, 70.8% WR)\n4. <b>BTCUSDT</b>: +36.68% (382 trades, 64.7% WR)\n5. <b>XRPUSDT</b>: +31.81% (212 trades, 60.4% WR)\n6. <b>SOLUSDT</b>: +24.58% (325 trades, 62.2% WR)\n7. <b>ETHUSDT</b>: +13.55% (166 trades, 60.8% WR)\n8. <b>ADAUSDT</b>: +12.48% (415 trades, 60.0% WR)\n\n\ud83d\udcbe <b>Datos Guardados:</b>\n\u2022 Estrategias por agente: <code>data/agents/{symbol}/strategies.json</code>\n\u2022 Runs completos: <code>data/training_sessions/train_hist_20250915_125236/</code>\n\u2022 Resumen ejecutivo: <code>data/training_sessions/train_hist_20250915_125236/executive_summary.md</code>"
+}

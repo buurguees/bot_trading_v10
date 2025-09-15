@@ -1,0 +1,23 @@
+{
+  "session_id": "train_hist_20250915_122436",
+  "updated_at": "2025-09-15T12:25:16.459588",
+  "symbol": "TRUMPUSDT",
+  "total_trades": 115,
+  "win_rate": 59.130434782608695,
+  "pnl_pct": 37.61269488813671,
+  "avg_leverage_used": null,
+  "top_strategies": [
+    [
+      "RSI_Divergence",
+      100
+    ],
+    [
+      "MA_Crossover",
+      37
+    ],
+    [
+      "Bollinger_Bounce",
+      69
+    ]
+  ]
+}
