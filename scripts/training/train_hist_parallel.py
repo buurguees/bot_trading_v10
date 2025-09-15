@@ -905,7 +905,7 @@ class TrainHistParallel:
         # Añadir métricas globales adicionales
         initial_balance_total = self.initial_balance * len(self.symbols)
         final_balance_total = sum(running_balance_per_symbol.values())
-        objective_balance_total = self.target_balance * len(self.symbols)
+        objective_balance_total = self.target_balance  # Objetivo por agente, no total
         avg_bars_per_trade = sum_bars_per_trade / count_bars_per_trade if count_bars_per_trade > 0 else 0
         
         return {
@@ -1230,7 +1230,7 @@ class TrainHistParallel:
             # Calcular métricas adicionales
             total_balance = global_summary.get('total_balance', 0)
             initial_balance_total = self.initial_balance * len(self.symbols)
-            objective_balance_total = self.target_balance * len(self.symbols)
+            objective_balance_total = self.target_balance  # Objetivo por agente, no total
             
             # Sharpe Ratio aproximado
             sharpe_ratio = (avg_pnl_pct / max_dd) if max_dd > 0 else 0
@@ -1269,7 +1269,7 @@ class TrainHistParallel:
 
 🎯 <b>Objetivos:</b>
 • ROI Objetivo: {self.target_roi_pct:.0f}%
-• Progreso: {((total_balance / objective_balance_total) * 100):.1f}%
+• Progreso: {((total_balance / (objective_balance_total * len(self.symbols))) * 100):.1f}%
 
 🏆 <b>Top 3 Performers:</b>"""
             
@@ -1288,6 +1288,20 @@ class TrainHistParallel:
                     
                 emoji = "🥇" if i == 1 else "🥈" if i == 2 else "🥉"
                 message += f"\n{emoji} <b>{symbol}</b>: {pnl_pct:+.2f}% ({trades} trades, {win_rate:.1f}% WR)"
+            
+            # Agregar símbolos más activos
+            message += f"""
+
+🔥 <b>Símbolos Más Activos:</b>"""
+            
+            # Ordenar por número de trades para Telegram
+            sorted_by_trades = sorted(symbol_metrics.items(), key=lambda x: x[1].get('trades', 0) if isinstance(x[1], dict) else x[1].total_trades, reverse=True)
+            
+            for i, (symbol, metrics) in enumerate(sorted_by_trades[:3], 1):
+                trades = metrics.get('trades', 0) if isinstance(metrics, dict) else metrics.total_trades
+                pnl_pct = metrics.get('pnl_pct', 0) if isinstance(metrics, dict) else metrics.total_pnl_pct
+                pnl_pct_sign = "+" if pnl_pct >= 0 else ""
+                message += f"\n• {i}. <b>{symbol}</b>: {trades} trades ({pnl_pct_sign}{pnl_pct:.2f}%)"
             
             message += f"""
 
@@ -1700,10 +1714,11 @@ class TrainHistParallel:
         
         # Mostrar progreso hacia objetivo
         final_balance = session_info.get('final_balance_total', 0)
-        target_balance = session_info.get('objective_balance_total', 0)
-        if target_balance > 0:
-            progress_pct = (final_balance / target_balance) * 100
-            print(f"- Progress to Target: {progress_pct:.1f}% (${final_balance:,.2f} / ${target_balance:,.2f})")
+        target_balance_per_agent = session_info.get('objective_balance_total', 0)
+        target_balance_total = target_balance_per_agent * len(self.symbols)
+        if target_balance_total > 0:
+            progress_pct = (final_balance / target_balance_total) * 100
+            print(f"- Progress to Target: {progress_pct:.1f}% (${final_balance:,.2f} / ${target_balance_total:,.2f})")
 
         # Mostrar ROI real vs objetivo
         initial_balance = session_info.get('initial_balance_total', 1)
