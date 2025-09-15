@@ -1,0 +1,48 @@
+{
+  "run_id": "run_20250914_201111",
+  "timestamp": "2025-09-14T22:34:55.542068",
+  "timeframe": "chronological",
+  "metrics": {
+    "pnl": 180.5000547000891,
+    "win_rate": 1.0,
+    "max_drawdown": 0.0,
+    "sharpe_ratio": 0.0,
+    "trade_count": 1,
+    "avg_daily_pnl": 0.5694008034703126,
+    "long_trades": 1,
+    "short_trades": 0,
+    "long_pnl": 180.5000547000891,
+    "short_pnl": 0,
+    "avg_leverage": 17.405455199149543,
+    "max_leverage": 17.405455199149543,
+    "avg_trade_duration": 0.016666666666666666,
+    "profit_factor": Infinity,
+    "avg_win": 180.5000547000891,
+    "avg_loss": 0.0,
+    "largest_win": 180.5000547000891,
+    "largest_loss": 0.0,
+    "consecutive_wins": 1,
+    "consecutive_losses": 0,
+    "volatility_avg": 0.011490650357123225,
+    "total_rewards": 4.0,
+    "execution_timeframes": [
+      "1m",
+      "5m"
+    ],
+    "analysis_timeframes": [
+      "1m",
+      "5m",
+      "15m",
+      "1h",
+      "4h",
+      "1d"
+    ],
+    "chronological_analysis": true
+  },
+  "model_path": "agents\\BTCUSDT\\model_run_20250914_201111.pkl",
+  "training_params": {
+    "model_type": "RandomForestRegressor",
+    "n_estimators": 100,
+    "max_depth": 10
+  }
+}

@@ -419,7 +419,7 @@ class UnifiedConfigManager:
         """
         try:
             # 1. Verificar override en user_settings
-            user_symbols = self._get_nested_value(self.user_settings, "trading_settings.symbols")
+            user_symbols = self._get_nested_value(self.user_settings, "data_settings.symbols")
             if user_symbols and isinstance(user_symbols, list):
                 return user_symbols
             

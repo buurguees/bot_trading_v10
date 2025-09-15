@@ -31,10 +31,24 @@ trading_settings:
 
 # Configuración de datos
 data_settings:
-  symbols: ["BTCUSDT", "ETHUSDT", "ADAUSDT"]
+  symbols: ["BTCUSDT", "ETHUSDT", "SOLUSDT", "ADAUSDT", "XRPUSDT", "DOGEUSDT", "TRUMPUSDT", "PEPEUSDT", "SHIBUSDT"]
   timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
   historical_days: 365
   real_time_enabled: true
+
+# Configuración de entrenamiento
+training_settings:
+  mode: "ultra_fast"  # ultra_fast, fast, normal, complete
+  ultra_fast_days: 30
+  fast_days: 90
+  normal_days: 180
+  complete_days: 365
+  # Configuración de entrenamiento incremental
+  incremental_training: true
+  chunk_size_days: 7  # Procesar 7 días por chunk
+  chunk_overlap_days: 1  # 1 día de solapamiento
+  max_memory_mb: 2048  # Límite de memoria en MB
+  progress_report_interval: 10  # Reportar cada 10%
 
 # Configuración de ML
 ml_settings:

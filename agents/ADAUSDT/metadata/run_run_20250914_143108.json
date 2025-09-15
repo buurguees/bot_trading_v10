@@ -1,0 +1,33 @@
+{
+  "run_id": "run_20250914_143108",
+  "timestamp": "2025-09-14T19:17:02.952899",
+  "timeframe": "chronological",
+  "metrics": {
+    "pnl": 0.0,
+    "win_rate": 0.0,
+    "max_drawdown": 0.0,
+    "sharpe_ratio": 0.0,
+    "trade_count": 0,
+    "avg_daily_pnl": 0.0,
+    "total_rewards": 0.0,
+    "execution_timeframes": [
+      "1m",
+      "5m"
+    ],
+    "analysis_timeframes": [
+      "1m",
+      "5m",
+      "15m",
+      "1h",
+      "4h",
+      "1d"
+    ],
+    "chronological_analysis": true
+  },
+  "model_path": "agents\\ADAUSDT\\model_run_20250914_143108.pkl",
+  "training_params": {
+    "model_type": "RandomForestRegressor",
+    "n_estimators": 100,
+    "max_depth": 10
+  }
+}

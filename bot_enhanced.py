@@ -463,8 +463,7 @@ class EnhancedTradingBot:
                 await self.telegram_bot.send_message(
                     "🤖 <b>Trading Bot v10 Enterprise MEJORADO</b>\n\n"
                     "🔄 Conectando con Exchange...",
-                    parse_mode="HTML",
-                    priority=1  # Alta prioridad para mensaje de inicio
+                    parse_mode="HTML"
                 )
                 self.logger.info("📨 Mensaje de inicio enviado a Telegram")
             except Exception as e:
@@ -481,16 +480,14 @@ class EnhancedTradingBot:
                 self.logger.error(f"❌ Error en análisis: {analysis_result.get('message')}")
                 await self.telegram_bot.send_message(
                     f"❌ <b>Error en análisis de datos</b>\n{analysis_result.get('message')}",
-                    parse_mode="HTML",
-                    priority=1  # Alta prioridad para errores
+                    parse_mode="HTML"
                 )
                 return False
             
             try:
                 await self.telegram_bot.send_message(
                     "✅ <b>Análisis de datos completado</b>\n" + "\n".join(analysis_result.get("report", [])),
-                    parse_mode="HTML",
-                    priority=2  # Media prioridad para reportes
+                    parse_mode="HTML"
                 )
             except Exception as e:
                 self.logger.warning(f"⚠️ No se pudo enviar reporte de análisis: {e}")
@@ -506,16 +503,14 @@ class EnhancedTradingBot:
                 self.logger.error(f"❌ Error en descarga: {download_result.get('message')}")
                 await self.telegram_bot.send_message(
                     f"❌ <b>Error en descarga de datos</b>\n{download_result.get('message')}",
-                    parse_mode="HTML",
-                    priority=1  # Alta prioridad para errores
+                    parse_mode="HTML"
                 )
                 return False
             
             try:
                 await self.telegram_bot.send_message(
                     f"✅ <b>Descarga completada</b>\n{download_result.get('total_downloaded', 0):,} registros",
-                    parse_mode="HTML",
-                    priority=2  # Media prioridad para reportes
+                    parse_mode="HTML"
                 )
             except Exception as e:
                 self.logger.warning(f"⚠️ No se pudo enviar reporte de descarga: {e}")
@@ -531,16 +526,14 @@ class EnhancedTradingBot:
                 self.logger.error(f"❌ Error en alineación: {align_result.get('message')}")
                 await self.telegram_bot.send_message(
                     f"❌ <b>Error en alineación</b>\n{align_result.get('message')}",
-                    parse_mode="HTML",
-                    priority=1  # Alta prioridad para errores
+                    parse_mode="HTML"
                 )
                 return False
             
             try:
                 await self.telegram_bot.send_message(
                     f"✅ <b>Alineación completada</b>\n{align_result.get('total_aligned', 0):,} registros",
-                    parse_mode="HTML",
-                    priority=2  # Media prioridad para reportes
+                    parse_mode="HTML"
                 )
             except Exception as e:
                 self.logger.warning(f"⚠️ No se pudo enviar reporte de alineación: {e}")
@@ -555,27 +548,28 @@ class EnhancedTradingBot:
                 self.logger.error(f"❌ Error en sincronización: {sync_result.get('message')}")
                 await self.telegram_bot.send_message(
                     f"❌ <b>Error en sincronización</b>\n{sync_result.get('message')}",
-                    parse_mode="HTML",
-                    priority=1  # Alta prioridad para errores
+                    parse_mode="HTML"
                 )
                 return False
             
             try:
                 await self.telegram_bot.send_message(
                     "✅ <b>Sincronización completada</b>\n" + sync_result.get("report", ""),
-                    parse_mode="HTML",
-                    priority=2  # Media prioridad para reportes
+                    parse_mode="HTML"
                 )
             except Exception as e:
                 self.logger.warning(f"⚠️ No se pudo enviar reporte de sincronización: {e}")
 
-            # 6. Confirmación final y recolección en tiempo real
+            # 6. Crear análisis pre-guardado si no existe
+            self.logger.info("🔍 Verificando análisis pre-guardado...")
+            await self._create_training_analysis_cache()
+            
+            # 7. Confirmación final y recolección en tiempo real
             self.logger.info("✅ Datos históricos procesados, iniciando recolección en tiempo real...")
             try:
                 await self.telegram_bot.send_message(
                     "✅ <b>Conexión establecida, datos actualizados</b>",
-                    parse_mode="HTML",
-                    priority=2  # Media prioridad para estado
+                    parse_mode="HTML"
                 )
             except Exception as e:
                 self.logger.warning(f"⚠️ No se pudo enviar mensaje de confirmación: {e}")
@@ -627,6 +621,70 @@ class EnhancedTradingBot:
         except Exception as e:
             self.logger.error(f"❌ Error en polling de Telegram: {e}")
             self.logger.warning("⚠️ Continuando sin Telegram - el bot funcionará sin interfaz de chat")
+    
+    async def _create_training_analysis_cache(self):
+        """Crea análisis pre-guardado para entrenamiento rápido"""
+        try:
+            from pathlib import Path
+            import json
+            
+            # Verificar si ya existe cache válido
+            cache_path = Path("data/training_analysis_cache.json")
+            if cache_path.exists():
+                try:
+                    with open(cache_path, 'r') as f:
+                        cached_data = json.load(f)
+                    
+                    # Verificar si el cache es válido (menos de 1 día)
+                    from datetime import datetime
+                    cache_date = datetime.fromisoformat(cached_data.get('created_at', ''))
+                    if (datetime.now() - cache_date).days < 1:
+                        self.logger.info("✅ Análisis pre-guardado ya existe y es válido")
+                        return True
+                except Exception as e:
+                    self.logger.warning(f"⚠️ Error leyendo cache: {e}")
+            
+            # Crear análisis pre-guardado
+            self.logger.info("🔍 Creando análisis pre-guardado...")
+            try:
+                await self.telegram_bot.send_message(
+                    "🔍 <b>Creando análisis pre-guardado...</b>\n⏳ Esto puede tomar unos minutos",
+                    parse_mode="HTML"
+                )
+            except Exception as e:
+                self.logger.warning(f"⚠️ No se pudo enviar mensaje de análisis: {e}")
+            
+            from scripts.training.train_historical import TrainHistoricalEnterprise
+            trainer = TrainHistoricalEnterprise(
+                progress_id="pre_cache_analysis",
+                training_mode="ultra_fast"
+            )
+            
+            # Inicializar trainer
+            if not await trainer.initialize():
+                self.logger.error("❌ Error inicializando trainer para análisis pre-guardado")
+                return False
+            
+            # Ejecutar análisis incremental
+            result = await trainer._execute_incremental_training()
+            
+            if result.get("status") == "success":
+                self.logger.info("✅ Análisis pre-guardado creado exitosamente")
+                try:
+                    await self.telegram_bot.send_message(
+                        f"✅ <b>Análisis pre-guardado creado</b>\n📊 Chunks procesados: {result.get('chunks_processed', 0)}",
+                        parse_mode="HTML"
+                    )
+                except Exception as e:
+                    self.logger.warning(f"⚠️ No se pudo enviar mensaje de confirmación: {e}")
+                return True
+            else:
+                self.logger.error(f"❌ Error creando análisis pre-guardado: {result.get('message')}")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"❌ Error en análisis pre-guardado: {e}")
+            return False
     
     async def _start_real_time_collection(self, collection_ready: asyncio.Event):
         """Inicia la recolección en tiempo real (igual que en bot.py original)"""

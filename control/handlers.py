@@ -179,16 +179,16 @@ class TradingBotHandlers:
         await update.message.reply_text(health_text, parse_mode='HTML')
 
     async def train_hist_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Inicia entrenamiento histórico"""
+        """Inicia entrenamiento histórico REAL"""
         if not self._check_authorization(update):
             await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
             return
         
         # Mensaje inicial
         await update.message.reply_text(
-            "🎓 <b>Iniciando Entrenamiento Histórico</b>\n\n"
+            "🎓 <b>Iniciando Entrenamiento Histórico REAL</b>\n\n"
             "🔄 Preparando sistema de entrenamiento...\n"
-            "📊 Cargando datos históricos...\n"
+            "📊 Cargando datos históricos REALES...\n"
             "🤖 Configurando agentes de trading...\n\n"
             "⏳ Este proceso puede tardar varios minutos.\n"
             "📱 Recibirás actualizaciones automáticamente.",
@@ -196,55 +196,49 @@ class TradingBotHandlers:
         )
         
         try:
-            # Intentar ejecutar entrenamiento real
-            logger.info("🎓 Iniciando entrenamiento histórico desde Telegram")
+            # Ejecutar entrenamiento REAL usando bot_enhanced
+            logger.info("🎓 Iniciando entrenamiento histórico REAL desde Telegram")
             
-            # Simular progreso (en producción, esto sería el entrenamiento real)
-            progress_updates = [
-                ("📥 Descargando datos históricos...", 10),
-                ("🔧 Procesando datos de mercado...", 25),
-                ("🧠 Entrenando modelos de IA...", 50),
-                ("📊 Validando predicciones...", 75),
-                ("💾 Guardando modelos entrenados...", 90),
-                ("✅ Entrenamiento completado!", 100)
-            ]
+            # Importar y usar el sistema de entrenamiento real
+            from bot_enhanced import EnhancedTradingBot
             
-            message = await update.message.reply_text(
-                "🎓 <b>Entrenamiento en Progreso</b>\n\n"
-                f"📊 Progreso: 0%\n"
-                f"⏳ Estado: Iniciando...",
-                parse_mode='HTML'
-            )
+            # Crear instancia del bot enhanced
+            bot_enhanced = EnhancedTradingBot()
+            await bot_enhanced.initialize()
             
-            for status, progress in progress_updates:
-                await asyncio.sleep(2)  # Simular tiempo de procesamiento
-                
-                progress_bar = "█" * (progress // 10) + "░" * (10 - progress // 10)
-                
-                await message.edit_text(
-                    f"🎓 <b>Entrenamiento en Progreso</b>\n\n"
-                    f"📊 Progreso: {progress}% [{progress_bar}]\n"
-                    f"⏳ Estado: {status}",
+            # Obtener días desde argumentos
+            days_back = 365  # Por defecto
+            if context.args and len(context.args) > 0:
+                try:
+                    days_back = int(context.args[0])
+                except ValueError:
+                    await update.message.reply_text("❌ Días inválidos. Usando 365 días por defecto.")
+            
+            # Ejecutar entrenamiento real
+            result = await bot_enhanced.handle_train_hist_command(days_back)
+            
+            if result['status'] == 'success':
+                await update.message.reply_text(
+                    f"✅ <b>Entrenamiento Histórico REAL Completado</b>\n\n"
+                    f"{result['message']}\n\n"
+                    f"🎯 <b>Estado:</b> Modelos entrenados con datos reales\n"
+                    f"💡 <b>Siguiente paso:</b> Usar /status para ver métricas",
+                    parse_mode='HTML'
+                )
+            else:
+                await update.message.reply_text(
+                    f"❌ <b>Error en Entrenamiento Real</b>\n\n"
+                    f"{result['message']}\n\n"
+                    f"🔧 <b>Soluciones:</b>\n"
+                    f"• Verificar configuración con /status\n"
+                    f"• Reintentar en unos minutos",
                     parse_mode='HTML'
                 )
             
-            # Mensaje final con resultados
-            await message.edit_text(
-                "✅ <b>Entrenamiento Histórico Completado</b>\n\n"
-                "📊 <b>Resultados:</b>\n"
-                "• Modelos entrenados: 4\n"
-                "• Precisión promedio: 87%\n"
-                "• Datos procesados: 365 días\n"
-                "• Tiempo total: ~5 minutos\n\n"
-                "🎯 <b>Estado:</b> Modelos listos para trading\n"
-                "💡 <b>Siguiente paso:</b> Usar /start_trading",
-                parse_mode='HTML'
-            )
-            
         except Exception as e:
-            logger.error(f"❌ Error en entrenamiento: {e}")
+            logger.error(f"❌ Error en entrenamiento real: {e}")
             await update.message.reply_text(
-                f"❌ <b>Error en Entrenamiento</b>\n\n"
+                f"❌ <b>Error en Entrenamiento Real</b>\n\n"
                 f"• Error: {str(e)[:100]}...\n"
                 f"• Timestamp: {datetime.now().strftime('%H:%M:%S')}\n\n"
                 f"🔧 <b>Soluciones:</b>\n"

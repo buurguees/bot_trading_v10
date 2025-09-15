@@ -108,6 +108,31 @@ class TrainHistoricalEnterprise:
     def _load_training_mode_config(self) -> Dict:
         """Carga la configuración del modo de entrenamiento"""
         try:
+            # Primero intentar cargar desde user_settings.yaml
+            user_training_settings = self.config_manager.get('training_settings', {})
+            if user_training_settings:
+                mode = user_training_settings.get('mode', 'fast')
+                days_key = f"{mode}_days"
+                data_period_days = user_training_settings.get(days_key, 90)
+                
+                # Configuración de chunks para entrenamiento incremental
+                chunk_config = {
+                    'data_period_days': data_period_days,
+                    'mode': mode,
+                    'incremental_training': True,
+                    'chunk_size_days': 7,  # Procesar 7 días por chunk
+                    'chunk_overlap_days': 1,  # 1 día de solapamiento entre chunks
+                    'max_memory_mb': 2048,  # Límite de memoria en MB
+                    'progress_report_interval': 10  # Reportar progreso cada 10%
+                }
+                
+                logger.info(f"⚙️ Modo de entrenamiento: {mode}")
+                logger.info(f"📅 Período de datos: {data_period_days} días")
+                logger.info(f"🔄 Entrenamiento incremental: {chunk_config['chunk_size_days']} días por chunk")
+                
+                return chunk_config
+            
+            # Fallback a configuración por defecto
             training_modes = self.config_manager.get('training_objectives', {}).get('training_modes', {})
             mode_config = training_modes.get(self.training_mode, training_modes.get('fast', {}))
             
@@ -119,7 +144,7 @@ class TrainHistoricalEnterprise:
             
         except Exception as e:
             logger.error(f"❌ Error cargando configuración de modo de entrenamiento: {e}")
-            return {}
+            return {'data_period_days': 90, 'mode': 'fast', 'incremental_training': True, 'chunk_size_days': 7}
     
     async def initialize(self) -> bool:
         """
@@ -1710,7 +1735,8 @@ class TrainHistoricalEnterprise:
                     'largest_loss': 0.0,
                     'consecutive_wins': 0,
                     'consecutive_losses': 0,
-                    'volatility_avg': 0.0
+                    'volatility_avg': 0.0,
+                    'total_rewards': 0.0
                 }
             
             # Filtrar trades cerrados
@@ -1738,7 +1764,8 @@ class TrainHistoricalEnterprise:
                     'largest_loss': 0.0,
                     'consecutive_wins': 0,
                     'consecutive_losses': 0,
-                    'volatility_avg': 0.0
+                    'volatility_avg': 0.0,
+                    'total_rewards': 0.0
                 }
             
             # Métricas básicas
@@ -1798,6 +1825,9 @@ class TrainHistoricalEnterprise:
             else:
                 avg_daily_pnl = 0
             
+            # Calcular total de rewards
+            total_rewards = sum(trade.get('reward', 0) for trade in closed_trades)
+            
             return {
                 'pnl': total_pnl,
                 'win_rate': win_rate,
@@ -1846,8 +1876,347 @@ class TrainHistoricalEnterprise:
                 'largest_loss': 0.0,
                 'consecutive_wins': 0,
                 'consecutive_losses': 0,
-                'volatility_avg': 0.0
+                'volatility_avg': 0.0,
+                'total_rewards': 0.0
             }
+    
+    def _create_time_chunks(self, start_date: datetime, end_date: datetime, chunk_size_days: int, overlap_days: int = 1) -> List[Dict]:
+        """Crea chunks de tiempo para entrenamiento incremental"""
+        try:
+            chunks = []
+            current_start = start_date
+            
+            while current_start < end_date:
+                current_end = min(
+                    current_start + timedelta(days=chunk_size_days),
+                    end_date
+                )
+                
+                chunks.append({
+                    'start': current_start,
+                    'end': current_end,
+                    'days': (current_end - current_start).days
+                })
+                
+                # Mover al siguiente chunk con solapamiento
+                current_start = current_end - timedelta(days=overlap_days)
+            
+            logger.info(f"📅 Creados {len(chunks)} chunks de {chunk_size_days} días cada uno")
+            return chunks
+            
+        except Exception as e:
+            logger.error(f"❌ Error creando chunks de tiempo: {e}")
+            return []
+    
+    def _get_memory_usage_mb(self) -> float:
+        """Obtiene el uso actual de memoria en MB"""
+        try:
+            import psutil
+            process = psutil.Process()
+            return process.memory_info().rss / 1024 / 1024
+        except ImportError:
+            # Fallback si psutil no está disponible
+            return 0.0
+        except Exception:
+            return 0.0
+    
+    async def _execute_incremental_training(self) -> Dict[str, Any]:
+        """Ejecuta entrenamiento incremental por chunks"""
+        try:
+            logger.info("🔄 Iniciando entrenamiento incremental")
+            
+            # Verificar si ya existe análisis pre-guardado
+            analysis_cache_path = Path("data/training_analysis_cache.json")
+            if analysis_cache_path.exists():
+                logger.info("📁 Cargando análisis pre-guardado...")
+                return await self._load_cached_analysis(analysis_cache_path)
+            
+            # Si no existe, crear análisis y guardarlo
+            logger.info("🔍 Creando análisis pre-guardado...")
+            return await self._create_and_cache_analysis()
+            
+        except Exception as e:
+            logger.error(f"❌ Error en entrenamiento incremental: {e}")
+            return {"status": "error", "message": str(e)}
+    
+    async def _load_cached_analysis(self, cache_path: Path) -> Dict[str, Any]:
+        """Carga análisis pre-guardado"""
+        try:
+            import json
+            with open(cache_path, 'r') as f:
+                cached_data = json.load(f)
+            
+            # Verificar si el cache es válido
+            cache_date = datetime.fromisoformat(cached_data.get('created_at', ''))
+            if (datetime.now() - cache_date).days > 1:  # Cache válido por 1 día
+                logger.info("⚠️ Cache expirado, recreando análisis...")
+                return await self._create_and_cache_analysis()
+            
+            logger.info("✅ Análisis pre-guardado cargado exitosamente")
+            return {
+                "status": "success",
+                "message": "Análisis pre-guardado cargado",
+                "report": f"✅ Análisis cargado desde cache - {cached_data.get('chunks_processed', 0)} chunks",
+                "joint_metrics": cached_data.get('joint_metrics', {}),
+                "run_id": self.run_id,
+                "chunks_processed": cached_data.get('chunks_processed', 0),
+                "cached": True
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error cargando cache: {e}")
+            return await self._create_and_cache_analysis()
+    
+    async def _create_and_cache_analysis(self) -> Dict[str, Any]:
+        """Crea análisis y lo guarda en cache"""
+        try:
+            # Configuración de chunks
+            chunk_size_days = self.training_config.get('chunk_size_days', 7)
+            overlap_days = self.training_config.get('chunk_overlap_days', 1)
+            max_memory_mb = self.training_config.get('max_memory_mb', 2048)
+            progress_interval = self.training_config.get('progress_report_interval', 10)
+            
+            # Crear chunks de tiempo
+            chunks = self._create_time_chunks(
+                self.start_date, 
+                self.end_date, 
+                chunk_size_days, 
+                overlap_days
+            )
+            
+            if not chunks:
+                logger.error("❌ No se pudieron crear chunks de tiempo")
+                return {"status": "error", "message": "Error creando chunks"}
+            
+            # Entrenar por chunks
+            all_results = {}
+            total_chunks = len(chunks)
+            
+            print(f"🔄 Creando análisis pre-guardado: {total_chunks} chunks de {chunk_size_days} días")
+            print(f"💾 Límite de memoria: {max_memory_mb} MB")
+            print("=" * 60)
+            
+            for chunk_idx, chunk in enumerate(chunks):
+                try:
+                    # Verificar memoria
+                    memory_usage = self._get_memory_usage_mb()
+                    if memory_usage > max_memory_mb:
+                        logger.warning(f"⚠️ Uso de memoria alto: {memory_usage:.1f} MB")
+                        # Limpiar memoria si es necesario
+                        import gc
+                        gc.collect()
+                    
+                    # Progreso
+                    progress = int((chunk_idx / total_chunks) * 100)
+                    if progress % progress_interval == 0:
+                        print(f"📊 Progreso: {progress}% - Chunk {chunk_idx + 1}/{total_chunks}")
+                        print(f"💾 Memoria: {memory_usage:.1f} MB")
+                        print(f"📅 Procesando: {chunk['start'].strftime('%Y-%m-%d')} a {chunk['end'].strftime('%Y-%m-%d')}")
+                        print("-" * 40)
+                    
+                    # Entrenar símbolos para este chunk
+                    chunk_results = {}
+                    for symbol in self.symbols:
+                        try:
+                            result = await self._train_symbol_chunk(symbol, chunk)
+                            chunk_results[symbol] = result
+                        except Exception as e:
+                            logger.error(f"❌ Error entrenando {symbol} en chunk {chunk_idx}: {e}")
+                            chunk_results[symbol] = {"status": "error", "message": str(e)}
+                    
+                    # Agregar resultados del chunk
+                    all_results[f"chunk_{chunk_idx}"] = {
+                        "period": f"{chunk['start'].strftime('%Y-%m-%d')} a {chunk['end'].strftime('%Y-%m-%d')}",
+                        "results": chunk_results
+                    }
+                    
+                    # Limpiar memoria después de cada chunk
+                    import gc
+                    gc.collect()
+                    
+                except Exception as e:
+                    logger.error(f"❌ Error procesando chunk {chunk_idx}: {e}")
+                    continue
+            
+            # Calcular métricas finales
+            final_metrics = self._calculate_final_metrics(all_results)
+            
+            # Guardar en cache
+            await self._save_analysis_cache(all_results, final_metrics, total_chunks)
+            
+            logger.info("✅ Análisis pre-guardado creado exitosamente")
+            return {
+                "status": "success",
+                "message": "Análisis pre-guardado creado",
+                "report": f"✅ Análisis pre-guardado creado - {total_chunks} chunks procesados",
+                "joint_metrics": final_metrics,
+                "run_id": self.run_id,
+                "chunks_processed": total_chunks,
+                "cached": False
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error creando análisis: {e}")
+            return {"status": "error", "message": str(e)}
+    
+    async def _save_analysis_cache(self, all_results: Dict, final_metrics: Dict, total_chunks: int):
+        """Guarda el análisis en cache"""
+        try:
+            import json
+            from datetime import datetime
+            
+            cache_data = {
+                "created_at": datetime.now().isoformat(),
+                "chunks_processed": total_chunks,
+                "joint_metrics": final_metrics,
+                "results": all_results,
+                "config": {
+                    "chunk_size_days": self.training_config.get('chunk_size_days', 7),
+                    "overlap_days": self.training_config.get('chunk_overlap_days', 1),
+                    "max_memory_mb": self.training_config.get('max_memory_mb', 2048)
+                }
+            }
+            
+            cache_path = Path("data/training_analysis_cache.json")
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(cache_path, 'w') as f:
+                json.dump(cache_data, f, indent=2, default=str)
+            
+            logger.info(f"💾 Análisis guardado en cache: {cache_path}")
+            
+        except Exception as e:
+            logger.error(f"❌ Error guardando cache: {e}")
+    
+    async def _train_symbol_chunk(self, symbol: str, chunk: Dict) -> Dict[str, Any]:
+        """Entrena un símbolo para un chunk específico"""
+        try:
+            # Cargar datos solo para este chunk
+            multi_timeframe_data = {}
+            for timeframe in self.timeframes:
+                data = await self._load_symbol_data_chunk(symbol, timeframe, chunk['start'], chunk['end'])
+                if data is not None and not data.empty:
+                    multi_timeframe_data[timeframe] = data
+            
+            if not multi_timeframe_data:
+                return {"status": "error", "message": "No hay datos para este chunk"}
+            
+            # Crear timeline cronológico para este chunk
+            chronological_data = self._create_chronological_timeline(multi_timeframe_data)
+            
+            if chronological_data.empty:
+                return {"status": "error", "message": "No se pudo crear timeline cronológico"}
+            
+            # Entrenar modelo para este chunk
+            X, y = self._prepare_training_data(chronological_data)
+            if X.empty or y.empty:
+                return {"status": "error", "message": "No hay datos de entrenamiento válidos"}
+            
+            model = RandomForestRegressor(n_estimators=50, random_state=42)
+            model.fit(X, y)
+            
+            # Simular trading para este chunk
+            execution_timeframes = [tf for tf in self.timeframes if tf in ['1m', '5m']]
+            trades = self._simulate_hierarchical_trading(chronological_data, model, symbol, execution_timeframes)
+            
+            # Calcular métricas
+            if trades:
+                metrics = self._calculate_metrics(trades, chronological_data)
+                metrics['total_rewards'] = sum(t.get('reward', 0) for t in trades)
+                metrics['execution_timeframes'] = execution_timeframes
+                metrics['analysis_timeframes'] = list(multi_timeframe_data.keys())
+                metrics['chronological_analysis'] = True
+                metrics['chunk_period'] = f"{chunk['start'].strftime('%Y-%m-%d')} a {chunk['end'].strftime('%Y-%m-%d')}"
+            else:
+                metrics = {
+                    'pnl': 0.0, 'win_rate': 0.0, 'max_drawdown': 0.0, 'sharpe_ratio': 0.0,
+                    'trade_count': 0, 'avg_daily_pnl': 0.0, 'total_rewards': 0.0,
+                    'execution_timeframes': execution_timeframes,
+                    'analysis_timeframes': list(multi_timeframe_data.keys()),
+                    'chronological_analysis': True,
+                    'chunk_period': f"{chunk['start'].strftime('%Y-%m-%d')} a {chunk['end'].strftime('%Y-%m-%d')}"
+                }
+            
+            return {
+                "status": "success",
+                "metrics": metrics,
+                "trades": trades,
+                "chunk_info": chunk
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error entrenando {symbol} en chunk: {e}")
+            return {"status": "error", "message": str(e)}
+    
+    async def _load_symbol_data_chunk(self, symbol: str, timeframe: str, start_date: datetime, end_date: datetime) -> Optional[pd.DataFrame]:
+        """Carga datos de un símbolo para un chunk específico"""
+        try:
+            # Cargar datos desde la base de datos para el rango específico
+            query = """
+                SELECT timestamp, open, high, low, close, volume
+                FROM market_data 
+                WHERE symbol = %s AND timeframe = %s 
+                AND timestamp >= %s AND timestamp <= %s
+                ORDER BY timestamp
+            """
+            
+            data = self.db_manager.execute_query(
+                query, 
+                (symbol, timeframe, start_date, end_date)
+            )
+            
+            if data is None or len(data) == 0:
+                return None
+            
+            df = pd.DataFrame(data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            df.set_index('timestamp', inplace=True)
+            
+            return df
+            
+        except Exception as e:
+            logger.error(f"❌ Error cargando datos de {symbol} {timeframe}: {e}")
+            return None
+    
+    def _calculate_final_metrics(self, all_results: Dict) -> Dict[str, Any]:
+        """Calcula métricas finales agregando todos los chunks"""
+        try:
+            total_pnl = 0.0
+            total_trades = 0
+            total_rewards = 0.0
+            all_trades = []
+            
+            # Agregar métricas de todos los chunks
+            for chunk_key, chunk_data in all_results.items():
+                if chunk_data.get("results"):
+                    for symbol, result in chunk_data["results"].items():
+                        if result.get("status") == "success" and result.get("metrics"):
+                            metrics = result["metrics"]
+                            total_pnl += metrics.get('pnl', 0)
+                            total_trades += metrics.get('trade_count', 0)
+                            total_rewards += metrics.get('total_rewards', 0)
+                            
+                            if result.get("trades"):
+                                all_trades.extend(result["trades"])
+            
+            # Calcular métricas agregadas
+            win_rate = 0.0
+            if all_trades:
+                profitable_trades = [t for t in all_trades if t.get('pnl', 0) > 0]
+                win_rate = len(profitable_trades) / len(all_trades)
+            
+            return {
+                'total_pnl': total_pnl,
+                'total_trades': total_trades,
+                'total_rewards': total_rewards,
+                'win_rate': win_rate,
+                'chunks_processed': len(all_results),
+                'symbols_trained': len(self.symbols)
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error calculando métricas finales: {e}")
+            return {}
     
     def _calculate_consecutive_wins(self, trades: List[Dict]) -> int:
         """Calcula el máximo número de ganancias consecutivas"""
@@ -2153,57 +2522,63 @@ class TrainHistoricalEnterprise:
             
             await self._update_progress(10, "Inicializando", "Cargando configuración...")
             
-            # Entrenar agentes multi-timeframe en paralelo
-            print(f"📊 Símbolos: {len(self.symbols)}")
-            print(f"🎯 Timeframes de análisis: {', '.join(self.timeframes)}")
-            print(f"⚡ Timeframes de ejecución: {', '.join(self.config_manager.get('symbols', {}).get('timeframes', {}).get('real_time', ['1m', '5m']))}")
-            print("=" * 60)
-            
-            # Entrenar agentes cronológicos en paralelo
-            tasks = [
-                self.train_chronological_agent(symbol)
-                for symbol in self.symbols
-            ]
-            
-            print(f"🚀 Iniciando entrenamiento cronológico de {len(tasks)} agentes...")
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            
-            # Procesar resultados
-            all_results = {}
-            for i, symbol in enumerate(self.symbols):
-                if isinstance(results[i], Exception):
-                    logger.error(f"❌ Error en {symbol}: {results[i]}")
-                    all_results[symbol] = {
-                        "status": "error",
-                        "message": str(results[i]),
-                        "metrics": {}
-                    }
-                else:
-                    all_results[symbol] = results[i]
-            
-            # Calcular métricas conjuntas
-            await self._update_progress(80, "Calculando métricas", "Procesando resultados...")
-            self.joint_metrics = self._calculate_joint_metrics(all_results)
-            
-            # Generar reporte
-            report = self._generate_multi_timeframe_report(all_results)
-            
-            # Guardar métricas conjuntas
-            await self._save_joint_metrics()
-            
-            # Log de sesión
-            await self._log_training_session(all_results)
-            
-            await self._update_progress(100, "Completado", "Entrenamiento finalizado")
-            
-            logger.info("✅ Entrenamiento histórico completado exitosamente")
-            
-            return {
-                "status": "success",
-                "report": report,
-                "joint_metrics": self.joint_metrics,
-                "run_id": self.run_id
-            }
+            # Verificar si usar entrenamiento incremental
+            if self.training_config.get('incremental_training', False):
+                logger.info("🔄 Usando entrenamiento incremental")
+                return await self._execute_incremental_training()
+            else:
+                logger.info("📊 Usando entrenamiento estándar")
+                # Entrenar agentes multi-timeframe en paralelo
+                print(f"📊 Símbolos: {len(self.symbols)}")
+                print(f"🎯 Timeframes de análisis: {', '.join(self.timeframes)}")
+                print(f"⚡ Timeframes de ejecución: {', '.join(self.config_manager.get('symbols', {}).get('timeframes', {}).get('real_time', ['1m', '5m']))}")
+                print("=" * 60)
+                
+                # Entrenar agentes cronológicos en paralelo
+                tasks = [
+                    self.train_chronological_agent(symbol)
+                    for symbol in self.symbols
+                ]
+                
+                print(f"🚀 Iniciando entrenamiento cronológico de {len(tasks)} agentes...")
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                
+                # Procesar resultados
+                all_results = {}
+                for i, symbol in enumerate(self.symbols):
+                    if isinstance(results[i], Exception):
+                        logger.error(f"❌ Error en {symbol}: {results[i]}")
+                        all_results[symbol] = {
+                            "status": "error",
+                            "message": str(results[i]),
+                            "metrics": {}
+                        }
+                    else:
+                        all_results[symbol] = results[i]
+                
+                # Calcular métricas conjuntas
+                await self._update_progress(80, "Calculando métricas", "Procesando resultados...")
+                self.joint_metrics = self._calculate_joint_metrics(all_results)
+                
+                # Generar reporte
+                report = self._generate_multi_timeframe_report(all_results)
+                
+                # Guardar métricas conjuntas
+                await self._save_joint_metrics()
+                
+                # Log de sesión
+                await self._log_training_session(all_results)
+                
+                await self._update_progress(100, "Completado", "Entrenamiento finalizado")
+                
+                logger.info("✅ Entrenamiento histórico completado exitosamente")
+                
+                return {
+                    "status": "success",
+                    "report": report,
+                    "joint_metrics": self.joint_metrics,
+                    "run_id": self.run_id
+                }
             
         except Exception as e:
             logger.error(f"❌ Error en ejecución: {e}")
