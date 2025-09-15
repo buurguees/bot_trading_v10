@@ -22,8 +22,7 @@ import os
 
 logger = logging.getLogger(__name__)
 
-# Señal global para detener cualquier entrenamiento (compartida con train_hist_parallel.py)
-STOP_EVENT = asyncio.Event()
+# Usaremos el STOP_EVENT del módulo de entrenamiento para evitar desincronización
 
 class TradingBotHandlers:
     """Handlers completos de comandos para Telegram"""
@@ -237,8 +236,15 @@ class TradingBotHandlers:
                     return
                 
                 # Ejecutar entrenamiento
-                global STOP_EVENT
-                STOP_EVENT.clear()
+                try:
+                    from scripts.training.train_hist_parallel import STOP_EVENT as TRAIN_STOP_EVENT
+                    if TRAIN_STOP_EVENT is None:
+                        # Inicializa si fuera necesario
+                        import asyncio as _asyncio
+                        TRAIN_STOP_EVENT = _asyncio.Event()
+                    TRAIN_STOP_EVENT.clear()
+                except Exception:
+                    pass
                 result = await execute_train_hist_for_telegram(progress_file)
                 
                 if result.get('success'):
@@ -298,23 +304,39 @@ class TradingBotHandlers:
                     "🛑 Usa /stop_train para detener.\n"
                     "📱 Recibirás el resumen final tras 50 ciclos o al detener."
                 )
-                global STOP_EVENT
-                STOP_EVENT.clear()
-                self.continuous_task = asyncio.create_task(execute_train_hist_continuous_for_telegram(progress_file))
-                await self.continuous_task  # Esperar a que termine para manejar el resultado
-                result = self.continuous_task.result()
-                
-                if result.get('success'):
-                    telegram_summary = result.get('telegram_summary', "Entrenamiento continuo completado sin resumen detallado.")
-                    await self._send_telegram_message(
-                        update,
-                        f"✅ <b>Entrenamiento Continuo Completado</b>\n\n{telegram_summary}"
-                    )
-                else:
-                    await self._send_telegram_message(
-                        update,
-                        f"❌ <b>Error en entrenamiento continuo</b>\n\n{result.get('message', 'Error')}"
-                    )
+                try:
+                    from scripts.training.train_hist_parallel import STOP_EVENT as TRAIN_STOP_EVENT
+                    if TRAIN_STOP_EVENT is None:
+                        import asyncio as _asyncio
+                        TRAIN_STOP_EVENT = _asyncio.Event()
+                    TRAIN_STOP_EVENT.clear()
+                except Exception:
+                    pass
+
+                # Ejecutar en background y no bloquear el loop principal
+                async def _run_and_notify():
+                    try:
+                        result = await execute_train_hist_continuous_for_telegram(progress_file)
+                        if result.get('success'):
+                            telegram_summary = result.get('telegram_summary', "Entrenamiento continuo completado sin resumen detallado.")
+                            await self._send_telegram_message(
+                                update,
+                                f"✅ <b>Entrenamiento Continuo Completado</b>\n\n{telegram_summary}"
+                            )
+                        else:
+                            await self._send_telegram_message(
+                                update,
+                                f"❌ <b>Error en entrenamiento continuo</b>\n\n{result.get('message', 'Error')}"
+                            )
+                    except Exception as _e:
+                        logger.exception("❌ Error en tarea de entrenamiento continuo")
+                        await self._send_telegram_message(
+                            update,
+                            f"❌ <b>Error en entrenamiento continuo</b>\n\n{str(_e)[:100]}..."
+                        )
+
+                self.continuous_task = asyncio.create_task(_run_and_notify())
+                return
             except Exception as e:
                 logger.exception("❌ Error en train_hist_continuous_command")
                 await self._send_telegram_message(
@@ -329,10 +351,13 @@ class TradingBotHandlers:
             return
         
         try:
-            from scripts.training.train_hist_parallel import stop_train_hist_continuous
-            global STOP_EVENT
-            STOP_EVENT.set()  # Señala parada para cualquier entrenamiento activo
-            stop_train_hist_continuous()  # Llama a la función específica si es continua
+            from scripts.training.train_hist_parallel import stop_train_hist_continuous, STOP_EVENT as TRAIN_STOP_EVENT
+            try:
+                if TRAIN_STOP_EVENT is not None:
+                    TRAIN_STOP_EVENT.set()
+            except Exception:
+                pass
+            stop_train_hist_continuous()
             if self.continuous_task and not self.continuous_task.done():
                 self.continuous_task.cancel()
                 try:
