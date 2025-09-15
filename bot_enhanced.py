@@ -396,6 +396,7 @@ class EnhancedTradingBot:
             
             # Usar el sistema paralelo principal
             progress_path = f"data/tmp/{uuid.uuid4().hex}_progress.json"
+            from scripts.training.train_hist_parallel import execute_train_hist_for_telegram
             results = await execute_train_hist_for_telegram(progress_file=progress_path)
             
             # Procesar resultados
@@ -572,18 +573,14 @@ class EnhancedTradingBot:
             # 7. Enviar comandos de entrenamiento disponibles (MEJORADOS)
             try:
                 await self.telegram_bot.send_message(
-                    "📚 <b>Comandos de entrenamiento MEJORADOS disponibles:</b>\n"
-                    "/train_hist - Entrenamiento histórico MEJORADO\n"
+                    "🤖 <b>Trading Bot v10 Enterprise</b>\n\n"
+                    "📚 <b>Comandos disponibles:</b>\n"
+                    "/train_hist - Entrenamiento histórico\n"
+                    "/train_hist_continuous - Entrenamiento histórico continuo\n"
                     "/train_live - Entrenamiento en vivo\n"
                     "/stop_train - Detener entrenamiento\n"
                     "/status - Estado del sistema\n"
-                    "/health - Salud del sistema\n\n"
-                    "🚀 <b>SISTEMA MEJORADO ACTIVO:</b>\n"
-                    "✅ Tracking granular de trades individuales\n"
-                    "✅ Análisis de portfolio con correlación\n"
-                    "✅ Reportes en tiempo real vía Telegram\n"
-                    "✅ Gestión de memoria optimizada\n"
-                    "✅ Recovery automático y robustez enterprise",
+                    "/health - Salud del sistema",
                     parse_mode="HTML"
                 )
             except Exception as e:
@@ -627,9 +624,12 @@ class EnhancedTradingBot:
                         cached_data = json.load(f)
                     
                     # Verificar si el cache es válido (menos de 1 día)
-                    from datetime import datetime
-                    cache_date = datetime.fromisoformat(cached_data.get('created_at', ''))
-                    if (datetime.now() - cache_date).days < 1:
+                    cache_created = cached_data.get('created_at', '')
+                    if cache_created:
+                        cache_date = datetime.fromisoformat(cache_created)
+                    else:
+                        cache_date = None
+                    if cache_date and (datetime.now() - cache_date).days < 1:
                         self.logger.info("✅ Análisis pre-guardado ya existe y es válido")
                         return True
                 except Exception as e:
@@ -638,6 +638,7 @@ class EnhancedTradingBot:
             # Reutilizar ejecución paralela para generar análisis/caché rápidamente
             from scripts.training.train_hist_parallel import TrainHistParallel
             trainer = TrainHistParallel(progress_file="data/tmp/pre_cache_progress.json")
+            trainer.force_simulate = True
             end_date = datetime.now() - timedelta(days=1)
             start_date = end_date - timedelta(days=30)
             result = await trainer.execute_training(start_date=start_date, end_date=end_date)

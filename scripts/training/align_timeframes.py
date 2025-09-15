@@ -13,8 +13,15 @@ import argparse
 import asyncio
 import json
 import logging
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Dict
+
+# Asegurar importación desde la raíz del proyecto
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from config.unified_config import get_config_manager
 from core.data.database import DatabaseManager  # Asume maneja queries a datos históricos
