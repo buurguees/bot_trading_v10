@@ -203,13 +203,15 @@ class TradingBotHandlers:
             await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
             return
         
+        # Evitar falso positivo: si ya está bloqueado, avisar y salir
+        if self.training_lock.locked():
+            await self._send_telegram_message(
+                update,
+                "⚠️ Un entrenamiento ya está en curso. Usa /status para verificar o /stop_train para detener."
+            )
+            return
+
         async with self.training_lock:
-            if self.training_lock.locked():
-                await self._send_telegram_message(
-                    update,
-                    "⚠️ Un entrenamiento ya está en curso. Usa /status para verificar o /stop_train para detener."
-                )
-                return
             
             # Mensaje inicial
             await self._send_telegram_message(
@@ -277,13 +279,14 @@ class TradingBotHandlers:
             await update.message.reply_text("❌ Acceso no autorizado.", parse_mode='HTML')
             return
         
+        if self.training_lock.locked():
+            await self._send_telegram_message(
+                update,
+                "⚠️ Un entrenamiento ya está en curso. Usa /status para verificar o /stop_train para detener."
+            )
+            return
+
         async with self.training_lock:
-            if self.training_lock.locked():
-                await self._send_telegram_message(
-                    update,
-                    "⚠️ Un entrenamiento ya está en curso. Usa /status para verificar o /stop_train para detener."
-                )
-                return
             
             try:
                 from scripts.training.train_hist_parallel import execute_train_hist_continuous_for_telegram
