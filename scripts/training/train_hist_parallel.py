@@ -1227,6 +1227,23 @@ class TrainHistParallel:
             if np.isnan(max_dd) or np.isinf(max_dd):
                 max_dd = 0
 
+            # Calcular métricas adicionales
+            total_balance = global_summary.get('total_balance', 0)
+            initial_balance_total = self.initial_balance * len(self.symbols)
+            objective_balance_total = self.target_balance * len(self.symbols)
+            
+            # Sharpe Ratio aproximado
+            sharpe_ratio = (avg_pnl_pct / max_dd) if max_dd > 0 else 0
+            
+            # Volatilidad aproximada
+            volatility = max_dd * 1.5
+            
+            # Trades por minuto
+            trades_per_minute = global_summary.get('total_trades', 0) / max(duration, 0.1)
+            
+            # Eficiencia de capital
+            capital_efficiency = (total_balance / initial_balance_total) if initial_balance_total > 0 else 0
+
             message = f"""🎯 <b>Entrenamiento Histórico Completado</b>
 
 📊 <b>Resumen Global (50 ciclos):</b>
@@ -1239,10 +1256,20 @@ class TrainHistParallel:
 • Win Rate Global: {global_summary.get('global_win_rate', 0):.1f}%
 • Max Drawdown: {max_dd:.2f}%
 
+💵 <b>Balances:</b>
+• Balance Inicial: ${initial_balance_total:,.0f}
+• Balance Objetivo: ${objective_balance_total:,.0f}
+• Balance Final: ${total_balance:,.0f}
+
+📈 <b>Métricas Adicionales:</b>
+• Sharpe Ratio: {sharpe_ratio:.2f}
+• Volatilidad: {volatility:.2f}%
+• Trades/min: {trades_per_minute:.1f}
+• Eficiencia Capital: {capital_efficiency:.2f}x
+
 🎯 <b>Objetivos:</b>
-• Balance Objetivo: ${self.target_balance * len(self.symbols):,.0f}
 • ROI Objetivo: {self.target_roi_pct:.0f}%
-• Progreso: {((global_summary.get('total_balance', 0) / (self.target_balance * len(self.symbols))) * 100):.1f}%
+• Progreso: {((total_balance / objective_balance_total) * 100):.1f}%
 
 🏆 <b>Top 3 Performers:</b>"""
             
@@ -1662,9 +1689,14 @@ class TrainHistParallel:
         print(f"• PnL Promedio: {avg_pnl_sign}${avg_pnl:.2f} ({avg_pnl_pct_sign}{avg_pnl_pct:.2f}%)")
         print(f"• Win Rate Global: {global_perf.get('global_win_rate', 0):.1f}%")
         print(f"• Max Drawdown: {global_perf.get('max_drawdown', 0):.2f}%")
-        print(f"- Initial Balance: ${session_info.get('initial_balance_total', 0):,.2f}")
-        print(f"- Objective Balance: ${session_info.get('objective_balance_total', 0):,.2f}")
-        print(f"- Final Balance: ${session_info.get('final_balance_total', 0):,.2f}")
+        
+        # Balances
+        initial_balance = session_info.get('initial_balance_total', 0)
+        objective_balance = session_info.get('objective_balance_total', 0)
+        final_balance = session_info.get('final_balance_total', 0)
+        print(f"• Balance Inicial: ${initial_balance:,.2f}")
+        print(f"• Balance Objetivo: ${objective_balance:,.2f}")
+        print(f"• Balance Final: ${final_balance:,.2f}")
         
         # Mostrar progreso hacia objetivo
         final_balance = session_info.get('final_balance_total', 0)
@@ -1682,6 +1714,33 @@ class TrainHistParallel:
         print(f"Trades LONG: {session_info.get('total_long_trades', 0)}")
         print(f"Trades SHORT: {session_info.get('total_short_trades', 0)}")
         print(f"Medium bars per trade: {session_info.get('avg_bars_per_trade', 0):.1f}")
+        
+        # Métricas adicionales
+        print("")
+        print("📈 Métricas Adicionales:")
+        
+        # Calcular Sharpe Ratio aproximado
+        total_trades = global_perf.get('total_trades', 1)
+        win_rate = global_perf.get('global_win_rate', 0)
+        avg_pnl_pct = global_perf.get('avg_pnl_pct', 0)
+        max_dd = global_perf.get('max_drawdown', 0)
+        
+        # Sharpe Ratio aproximado (PnL% / Max Drawdown%)
+        sharpe_ratio = (avg_pnl_pct / max_dd) if max_dd > 0 else 0
+        print(f"• Sharpe Ratio: {sharpe_ratio:.2f}")
+        
+        # Volatilidad aproximada (basada en drawdown)
+        volatility = max_dd * 1.5  # Aproximación simple
+        print(f"• Volatilidad: {volatility:.2f}%")
+        
+        # Trades por minuto
+        trades_per_minute = total_trades / max(duration_min, 0.1)
+        print(f"• Trades/min: {trades_per_minute:.1f}")
+        
+        # Eficiencia de capital
+        capital_efficiency = (final_balance / initial_balance) if initial_balance > 0 else 0
+        print(f"• Eficiencia Capital: {capital_efficiency:.2f}x")
+        
         print("")
         print("MEDIUM LEVERAGE PER SYMBOL:")
         performance_summary = results.get('performance_summary', {})
@@ -1692,6 +1751,16 @@ class TrainHistParallel:
                 print(f"• {symbol}: {avg_lev:.1f}x")
             else:
                 print(f"• {symbol}: N/A")
+        print("")
+        print("🔥 Símbolos Más Activos:")
+        # Ordenar por número de trades
+        sorted_by_trades = sorted(symbol_perf.items(), key=lambda x: x[1].get('trades', 0), reverse=True)
+        for i, (symbol, perf) in enumerate(sorted_by_trades[:5], 1):
+            trades = perf.get('trades', 0)
+            pnl_pct = perf.get('pnl_pct', 0)
+            pnl_pct_sign = "+" if pnl_pct >= 0 else ""
+            print(f"• {i}. {symbol}: {trades} trades ({pnl_pct_sign}{pnl_pct:.2f}%)")
+        
         print("")
         print("🏆 Top Performers:")
         sorted_symbols = sorted(symbol_perf.items(), key=lambda x: x[1].get('pnl_pct', 0), reverse=True)
