@@ -476,6 +476,18 @@ class TrainHistParallel:
         
         # Determinar timestamps alineados (usar pre_aligned si disponible, sino generar)
         timestamps = self.pre_aligned_data.get('aligned_timestamps', []) if self.pre_aligned_data else pd.date_range(start=start_date, end=end_date, freq='H').tolist()
+        # Normalizar a pd.Timestamp para comparaciones contra df['timestamp']
+        if isinstance(timestamps, list) and timestamps:
+            sample = timestamps[0]
+            try:
+                if isinstance(sample, (int, float)):
+                    timestamps = pd.to_datetime(timestamps, unit='ms').tolist()
+                elif isinstance(sample, str):
+                    timestamps = pd.to_datetime(timestamps).tolist()
+                # si ya son pd.Timestamp, no hacer nada
+            except Exception:
+                # fallback a rango horario si algo falla
+                timestamps = pd.date_range(start=start_date, end=end_date, freq='H').tolist()
         if not timestamps:
             raise ValueError("No hay timestamps alineados disponibles.")
         
