@@ -488,6 +488,28 @@ class TrainHistParallel:
             except Exception:
                 # fallback a rango horario si algo falla
                 timestamps = pd.date_range(start=start_date, end=end_date, freq='H').tolist()
+
+        # Asegurar que los timestamps caen dentro del rango real de datos históricos
+        try:
+            min_ts = None
+            max_ts = None
+            for sym, tfs in self.historical_data.items():
+                for tf_df in tfs.values():
+                    if tf_df.empty:
+                        continue
+                    dmin = tf_df['timestamp'].min()
+                    dmax = tf_df['timestamp'].max()
+                    min_ts = dmin if (min_ts is None or dmin < min_ts) else min_ts
+                    max_ts = dmax if (max_ts is None or dmax > max_ts) else max_ts
+
+            if min_ts is not None and max_ts is not None:
+                # filtrar timestamps al rango de datos reales
+                timestamps = [ts for ts in timestamps if (ts >= min_ts and ts <= max_ts)]
+                if not timestamps:
+                    # regenerar por hora dentro del rango de datos reales
+                    timestamps = pd.date_range(start=min_ts, end=max_ts, freq='H').tolist()
+        except Exception:
+            pass
         if not timestamps:
             raise ValueError("No hay timestamps alineados disponibles.")
         
