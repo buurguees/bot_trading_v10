@@ -6,17 +6,17 @@ Training Scripts - Bot Trading v10 Enterprise
 Scripts para entrenamiento del modelo de IA.
 
 Scripts disponibles:
-- train_historical: Entrenamiento sobre datos históricos
+- train_hist_parallel: Entrenamiento histórico paralelo (principal)
 - train_live: Entrenamiento en tiempo real
 - state_manager: Gestión de estado del entrenamiento
 """
 
-from .train_historical import *
+from .train_hist_parallel import *
 from .train_live import *
 from .state_manager import *
 
 __all__ = [
-    'train_historical',
+    'train_hist_parallel',
     'train_live',
     'state_manager'
 ]

@@ -63,7 +63,7 @@ bot_trading_v10/
 │
 ├── 📁 scripts/                  # Scripts de ejecución
 │   ├── 📁 training/             # Scripts de entrenamiento
-│   │   └── train_historical.py
+│   │   └── train_hist_parallel.py  (principal)
 │   └── 📁 data/                 # Scripts de datos
 │       └── ensure_historical_data.py
 │
@@ -188,7 +188,9 @@ ENCRYPTION_KEY=your_encryption_key_here
 - `/historical_data_report` - Reporte de datos históricos
 
 ### Comandos de Entrenamiento
-- `/train_hist` - Entrenamiento histórico
+- `/train_hist` - Entrenamiento histórico paralelo (usa `scripts/training/train_hist_parallel.py`)
+  - Opcional: pre-generar alineamiento multi-timeframe ejecutando manualmente:
+    `python scripts/training/align_timeframes.py --days-back 365`
 - `/train_live` - Entrenamiento en vivo
 - `/stop_train` - Detener entrenamiento
 

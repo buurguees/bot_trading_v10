@@ -196,26 +196,11 @@ class TradingBotHandlers:
         )
         
         try:
-            # Ejecutar entrenamiento REAL usando bot_enhanced
-            logger.info("🎓 Iniciando entrenamiento histórico REAL desde Telegram")
-            
-            # Importar y usar el sistema de entrenamiento real
-            from bot_enhanced import EnhancedTradingBot
-            
-            # Crear instancia del bot enhanced
-            bot_enhanced = EnhancedTradingBot()
-            await bot_enhanced.initialize()
-            
-            # Obtener días desde argumentos
-            days_back = 365  # Por defecto
-            if context.args and len(context.args) > 0:
-                try:
-                    days_back = int(context.args[0])
-                except ValueError:
-                    await update.message.reply_text("❌ Días inválidos. Usando 365 días por defecto.")
-            
-            # Ejecutar entrenamiento real
-            result = await bot_enhanced.handle_train_hist_command(days_back)
+            # Ejecutar entrenamiento paralelo principal para Telegram
+            logger.info("🎓 Iniciando entrenamiento histórico PARALELO desde Telegram")
+            from scripts.training.train_hist_parallel import execute_train_hist_for_telegram
+            progress_file = f"data/tmp/train_hist_{uuid.uuid4().hex}.json"
+            result = await execute_train_hist_for_telegram(progress_file)
             
             if result['status'] == 'success':
                 await update.message.reply_text(

@@ -20,7 +20,7 @@ Se ha implementado un sistema completo de actualización en tiempo real para el 
 
 ### ✅ **Flujo de Comandos Completo**
 ```
-Telegram → control/handlers.py → scripts/training/train_historical.py → core/ → scripts/ → control/ → Telegram
+Telegram → control/handlers.py → scripts/training/train_hist_parallel.py → core/ → scripts/ → control/ → Telegram
 ```
 
 ## 📊 Flujo de Funcionamiento
@@ -40,7 +40,7 @@ Mensaje inicial con configuración completa
 ```
 Para cada símbolo en user_settings.yaml:
 ├── Mensaje inicial del ciclo
-├── Ejecución de train_historical.py con símbolo específico
+├── Ejecución de train_hist_parallel.py con símbolos en paralelo
 ├── Actualizaciones cada 10 segundos:
 │   ├── Progreso: 0% → 100%
 │   ├── Estado: Preparando → Procesando → Entrenando → Validando

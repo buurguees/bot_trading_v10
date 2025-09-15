@@ -6,7 +6,7 @@ Este directorio contiene los scripts de entrenamiento avanzado para el sistema d
 
 ```
 scripts/train/
-├── train_historical.py    # Entrenamiento sobre datos históricos
+├── train_hist_parallel.py  # Entrenamiento histórico paralelo (principal)
 ├── train_live.py          # Entrenamiento en tiempo real (paper trading)
 ├── state_manager.py       # Gestión de estado y sincronización
 ├── config.yaml           # Configuración de los scripts
@@ -15,16 +15,10 @@ scripts/train/
 
 ## 🚀 Uso Rápido
 
-### Entrenamiento Histórico
+### Entrenamiento Histórico Paralelo
 ```bash
 # Uso básico
-python scripts/train/train_historical.py
-
-# Con parámetros personalizados
-python scripts/train/train_historical.py --cycle_size 1000 --update_every 50
-
-# Con configuración personalizada
-python scripts/train/train_historical.py --config custom_config.yaml
+python scripts/training/train_hist_parallel.py --progress-file data/tmp/progress.json
 ```
 
 ### Entrenamiento en Vivo
@@ -47,7 +41,7 @@ python scripts/train/train_live.py --config custom_config.yaml
 
 ## 📊 Características
 
-### Entrenamiento Histórico (`train_historical.py`)
+### Entrenamiento Histórico Paralelo (`train_hist_parallel.py`)
 - **Sincronización multi-símbolo**: Todos los símbolos avanzan en paralelo
 - **Ciclos configurables**: Tamaño de ciclo y frecuencia de actualización
 - **Métricas en tiempo real**: Actualizaciones periódicas via Telegram
@@ -130,16 +124,7 @@ export REDIS_URL="redis://localhost:6379"
 
 ### Entrenamiento Histórico
 ```bash
-python train_historical.py [opciones]
-
-Opciones:
-  --cycle_size SIZE        Tamaño del ciclo en barras (default: 500)
-  --update_every N         Actualizar cada N barras (default: 25)
-  --config FILE            Archivo de configuración (default: config.yaml)
-  --symbols SYMBOLS        Símbolos a procesar (default: del config)
-  --max_cycles N           Máximo número de ciclos (default: 100)
-  --output_dir DIR         Directorio de salida (default: artifacts/)
-  --log_level LEVEL        Nivel de logging (default: INFO)
+python scripts/training/train_hist_parallel.py [opciones]
 ```
 
 ### Entrenamiento en Vivo
@@ -225,8 +210,8 @@ Opciones:
 
 ### Logs y Debugging
 ```bash
-# Ver logs en tiempo real
-tail -f logs/train_historical.log
+# Ver logs en tiempo real del histórico paralelo
+tail -f data/logs/train_hist_parallel.log
 tail -f logs/train_live.log
 
 # Ver logs con filtro

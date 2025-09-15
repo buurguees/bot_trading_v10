@@ -103,6 +103,8 @@ class TrainHistParallel:
         self.is_running = False
         self.start_time = None
         self.results = None
+        self.pre_aligned_data: Optional[Dict[str, Any]] = None
+        self.cycle_metrics_history: List[Dict[str, Any]] = []
         
         logger.info(f"🎯 TrainHistParallel inicializado: {len(self.symbols)} símbolos")
     
@@ -156,6 +158,9 @@ class TrainHistParallel:
             # Inicializar componentes
             await self.initialize_components()
             
+            # Integrar alineamiento pre-generado si existe; si no, generarlo
+            await self._ensure_pre_alignment(start_date, end_date)
+            
             # Configurar callback de progreso
             progress_callback = self._create_progress_callback()
             
@@ -176,6 +181,11 @@ class TrainHistParallel:
             await self._update_progress(90, "Procesando resultados", "📊 Agregando métricas globales")
             
             final_results = await self._process_final_results(results)
+
+            # Anexar métricas por ciclo consolidadas a resultados finales
+            if self.cycle_metrics_history:
+                final_results["cycle_metrics_history"] = self.cycle_metrics_history
+                final_results["cycle_metrics"] = self.cycle_metrics_history[-1]
             
             # Guardar resultados completos
             await self._save_final_results(final_results)
@@ -300,12 +310,88 @@ class TrainHistParallel:
                 
                 detailed_status = f"🔄 Ciclo {current_cycle}/{total_cycles}: {status}"
                 
-                await self._update_progress(mapped_progress, status, detailed_status)
+                # Calcular métricas medias por ciclo si hay datos disponibles
+                cycle_metrics = self._compute_cycle_metrics(data)
+
+                # Guardar historial de métricas por ciclo si se obtuvo algo
+                if cycle_metrics:
+                    self.cycle_metrics_history.append({
+                        **cycle_metrics,
+                        "cycle": current_cycle,
+                        "total_cycles": total_cycles,
+                        "timestamp": data.get('timestamp')
+                    })
+
+                # Actualizar progreso incluyendo métricas por ciclo en el JSON de progreso
+                await self._update_progress(
+                    mapped_progress,
+                    status,
+                    detailed_status if not cycle_metrics else f"{detailed_status} | PnL̄: {cycle_metrics['avg_pnl']:+.2f} | WR̄: {cycle_metrics['avg_win_rate']:.1f}% | DD̄: {cycle_metrics['avg_drawdown']:.2f}%"
+                )
                 
             except Exception as e:
                 logger.error(f"❌ Error en callback de progreso: {e}")
         
         return progress_callback
+
+    def _compute_cycle_metrics(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Extrae y promedia métricas clave del ciclo actual a través de agentes.
+        Espera datos como 'agent_cycle_stats' o 'agent_summaries' en el payload del orchestrador.
+        """
+        try:
+            agent_stats = None
+            if 'agent_cycle_stats' in data and isinstance(data['agent_cycle_stats'], dict):
+                agent_stats = data['agent_cycle_stats']
+            elif 'agent_summaries' in data and isinstance(data['agent_summaries'], dict):
+                agent_stats = data['agent_summaries']
+            else:
+                return None
+
+            if not agent_stats:
+                return None
+
+            num = max(1, len(agent_stats))
+            sum_pnl = 0.0
+            sum_wr = 0.0
+            sum_dd = 0.0
+            sum_trades = 0
+            sum_sharpe = 0.0
+            sharpe_count = 0
+
+            for _sym, stat in agent_stats.items():
+                pnl = stat.get('cycle_pnl', stat.get('total_pnl', 0))
+                win_rate = stat.get('cycle_win_rate', stat.get('win_rate', 0))
+                dd = stat.get('cycle_drawdown', stat.get('max_drawdown', 0))
+                trades = stat.get('cycle_trades', stat.get('total_trades', 0))
+                sharpe = stat.get('cycle_sharpe', stat.get('sharpe_ratio', None))
+
+                sum_pnl += float(pnl or 0)
+                sum_wr += float(win_rate or 0)
+                sum_dd += float(dd or 0)
+                sum_trades += int(trades or 0)
+                if sharpe is not None:
+                    sum_sharpe += float(sharpe)
+                    sharpe_count += 1
+
+            avg_pnl = sum_pnl / num
+            avg_wr = sum_wr / num
+            avg_dd = sum_dd / num
+            avg_trades = sum_trades / num
+            avg_sharpe = (sum_sharpe / sharpe_count) if sharpe_count > 0 else 0.0
+
+            profitability = "rentable" if (avg_pnl > 0 and avg_wr > 50.0) else "no rentable"
+
+            return {
+                "avg_pnl": avg_pnl,
+                "avg_win_rate": avg_wr,
+                "avg_drawdown": avg_dd,
+                "avg_sharpe": avg_sharpe,
+                "avg_trades": avg_trades,
+                "profitability": profitability
+            }
+        except Exception as e:
+            logger.warning(f"⚠️ No se pudieron calcular métricas de ciclo: {e}")
+            return None
     
     async def _process_final_results(self, orchestrator_results: Dict[str, Any]) -> Dict[str, Any]:
         """Procesa y agrega resultados finales"""
@@ -483,6 +569,12 @@ class TrainHistParallel:
         try:
             duration = (datetime.now() - self.start_time).total_seconds() / 60  # minutos
             
+            # Evaluación de rentabilidad si hay métricas de ciclo
+            rentable_line = ""
+            if self.cycle_metrics_history:
+                last_cycle = self.cycle_metrics_history[-1]
+                rentable_line = f"\n💡 <b>Rentabilidad (último ciclo):</b> {last_cycle.get('profitability','N/A').upper()}  (PnL̄ {last_cycle.get('avg_pnl',0):+.2f}, WR̄ {last_cycle.get('avg_win_rate',0):.1f}%)\n"
+
             message = f"""🎯 <b>Entrenamiento Histórico Completado</b>
 
 📊 <b>Resumen Global:</b>
@@ -494,6 +586,7 @@ class TrainHistParallel:
 • PnL Promedio: ${global_summary.get('avg_pnl_per_agent', 0):+.2f} ({global_summary.get('avg_pnl_pct', 0):+.2f}%)
 • Win Rate Global: {global_summary.get('global_win_rate', 0):.1f}%
 • Max Drawdown: {global_summary.get('max_drawdown', 0):.2f}%
+{rentable_line}
 
 🏆 <b>Top Performers:</b>
 • 🥇 {global_summary.get('best_performer', {}).get('symbol', 'N/A')}: {global_summary.get('best_performer', {}).get('pnl_pct', 0):+.2f}%
@@ -572,6 +665,38 @@ class TrainHistParallel:
             
         except Exception as e:
             logger.error(f"❌ Error guardando resultados: {e}")
+
+    async def _ensure_pre_alignment(self, start_date: datetime, end_date: datetime):
+        """Carga alineamiento pre-generado desde data/aligned_timeframes.json si existe.
+        Si no existe, intenta generarlo automáticamente usando scripts/training/align_timeframes.py
+        """
+        try:
+            alignment_path = Path("data/aligned_timeframes.json")
+            if alignment_path.exists():
+                with open(alignment_path, 'r') as f:
+                    self.pre_aligned_data = json.load(f)
+                logger.info("✅ Alineamiento pre-generado cargado desde data/aligned_timeframes.json")
+                return
+
+            # Si no existe, intentar generarlo automáticamente
+            logger.info("⚠️ Alineamiento no encontrado. Generando con align_timeframes.py...")
+            try:
+                import subprocess, sys
+                days_back = max(1, (end_date - start_date).days) if (start_date and end_date) else 365
+                cmd = [sys.executable, "scripts/training/align_timeframes.py", "--days-back", str(days_back)]
+                subprocess.run(cmd, check=True)
+            except Exception as gen_err:
+                logger.warning(f"⚠️ No se pudo generar alineamiento automáticamente: {gen_err}")
+                return
+
+            if alignment_path.exists():
+                with open(alignment_path, 'r') as f:
+                    self.pre_aligned_data = json.load(f)
+                logger.info("✅ Alineamiento generado y cargado correctamente")
+            else:
+                logger.warning("⚠️ Aún no existe data/aligned_timeframes.json tras la generación")
+        except Exception as e:
+            logger.warning(f"⚠️ Error manejando alineamiento pre-generado: {e}")
     
     def _create_executive_summary(self, results: Dict[str, Any]) -> str:
         """Crea resumen ejecutivo en formato Markdown"""

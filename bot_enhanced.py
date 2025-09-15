@@ -18,7 +18,7 @@ import logging
 import uuid
 import os
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 from typing import Dict, Any, Optional
 
@@ -394,18 +394,9 @@ class EnhancedTradingBot:
         try:
             self.logger.info(f"🚀 Ejecutando entrenamiento mejorado con DATOS REALES ({days_back} días)")
             
-            # Usar el sistema de entrenamiento histórico real
-            from scripts.training.train_historical import TrainHistoricalEnterprise
-            
-            # Crear entrenador con datos reales
-            progress_id = f"enhanced_train_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            trainer = TrainHistoricalEnterprise(progress_id, training_mode='fast')
-            
-            # Inicializar el entrenador
-            await trainer.initialize()
-            
-            # Ejecutar entrenamiento con datos reales
-            results = await trainer.execute()
+            # Usar el sistema paralelo principal
+            progress_path = f"data/tmp/{uuid.uuid4().hex}_progress.json"
+            results = await execute_train_hist_for_telegram(progress_file=progress_path)
             
             # Procesar resultados
             if 'error' in results:
@@ -644,30 +635,13 @@ class EnhancedTradingBot:
                 except Exception as e:
                     self.logger.warning(f"⚠️ Error leyendo cache: {e}")
             
-            # Crear análisis pre-guardado
-            self.logger.info("🔍 Creando análisis pre-guardado...")
-            try:
-                await self.telegram_bot.send_message(
-                    "🔍 <b>Creando análisis pre-guardado...</b>\n⏳ Esto puede tomar unos minutos",
-                    parse_mode="HTML"
-                )
-            except Exception as e:
-                self.logger.warning(f"⚠️ No se pudo enviar mensaje de análisis: {e}")
-            
-            from scripts.training.train_historical import TrainHistoricalEnterprise
-            trainer = TrainHistoricalEnterprise(
-                progress_id="pre_cache_analysis",
-                training_mode="ultra_fast"
-            )
-            
-            # Inicializar trainer
-            if not await trainer.initialize():
-                self.logger.error("❌ Error inicializando trainer para análisis pre-guardado")
-                return False
-            
-            # Ejecutar análisis incremental
-            result = await trainer._execute_incremental_training()
-            
+            # Reutilizar ejecución paralela para generar análisis/caché rápidamente
+            from scripts.training.train_hist_parallel import TrainHistParallel
+            trainer = TrainHistParallel(progress_file="data/tmp/pre_cache_progress.json")
+            end_date = datetime.now() - timedelta(days=1)
+            start_date = end_date - timedelta(days=30)
+            result = await trainer.execute_training(start_date=start_date, end_date=end_date)
+
             if result.get("status") == "success":
                 self.logger.info("✅ Análisis pre-guardado creado exitosamente")
                 try:

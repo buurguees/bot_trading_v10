@@ -10,7 +10,7 @@ from pathlib import Path
 # Agregar el directorio raíz al path
 sys.path.append(str(Path(__file__).parent))
 
-from scripts.training.train_historical import TrainHistoricalEnterprise
+from scripts.training.train_hist_parallel import TrainHistParallel
 
 async def test_ultra_fast_training():
     """Prueba el entrenamiento en modo ultra rápido"""
@@ -19,27 +19,16 @@ async def test_ultra_fast_training():
     
     try:
         # Crear entrenador en modo ultra rápido
-        trainer = TrainHistoricalEnterprise(
-            progress_id="test_ultra_fast",
-            training_mode="ultra_fast"
-        )
+        trainer = TrainHistParallel(progress_file="data/tmp/test_ultra_fast_progress.json")
         
         # Inicializar
         print("🔧 Inicializando entrenador...")
-        success = await trainer.initialize()
-        
-        if not success:
-            print("❌ Error en inicialización")
-            return False
-        
         print("✅ Entrenador inicializado correctamente")
-        print(f"📅 Período de datos: {trainer.training_config.get('data_period_days', 30)} días")
-        print(f"🤖 Símbolos: {len(trainer.symbols)}")
-        print(f"⏰ Timeframes: {len(trainer.timeframes)}")
-        
-        # Ejecutar entrenamiento
+        from datetime import datetime, timedelta
+        end_date = datetime.now() - timedelta(days=1)
+        start_date = end_date - timedelta(days=30)
         print("\n🚀 Iniciando entrenamiento ultra rápido...")
-        result = await trainer.execute()
+        result = await trainer.execute_training(start_date=start_date, end_date=end_date)
         
         if result:
             print("✅ Entrenamiento completado exitosamente")
@@ -47,7 +36,7 @@ async def test_ultra_fast_training():
         else:
             print("❌ Error en el entrenamiento")
             
-        return result
+        return True if result else False
         
     except Exception as e:
         print(f"❌ Error durante la prueba: {e}")

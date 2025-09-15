@@ -129,7 +129,7 @@ python -c "from control.telegram_bot import TelegramBot; print('✅ Control OK')
 python -c "from core.config.enterprise_config import EnterpriseConfigManager; print('✅ Core OK')"
 
 # Probar scripts
-python -c "from scripts.training.train_historical import HistoricalTrainer; print('✅ Scripts OK')"
+python -c "from scripts.training.train_hist_parallel import TrainHistParallel; print('✅ Scripts OK')"
 ```
 
 ### **2. Probar Configuración**
@@ -308,7 +308,7 @@ python -c "from core.config.enterprise_config import EnterpriseConfigManager; c 
 1. **Configurar credenciales** en `.env`
 2. **Probar comandos básicos** de Telegram
 3. **Descargar datos históricos** con `/download_history`
-4. **Entrenar modelo** con `/train_hist`
+4. **Entrenar modelo** con `/train_hist` (paralelo)
 5. **Iniciar trading** con `/start_trading`
 
 ---

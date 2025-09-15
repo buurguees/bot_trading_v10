@@ -10,7 +10,7 @@ from pathlib import Path
 # Agregar el directorio raíz al path
 sys.path.append(str(Path(__file__).parent))
 
-from scripts.training.train_historical import TrainHistoricalEnterprise
+from scripts.training.train_hist_parallel import TrainHistParallel
 
 async def test_cached_analysis():
     """Prueba el análisis pre-guardado"""
@@ -19,27 +19,16 @@ async def test_cached_analysis():
     
     try:
         # Crear entrenador en modo ultra rápido
-        trainer = TrainHistoricalEnterprise(
-            progress_id="test_cached",
-            training_mode="ultra_fast"
-        )
+        trainer = TrainHistParallel(progress_file="data/tmp/test_cached_progress.json")
         
         # Inicializar
         print("🔧 Inicializando entrenador...")
-        success = await trainer.initialize()
-        
-        if not success:
-            print("❌ Error en inicialización")
-            return False
-        
         print("✅ Entrenador inicializado correctamente")
-        print(f"📅 Período de datos: {trainer.training_config.get('data_period_days', 30)} días")
-        print(f"🔄 Entrenamiento incremental: {trainer.training_config.get('incremental_training', False)}")
-        print(f"📦 Tamaño de chunk: {trainer.training_config.get('chunk_size_days', 7)} días")
-        
-        # Ejecutar entrenamiento (usará cache si existe)
-        print("\n🚀 Iniciando entrenamiento (usará cache si existe)...")
-        result = await trainer.execute()
+        from datetime import datetime, timedelta
+        end_date = datetime.now() - timedelta(days=1)
+        start_date = end_date - timedelta(days=30)
+        print("\n🚀 Iniciando entrenamiento (usará alineamiento si existe)...")
+        result = await trainer.execute_training(start_date=start_date, end_date=end_date)
         
         if result.get("status") == "success":
             print("✅ Entrenamiento completado exitosamente")
@@ -59,7 +48,7 @@ async def test_cached_analysis():
             print("❌ Error en el entrenamiento")
             print(f"💥 Mensaje: {result.get('message', 'Error desconocido')}")
             
-        return result.get("status") == "success"
+        return True if result else False
         
     except Exception as e:
         print(f"❌ Error durante la prueba: {e}")

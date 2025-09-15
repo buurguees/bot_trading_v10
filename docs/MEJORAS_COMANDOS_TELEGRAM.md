@@ -7,7 +7,7 @@ Se han implementado mejoras significativas en los comandos de Telegram del Bot T
 ## 🎯 Objetivos Cumplidos
 
 ### ✅ 1. Mapeo de Comandos a Scripts de Terminal
-- **`/train_hist`** → `scripts/training/train_historical.py`
+- **`/train_hist`** → `scripts/training/train_hist_parallel.py`
 - **`/download_history`** → `scripts/history/download_history.py`
 - **`/inspect_history`** → `scripts/history/inspect_history.py`
 - **`/repair_history`** → `scripts/history/repair_history.py`
@@ -36,7 +36,7 @@ Se han implementado mejoras significativas en los comandos de Telegram del Bot T
 
 **Comando de Terminal:**
 ```bash
-python scripts/training/train_historical.py --config config/user_settings.yaml --cycle_size 500 --update_every 25
+python scripts/training/train_hist_parallel.py --progress-file data/tmp/progress.json
 ```
 
 **Características:**
@@ -141,7 +141,7 @@ Telegram → control/handlers.py → scripts/ → core/ → scripts/ → control
 1. Usuario envía `/train_hist` al bot
 2. `handlers.py` valida autorización
 3. Lee configuración de `user_settings.yaml`
-4. Ejecuta `scripts/training/train_historical.py`
+4. Ejecuta `scripts/training/train_hist_parallel.py`
 5. Procesa datos con `core/ml/` y `core/data/`
 6. Guarda resultados en `data/models/`
 7. Envía respuesta detallada a Telegram
