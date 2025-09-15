@@ -321,28 +321,154 @@ class TrainHistParallel:
         return [5.0, 20.0]
     
     async def _load_historical_data(self, start_date: datetime, end_date: datetime):
-        """Carga datos históricos reales de las DBs locales para cada símbolo y timeframe."""
+        """Carga datos históricos reales desde SQLite, detectando esquema dinámicamente.
+
+        - Detecta tabla disponible (candles/klines/ohlcv/...)
+        - Mapea columnas a alias estándar: timestamp, open, high, low, close, volume
+        - Tolera ausencia de volume (rellena con NaN)
+        - Omite TFs o símbolos sin datos sin abortar el entrenamiento
+        """
+
+        def _detect_table_and_columns(sql_conn: sqlite3.Connection):
+            # Obtiene primera tabla que contenga OHLC
+            try:
+                tables = pd.read_sql_query("SELECT name FROM sqlite_master WHERE type='table'", sql_conn)
+                table_names = [str(n).lower() for n in tables['name'].tolist()]
+            except Exception:
+                table_names = []
+
+            candidate_tables = ['candles', 'klines', 'ohlcv', 'candle', 'kline', 'prices']
+            chosen_table = None
+            for t in table_names:
+                if t in candidate_tables:
+                    chosen_table = t
+                    break
+            if chosen_table is None and table_names:
+                # Último recurso: tomar la primera si parece contener columnas OHLC
+                for t in table_names:
+                    try:
+                        cols_df = pd.read_sql_query(f"PRAGMA table_info({t})", sql_conn)
+                        cols = [c.lower() for c in cols_df['name'].tolist()]
+                        if any(c in cols for c in ['open','o']) and any(c in cols for c in ['close','c']):
+                            chosen_table = t
+                            break
+                    except Exception:
+                        continue
+
+            if chosen_table is None:
+                return None, None
+
+            try:
+                cols_df = pd.read_sql_query(f"PRAGMA table_info({chosen_table})", sql_conn)
+                cols = [c.lower() for c in cols_df['name'].tolist()]
+            except Exception:
+                return chosen_table, None
+
+            def pick(*names):
+                for n in names:
+                    if n in cols:
+                        return n
+                return None
+
+            timestamp_col = pick('timestamp','time','open_time','ts','t')
+            open_col = pick('open','o')
+            high_col = pick('high','h')
+            low_col = pick('low','l')
+            close_col = pick('close','c')
+            volume_col = pick('volume','vol','quote_volume','v')
+
+            mapping = {
+                'timestamp': timestamp_col,
+                'open': open_col,
+                'high': high_col,
+                'low': low_col,
+                'close': close_col,
+                'volume': volume_col,
+            }
+            # Requiere al menos timestamp y precios OHLC
+            required_ok = timestamp_col and open_col and high_col and low_col and close_col
+            return chosen_table, (mapping if required_ok else None)
+
+        symbols_with_any_data = []
+
         for symbol in self.symbols:
             self.historical_data[symbol] = {}
             for tf in self.timeframes:
                 db_path = Path(f"data/{symbol}/{symbol}_{tf}.db")
                 if not db_path.exists():
                     continue
-                conn = sqlite3.connect(str(db_path))
-                query = f"""
-                    SELECT timestamp, open, high, low, close, volume 
-                    FROM candles 
-                    WHERE timestamp >= {int(start_date.timestamp() * 1000)} 
-                    AND timestamp <= {int(end_date.timestamp() * 1000)}
-                    ORDER BY timestamp ASC
-                """
-                df = pd.read_sql_query(query, conn)
-                df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-                self.historical_data[symbol][tf] = df
-                conn.close()
+                try:
+                    conn = sqlite3.connect(str(db_path))
+                    table, mapping = _detect_table_and_columns(conn)
+                    if table is None or mapping is None:
+                        logger.info(f"ℹ️ Esquema no compatible en {db_path}, omitido")
+                        conn.close()
+                        continue
+
+                    # Construir query con alias estándar
+                    ts_ms_start = int(start_date.timestamp() * 1000)
+                    ts_ms_end = int(end_date.timestamp() * 1000)
+
+                    # Algunos esquemas usan segundos, crear filtro doble: ms y s
+                    ts_col = mapping['timestamp']
+                    where_clause = (
+                        f"(({ts_col} BETWEEN {ts_ms_start} AND {ts_ms_end})"
+                        f" OR ({ts_col} BETWEEN {ts_ms_start//1000} AND {ts_ms_end//1000}))"
+                    )
+
+                    select_cols = [
+                        f"{mapping['timestamp']} AS timestamp",
+                        f"{mapping['open']} AS open",
+                        f"{mapping['high']} AS high",
+                        f"{mapping['low']} AS low",
+                        f"{mapping['close']} AS close",
+                    ]
+                    if mapping['volume']:
+                        select_cols.append(f"{mapping['volume']} AS volume")
+                    else:
+                        # Si no hay volumen, generaremos NaN tras la consulta
+                        pass
+
+                    query = (
+                        "SELECT " + ", ".join(select_cols) +
+                        f" FROM {table} WHERE {where_clause} ORDER BY {ts_col} ASC"
+                    )
+
+                    df = pd.read_sql_query(query, conn)
+                    conn.close()
+
+                    if df.empty:
+                        continue
+
+                    # Normalizar timestamp (s vs ms)
+                    # Heurística: si max < 10^12 asumimos segundos
+                    try:
+                        max_ts = float(df['timestamp'].max())
+                        unit = 'ms' if max_ts >= 1e12 else 's'
+                    except Exception:
+                        unit = 'ms'
+
+                    df['timestamp'] = pd.to_datetime(df['timestamp'], unit=unit)
+                    if 'volume' not in df.columns:
+                        df['volume'] = np.nan
+
+                    self.historical_data[symbol][tf] = df
+                    symbols_with_any_data.append(symbol)
+                except Exception as e:
+                    try:
+                        conn.close()
+                    except Exception:
+                        pass
+                    logger.info(f"ℹ️ No se pudo leer {db_path}: {e}")
+                    continue
+
             if not self.historical_data[symbol]:
-                raise ValueError(f"No hay datos históricos para {symbol}")
-        logger.info("✅ Datos históricos cargados correctamente")
+                logger.info(f"ℹ️ Sin datos históricos utilizables para {symbol}, será omitido en cálculos")
+
+        if not any(self.historical_data.get(s) for s in self.symbols):
+            raise ValueError("No hay datos históricos utilizables en ninguna DB local")
+
+        logger.info("✅ Datos históricos cargados (con detección de esquema)")
 
     async def _real_training_session(self, start_date: datetime, end_date: datetime, progress_callback) -> Dict[str, Any]:
         """Ejecuta entrenamiento real usando datos históricos cargados, procesando cronológicamente en 50 ciclos."""
