@@ -138,6 +138,7 @@ docker-compose.yaml
 *.yaml
 *.yml
 !config/*.yaml
+!config/core/*.yaml
 !core/config/enterprise/*.yaml
 
 # Secrets & Keys

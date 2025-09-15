@@ -1,0 +1,185 @@
+# =================================================================
+# SISTEMA DE RECOMPENSAS - Bot Trading v10 Enterprise
+# =================================================================
+# Sistema balanceado que premia trading responsable y penaliza comportamientos de riesgo
+
+# 💰 RECOMPENSAS POR RENTABILIDAD (MODERADAS)
+profit_rewards:
+  micro_profit: 0.2            # Trades pequeños pero consistentes
+  small_profit: 0.5            # 0.5-1.5% por trade
+  medium_profit: 1.0           # 1.5-3% por trade
+  large_profit: 1.8            # 3-5% por trade
+  exceptional_profit: 2.5      # >5% por trade (raro pero posible)
+
+# 📊 RECOMPENSAS POR GESTIÓN DE RIESGO (ALTA PRIORIDAD)
+risk_management_rewards:
+  perfect_risk_ratio: 2.0      # R ratio >= 2.5
+  good_risk_ratio: 1.0         # R ratio >= 1.8
+  adequate_risk_ratio: 0.3     # R ratio >= 1.2
+  stop_loss_respected: 0.5     # Respetar stop loss
+  position_size_correct: 0.3   # Tamaño de posición adecuado
+  leverage_discipline: 0.4     # No exceder límites de leverage
+
+# 🎯 RECOMPENSAS POR PRECISIÓN ML
+ml_rewards:
+  high_confidence_correct: 2.0     # Predicción correcta con >85% confianza
+  medium_confidence_correct: 1.0   # Predicción correcta con 70-85% confianza
+  low_confidence_correct: 0.3      # Predicción correcta con 60-70% confianza
+  model_improvement: 1.5            # Mejora en precisión del modelo
+  consistent_predictions: 0.8       # Consistencia en predicciones
+
+# 🏆 RECOMPENSAS POR LOGROS (SISTEMA DE MILESTONES)
+achievement_rewards:
+  first_profitable_day: 3.0        # Primer día rentable
+  profitable_week: 5.0             # Primera semana rentable
+  profitable_month: 10.0           # Primer mes rentable
+  risk_master: 8.0                 # 30 días sin violaciones de riesgo
+  consistency_expert: 6.0          # Win rate >65% durante 2 semanas
+  drawdown_control: 4.0            # Mantener drawdown <10% por mes
+  
+# 📈 RECOMPENSAS POR PERFORMANCE SOSTENIBLE
+performance_rewards:
+  win_rate_excellent: 2.0      # Win rate >70%
+  win_rate_good: 1.0          # Win rate 60-70%
+  win_rate_acceptable: 0.3    # Win rate 55-60%
+  sharpe_excellent: 2.5       # Sharpe ratio >2.5
+  sharpe_good: 1.5           # Sharpe ratio 1.5-2.5
+  profit_factor_good: 1.2    # Profit factor >1.8
+  low_drawdown: 1.8          # Drawdown <8%
+
+# ⚠️ PENALIZACIONES POR RIESGO (IMPORTANTES PARA APRENDIZAJE)
+risk_penalties:
+  stop_loss_violation: -1.5       # No usar stop loss o moverlo en contra
+  large_loss: -2.5               # Pérdida >5% en un trade
+  excessive_leverage: -2.0        # Usar leverage >límite del símbolo
+  position_oversizing: -1.8       # Posición >3% del capital
+  consecutive_losses: -1.2        # 3+ pérdidas consecutivas
+  drawdown_excessive: -3.0        # Drawdown >15%
+
+# 🚫 PENALIZACIONES POR TRADING PROBLEMÁTICO
+behavioral_penalties:
+  overtrading: -1.5              # >50 trades en un día
+  revenge_trading: -2.0          # Trading después de pérdida grande
+  fomo_trading: -1.0             # Entrar sin señal clara
+  ignored_signal: -0.8           # Ignorar señal del modelo
+  emotional_decision: -1.2       # Decisión contra análisis técnico
+  weekend_gap_risk: -0.5         # Mantener posiciones en gaps
+
+# 🤖 PENALIZACIONES POR ERRORES DE ML
+ml_penalties:
+  high_confidence_wrong: -1.5    # Predicción incorrecta con >85% confianza
+  model_degradation: -2.0        # Deterioro en precisión del modelo
+  ignored_low_confidence: -0.5   # Tradear con <60% confianza
+  overfitting_detected: -1.8     # Sobreajuste del modelo
+
+# 🎯 RECOMPENSAS BASADAS EN OBJETIVOS PROGRESIVOS
+objective_rewards:
+  milestone_progress:
+    multiplier: 0.5              # reward = (progress_to_milestone / 100) * multiplier
+    bonus_threshold_pct: 90.0    # Bonus si >= 90% del milestone
+    bonus_multiplier: 1.5
+    
+  roi_progress:
+    daily_target_met: 0.8        # Cumplir target diario
+    weekly_target_met: 2.0       # Cumplir target semanal
+    monthly_target_met: 4.0      # Cumplir target mensual
+    exceeded_expectations: 1.5    # Superar targets sin exceso riesgo
+
+# 📊 RECOMPENSAS POR CONSISTENCIA TEMPORAL
+consistency_rewards:
+  daily_consistency: 0.4         # Performance estable día a día
+  weekly_pattern: 0.8            # Patrón de mejora semanal
+  monthly_growth: 1.5            # Crecimiento mensual sostenido
+  volatility_control: 1.0        # Baja volatilidad en returns
+  
+# 🔄 SISTEMA ADAPTATIVO DE RECOMPENSAS
+adaptive_system:
+  performance_scaling:
+    beginner_multiplier: 1.2     # Bonificación para primeras semanas
+    intermediate_multiplier: 1.0  # Recompensas normales
+    expert_multiplier: 0.8       # Mayor exigencia para expertos
+    
+  difficulty_adjustment:
+    easy_mode_bonus: 0.3         # Bonus temporal para facilitar aprendizaje
+    challenge_mode_bonus: 1.5    # Bonus por trading en condiciones difíciles
+    
+  streak_bonuses:
+    winning_streak_3: 0.5        # 3 trades ganadores seguidos
+    winning_streak_5: 1.0        # 5 trades ganadores seguidos
+    winning_streak_10: 2.0       # 10 trades ganadores seguidos
+    profitable_days_7: 2.5       # 7 días rentables seguidos
+
+# 🎮 SISTEMA DE EXPERIENCIA Y NIVELES
+experience_system:
+  base_experience:
+    successful_trade: 10         # XP por trade exitoso
+    failed_trade: 2             # XP mínimo por intento
+    model_prediction: 5         # XP por predicción del modelo
+    
+  bonus_experience:
+    perfect_trade: 25           # Trade perfecto (alta confianza + profit)
+    risk_management: 15         # Excelente gestión de riesgo
+    model_accuracy: 20          # Alta precisión en predicciones
+    
+  level_benefits:
+    level_2_unlock: "Leverage hasta 15x"
+    level_5_unlock: "Timeframes adicionales"
+    level_10_unlock: "Estrategias avanzadas"
+    level_20_unlock: "Trading nocturno"
+
+# 🏅 SISTEMA DE BADGES Y RECONOCIMIENTOS
+badges_system:
+  risk_master:
+    requirement: "30 días sin violaciones de riesgo"
+    reward_multiplier: 1.2
+    
+  precision_expert:
+    requirement: "Precisión modelo >80% por 2 semanas"
+    reward_multiplier: 1.15
+    
+  consistency_king:
+    requirement: "Win rate >65% por mes"
+    reward_multiplier: 1.1
+    
+  drawdown_defender:
+    requirement: "Drawdown <10% por 3 meses"
+    reward_multiplier: 1.25
+
+# 📉 SISTEMA DE RECUPERACIÓN POST-PÉRDIDAS
+recovery_system:
+  loss_recovery_bonus:
+    small_recovery: 0.5         # Recuperar después de -2%
+    medium_recovery: 1.0        # Recuperar después de -5%
+    major_recovery: 2.0         # Recuperar después de -10%
+    
+  comeback_multiplier: 1.3     # Multiplica recompensas tras recovery
+  patience_reward: 0.8         # Por esperar mejores oportunidades
+
+# ⚙️ CONFIGURACIÓN DEL SISTEMA
+system_config:
+  max_daily_rewards: 20.0      # Límite de recompensas diarias
+  min_daily_rewards: -10.0     # Límite de penalizaciones diarias
+  reward_decay_rate: 0.95      # Decay de recompensas por tiempo
+  
+  auto_adjust: true            # Ajuste automático basado en performance
+  learning_rate_bonus: 0.1     # Bonus por rápido aprendizaje
+  
+# 🎯 MÉTRICAS DE EVALUACIÓN DE RECOMPENSAS
+reward_metrics:
+  total_reward_score: 0.0      # Score total acumulado
+  risk_adjusted_reward: 0.0    # Recompensa ajustada por riesgo
+  consistency_score: 0.0       # Score de consistencia
+  learning_velocity: 0.0       # Velocidad de mejora
+  
+# 🔧 CONFIGURACIÓN EXPERIMENTAL
+experimental_features:
+  social_trading_bonus: 0.3    # Bonus por compartir estrategias exitosas
+  community_feedback: 0.2      # Bonus por feedback de otros traders
+  innovation_reward: 1.5       # Por desarrollar nuevas estrategias
+  teaching_bonus: 0.8          # Por ayudar a otros agentes
+
+# 💡 SISTEMA DE HINTS Y SUGERENCIAS
+learning_assistance:
+  hint_bonus: 0.1             # Pequeño bonus por seguir sugerencias
+  educational_content: 0.2    # Bonus por revisar material educativo
+  risk_warning_heeded: 0.5    # Por hacer caso a advertencias de riesgo

@@ -1,0 +1,160 @@
+# Configuración de Trading - Bot Trading v10 Enterprise
+# =====================================================
+# Configuración centralizada para operaciones de trading
+
+trading:
+  # Configuración general
+  mode: "paper_trading"  # paper_trading, live_trading, backtesting
+  enabled: true
+  auto_trading: false
+  
+  # Configuración de órdenes
+  order_settings:
+    default_order_type: "market"  # market, limit, stop
+    max_orders_per_symbol: 5
+    order_timeout: 30  # segundos
+    
+  # Configuración de ejecución
+  execution:
+    slippage_tolerance: 0.001  # 0.1%
+    max_retries: 3
+    retry_delay: 1  # segundos
+    
+  # Configuración de comisiones
+  fees:
+    maker_fee: 0.001  # 0.1%
+    taker_fee: 0.001  # 0.1%
+    funding_fee: 0.0001  # 0.01%
+
+# Configuración de estrategias
+strategies:
+  # Estrategias activas
+  active_strategies:
+    - "ml_strategy"
+    - "momentum_strategy"
+    - "mean_reversion_strategy"
+  
+  # Configuración por estrategia
+  ml_strategy:
+    enabled: true
+    confidence_threshold: 0.75
+    risk_per_trade: 0.02
+    max_positions: 3
+    
+  momentum_strategy:
+    enabled: true
+    lookback_period: 20
+    threshold: 0.02
+    risk_per_trade: 0.015
+    
+  mean_reversion_strategy:
+    enabled: true
+    lookback_period: 50
+    threshold: 2.0  # desviaciones estándar
+    risk_per_trade: 0.01
+
+# Configuración de posiciones
+position_management:
+  # Límites de posición
+  max_positions_per_symbol: 1
+  max_total_positions: 10
+  
+  # Gestión de riesgo por posición
+  stop_loss:
+    enabled: true
+    default_pct: 0.02  # 2%
+    max_pct: 0.05  # 5%
+    
+  take_profit:
+    enabled: true
+    default_pct: 0.04  # 4%
+    max_pct: 0.10  # 10%
+    
+  # Trailing stop
+  trailing_stop:
+    enabled: true
+    activation_pct: 0.015  # 1.5%
+    step_pct: 0.005  # 0.5%
+
+# Configuración de mercado
+market_settings:
+  # Horarios de trading
+  trading_hours:
+    start: "00:00"
+    end: "23:59"
+    timezone: "UTC"
+    
+  # Configuración de mercado
+  market_conditions:
+    min_volume: 1000000  # volumen mínimo en USDT
+    max_spread_pct: 0.005  # 0.5%
+    min_price_change: 0.001  # 0.1%
+    
+  # Configuración de datos
+  data_requirements:
+    min_candles: 100
+    max_age_minutes: 5
+    required_indicators: ["sma", "rsi", "macd"]
+
+# Configuración de notificaciones
+notifications:
+  # Eventos de trading
+  trade_executed: true
+  trade_closed: true
+  stop_loss_triggered: true
+  take_profit_triggered: true
+  
+  # Alertas de riesgo
+  high_drawdown: true
+  consecutive_losses: true
+  unusual_volume: true
+  
+  # Configuración de canales
+  telegram:
+    enabled: true
+    include_charts: false
+    
+  email:
+    enabled: false
+    smtp_server: ""
+    smtp_port: 587
+
+# Configuración de logging
+logging:
+  # Niveles de log
+  trade_log_level: "INFO"
+  strategy_log_level: "DEBUG"
+  risk_log_level: "WARNING"
+  
+  # Archivos de log
+  trade_log_file: "logs/trading.log"
+  strategy_log_file: "logs/strategies.log"
+  risk_log_file: "logs/risk.log"
+  
+  # Rotación de logs
+  max_file_size: "10MB"
+  backup_count: 5
+
+# Configuración de backtesting
+backtesting:
+  # Configuración general
+  enabled: true
+  start_date: "2023-01-01"
+  end_date: "2024-01-01"
+  
+  # Configuración de datos
+  data_source: "historical"
+  resample_frequency: "1m"
+  
+  # Configuración de simulación
+  initial_capital: 10000
+  commission: 0.001
+  slippage: 0.0005
+  
+  # Métricas a calcular
+  metrics:
+    - "total_return"
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "win_rate"
+    - "profit_factor"

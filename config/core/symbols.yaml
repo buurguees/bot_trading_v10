@@ -1,0 +1,197 @@
+# Este archivo es la ÚNICA fuente de símbolos y timeframes
+# Configuración CONSERVADORA para trading responsable
+
+active_symbols:
+  primary: ["BTCUSDT", "ETHUSDT", "SOLUSDT"]        # Máxima liquidez y estabilidad
+  secondary: ["ADAUSDT", "XRPUSDT", "DOGEUSDT"]     # Liquidez buena, volatilidad moderada
+  experimental: ["TRUMPUSDT", "PEPEUSDT", "SHIBUSDT"]  # Alta volatilidad, usar con precaución
+
+timeframes:
+  execution: ["1m", "5m"]          # Timeframes de ejecución de trades
+  analysis: ["15m", "1h", "4h"]    # Timeframes de análisis técnico jerárquico
+  strategic: ["1d"]                # Timeframe estratégico de tendencias
+
+symbol_configs:
+  # TIER 1: Símbolos principales - Mayor liquidez, leverage moderado
+  BTCUSDT:
+    min_volume: 1000000
+    leverage_range: [5, 20]        # Reducido de [5, 100]
+    priority: 1
+    risk_category: "low"
+    max_position_size_pct: 15      # Máximo 15% del capital en una posición
+    stop_loss_requirement: true
+    
+  ETHUSDT:
+    min_volume: 500000
+    leverage_range: [5, 18]        # Reducido de [5, 80]
+    priority: 2
+    risk_category: "low"
+    max_position_size_pct: 12
+    stop_loss_requirement: true
+    
+  SOLUSDT:
+    min_volume: 200000
+    leverage_range: [3, 15]        # Reducido por mayor volatilidad
+    priority: 3
+    risk_category: "medium"
+    max_position_size_pct: 10
+    stop_loss_requirement: true
+    
+  # TIER 2: Símbolos secundarios - Leverage más conservador
+  ADAUSDT:
+    min_volume: 100000
+    leverage_range: [3, 12]        # Reducido de [5, 40]
+    priority: 4
+    risk_category: "medium"
+    max_position_size_pct: 8
+    stop_loss_requirement: true
+    
+  XRPUSDT:
+    min_volume: 100000
+    leverage_range: [3, 12]
+    priority: 5
+    risk_category: "medium"
+    max_position_size_pct: 8
+    stop_loss_requirement: true
+    
+  DOGEUSDT:
+    min_volume: 100000
+    leverage_range: [2, 10]        # Muy conservador por volatilidad
+    priority: 6
+    risk_category: "high"
+    max_position_size_pct: 6
+    stop_loss_requirement: true
+    
+  # TIER 3: Símbolos experimentales - Leverage mínimo
+  PEPEUSDT:
+    min_volume: 50000
+    leverage_range: [2, 8]         # Muy reducido por extrema volatilidad
+    priority: 7
+    risk_category: "very_high"
+    max_position_size_pct: 4
+    stop_loss_requirement: true
+    
+  SHIBUSDT:
+    min_volume: 50000
+    leverage_range: [2, 8]
+    priority: 8
+    risk_category: "very_high"
+    max_position_size_pct: 4
+    stop_loss_requirement: true
+    
+  TRUMPUSDT:
+    min_volume: 25000
+    leverage_range: [2, 6]         # Extremadamente conservador
+    priority: 9
+    risk_category: "extreme"
+    max_position_size_pct: 3
+    stop_loss_requirement: true
+
+# Configuración de gestión de riesgo por categoría
+risk_management:
+  low:
+    max_daily_trades: 30
+    max_drawdown_pct: 8.0
+    required_win_rate_pct: 58.0
+    
+  medium:
+    max_daily_trades: 25
+    max_drawdown_pct: 10.0
+    required_win_rate_pct: 62.0
+    
+  high:
+    max_daily_trades: 20
+    max_drawdown_pct: 12.0
+    required_win_rate_pct: 65.0
+    
+  very_high:
+    max_daily_trades: 15
+    max_drawdown_pct: 8.0
+    required_win_rate_pct: 70.0
+    
+  extreme:
+    max_daily_trades: 10
+    max_drawdown_pct: 5.0
+    required_win_rate_pct: 75.0
+
+# Configuración de horarios de trading
+trading_hours:
+  global_markets: true
+  avoid_low_liquidity: true
+  weekend_trading: false
+  news_event_pause: true
+  
+  high_liquidity_hours:
+    - "08:00-12:00"  # Sesión europea
+    - "13:00-17:00"  # Overlap europeo-americano
+    - "20:00-00:00"  # Sesión americana
+
+# Configuración de correlaciones
+correlation_limits:
+  max_correlated_positions: 3    # Máximo 3 posiciones correlacionadas
+  correlation_threshold: 0.7     # Umbral de correlación
+  
+  correlation_groups:
+    crypto_majors: ["BTCUSDT", "ETHUSDT"]
+    altcoins: ["ADAUSDT", "SOLUSDT", "XRPUSDT"]
+    memecoins: ["DOGEUSDT", "PEPEUSDT", "SHIBUSDT"]
+    experimental: ["TRUMPUSDT"]
+
+# Configuración de volatilidad
+volatility_controls:
+  max_daily_volatility: 0.15     # Máxima volatilidad diaria aceptable
+  volatility_adjustment: true    # Ajustar leverage por volatilidad
+  
+  volatility_tiers:
+    low: [0.0, 0.05]      # BTC, ETH - leverage completo
+    medium: [0.05, 0.10]  # SOL, ADA, XRP - leverage reducido 20%
+    high: [0.10, 0.20]    # DOGE - leverage reducido 50%
+    extreme: [0.20, 1.0]  # PEPE, SHIB - leverage reducido 70%
+
+# Sistema de alertas y límites
+alert_system:
+  price_movement_alerts:
+    sudden_spike: 0.05    # Alerta si precio sube >5% en 5min
+    sudden_drop: 0.05     # Alerta si precio baja >5% en 5min
+    volume_spike: 3.0     # Alerta si volumen >3x promedio
+    
+  risk_alerts:
+    approaching_stop_loss: 0.8   # Alerta al 80% del stop loss
+    high_correlation: 0.7        # Alerta por alta correlación
+    margin_warning: 0.8          # Alerta al 80% del margin
+
+# Configuración de backtesting
+backtesting_config:
+  default_period_days: 180
+  min_trades_required: 50
+  confidence_interval: 0.95
+  
+  validation_splits:
+    train: 0.7      # 70% para entrenamiento  
+    validate: 0.2   # 20% para validación
+    test: 0.1       # 10% para testing final
+
+# Configuración específica para paper trading
+paper_trading:
+  enabled: true
+  starting_balance: 10000
+  realistic_slippage: true
+  commission_simulation: true
+  latency_simulation: true
+  
+# Configuración de machine learning por símbolo
+ml_config:
+  BTCUSDT:
+    model_type: "lstm_attention"
+    sequence_length: 60
+    confidence_threshold: 0.65
+    
+  ETHUSDT:
+    model_type: "lstm_attention" 
+    sequence_length: 60
+    confidence_threshold: 0.68
+    
+  default:
+    model_type: "lstm_attention"
+    sequence_length: 45
+    confidence_threshold: 0.70

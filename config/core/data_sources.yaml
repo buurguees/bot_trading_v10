@@ -1,0 +1,16 @@
+exchanges:
+  primary: "bitget"
+  fallback: ["binance", "okx"]
+
+data_collection:
+  batch_size: 1000
+  update_frequency: 5  # seconds
+  retention_days: 365
+  historical:
+    years: 1
+    timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
+
+real_time:
+  enabled: true
+  websocket_timeout: 5
+  reconnect_attempts: 3
