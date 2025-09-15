@@ -1,0 +1,109 @@
+{
+  "session_id": "train_hist_20250915_182613",
+  "global_performance": {
+    "total_balance": 1009.2232994128981,
+    "avg_balance_per_agent": 126.15291242661226,
+    "total_pnl": 9.223299412898097,
+    "avg_pnl_per_agent": 1.1529124266122621,
+    "avg_pnl_pct": 0.11529124266122621,
+    "total_trades": 289,
+    "total_long_trades": 143,
+    "total_short_trades": 146,
+    "winning_trades": 158,
+    "losing_trades": 131,
+    "global_win_rate": 54.67128027681662,
+    "max_drawdown": 1.947617365954684,
+    "best_performer": {
+      "symbol": "SOLUSDT",
+      "pnl_pct": 3.198068064576584
+    },
+    "worst_performer": {
+      "symbol": "ETHUSDT",
+      "pnl_pct": -1.3573022910141734
+    },
+    "active_agents": 8
+  },
+  "symbol_performance": {
+    "BTCUSDT": {
+      "balance": 128.9947026612538,
+      "pnl": 3.9947026612538226,
+      "pnl_pct": 3.0967958984673203,
+      "trades": 64,
+      "win_rate": 54.6875,
+      "sharpe_ratio": 0,
+      "max_drawdown": 1.947617365954684,
+      "avg_leverage_used": null
+    },
+    "ETHUSDT": {
+      "balance": 123.32609212615348,
+      "pnl": -1.6739078738465314,
+      "pnl_pct": -1.3573022910141734,
+      "trades": 64,
+      "win_rate": 54.6875,
+      "sharpe_ratio": 0,
+      "max_drawdown": 1.7811749979643057,
+      "avg_leverage_used": null
+    },
+    "SOLUSDT": {
+      "balance": 129.12965423395423,
+      "pnl": 4.1296542339542555,
+      "pnl_pct": 3.198068064576584,
+      "trades": 64,
+      "win_rate": 56.25,
+      "sharpe_ratio": 0,
+      "max_drawdown": 1.6375187088133476,
+      "avg_leverage_used": null
+    },
+    "ADAUSDT": {
+      "balance": 126.47424196402378,
+      "pnl": 1.4742419640237583,
+      "pnl_pct": 1.1656460170309728,
+      "trades": 64,
+      "win_rate": 54.6875,
+      "sharpe_ratio": 0,
+      "max_drawdown": 1.5906037038220557,
+      "avg_leverage_used": null
+    },
+    "XRPUSDT": {
+      "balance": 126.62351154728219,
+      "pnl": 1.623511547282189,
+      "pnl_pct": 1.2821564711352658,
+      "trades": 9,
+      "win_rate": 44.44444444444444,
+      "sharpe_ratio": 0,
+      "max_drawdown": 0.0,
+      "avg_leverage_used": null
+    },
+    "DOGEUSDT": {
+      "balance": 124.6750968802306,
+      "pnl": -0.32490311976939745,
+      "pnl_pct": -0.26059985345871944,
+      "trades": 24,
+      "win_rate": 54.166666666666664,
+      "sharpe_ratio": 0,
+      "max_drawdown": 1.3545619396235211,
+      "avg_leverage_used": null
+    },
+    "PEPEUSDT": {
+      "balance": 125.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "sharpe_ratio": 0,
+      "max_drawdown": 0.0,
+      "avg_leverage_used": null
+    },
+    "SHIBUSDT": {
+      "balance": 125.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "sharpe_ratio": 0,
+      "max_drawdown": 0.0,
+      "avg_leverage_used": null
+    }
+  },
+  "telegram_summary": "\ud83c\udfaf <b>Entrenamiento Hist\u00f3rico Completado</b>\n\n\ud83d\udcca <b>Resumen Global (50 ciclos):</b>\n\u2022 Duraci\u00f3n: 0.1 minutos\n\u2022 Agentes: 8\n\u2022 Total Trades: 289  (L:143 / S:146)\n\n\ud83d\udcb0 <b>Performance Agregada:</b>\n\u2022 PnL Promedio: $+1.15 (+0.12%)\n\u2022 Win Rate Global: 54.7%\n\u2022 Max Drawdown: 1.95%\n\n\ud83d\udcb5 <b>Balances:</b>\n\u2022 Balance Inicial: $1,000\n\u2022 Balance Objetivo: $5,000\n\u2022 Balance Final: $1,009\n\n\ud83d\udcc8 <b>M\u00e9tricas Adicionales:</b>\n\u2022 Sharpe Ratio: 0.06\n\u2022 Volatilidad: 2.92%\n\u2022 Trades/min: 2890.0\n\u2022 Eficiencia Capital: 1.01x\n\n\ud83c\udfaf <b>Objetivos:</b>\n\u2022 ROI Objetivo: 400%\n\u2022 Progreso: 20.2%\n\n\ud83c\udfc6 <b>Top 3 Performers:</b>\n\ud83e\udd47 <b>SOLUSDT</b>: +3.20% (64 trades, 56.2% WR)\n\ud83e\udd48 <b>BTCUSDT</b>: +3.10% (64 trades, 54.7% WR)\n\ud83e\udd49 <b>XRPUSDT</b>: +1.28% (9 trades, 44.4% WR)\n\n\ud83d\udd25 <b>S\u00edmbolos M\u00e1s Activos:</b>\n\u2022 1. <b>BTCUSDT</b>: 64 trades (+3.10%)\n\u2022 2. <b>ETHUSDT</b>: 64 trades (-1.36%)\n\u2022 3. <b>SOLUSDT</b>: 64 trades (+3.20%)\n\n\ud83d\udcbe <b>Datos Guardados:</b>\n\u2022 Estrategias: <code>data/agents/{symbol}/strategies.json</code>\n\u2022 Sesi\u00f3n: <code>data/training_sessions/train_hist_20250915_182613/</code>"
+}

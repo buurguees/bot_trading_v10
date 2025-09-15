@@ -32,7 +32,7 @@ try:
 except ImportError:
     talib = None
 from core.data.database import db_manager
-from control.telegram_bot import telegram_bot
+from control.telegram_bot import TelegramBot
 
 logger = logging.getLogger(__name__)
 
@@ -186,7 +186,8 @@ class MarketAnalyzer:
             if alerts:
                 self.alert_count += len(alerts)
                 for alert in alerts:
-                    await telegram_bot.send_message(f"⚠️ Alerta de Mercado: {alert}")
+                    # await telegram_bot.send_message(f"⚠️ Alerta de Mercado: {alert}")
+                    logger.info(f"⚠️ Alerta de Mercado: {alert}")
             
             return analysis
             

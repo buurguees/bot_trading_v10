@@ -37,7 +37,7 @@ class BitgetClient:
     """Cliente de Bitget para trading y datos de mercado enterprise"""
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        self.config = config or config_loader.get_trading_config()
+        self.config = config or config_loader.get_main_config()
         
         # Configuración de API
         self.api_key = os.getenv('BITGET_API_KEY')

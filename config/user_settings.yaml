@@ -37,18 +37,11 @@ data_settings:
   real_time_enabled: true
 
 # Configuración de entrenamiento
+# NOTA: Los modos de entrenamiento se configuran ahora en training_objectives.yaml
 training_settings:
-  mode: "ultra_fast"  # ultra_fast, fast, normal, complete
-  ultra_fast_days: 30
-  fast_days: 90
-  normal_days: 180
-  complete_days: 365
-  # Configuración de entrenamiento incremental
-  incremental_training: true
-  chunk_size_days: 7  # Procesar 7 días por chunk
-  chunk_overlap_days: 1  # 1 día de solapamiento
-  max_memory_mb: 2048  # Límite de memoria en MB
-  progress_report_interval: 10  # Reportar cada 10%
+  mode: "realistic"  # ultra_fast, fast, normal, complete, realistic (configurado en training_objectives.yaml)
+  # Las configuraciones específicas de cada modo se leen desde training_objectives.yaml
+  # Solo se mantiene aquí la selección del modo activo
 
 # Configuración de ML
 ml_settings:

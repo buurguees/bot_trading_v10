@@ -104,11 +104,11 @@ class AnalyzeDataEnterprise:
             end_date = datetime.now(timezone.utc)
 
             issues_by_symbol = {}
-            reports_by_symbol = []
             total_issues = 0
             total_symbols = len(symbols)
             step = 0
 
+            # Procesar cada símbolo y generar reportes
             for symbol in symbols:
                 self._update_progress_safe(int((step / total_symbols) * 90) + 10, symbol)
                 try:
@@ -116,19 +116,46 @@ class AnalyzeDataEnterprise:
                     sym_issues = issues.get("symbol_issues", {}).get(symbol, {})
                     total_issues += len(sym_issues.get("issues", []))
                     issues_by_symbol[symbol] = sym_issues
-                    sym_report = self._generate_symbol_report(symbol, sym_issues)
-                    reports_by_symbol.append(sym_report)
+                    # Generar reporte por símbolo (ahora con lógica optimizada)
+                    self._generate_symbol_report(symbol, sym_issues)
                     step += 1
                 except Exception as e:
                     logger.error(f"❌ {symbol}: {e}")
                     issues_by_symbol[symbol] = {"total_issues": 0, "status": "error"}
-                    reports_by_symbol.append(f"<b>{symbol}:</b>\n• ❌ Error: {str(e)}")
+                    # Manejar errores en el estado global
+                    if not hasattr(self, '_symbol_states'):
+                        self._symbol_states = {}
+                    self._symbol_states[symbol] = {
+                        'gaps': 0,
+                        'duplicates': 0,
+                        'invalid': 0,
+                        'is_clean': False,
+                        'status': f"Error: {str(e)}"
+                    }
                     step += 1
+
+            # Generar reportes por símbolo (solo los que tienen problemas)
+            symbol_reports = []
+            for symbol in symbols:
+                if symbol in issues_by_symbol:
+                    issues = issues_by_symbol[symbol]
+                    report = self._generate_symbol_report(symbol, issues)
+                    if report:  # Solo agregar si tiene contenido (hay problemas)
+                        symbol_reports.append(report)
+
+            # Determinar qué tipo de mensaje mostrar
+            if symbol_reports:
+                # Hay símbolos con problemas - mostrar detalle + resumen global
+                global_summary = self._generate_global_summary()
+                final_report = global_summary + "\n\n" + "\n".join(symbol_reports)
+            else:
+                # Todos limpios - solo resumen global
+                final_report = self._generate_global_summary()
 
             self._update_progress_safe(100, "Completado", "completed")
             return {
                 "status": "success",
-                "report": reports_by_symbol,
+                "report": [final_report],  # Mantener formato de lista para compatibilidad
                 "total_issues": total_issues,
                 "issues_by_symbol": issues_by_symbol
             }
@@ -139,6 +166,11 @@ class AnalyzeDataEnterprise:
             return {"status": "error", "message": str(e)}
 
     def _generate_symbol_report(self, symbol: str, issues: Dict) -> str:
+        """
+        Genera reporte por símbolo con formato optimizado.
+        Si todos los datos están limpios, muestra resumen global.
+        Si hay problemas, muestra detalle por símbolo.
+        """
         issues_list = issues.get("issues", [])
         
         # Contar diferentes tipos de issues
@@ -160,22 +192,93 @@ class AnalyzeDataEnterprise:
         
         total_issues = len(issues_list)
         
-        # Si hay errores de análisis, mostrar como limpio pero con nota
-        if errors > 0 and total_issues == errors:
-            status = "✅ Datos disponibles (análisis limitado)"
-        elif total_issues == 0:
-            status = "✅ Limpio"
-        else:
-            status = "⚠️ Issues encontrados"
+        # Determinar si hay problemas reales (excluyendo errores de análisis limitado)
+        real_issues = gaps + duplicates + invalid
         
-        report = f"""
+        # Si hay errores de análisis pero no problemas reales, considerar como limpio
+        if errors > 0 and real_issues == 0:
+            status = "Datos disponibles (análisis limitado)"
+            is_clean = True
+        elif total_issues == 0:
+            status = "Datos disponibles"
+            is_clean = True
+        else:
+            status = "Issues encontrados"
+            is_clean = False
+        
+        # Guardar estado para usar en el resumen global
+        if not hasattr(self, '_symbol_states'):
+            self._symbol_states = {}
+        
+        self._symbol_states[symbol] = {
+            'gaps': gaps,
+            'duplicates': duplicates,
+            'invalid': invalid,
+            'is_clean': is_clean,
+            'status': status
+        }
+        
+        # Si hay problemas reales, mostrar detalle por símbolo
+        if real_issues > 0:
+            report = f"""
 <b>🔍 {symbol}:</b>
 • Gaps: {gaps}
 • Duplicados: {duplicates}
 • Inválidos: {invalid}
-• Estado: {status}
+• Estado: ⚠️ {status}
+            """
+            return report.strip()
+        
+        # Si está limpio, contribuir al resumen global (se procesará al final)
+        return ""  # No mostrar detalle individual si está limpio
+
+    def _generate_global_summary(self) -> str:
         """
-        return report.strip()
+        Genera resumen global cuando todos los símbolos están limpios
+        o hay pocos problemas.
+        """
+        if not hasattr(self, '_symbol_states'):
+            return ""
+        
+        total_symbols = len(self._symbol_states)
+        clean_symbols = sum(1 for state in self._symbol_states.values() if state['is_clean'])
+        total_gaps = sum(state['gaps'] for state in self._symbol_states.values())
+        total_duplicates = sum(state['duplicates'] for state in self._symbol_states.values())
+        total_invalid = sum(state['invalid'] for state in self._symbol_states.values())
+        
+        # Si todos están limpios o solo hay problemas mínimos
+        if clean_symbols == total_symbols:
+            return f"""
+<b>📊 Análisis de datos completado:</b>
+• Gaps: {total_gaps}
+• Duplicados: {total_duplicates} 
+• Inválidos: {total_invalid}
+• Estado: ✅ Datos disponibles
+            """.strip()
+        
+        # Si hay algunos problemas, mostrar resumen con detalle de símbolos problemáticos
+        problematic_symbols = [
+            symbol for symbol, state in self._symbol_states.items() 
+            if not state['is_clean']
+        ]
+        
+        summary = f"""
+<b>📊 Análisis de datos completado:</b>
+• Símbolos analizados: {total_symbols}
+• Símbolos limpios: {clean_symbols}
+• Símbolos con problemas: {len(problematic_symbols)}
+• Total gaps: {total_gaps}
+• Total duplicados: {total_duplicates}
+• Total inválidos: {total_invalid}
+
+<b>🔍 Símbolos con problemas:</b>
+        """
+        
+        for symbol in problematic_symbols:
+            state = self._symbol_states[symbol]
+            summary += f"\n• {symbol}: G:{state['gaps']} D:{state['duplicates']} I:{state['invalid']}"
+        
+        return summary.strip()
 
 async def main():
     import argparse

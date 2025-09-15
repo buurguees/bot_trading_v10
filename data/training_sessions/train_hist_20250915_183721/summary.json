@@ -1,0 +1,109 @@
+{
+  "session_id": "train_hist_20250915_183721",
+  "global_performance": {
+    "total_balance": 1000.2794375468785,
+    "avg_balance_per_agent": 125.03492969335981,
+    "total_pnl": 0.27943754687843647,
+    "avg_pnl_per_agent": 0.03492969335980456,
+    "avg_pnl_pct": 0.003492969335980456,
+    "total_trades": 289,
+    "total_long_trades": 143,
+    "total_short_trades": 146,
+    "winning_trades": 157,
+    "losing_trades": 132,
+    "global_win_rate": 54.325259515570934,
+    "max_drawdown": 1.8870916644730893,
+    "best_performer": {
+      "symbol": "SOLUSDT",
+      "pnl_pct": 5.183349160003822
+    },
+    "worst_performer": {
+      "symbol": "ETHUSDT",
+      "pnl_pct": -7.005613208969851
+    },
+    "active_agents": 8
+  },
+  "symbol_performance": {
+    "BTCUSDT": {
+      "balance": 124.59982698660309,
+      "pnl": -0.4001730133969126,
+      "pnl_pct": -0.3211665883291628,
+      "trades": 64,
+      "win_rate": 54.6875,
+      "sharpe_ratio": 0,
+      "max_drawdown": 1.4878746357630048,
+      "avg_leverage_used": null
+    },
+    "ETHUSDT": {
+      "balance": 116.81630173539509,
+      "pnl": -8.183698264604915,
+      "pnl_pct": -7.005613208969851,
+      "trades": 64,
+      "win_rate": 56.25,
+      "sharpe_ratio": 0,
+      "max_drawdown": 1.8870916644730893,
+      "avg_leverage_used": null
+    },
+    "SOLUSDT": {
+      "balance": 131.83338463508744,
+      "pnl": 6.833384635087413,
+      "pnl_pct": 5.183349160003822,
+      "trades": 64,
+      "win_rate": 53.125,
+      "sharpe_ratio": 0,
+      "max_drawdown": 1.3850214735225177,
+      "avg_leverage_used": null
+    },
+    "ADAUSDT": {
+      "balance": 124.27107161220874,
+      "pnl": -0.7289283877912568,
+      "pnl_pct": -0.5865632108379154,
+      "trades": 64,
+      "win_rate": 54.6875,
+      "sharpe_ratio": 0,
+      "max_drawdown": 1.669824205060017,
+      "avg_leverage_used": null
+    },
+    "XRPUSDT": {
+      "balance": 126.44477752439099,
+      "pnl": 1.4447775243909824,
+      "pnl_pct": 1.1426154189027595,
+      "trades": 9,
+      "win_rate": 44.44444444444444,
+      "sharpe_ratio": 0,
+      "max_drawdown": 0.0,
+      "avg_leverage_used": null
+    },
+    "DOGEUSDT": {
+      "balance": 126.31407505319314,
+      "pnl": 1.3140750531931262,
+      "pnl_pct": 1.0403235368978045,
+      "trades": 24,
+      "win_rate": 54.166666666666664,
+      "sharpe_ratio": 0,
+      "max_drawdown": 0.2706564509060266,
+      "avg_leverage_used": null
+    },
+    "PEPEUSDT": {
+      "balance": 125.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "sharpe_ratio": 0,
+      "max_drawdown": 0.0,
+      "avg_leverage_used": null
+    },
+    "SHIBUSDT": {
+      "balance": 125.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "sharpe_ratio": 0,
+      "max_drawdown": 0.0,
+      "avg_leverage_used": null
+    }
+  },
+  "telegram_summary": "\u274c Error generando resumen del entrenamiento"
+}

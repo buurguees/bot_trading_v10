@@ -127,7 +127,8 @@ class StateManager:
             Path(directory).mkdir(parents=True, exist_ok=True)
     
     def create_session(self, mode: TrainMode, symbols: List[str], 
-                      cycle_duration: int = 30, session_id: Optional[str] = None) -> TrainSessionState:
+                      cycle_duration: int = 30, session_id: Optional[str] = None,
+                      capital_manager=None) -> TrainSessionState:
         """Crea una nueva sesión de entrenamiento"""
         with self.state_lock:
             if session_id is None:
@@ -135,22 +136,46 @@ class StateManager:
             
             # Inicializar estado de símbolos
             per_symbol = {}
-            for symbol in symbols:
-                per_symbol[symbol] = SymbolState(
-                    symbol=symbol,
-                    balance=self.config['initial_balance'],
-                    equity=self.config['initial_balance'],
-                    open_positions=[],
-                    kpis={},
-                    trades_count=0,
-                    winning_trades=0,
-                    losing_trades=0,
-                    max_drawdown=0.0,
-                    current_drawdown=0.0,
-                    peak_equity=self.config['initial_balance'],
-                    strategies_used=[],
-                    bad_strategies=[]
-                )
+            initial_balance = self.config['initial_balance']
+            
+            # Si hay gestor de capital, usar asignaciones distribuidas
+            if capital_manager:
+                symbol_balances = capital_manager.get_symbol_allocations()
+                for symbol in symbols:
+                    symbol_balance = symbol_balances.get(symbol, {}).get('allocated_balance', initial_balance)
+                    per_symbol[symbol] = SymbolState(
+                        symbol=symbol,
+                        balance=symbol_balance,
+                        equity=symbol_balance,
+                        open_positions=[],
+                        kpis={},
+                        trades_count=0,
+                        winning_trades=0,
+                        losing_trades=0,
+                        max_drawdown=0.0,
+                        current_drawdown=0.0,
+                        peak_equity=symbol_balance,
+                        strategies_used=[],
+                        bad_strategies=[]
+                    )
+            else:
+                # Usar balance igual para todos (comportamiento anterior)
+                for symbol in symbols:
+                    per_symbol[symbol] = SymbolState(
+                        symbol=symbol,
+                        balance=initial_balance,
+                        equity=initial_balance,
+                        open_positions=[],
+                        kpis={},
+                        trades_count=0,
+                        winning_trades=0,
+                        losing_trades=0,
+                        max_drawdown=0.0,
+                        current_drawdown=0.0,
+                        peak_equity=initial_balance,
+                        strategies_used=[],
+                        bad_strategies=[]
+                    )
             
             # Crear estado de sesión
             self.state = TrainSessionState(
@@ -163,6 +188,10 @@ class StateManager:
                 session_id=session_id,
                 config=self.config
             )
+            
+            # Si hay gestor de capital, guardar referencia
+            if capital_manager:
+                self.state.capital_manager = capital_manager
             
             # Crear barreras de sincronización
             self.cycle_barrier = Barrier(len(symbols))

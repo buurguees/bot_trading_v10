@@ -105,19 +105,32 @@ class TradingAgent:
     base de conocimiento, estrategias y memoria de decisiones.
     """
     
-    def __init__(self, symbol: str, initial_balance: float = 1000.0):
+    def __init__(self, symbol: str, initial_balance: float = 1000.0, 
+                 capital_manager=None, is_shared_capital: bool = False):
         """
         Inicializa el agente de trading
         
         Args:
             symbol: Símbolo a operar (ej: BTCUSDT)
-            initial_balance: Balance inicial
+            initial_balance: Balance inicial (usado solo si is_shared_capital=False)
+            capital_manager: Gestor de capital centralizado (opcional)
+            is_shared_capital: Si True, usa el gestor de capital compartido
         """
         self.symbol = symbol
         self.agent_id = f"agent_{symbol}_{uuid.uuid4().hex[:8]}"
-        self.initial_balance = initial_balance
-        self.current_balance = initial_balance
-        self.peak_balance = initial_balance
+        self.capital_manager = capital_manager
+        self.is_shared_capital = is_shared_capital
+        
+        if is_shared_capital and capital_manager:
+            # Usar balance del gestor de capital centralizado
+            self.initial_balance = capital_manager.get_symbol_balance(symbol)
+            self.current_balance = self.initial_balance
+        else:
+            # Usar balance individual
+            self.initial_balance = initial_balance
+            self.current_balance = initial_balance
+            
+        self.peak_balance = self.initial_balance
         
         # Estado del agente
         self.is_active = True
@@ -809,6 +822,14 @@ class TradingAgent:
         try:
             # Actualizar balance
             self.current_balance += result.pnl
+            
+            # Si usa capital compartido, actualizar el gestor central
+            if self.is_shared_capital and self.capital_manager:
+                self.capital_manager.update_symbol_balance(
+                    self.symbol, 
+                    self.current_balance, 
+                    result.pnl
+                )
             
             # Actualizar peak y drawdown
             if self.current_balance > self.peak_balance:

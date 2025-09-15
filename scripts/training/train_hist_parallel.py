@@ -1,28 +1,28 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Train Hist Parallel - Bot Trading v10 Enterprise
 ================================================
 Script principal para comando /train_hist con entrenamiento paralelo sincronizado.
-Ejecuta múltiples agentes en paralelo con timestamps sincronizados.
+Ejecuta mÃºltiples agentes en paralelo con timestamps sincronizados.
 
-Características:
+CaracterÃ­sticas:
 - Entrenamiento paralelo sincronizado por timestamps
 - PnL diario agregado (media entre agentes)
-- Win rate global y métricas consolidadas
+- Win rate global y mÃ©tricas consolidadas
 - Progreso en tiempo real para Telegram
 - Guardado de estrategias y runs por agente
 - Base de conocimiento compartida
-- Uso de datos históricos reales de DBs locales
+- Uso de datos histÃ³ricos reales de DBs locales
 
 Uso desde Telegram:
     /train_hist
 
-Uso desde línea de comandos:
+Uso desde lÃ­nea de comandos:
     python scripts/training/train_hist_parallel.py --progress-file data/tmp/progress.json
 
 Autor: Bot Trading v10 Enterprise
-Versión: 2.1.0 (Actualizado para entrenamiento real con datos históricos)
+VersiÃ³n: 2.1.0 (Actualizado para entrenamiento real con datos histÃ³ricos)
 """
 
 import asyncio
@@ -43,7 +43,7 @@ import numpy as np
 # Cargar variables de entorno
 load_dotenv()
 
-# Agregar directorio raíz al path
+# Agregar directorio raÃ­z al path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 def _load_training_objectives():
@@ -61,13 +61,40 @@ def _load_training_objectives():
         logger.warning(f"Error cargando training_objectives.yaml: {e}")
         return None
 
+def _load_training_mode_config(mode: str = "ultra_fast"):
+    """Carga configuraciÃ³n especÃ­fica del modo de entrenamiento desde training_objectives.yaml"""
+    try:
+        objectives = _load_training_objectives()
+        if objectives and 'historical_training_modes' in objectives:
+            training_modes = objectives['historical_training_modes']
+            if mode in training_modes:
+                return training_modes[mode]
+            else:
+                logger.warning(f"Modo '{mode}' no encontrado, usando 'ultra_fast'")
+                return training_modes.get('ultra_fast', {})
+        else:
+            logger.warning("No se encontraron modos de entrenamiento histÃ³rico, usando configuraciÃ³n por defecto")
+            return {}
+    except Exception as e:
+        logger.warning(f"Error cargando configuraciÃ³n del modo de entrenamiento: {e}")
+        return {}
+    
+    # ConfiguraciÃ³n por defecto si falla la carga
+    defaults = {
+        'ultra_fast': {'days': 30, 'cycles': 50, 'chunk_size_days': 7, 'chunk_overlap_days': 1, 'max_memory_mb': 2048, 'progress_report_interval': 10},
+        'fast': {'days': 90, 'cycles': 100, 'chunk_size_days': 14, 'chunk_overlap_days': 2, 'max_memory_mb': 4096, 'progress_report_interval': 5},
+        'normal': {'days': 180, 'cycles': 200, 'chunk_size_days': 30, 'chunk_overlap_days': 3, 'max_memory_mb': 8192, 'progress_report_interval': 2},
+        'complete': {'days': 365, 'cycles': 500, 'chunk_size_days': 60, 'chunk_overlap_days': 5, 'max_memory_mb': 16384, 'progress_report_interval': 1}
+    }
+    return defaults.get(mode, defaults['ultra_fast'])
+
 # Imports del proyecto
 try:
     from scripts.training.parallel_training_orchestrator import create_parallel_training_orchestrator
     from core.sync.metrics_aggregator import create_metrics_aggregator
     from config.unified_config import get_config_manager
 except ImportError as e:
-    print(f"⚠️ Imports no disponibles, usando fallbacks funcionales: {e}")
+    print(f"âš ï¸ Imports no disponibles, usando fallbacks funcionales: {e}")
     
     # Fallbacks FUNCIONALES en lugar de None
     async def create_parallel_training_orchestrator(*args, **kwargs):
@@ -83,6 +110,23 @@ except ImportError as e:
     
     def get_config_manager():
         class WorkingFallbackConfig:
+            def __init__(self):
+                # Cargar user_settings.yaml
+                self.training_settings = self._load_user_settings()
+            
+            def _load_user_settings(self):
+                """Carga configuraciÃ³n desde user_settings.yaml"""
+                try:
+                    import yaml
+                    user_settings_path = Path("config/user_settings.yaml")
+                    if user_settings_path.exists():
+                        data = yaml.safe_load(user_settings_path.read_text(encoding='utf-8')) or {}
+                        return data.get('training_settings', {})
+                except Exception:
+                    pass
+                # Fallback por defecto
+                return {'mode': 'ultra_fast'}
+            
             def get_symbols(self): 
                 # Cargar desde symbols.yaml como fallback
                 try:
@@ -136,16 +180,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Señal global para modo continuo controlado desde Telegram
+# SeÃ±al global para modo continuo controlado desde Telegram
 STOP_EVENT: asyncio.Event | None = None
 
 class TrainHistParallel:
     """
-    Entrenador Histórico Paralelo
+    Entrenador HistÃ³rico Paralelo
     =============================
     
-    Ejecuta entrenamiento histórico con múltiples agentes sincronizados
-    y agrega resultados globales para análisis conjunto. Ahora usa datos históricos reales de DBs.
+    Ejecuta entrenamiento histÃ³rico con mÃºltiples agentes sincronizados
+    y agrega resultados globales para anÃ¡lisis conjunto. Ahora usa datos histÃ³ricos reales de DBs.
     """
     
     def __init__(self, progress_file: Optional[str] = None):
@@ -163,13 +207,13 @@ class TrainHistParallel:
         random.seed(self.random_seed)
         np.random.seed(self.random_seed)
         
-        # Configuración
+        # ConfiguraciÃ³n
         self.config = get_config_manager()
         self.symbols = self.config.get_symbols()
         
-        # Separar timeframes por función
+        # Separar timeframes por funciÃ³n
         self.execution_timeframes = ['1m', '5m']  # Obligatorios para trading
-        self.analysis_timeframes = ['15m', '1h', '4h', '1d']  # Para features y análisis
+        self.analysis_timeframes = ['15m', '1h', '4h', '1d']  # Para features y anÃ¡lisis
         self.all_timeframes = self.execution_timeframes + self.analysis_timeframes
         
         # Usar todos para carga de datos
@@ -193,6 +237,7 @@ class TrainHistParallel:
         # Componentes principales
         self.orchestrator = None
         self.metrics_aggregator = None
+        self.capital_manager = None
         
         # Estado del entrenamiento
         self.is_running = False
@@ -205,67 +250,246 @@ class TrainHistParallel:
         self._prev_cycle_leverage_per_symbol: Dict[str, float] = {}
         # Desactivar mensajes por ciclo a Telegram (solo enviar resumen final)
         self.enable_cycle_telegram: bool = False
-        # Suprimir ruido de sincronización cuando se cae a simulación
+        # Suprimir ruido de sincronizaciÃ³n cuando se cae a simulaciÃ³n
         self._install_sync_log_filters()
         
-        logger.info(f"🎯 TrainHistParallel inicializado: {len(self.symbols)} símbolos")
+        logger.info(f"ðŸŽ¯ TrainHistParallel inicializado: {len(self.symbols)} sÃ­mbolos")
 
         # Cargar rangos de leverage desde YAML (si es posible)
         try:
             self._load_symbol_leverage_ranges()
         except Exception as e:
-            logger.warning(f"⚠️ No se pudieron cargar leverage_range de symbols.yaml: {e}")
+            logger.warning(f"âš ï¸ No se pudieron cargar leverage_range de symbols.yaml: {e}")
 
-        # Datos históricos cargados
+        # Datos histÃ³ricos cargados
         self.historical_data: Dict[str, Dict[str, pd.DataFrame]] = {}  # {symbol: {tf: df}}
 
-    def _get_training_days(self, mode: str = "normal") -> int:
-        """Obtiene días por modo desde la config del usuario. Fallback seguro.
+    def _get_training_days(self, mode: str = "ultra_fast") -> int:
+        """Obtiene dÃ­as por modo desde training_objectives.yaml. Fallback seguro.
         Modo puede ser: ultra_fast, fast, normal, complete.
         """
         try:
-            settings = getattr(self.config, 'training_settings', None)
-            if isinstance(settings, dict):
-                key = f"{mode}_days"
-                if key in settings:
-                    return int(settings[key])
-            getter = getattr(self.config, 'get_training_days', None)
-            if callable(getter):
-                return int(getter(mode))
-        except Exception:
-            pass
+            mode_config = _load_training_mode_config(mode)
+            if 'days' in mode_config:
+                return int(mode_config['days'])
+        except Exception as e:
+            logger.warning(f"Error obteniendo dÃ­as de entrenamiento para modo '{mode}': {e}")
+        
+        # Fallback por defecto
         defaults = {
             'ultra_fast': 30,
             'fast': 90,
             'normal': 180,
             'complete': 365,
         }
-        return defaults.get(mode, 180)
+        return defaults.get(mode, 30)
+    
+    def _get_training_cycles(self, mode: str = "ultra_fast") -> int:
+        """Obtiene nÃºmero de ciclos por modo desde training_objectives.yaml"""
+        try:
+            mode_config = _load_training_mode_config(mode)
+            if 'cycles' in mode_config:
+                return int(mode_config['cycles'])
+        except Exception as e:
+            logger.warning(f"Error obteniendo ciclos de entrenamiento para modo '{mode}': {e}")
+        
+        # Fallback por defecto
+        defaults = {
+            'ultra_fast': 50,
+            'fast': 100,
+            'normal': 200,
+            'complete': 500,
+        }
+        return defaults.get(mode, 50)
+    
+    def _load_training_mode_from_user_settings(self) -> str:
+        """Carga el modo de entrenamiento desde user_settings.yaml"""
+        try:
+            import yaml
+            user_settings_path = Path("config/user_settings.yaml")
+            if user_settings_path.exists():
+                with open(user_settings_path, 'r', encoding='utf-8') as f:
+                    data = yaml.safe_load(f)
+                return data.get('training_settings', {}).get('mode', 'ultra_fast')
+        except Exception as e:
+            logger.warning(f"Error cargando modo de entrenamiento desde user_settings.yaml: {e}")
+        return 'ultra_fast'
+    
+    def get_current_training_config(self) -> Dict[str, Any]:
+        """Obtiene la configuraciÃ³n actual del entrenamiento"""
+        try:
+            # Cargar directamente desde user_settings.yaml
+            training_mode = self._load_training_mode_from_user_settings()
+            mode_config = _load_training_mode_config(training_mode)
+            
+            return {
+                'mode': training_mode,
+                'name': mode_config.get('name', training_mode.title()),
+                'description': mode_config.get('description', ''),
+                'days': mode_config.get('days', 30),
+                'cycles': mode_config.get('cycles', 50),
+                'chunk_size_days': mode_config.get('chunk_size_days', 7),
+                'chunk_overlap_days': mode_config.get('chunk_overlap_days', 1),
+                'max_memory_mb': mode_config.get('max_memory_mb', 2048),
+                'progress_report_interval': mode_config.get('progress_report_interval', 10),
+                'use_case': mode_config.get('use_case', '')
+            }
+        except Exception as e:
+            logger.warning(f"Error obteniendo configuraciÃ³n actual del entrenamiento: {e}")
+            return {
+                'mode': 'ultra_fast',
+                'name': 'Ultra RÃ¡pido',
+                'description': 'ConfiguraciÃ³n por defecto',
+                'days': 30,
+                'cycles': 50,
+                'chunk_size_days': 7,
+                'chunk_overlap_days': 1,
+                'max_memory_mb': 2048,
+                'progress_report_interval': 10,
+                'use_case': 'ConfiguraciÃ³n por defecto'
+            }
+    
+    async def _update_progress(self, progress: float, status: str, details: str = ""):
+        """
+        Actualiza el progreso del entrenamiento
+        
+        Args:
+            progress: Porcentaje de progreso (0-100)
+            status: Estado actual del entrenamiento
+            details: Detalles adicionales del progreso
+        """
+        try:
+            # Crear datos de progreso
+            progress_data = {
+                'session_id': self.session_id,
+                'progress': progress,
+                'status': status,
+                'details': details,
+                'timestamp': datetime.now().isoformat(),
+                'symbols': self.symbols,
+                'initial_balance': self.initial_balance,
+                'target_balance': self.target_balance,
+                'target_roi_pct': self.target_roi_pct
+            }
+            
+            # Guardar progreso en archivo si está configurado
+            if self.progress_file:
+                try:
+                    import json
+                    with open(self.progress_file, 'w', encoding='utf-8') as f:
+                        json.dump(progress_data, f, indent=2, ensure_ascii=False)
+                except Exception as e:
+                    logger.warning(f"Error guardando progreso en archivo: {e}")
+            
+            # Log del progreso
+            logger.info(f"📊 Progreso: {progress:.1f}% - {status}")
+            if details:
+                logger.info(f"📝 Detalles: {details}")
+                
+        except Exception as e:
+            logger.error(f"Error actualizando progreso: {e}")
+    
+    def _get_training_chunk_config(self, mode: str = "ultra_fast") -> Dict[str, int]:
+        """Obtiene configuraciÃ³n de chunks por modo desde training_objectives.yaml"""
+        try:
+            mode_config = _load_training_mode_config(mode)
+            return {
+                'chunk_size_days': int(mode_config.get('chunk_size_days', 7)),
+                'chunk_overlap_days': int(mode_config.get('chunk_overlap_days', 1)),
+                'max_memory_mb': int(mode_config.get('max_memory_mb', 2048)),
+                'progress_report_interval': int(mode_config.get('progress_report_interval', 10))
+            }
+        except Exception as e:
+            logger.warning(f"Error obteniendo configuraciÃ³n de chunks para modo '{mode}': {e}")
+            return {
+                'chunk_size_days': 7,
+                'chunk_overlap_days': 1,
+                'max_memory_mb': 2048,
+                'progress_report_interval': 10
+            }
+    
+    def _get_symbol_configs(self) -> Dict[str, Dict[str, Any]]:
+        """Obtiene configuraciones especÃ­ficas de sÃ­mbolos"""
+        try:
+            symbol_configs = {}
+            
+            # Cargar configuraciones desde symbols.yaml
+            try:
+                import yaml
+                symbols_path = Path("config/core/symbols.yaml")
+                if symbols_path.exists():
+                    with open(symbols_path, 'r', encoding='utf-8') as f:
+                        symbols_data = yaml.safe_load(f)
+                    
+                    symbol_configs_data = symbols_data.get('symbol_configs', {})
+                    for symbol in self.symbols:
+                        if symbol in symbol_configs_data:
+                            config = symbol_configs_data[symbol]
+                            symbol_configs[symbol] = {
+                                'max_position_size_pct': config.get('max_position_size_pct', 25),
+                                'min_position_size_pct': config.get('min_position_size_pct', 5),
+                                'risk_category': config.get('risk_category', 'medium'),
+                                'leverage_range': config.get('leverage_range', [1, 10])
+                            }
+            except Exception as e:
+                logger.warning(f"âš ï¸ No se pudieron cargar configuraciones de sÃ­mbolos: {e}")
+            
+            # Configuraciones por defecto si no hay archivo
+            if not symbol_configs:
+                for symbol in self.symbols:
+                    symbol_configs[symbol] = {
+                        'max_position_size_pct': 25,
+                        'min_position_size_pct': 5,
+                        'risk_category': 'medium',
+                        'leverage_range': [1, 10]
+                    }
+            
+            return symbol_configs
+            
+        except Exception as e:
+            logger.error(f"âŒ Error obteniendo configuraciones de sÃ­mbolos: {e}")
+            return {}
     
     async def initialize_components(self):
         """Inicializa componentes del sistema"""
         try:
-            logger.info("🔧 Inicializando componentes del sistema...")
+            logger.info("ðŸ”§ Inicializando componentes del sistema...")
+            
+            # Crear gestor de capital multi-sÃ­mbolo
+            from core.trading.multi_symbol_capital_manager import create_capital_manager, AllocationMethod
+            self.capital_manager = create_capital_manager(
+                initial_balance=self.initial_balance,
+                allocation_method=AllocationMethod.EQUAL_WEIGHT
+            )
+            
+            # Inicializar sÃ­mbolos en el gestor de capital
+            symbol_configs = self._get_symbol_configs()
+            symbol_balances = self.capital_manager.initialize_symbols(self.symbols, symbol_configs)
+            
+            logger.info(f"ðŸ’° Capital distribuido entre {len(self.symbols)} sÃ­mbolos:")
+            for symbol, balance in symbol_balances.items():
+                logger.info(f"  â€¢ {symbol}: ${balance:,.2f}")
             
             # Crear orchestrador
             self.orchestrator = await create_parallel_training_orchestrator(
                 symbols=self.symbols,
                 timeframes=self.timeframes,
-                initial_balance=self.initial_balance
+                initial_balance=self.initial_balance,
+                capital_manager=self.capital_manager
             )
             
-            # Crear agregador de métricas
+            # Crear agregador de mÃ©tricas
             self.metrics_aggregator = create_metrics_aggregator(self.symbols)
             
-            logger.info("✅ Componentes inicializados correctamente")
+            logger.info("âœ… Componentes inicializados correctamente")
             
         except Exception as e:
-            logger.error(f"❌ Error inicializando componentes: {e}")
+            logger.error(f"âŒ Error inicializando componentes: {e}")
             raise
     
     async def execute_training(self, start_date: datetime = None, end_date: datetime = None) -> Dict[str, Any]:
         """
-        Ejecuta entrenamiento histórico paralelo
+        Ejecuta entrenamiento histÃ³rico paralelo
         
         Args:
             start_date: Fecha de inicio (None = usar config)
@@ -278,23 +502,24 @@ class TrainHistParallel:
             self.start_time = datetime.now()
             self.is_running = True
             
-            logger.info(f"🚀 Iniciando entrenamiento histórico paralelo: {self.session_id}")
+            logger.info(f"ðŸš€ Iniciando entrenamiento histÃ³rico paralelo: {self.session_id}")
             
-            # Configurar fechas por defecto (modo normal)
+            # Configurar fechas por defecto usando el modo configurado
             if start_date is None:
-                start_date = datetime.now() - timedelta(days=self._get_training_days('normal'))
+                training_mode = self._load_training_mode_from_user_settings()
+                start_date = datetime.now() - timedelta(days=self._get_training_days(training_mode))
             if end_date is None:
                 end_date = datetime.now() - timedelta(days=1)  # Hasta ayer
             
             # Actualizar progreso inicial
-            await self._update_progress(0, "Inicializando sistema", "🔧 Preparando componentes")
+            await self._update_progress(0, "Inicializando sistema", "ðŸ”§ Preparando componentes")
             
-            # Filtrar símbolos con datos locales
+            # Filtrar sÃ­mbolos con datos locales
             self._filter_symbols_with_local_data()
             if not self.symbols:
-                raise ValueError("No hay símbolos con datos históricos locales disponibles.")
+                raise ValueError("No hay sÃ­mbolos con datos histÃ³ricos locales disponibles.")
             
-            # Cargar datos históricos reales
+            # Cargar datos histÃ³ricos reales
             await self._load_historical_data(start_date, end_date)
             
             # Integrar alineamiento pre-generado
@@ -303,13 +528,13 @@ class TrainHistParallel:
             # Configurar callback de progreso
             progress_callback = self._create_progress_callback()
             
-            # Ejecutar entrenamiento real con datos históricos
-            await self._update_progress(10, "Ejecutando entrenamiento", "🤖 Iniciando agentes paralelos")
+            # Ejecutar entrenamiento real con datos histÃ³ricos
+            await self._update_progress(10, "Ejecutando entrenamiento", "ðŸ¤– Iniciando agentes paralelos")
             
             results = await self._real_training_session(start_date, end_date, progress_callback)
             
             # Procesar y agregar resultados finales
-            await self._update_progress(90, "Procesando resultados", "📊 Agregando métricas globales")
+            await self._update_progress(90, "Procesando resultados", "ðŸ“Š Agregando mÃ©tricas globales")
             
             final_results = await self._process_final_results(results)
             
@@ -320,12 +545,12 @@ class TrainHistParallel:
             # Guardar resultados completos
             await self._save_final_results(final_results)
             
-            await self._update_progress(100, "Completado", "✅ Entrenamiento finalizado")
+            await self._update_progress(100, "Completado", "âœ… Entrenamiento finalizado")
             
             self.is_running = False
             self.results = final_results
             
-            logger.info(f"✅ Entrenamiento completado: {self.session_id}")
+            logger.info(f"âœ… Entrenamiento completado: {self.session_id}")
             
             # Imprimir resumen en el formato deseado
             self._print_formatted_summary(final_results)
@@ -333,16 +558,16 @@ class TrainHistParallel:
             return final_results
             
         except Exception as e:
-            logger.error(f"❌ Error en entrenamiento: {e}")
+            logger.error(f"âŒ Error en entrenamiento: {e}")
             self.is_running = False
-            await self._update_progress(0, "Error", f"❌ Error: {str(e)}")
+            await self._update_progress(0, "Error", f"âŒ Error: {str(e)}")
             raise
 
     def _install_sync_log_filters(self):
-        """Instala filtros para reducir ruido de logs de sincronización de otros módulos."""
+        """Instala filtros para reducir ruido de logs de sincronizaciÃ³n de otros mÃ³dulos."""
         class _SyncNoiseFilter(logging.Filter):
             phrases = [
-                'No se pudieron generar puntos de sincronización',
+                'No se pudieron generar puntos de sincronizaciÃ³n',
                 'Base de datos no encontrada',
                 'Timestamps comunes encontrados: 0',
                 'Error preparando timeline'
@@ -362,9 +587,9 @@ class TrainHistParallel:
             pass
 
     def _filter_symbols_with_local_data(self, required_timeframes: List[str] = None):
-        """Filtra símbolos que tienen al menos los timeframes de ejecución obligatorios"""
+        """Filtra sÃ­mbolos que tienen al menos los timeframes de ejecuciÃ³n obligatorios"""
         if required_timeframes is None:
-            # OBLIGATORIO: símbolos deben tener 1m y 5m para trading
+            # OBLIGATORIO: sÃ­mbolos deben tener 1m y 5m para trading
             required_timeframes = self.execution_timeframes
         
         kept = []
@@ -381,52 +606,52 @@ class TrainHistParallel:
             else:
                 missing_tfs = [tf for tf in required_timeframes 
                               if not Path(f"data/{sym}/{sym}_{tf}.db").exists()]
-                logger.info(f"⚠️ {sym}: Falta timeframes de ejecución {missing_tfs}")
+                logger.info(f"âš ï¸ {sym}: Falta timeframes de ejecuciÃ³n {missing_tfs}")
         
         if not kept:
             raise ValueError(
-                f"No hay símbolos con timeframes de ejecución obligatorios {required_timeframes}. "
+                f"No hay sÃ­mbolos con timeframes de ejecuciÃ³n obligatorios {required_timeframes}. "
                 "Ejecuta el recolector de datos para descargar 1m y 5m."
             )
         
         self.symbols = kept
 
     def _load_symbols_from_yaml(self) -> List[str]:
-        """Carga símbolos desde symbols.yaml como fallback"""
+        """Carga sÃ­mbolos desde symbols.yaml como fallback"""
         try:
             import yaml
             symbols_path = Path("config/core/symbols.yaml")
             if not symbols_path.exists():
-                logger.warning("⚠️ Archivo symbols.yaml no encontrado, usando símbolos por defecto")
+                logger.warning("âš ï¸ Archivo symbols.yaml no encontrado, usando sÃ­mbolos por defecto")
                 return ["BTCUSDT", "ETHUSDT", "SOLUSDT", "ADAUSDT", "XRPUSDT", "DOGEUSDT"]
             
             data = yaml.safe_load(symbols_path.read_text(encoding='utf-8')) or {}
             active_symbols = data.get('active_symbols', {})
             
-            # Combinar todos los grupos de símbolos
+            # Combinar todos los grupos de sÃ­mbolos
             symbols = []
             for group in ['primary', 'secondary', 'experimental']:
                 if group in active_symbols:
                     symbols.extend(active_symbols[group])
             
             if symbols:
-                logger.info(f"✅ Cargados {len(symbols)} símbolos desde symbols.yaml: {', '.join(symbols)}")
+                logger.info(f"âœ… Cargados {len(symbols)} sÃ­mbolos desde symbols.yaml: {', '.join(symbols)}")
                 return symbols
             else:
-                logger.warning("⚠️ No se encontraron símbolos en symbols.yaml, usando por defecto")
+                logger.warning("âš ï¸ No se encontraron sÃ­mbolos en symbols.yaml, usando por defecto")
                 return ["BTCUSDT", "ETHUSDT", "SOLUSDT", "ADAUSDT", "XRPUSDT", "DOGEUSDT"]
                 
         except Exception as e:
-            logger.warning(f"⚠️ Error leyendo symbols.yaml: {e}, usando símbolos por defecto")
+            logger.warning(f"âš ï¸ Error leyendo symbols.yaml: {e}, usando sÃ­mbolos por defecto")
             return ["BTCUSDT", "ETHUSDT", "SOLUSDT", "ADAUSDT", "XRPUSDT", "DOGEUSDT"]
 
     def _load_symbol_leverage_ranges(self):
-        """Carga los rangos de leverage por símbolo desde config/core/symbols.yaml"""
+        """Carga los rangos de leverage por sÃ­mbolo desde config/core/symbols.yaml"""
         try:
             import yaml
             symbols_path = Path("config/core/symbols.yaml")
             if not symbols_path.exists():
-                logger.warning("⚠️ Archivo symbols.yaml no encontrado, usando leverage por defecto")
+                logger.warning("âš ï¸ Archivo symbols.yaml no encontrado, usando leverage por defecto")
                 return
             data = yaml.safe_load(symbols_path.read_text(encoding='utf-8')) or {}
             symbol_cfgs = (data.get('symbol_configs') or {})
@@ -434,24 +659,344 @@ class TrainHistParallel:
                 rng = cfg.get('leverage_range') or []
                 if isinstance(rng, list) and len(rng) == 2:
                     self._symbol_leverage_ranges[sym] = [float(rng[0]), float(rng[1])]
-                    logger.debug(f"📊 Cargado leverage para {sym}: {rng[0]}-{rng[1]}x")
-            logger.info(f"✅ Cargados rangos de leverage para {len(self._symbol_leverage_ranges)} símbolos")
+                    logger.debug(f"ðŸ“Š Cargado leverage para {sym}: {rng[0]}-{rng[1]}x")
+            logger.info(f"âœ… Cargados rangos de leverage para {len(self._symbol_leverage_ranges)} sÃ­mbolos")
         except Exception as e:
-            logger.warning(f"⚠️ Error leyendo YAML de símbolos: {e}")
+            logger.warning(f"âš ï¸ Error leyendo YAML de sÃ­mbolos: {e}")
 
     def _get_symbol_leverage_bounds(self, symbol: str) -> List[float]:
-        """Devuelve [min,max] de leverage para el símbolo, con fallback sensato."""
+        """Devuelve [min,max] de leverage para el sÃ­mbolo, con fallback sensato."""
         if symbol in self._symbol_leverage_ranges:
             return self._symbol_leverage_ranges[symbol]
         return [5.0, 20.0]
     
+    def _calculate_realistic_pnl(self, price_change_pct: float, direction_bias: float, 
+                                cycle_trades: int, current_balance: float, 
+                                mode_config: Dict[str, Any]) -> float:
+        """
+        Calcula PnL realista aplicando restricciones del mundo real.
+        
+        Args:
+            price_change_pct: Cambio de precio en porcentaje
+            direction_bias: Sesgo direccional (1 o -1)
+            cycle_trades: NÃºmero de trades en el ciclo
+            current_balance: Balance actual
+            mode_config: ConfiguraciÃ³n del modo de entrenamiento
+            
+        Returns:
+            PnL porcentual realista
+        """
+        # ParÃ¡metros realistas
+        max_daily_roi = mode_config.get('max_daily_roi', 2.0)  # 2% mÃ¡ximo diario
+        max_annual_roi = mode_config.get('max_annual_roi', 50.0)  # 50% mÃ¡ximo anual
+        commission_rate = mode_config.get('commission_rate', 0.001)  # 0.1% comisiÃ³n
+        spread_rate = mode_config.get('spread_rate', 0.0005)  # 0.05% spread
+        slippage_rate = mode_config.get('slippage_rate', 0.0002)  # 0.02% slippage
+        max_leverage = mode_config.get('max_leverage', 5.0)  # 5x mÃ¡ximo
+        
+        # Calcular PnL base basado en cambio de precio real
+        base_pnl_pct = price_change_pct * direction_bias
+        
+        # Aplicar leverage realista (mÃ¡ximo 5x)
+        leverage = min(max_leverage, random.uniform(1.0, max_leverage))
+        leveraged_pnl = base_pnl_pct * leverage
+        
+        # Aplicar costos de trading
+        total_costs = commission_rate + spread_rate + slippage_rate
+        cost_per_trade = total_costs * 100  # Convertir a porcentaje
+        
+        # Calcular costos totales para el ciclo
+        total_costs_pct = cost_per_trade * cycle_trades
+        
+        # Aplicar costos al PnL
+        net_pnl_pct = leveraged_pnl - total_costs_pct
+        
+        # Aplicar restricciones de volatilidad realista
+        # En el mundo real, los cambios de precio grandes son raros
+        if abs(price_change_pct) > 0.1:  # >10% cambio
+            # Reducir significativamente el PnL para cambios extremos
+            volatility_penalty = 0.3
+            net_pnl_pct *= volatility_penalty
+        
+        # Aplicar lÃ­mites de ROI diario
+        if net_pnl_pct > max_daily_roi:
+            net_pnl_pct = max_daily_roi
+        elif net_pnl_pct < -max_daily_roi:
+            net_pnl_pct = -max_daily_roi
+        
+        # Aplicar ruido realista (pequeÃ±as variaciones)
+        noise_factor = random.uniform(-0.1, 0.1)  # Â±10% de variaciÃ³n
+        final_pnl_pct = net_pnl_pct * (1 + noise_factor)
+        
+        # Asegurar que el PnL estÃ© en un rango realista
+        final_pnl_pct = max(-max_daily_roi, min(max_daily_roi, final_pnl_pct))
+        
+        return final_pnl_pct
+    
+    def _get_historical_data_for_cycle(self, symbol: str, cycle_timestamps: List) -> pd.DataFrame:
+        """Obtiene datos histÃ³ricos para un sÃ­mbolo en un ciclo especÃ­fico"""
+        try:
+            if symbol not in self.historical_data:
+                return pd.DataFrame()
+            
+            # Usar el timeframe principal (1h) para anÃ¡lisis
+            main_tf = '1h' if '1h' in self.historical_data[symbol] else list(self.historical_data[symbol].keys())[0]
+            df = self.historical_data[symbol][main_tf].copy()
+            
+            if df.empty:
+                return pd.DataFrame()
+            
+            # Filtrar por timestamps del ciclo
+            cycle_start = min(cycle_timestamps)
+            cycle_end = max(cycle_timestamps)
+            
+            # Convertir timestamps a formato comparable
+            if 'timestamp' in df.columns:
+                df['timestamp_dt'] = pd.to_datetime(df['timestamp'], unit='ms')
+                mask = (df['timestamp_dt'] >= cycle_start) & (df['timestamp_dt'] <= cycle_end)
+                return df[mask].copy()
+            
+            return pd.DataFrame()
+        except Exception as e:
+            logger.error(f"Error obteniendo datos histÃ³ricos para ciclo {symbol}: {e}")
+            return pd.DataFrame()
+    
+    def _calculate_real_technical_indicators(self, df: pd.DataFrame) -> Dict[str, float]:
+        """Calcula indicadores tÃ©cnicos reales basados en datos histÃ³ricos"""
+        try:
+            if df.empty or len(df) < 14:
+                return {'rsi': 50.0, 'sma_20': 0.0, 'sma_50': 0.0, 'macd': 0.0}
+            
+            # Calcular RSI
+            rsi = self._calculate_rsi(df['close'].values, 14)
+            
+            # Calcular medias mÃ³viles
+            sma_20 = df['close'].rolling(window=20).mean().iloc[-1] if len(df) >= 20 else df['close'].mean()
+            sma_50 = df['close'].rolling(window=50).mean().iloc[-1] if len(df) >= 50 else df['close'].mean()
+            
+            # Calcular MACD
+            macd = self._calculate_macd(df['close'].values)
+            
+            return {
+                'rsi': rsi,
+                'sma_20': float(sma_20),
+                'sma_50': float(sma_50),
+                'macd': macd,
+                'price_change_pct': ((df['close'].iloc[-1] - df['close'].iloc[0]) / df['close'].iloc[0]) * 100
+            }
+        except Exception as e:
+            logger.error(f"Error calculando indicadores tÃ©cnicos: {e}")
+            return {'rsi': 50.0, 'sma_20': 0.0, 'sma_50': 0.0, 'macd': 0.0, 'price_change_pct': 0.0}
+    
+    def _calculate_rsi(self, prices: np.ndarray, period: int = 14) -> float:
+        """Calcula RSI real basado en precios histÃ³ricos"""
+        try:
+            if len(prices) < period + 1:
+                return 50.0
+            
+            deltas = np.diff(prices)
+            gains = np.where(deltas > 0, deltas, 0)
+            losses = np.where(deltas < 0, -deltas, 0)
+            
+            avg_gains = np.mean(gains[-period:])
+            avg_losses = np.mean(losses[-period:])
+            
+            if avg_losses == 0:
+                return 100.0
+            
+            rs = avg_gains / avg_losses
+            rsi = 100 - (100 / (1 + rs))
+            
+            return float(rsi)
+        except Exception:
+            return 50.0
+    
+    def _calculate_macd(self, prices: np.ndarray, fast: int = 12, slow: int = 26, signal: int = 9) -> float:
+        """Calcula MACD real basado en precios histÃ³ricos"""
+        try:
+            if len(prices) < slow + signal:
+                return 0.0
+            
+            # Calcular EMAs
+            ema_fast = self._calculate_ema(prices, fast)
+            ema_slow = self._calculate_ema(prices, slow)
+            
+            # MACD line
+            macd_line = ema_fast - ema_slow
+            
+            return float(macd_line[-1]) if len(macd_line) > 0 else 0.0
+        except Exception:
+            return 0.0
+    
+    def _calculate_ema(self, prices: np.ndarray, period: int) -> np.ndarray:
+        """Calcula EMA (Exponential Moving Average)"""
+        try:
+            if len(prices) < period:
+                return np.array([np.mean(prices)])
+            
+            alpha = 2.0 / (period + 1)
+            ema = np.zeros_like(prices)
+            ema[0] = prices[0]
+            
+            for i in range(1, len(prices)):
+                ema[i] = alpha * prices[i] + (1 - alpha) * ema[i-1]
+            
+            return ema
+        except Exception:
+            return np.array([np.mean(prices)])
+    
+    def _simulate_realistic_trades(self, symbol: str, df: pd.DataFrame, 
+                                 technical_indicators: Dict[str, float], 
+                                 current_balance: float, 
+                                 mode_config: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Simula trades realistas basados en datos histÃ³ricos y indicadores tÃ©cnicos"""
+        try:
+            if df.empty or len(df) < 2:
+                return []
+            
+            trades = []
+            
+            # ParÃ¡metros realistas
+            commission_rate = mode_config.get('commission_rate', 0.001)
+            spread_rate = mode_config.get('spread_rate', 0.0005)
+            slippage_rate = mode_config.get('slippage_rate', 0.0002)
+            max_leverage = mode_config.get('max_leverage', 5.0)
+            
+            # Obtener configuraciÃ³n del sÃ­mbolo
+            symbol_config = self.config.get('symbol_configs', {}).get(symbol, {})
+            leverage_range = symbol_config.get('leverage_range', [1, 5])
+            max_position_size_pct = symbol_config.get('max_position_size_pct', 5.0)
+            
+            # Calcular nÃºmero de trades basado en volatilidad
+            price_change_pct = technical_indicators.get('price_change_pct', 0.0)
+            volatility_factor = min(2.0, max(0.5, abs(price_change_pct) / 2.0))
+            num_trades = max(1, min(5, int(3 * volatility_factor)))
+            
+            # Procesar cada trade
+            for i in range(num_trades):
+                # Determinar acciÃ³n basada en indicadores tÃ©cnicos
+                rsi = technical_indicators.get('rsi', 50.0)
+                macd = technical_indicators.get('macd', 0.0)
+                sma_20 = technical_indicators.get('sma_20', 0.0)
+                sma_50 = technical_indicators.get('sma_50', 0.0)
+                
+                # LÃ³gica de decisiÃ³n basada en indicadores
+                if rsi < 30 and macd > 0:  # Oversold + MACD positivo
+                    action = 'BUY'
+                    confidence = 0.8
+                elif rsi > 70 and macd < 0:  # Overbought + MACD negativo
+                    action = 'SELL'
+                    confidence = 0.8
+                elif sma_20 > sma_50 and macd > 0:  # Tendencia alcista
+                    action = 'BUY'
+                    confidence = 0.6
+                elif sma_20 < sma_50 and macd < 0:  # Tendencia bajista
+                    action = 'SELL'
+                    confidence = 0.6
+                else:
+                    # No trade en condiciones neutrales
+                    continue
+                
+                # Calcular tamaÃ±o de posiciÃ³n
+                position_size_pct = min(max_position_size_pct, 2.0)  # MÃ¡ximo 2% por trade
+                position_value = current_balance * (position_size_pct / 100.0)
+                
+                # Calcular leverage
+                leverage = min(max_leverage, random.uniform(leverage_range[0], leverage_range[1]))
+                
+                # Precios de entrada y salida
+                entry_price = df['close'].iloc[-1]
+                price_change = technical_indicators.get('price_change_pct', 0.0) / 100.0
+                exit_price = entry_price * (1 + price_change * (1 if action == 'BUY' else -1))
+                
+                # Calcular PnL
+                if action == 'BUY':
+                    pnl_usdt = (exit_price - entry_price) * (position_value / entry_price) * leverage
+                else:
+                    pnl_usdt = (entry_price - exit_price) * (position_value / entry_price) * leverage
+                
+                # Aplicar costos de trading
+                trade_value = position_value * leverage
+                commission = trade_value * commission_rate
+                spread_cost = trade_value * spread_rate
+                slippage_cost = trade_value * slippage_rate
+                total_costs = commission + spread_cost + slippage_cost
+                
+                # PnL neto
+                net_pnl = pnl_usdt - total_costs
+                
+                # Crear trade
+                trade = {
+                    'action': action,
+                    'entry_price': entry_price,
+                    'exit_price': exit_price,
+                    'quantity': position_value / entry_price,
+                    'leverage': leverage,
+                    'pnl_usdt': net_pnl,
+                    'commission': commission,
+                    'spread_cost': spread_cost,
+                    'slippage_cost': slippage_cost,
+                    'total_costs': total_costs,
+                    'confidence': confidence,
+                    'rsi': rsi,
+                    'macd': macd
+                }
+                
+                trades.append(trade)
+            
+            return trades
+        except Exception as e:
+            logger.error(f"Error simulando trades realistas para {symbol}: {e}")
+            return []
+    
+    def _calculate_final_metrics(self, agent_summaries: Dict, sum_cycle_pnl: float, 
+                               sum_cycle_trades: int, sum_cycle_wins: int, 
+                               sum_cycle_losses: int, total_cycles: int) -> Dict[str, Any]:
+        """Calcula mÃ©tricas finales del entrenamiento"""
+        try:
+            # MÃ©tricas globales
+            global_win_rate = (sum_cycle_wins / sum_cycle_trades * 100) if sum_cycle_trades > 0 else 0
+            total_pnl = sum_cycle_pnl
+            avg_pnl_per_trade = total_pnl / sum_cycle_trades if sum_cycle_trades > 0 else 0
+            
+            # Calcular mÃ©tricas por agente
+            for symbol, summary in agent_summaries.items():
+                if summary['total_trades'] > 0:
+                    summary['win_rate'] = (summary['winning_trades'] / summary['total_trades']) * 100
+                    summary['avg_win'] = summary['total_pnl'] / summary['winning_trades'] if summary['winning_trades'] > 0 else 0
+                    summary['avg_loss'] = summary['total_pnl'] / summary['losing_trades'] if summary['losing_trades'] > 0 else 0
+                    summary['profit_factor'] = abs(summary['avg_win'] * summary['winning_trades']) / abs(summary['avg_loss'] * summary['losing_trades']) if summary['losing_trades'] > 0 else float('inf')
+                else:
+                    summary['win_rate'] = 0
+                    summary['avg_win'] = 0
+                    summary['avg_loss'] = 0
+                    summary['profit_factor'] = 0
+            
+            return {
+                'global_summary': {
+                    'total_cycles': total_cycles,
+                    'total_trades': sum_cycle_trades,
+                    'total_wins': sum_cycle_wins,
+                    'total_losses': sum_cycle_losses,
+                    'global_win_rate': global_win_rate,
+                    'total_pnl': total_pnl,
+                    'avg_pnl_per_trade': avg_pnl_per_trade
+                },
+                'agent_summaries': agent_summaries,
+                'training_completed': True,
+                'realistic_mode': True
+            }
+        except Exception as e:
+            logger.error(f"Error calculando mÃ©tricas finales: {e}")
+            return {'error': str(e)}
+    
     async def _load_historical_data(self, start_date: datetime, end_date: datetime):
-        """Carga datos históricos reales desde SQLite, detectando esquema dinámicamente.
+        """Carga datos histÃ³ricos reales desde SQLite, detectando esquema dinÃ¡micamente.
 
         - Detecta tabla disponible (candles/klines/ohlcv/...)
-        - Mapea columnas a alias estándar: timestamp, open, high, low, close, volume
+        - Mapea columnas a alias estÃ¡ndar: timestamp, open, high, low, close, volume
         - Tolera ausencia de volume (rellena con NaN)
-        - Omite TFs o símbolos sin datos sin abortar el entrenamiento
+        - Omite TFs o sÃ­mbolos sin datos sin abortar el entrenamiento
         """
 
         def _detect_table_and_columns(sql_conn: sqlite3.Connection):
@@ -469,7 +1014,7 @@ class TrainHistParallel:
                     chosen_table = t
                     break
             if chosen_table is None and table_names:
-                # Último recurso: tomar la primera si parece contener columnas OHLC
+                # Ãšltimo recurso: tomar la primera si parece contener columnas OHLC
                 for t in table_names:
                     try:
                         cols_df = pd.read_sql_query(f"PRAGMA table_info({t})", sql_conn)
@@ -519,18 +1064,21 @@ class TrainHistParallel:
         for symbol in self.symbols:
             self.historical_data[symbol] = {}
             for tf in self.timeframes:
-                db_path = Path(f"data/{symbol}/{symbol}_{tf}.db")
+                # Buscar primero en directorio histÃ³rico, luego en directorio principal
+                db_path = Path(f"data/historical/{symbol}/{symbol}_{tf}.db")
+                if not db_path.exists():
+                    db_path = Path(f"data/{symbol}/{symbol}_{tf}.db")
                 if not db_path.exists():
                     continue
                 try:
                     conn = sqlite3.connect(str(db_path))
                     table, mapping = _detect_table_and_columns(conn)
                     if table is None or mapping is None:
-                        logger.info(f"ℹ️ Esquema no compatible en {db_path}, omitido")
+                        logger.info(f"â„¹ï¸ Esquema no compatible en {db_path}, omitido")
                         conn.close()
                         continue
 
-                    # Construir query con alias estándar
+                    # Construir query con alias estÃ¡ndar
                     ts_ms_start = int(start_date.timestamp() * 1000)
                     ts_ms_end = int(end_date.timestamp() * 1000)
 
@@ -566,7 +1114,7 @@ class TrainHistParallel:
                         continue
 
                     # Normalizar timestamp (s vs ms)
-                    # Heurística: si max < 10^12 asumimos segundos
+                    # HeurÃ­stica: si max < 10^12 asumimos segundos
                     try:
                         max_ts = float(df['timestamp'].max())
                         unit = 'ms' if max_ts >= 1e12 else 's'
@@ -584,25 +1132,25 @@ class TrainHistParallel:
                         conn.close()
                     except Exception:
                         pass
-                    logger.info(f"ℹ️ No se pudo leer {db_path}: {e}")
+                    logger.info(f"â„¹ï¸ No se pudo leer {db_path}: {e}")
                     continue
 
             if not self.historical_data[symbol]:
-                logger.info(f"ℹ️ Sin datos históricos utilizables para {symbol}, será omitido en cálculos")
+                logger.info(f"â„¹ï¸ Sin datos histÃ³ricos utilizables para {symbol}, serÃ¡ omitido en cÃ¡lculos")
 
-        # Filtrar símbolos sin datos del diccionario principal
+        # Filtrar sÃ­mbolos sin datos del diccionario principal
         symbols_with_complete_data = []
         for symbol in self.symbols:
             if symbol not in self.historical_data:
                 continue
             
-            # Verificar timeframes de ejecución (obligatorios)
+            # Verificar timeframes de ejecuciÃ³n (obligatorios)
             has_execution_data = all(
                 tf in self.historical_data[symbol] and not self.historical_data[symbol][tf].empty
                 for tf in self.execution_timeframes
             )
             
-            # Verificar al menos un timeframe de análisis
+            # Verificar al menos un timeframe de anÃ¡lisis
             has_analysis_data = any(
                 tf in self.historical_data[symbol] and not self.historical_data[symbol][tf].empty
                 for tf in self.analysis_timeframes
@@ -610,25 +1158,25 @@ class TrainHistParallel:
             
             if has_execution_data and has_analysis_data:
                 symbols_with_complete_data.append(symbol)
-                logger.info(f"✅ {symbol}: Datos completos (ejecución + análisis)")
+                logger.info(f"âœ… {symbol}: Datos completos (ejecuciÃ³n + anÃ¡lisis)")
             elif has_execution_data:
                 symbols_with_complete_data.append(symbol)
-                logger.warning(f"⚠️ {symbol}: Solo datos de ejecución (sin análisis jerárquico)")
+                logger.warning(f"âš ï¸ {symbol}: Solo datos de ejecuciÃ³n (sin anÃ¡lisis jerÃ¡rquico)")
             else:
-                logger.error(f"❌ {symbol}: Sin datos de ejecución mínimos")
+                logger.error(f"âŒ {symbol}: Sin datos de ejecuciÃ³n mÃ­nimos")
 
-        # Actualizar lista de símbolos activos
+        # Actualizar lista de sÃ­mbolos activos
         self.symbols = symbols_with_complete_data
 
         if not self.symbols:
-            raise ValueError("No hay símbolos con datos históricos válidos")
+            raise ValueError("No hay sÃ­mbolos con datos histÃ³ricos vÃ¡lidos")
 
-        logger.info(f"✅ Datos históricos reales cargados para {len(self.symbols)} símbolos: {', '.join(self.symbols)}")
+        logger.info(f"âœ… Datos histÃ³ricos reales cargados para {len(self.symbols)} sÃ­mbolos: {', '.join(self.symbols)}")
 
 
     async def _real_training_session(self, start_date: datetime, end_date: datetime, progress_callback) -> Dict[str, Any]:
-        """Ejecuta entrenamiento real usando datos históricos cargados, procesando cronológicamente en 50 ciclos."""
-        logger.info("🔥 Ejecutando entrenamiento real con datos históricos...")
+        """Ejecuta entrenamiento real usando datos histÃ³ricos cargados, procesando cronolÃ³gicamente en 50 ciclos."""
+        logger.info("ðŸ”¥ Ejecutando entrenamiento real con datos histÃ³ricos...")
         
         # Determinar timestamps alineados (usar pre_aligned si disponible, sino generar)
         timestamps = self.pre_aligned_data.get('aligned_timestamps', []) if self.pre_aligned_data else pd.date_range(start=start_date, end=end_date, freq='H').tolist()
@@ -645,7 +1193,7 @@ class TrainHistParallel:
                 # fallback a rango horario si algo falla
                 timestamps = pd.date_range(start=start_date, end=end_date, freq='H').tolist()
 
-        # Asegurar que los timestamps caen dentro del rango real de datos históricos
+        # Asegurar que los timestamps caen dentro del rango real de datos histÃ³ricos
         try:
             min_ts = None
             max_ts = None
@@ -659,6 +1207,15 @@ class TrainHistParallel:
                     max_ts = dmax if (max_ts is None or dmax > max_ts) else max_ts
 
             if min_ts is not None and max_ts is not None:
+                # Convertir timestamps a datetime para comparaciÃ³n
+                min_dt = pd.to_datetime(min_ts, unit='ms') if min_ts > 1e10 else pd.to_datetime(min_ts, unit='s')
+                max_dt = pd.to_datetime(max_ts, unit='ms') if max_ts > 1e10 else pd.to_datetime(max_ts, unit='s')
+                
+                # Calcular dÃ­as disponibles
+                days_available = (max_dt - min_dt).days + 1
+                logger.warning(f"âš ï¸ Datos histÃ³ricos limitados: solo {days_available} dÃ­as disponibles ({min_dt.strftime('%Y-%m-%d')} a {max_dt.strftime('%Y-%m-%d')})")
+                logger.warning(f"âš ï¸ Modo '{training_mode}' requiere {self._get_training_days(training_mode)} dÃ­as, pero solo hay {days_available} dÃ­as")
+                
                 # filtrar timestamps al rango de datos reales
                 timestamps = [ts for ts in timestamps if (ts >= min_ts and ts <= max_ts)]
                 if not timestamps:
@@ -669,21 +1226,35 @@ class TrainHistParallel:
         if not timestamps:
             raise ValueError("No hay timestamps alineados disponibles.")
         
-        # Limitar a 50 ciclos para el entrenamiento
-        total_cycles = min(50, len(timestamps))
-        cycle_step = max(1, len(timestamps) // total_cycles)
-        cycle_timestamps = timestamps[::cycle_step][:total_cycles]
+        # Obtener configuraciÃ³n del modo de entrenamiento
+        training_mode = self._load_training_mode_from_user_settings()
+        mode_config = _load_training_mode_config(training_mode)
+        is_realistic = mode_config.get('realistic_mode', False)
+        
+        # Dividir timestamps en ciclos (aproximadamente 50 ciclos)
+        total_cycles = 50
+        timestamps_per_cycle = len(timestamps) // total_cycles
+        if timestamps_per_cycle < 1:
+            timestamps_per_cycle = 1
+        
+        logger.info(f"ðŸŽ¯ Modo de entrenamiento: {training_mode} - {total_cycles} ciclos de {len(timestamps)} timestamps disponibles")
+        logger.info(f"ðŸ”§ Modo realista: {'SÃ' if is_realistic else 'NO'}")
         
         # Inicializar estados
         agent_summaries = {}
-        running_balance_per_symbol = {s: self.initial_balance for s in self.symbols}
-        leverage_sum_per_symbol = {s: 0.0 for s in self.symbols}
-        leverage_count_per_symbol = {s: 0 for s in self.symbols}
-        tf_counts_per_symbol: Dict[str, Dict[str, int]] = {s: {tf: 0 for tf in self.timeframes} for s in self.symbols}
-        total_long_trades = 0
-        total_short_trades = 0
-        sum_bars_per_trade = 0
-        count_bars_per_trade = 0
+        # Usar balance distribuido por sÃ­mbolo, no el balance inicial completo
+        if self.capital_manager:
+            symbol_balances = self.capital_manager.get_symbol_allocations()
+            running_balance_per_symbol = {s: symbol_balances.get(s, {}).get('allocated_balance', self.initial_balance / len(self.symbols)) for s in self.symbols}
+        else:
+            running_balance_per_symbol = {s: self.initial_balance / len(self.symbols) for s in self.symbols}
+        
+        # Inicializar mÃ©tricas globales
+        sum_cycle_pnl = 0.0
+        sum_cycle_trades = 0
+        sum_cycle_wins = 0
+        sum_cycle_losses = 0
+        total_cycles_completed = 0
         
         # Inicializar leverage previo
         for s in self.symbols:
@@ -693,7 +1264,7 @@ class TrainHistParallel:
         for symbol in self.symbols:
             agent_summaries[symbol] = {
                 'symbol': symbol,
-                'current_balance': self.initial_balance,
+                'current_balance': running_balance_per_symbol[symbol],
                 'total_pnl': 0.0,
                 'total_pnl_pct': 0.0,
                 'total_trades': 0,
@@ -707,1234 +1278,229 @@ class TrainHistParallel:
                 'avg_leverage_used': None,
             }
         
-        # Procesar cada ciclo cronológicamente
-        for cycle, ts in enumerate(cycle_timestamps, 1):
-            await asyncio.sleep(0.01)  # Pequeño delay para no bloquear loop
+        # Procesar cada ciclo cronolÃ³gicamente
+        for cycle_idx in range(total_cycles):
+            cycle_start_idx = cycle_idx * timestamps_per_cycle
+            cycle_end_idx = min((cycle_idx + 1) * timestamps_per_cycle, len(timestamps))
             
-            progress = (cycle / total_cycles) * 100
-            
-            agent_cycle_stats = {}
+            if cycle_start_idx >= len(timestamps):
+                break
+                
+            cycle_timestamps = timestamps[cycle_start_idx:cycle_end_idx]
+            if not cycle_timestamps:
+                continue
+                
+            total_cycles_completed += 1
             cycle_pnl_total = 0.0
-            cycle_tf_counts: Dict[str, int] = {tf: 0 for tf in self.timeframes}
-            sum_cycle_bars = 0
-            cnt_cycle_bars = 0
-            cycle_long_total = 0
-            cycle_short_total = 0
+            cycle_trades_total = 0
+            cycle_wins_total = 0
+            cycle_losses_total = 0
             
+            # Procesar cada sÃ­mbolo en este ciclo
             for symbol in self.symbols:
-                # Separar datos por función
-                execution_data = {}
-                analysis_data = {}
-                
-                for tf in self.timeframes:
-                    if tf in self.historical_data[symbol]:
-                        df = self.historical_data[symbol][tf]
-                        data_up_to_ts = df[df['timestamp'] <= ts]
-                        
-                        if tf in self.execution_timeframes:
-                            execution_data[tf] = data_up_to_ts
-                        else:
-                            analysis_data[tf] = data_up_to_ts
-                
-                # Verificar que tenemos datos de ejecución mínimos
-                if not execution_data or not any(not df.empty for df in execution_data.values()):
+                if symbol not in self.historical_data:
                     continue
-                
-                # Usar 1m para timing preciso, análisis jerárquico para dirección
-                primary_execution_tf = '1m' if '1m' in execution_data else '5m'
-                primary_analysis_tf = '1h' if '1h' in analysis_data else list(analysis_data.keys())[0] if analysis_data else primary_execution_tf
-                
-                df_execution = execution_data[primary_execution_tf].copy()
-                df_analysis = analysis_data.get(primary_analysis_tf, df_execution).copy()
-                
-                if len(df_execution) < 14 or len(df_analysis) < 14:
-                    continue
-                
-                # RSI en timeframe de análisis para dirección
-                delta = df_analysis['close'].diff()
-                gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-                loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-                rs = gain / loss
-                rsi = 100 - (100 / (1 + rs))
-                last_rsi = rsi.iloc[-1]
-                
-                # Timing preciso en timeframe de ejecución
-                execution_price_change = 0
-                if len(df_execution) > 1 and df_execution['close'].iloc[0] != 0:
-                    # Calcular cambio de precio más realista basado en volatilidad
-                    price_start = df_execution['close'].iloc[0]
-                    price_end = df_execution['close'].iloc[-1]
-                    execution_price_change = (price_end - price_start) / price_start * 100
                     
-                    # Aplicar factor de volatilidad realista (máximo 5% por ciclo)
-                    execution_price_change = max(-5, min(5, execution_price_change))
+                # Obtener datos histÃ³ricos para el sÃ­mbolo en este ciclo
+                symbol_data = self._get_historical_data_for_cycle(symbol, cycle_timestamps)
+                if symbol_data.empty:
+                    continue
                 
-                # Simular trade basado en datos reales (lógica simple: RSI para decisión)
-                # Reducir variabilidad: rango más estrecho y basado en volatilidad
-                base_trades = 8  # Base más conservadora
-                volatility_factor = abs(execution_price_change) / 10 if execution_price_change != 0 else 1
-                cycle_trades = max(3, min(15, int(base_trades * volatility_factor)))
-                cycle_long = int(cycle_trades * 0.5)  # 50/50 split más realista
-                cycle_short = cycle_trades - cycle_long
-                cycle_long_total += cycle_long
-                cycle_short_total += cycle_short
+                # Calcular indicadores tÃ©cnicos reales
+                technical_indicators = self._calculate_real_technical_indicators(symbol_data)
                 
-                # Decisión basada en RSI: buy si <30, sell si >70, neutral otherwise
-                if last_rsi < 30:
-                    direction_bias = 1  # Oversold, comprar
-                    cycle_wr = random.uniform(60, 80)  # Mejor win rate en oversold
-                elif last_rsi > 70:
-                    direction_bias = -1  # Overbought, vender
-                    cycle_wr = random.uniform(55, 75)  # Win rate moderado en overbought
-                else:
-                    # Zona neutral: decisión basada en tendencia de precio
-                    direction_bias = 1 if execution_price_change > 0 else -1
-                    cycle_wr = random.uniform(50, 70)  # Win rate neutral
-                winning = int(cycle_trades * cycle_wr / 100)
-                losing = cycle_trades - winning
-                
-                # PnL basado en cambios reales de precio (usar execution_price_change)
-                price_change_pct = execution_price_change if execution_price_change != 0 else random.uniform(-2, 2)
-                # Reducir aleatoriedad: solo 20% de variación adicional
-                noise_factor = random.uniform(-0.2, 0.2)
-                cycle_pnl_pct = price_change_pct * direction_bias * (1 + noise_factor)
-                # Evitar división por cero en cycle_trades
-                if cycle_trades > 0:
-                    cycle_pnl_abs = (cycle_pnl_pct / 100.0) * running_balance_per_symbol[symbol]
-                else:
-                    cycle_pnl_abs = 0
-                
-                # Validar que cycle_pnl_abs no sea nan o inf
-                if not (np.isnan(cycle_pnl_abs) or np.isinf(cycle_pnl_abs)):
-                    running_balance_per_symbol[symbol] += cycle_pnl_abs
-                else:
-                    cycle_pnl_abs = 0  # Resetear a 0 si es nan/inf
-                
-                cycle_dd = abs(min(0, cycle_pnl_pct)) if not np.isnan(cycle_pnl_pct) else 0
-                
-                # Leverage adaptativo
-                lev_min, lev_max = self._get_symbol_leverage_bounds(symbol)
-                prev_lev = self._prev_cycle_leverage_per_symbol.get(symbol, (lev_min + lev_max)/2.0)
-                direction = 1.0 if cycle_pnl_abs >= 0 else -1.0
-                step = (lev_max - lev_min) * 0.05
-                candidate = prev_lev + direction * step
-                cycle_lev = max(lev_min, min(lev_max, candidate))
-                self._prev_cycle_leverage_per_symbol[symbol] = cycle_lev
-                leverage_sum_per_symbol[symbol] += cycle_lev * cycle_trades
-                leverage_count_per_symbol[symbol] += cycle_trades
-                
-                # Duración media de trades en barras
-                avg_bars = random.randint(5, 60)  # Simulado, pero podría calcularse de datos
-                sum_cycle_bars += avg_bars * cycle_trades
-                cnt_cycle_bars += cycle_trades
-                sum_bars_per_trade += avg_bars * cycle_trades
-                count_bars_per_trade += cycle_trades
-                
-                # TFs usados
-                used_tfs = random.sample(self.timeframes, k=min(2, len(self.timeframes)))
-                for tf in used_tfs:
-                    cycle_tf_counts[tf] += 1
-                    tf_counts_per_symbol[symbol][tf] += 1
-                
-                agent_cycle_stats[symbol] = {
-                    'cycle_trades': cycle_trades,
-                    'cycle_long_trades': cycle_long,
-                    'cycle_short_trades': cycle_short,
-                    'cycle_win_rate': cycle_wr,
-                    'cycle_pnl_pct': cycle_pnl_pct,
-                    'cycle_pnl': cycle_pnl_abs,
-                    'cycle_drawdown': cycle_dd,
-                    'cycle_start_balance': running_balance_per_symbol[symbol] - cycle_pnl_abs,
-                    'cycle_end_balance': running_balance_per_symbol[symbol],
-                    'cycle_leverage_used': cycle_lev,
-                    'cycle_avg_bars_per_trade': avg_bars,
-                    'cycle_timeframes_used': used_tfs,
-                }
-                
-                # Actualizar summaries
-                summ = agent_summaries[symbol]
-                summ['total_pnl'] += cycle_pnl_abs
-                summ['total_pnl_pct'] = (summ['total_pnl'] / self.initial_balance) * 100
-                summ['current_balance'] = running_balance_per_symbol[symbol]
-                summ['total_trades'] += cycle_trades
-                summ['total_long_trades'] += cycle_long
-                summ['total_short_trades'] += cycle_short
-                summ['winning_trades'] += winning
-                summ['losing_trades'] += losing
-                summ['win_rate'] = (summ['winning_trades'] / summ['total_trades'] * 100) if summ['total_trades'] > 0 else 0
-                summ['max_drawdown'] = max(summ['max_drawdown'], cycle_dd)
-                
-                # Validar antes de sumar a cycle_pnl_total
-                if not (np.isnan(cycle_pnl_abs) or np.isinf(cycle_pnl_abs)):
-                    cycle_pnl_total += cycle_pnl_abs
-            
-            # Acumular trades del ciclo (una vez por ciclo, no por símbolo)
-            total_long_trades += cycle_long_total
-            total_short_trades += cycle_short_total
-            
-            # Pequeño delay para hacer el entrenamiento más realista
-            await asyncio.sleep(0.1)  # 100ms por ciclo
-            
-            if progress_callback:
-                await progress_callback({
-                    'progress': progress,
-                    'status': f'Procesando ciclo {cycle}',
-                    'current_cycle': cycle,
-                    'total_cycles': total_cycles,
-                    'timestamp': ts.isoformat() if isinstance(ts, pd.Timestamp) else ts,
-                    'symbols': self.symbols,
-                    'agent_cycle_stats': agent_cycle_stats,
-                    'cycle_avg_bars_per_trade': (sum_cycle_bars / cnt_cycle_bars) if cnt_cycle_bars > 0 else None,
-                    'cycle_timeframe_counts': cycle_tf_counts,
-                })
-        
-        # Calcular promedios finales
-        for s in self.symbols:
-            cnt = leverage_count_per_symbol[s]
-            if cnt > 0:
-                agent_summaries[s]['avg_leverage_used'] = leverage_sum_per_symbol[s] / cnt
-        
-        # Estrategias simuladas
-        strategies = ['RSI_Divergence', 'MA_Crossover', 'Bollinger_Bounce', 'MACD_Signal', 'Support_Resistance']
-        strategy_analysis = {
-            'top_strategies': [(strategy, random.randint(10, 100)) for strategy in strategies[:3]],
-            'total_unique_strategies': len(strategies),
-            'strategy_distribution': {strategy: random.randint(5, 50) for strategy in strategies}
-        }
-        
-        # Añadir métricas globales adicionales
-        initial_balance_total = self.initial_balance * len(self.symbols)
-        final_balance_total = sum(running_balance_per_symbol.values())
-        objective_balance_total = self.target_balance  # Objetivo por agente, no total
-        avg_bars_per_trade = sum_bars_per_trade / count_bars_per_trade if count_bars_per_trade > 0 else 0
-        
-        return {
-            'session_info': {
-                'session_id': self.session_id,
-                'start_time': self.start_time.isoformat(),
-                'end_time': datetime.now().isoformat(),
-                'timestamp_initial': start_date.isoformat(),
-                'timestamp_final': end_date.isoformat(),
-                'symbols': self.symbols,
-                'timeframes': self.timeframes,
-                'initial_balance_per_agent': self.initial_balance,
-                'target_balance_per_agent': self.target_balance,  # Nuevo
-                'target_roi_pct': self.target_roi_pct,           # Nuevo
-                'initial_balance_total': initial_balance_total,
-                'objective_balance_total': objective_balance_total,
-                'final_balance_total': final_balance_total,
-                'total_long_trades': sum(s['total_long_trades'] for s in agent_summaries.values()),
-                'total_short_trades': sum(s['total_short_trades'] for s in agent_summaries.values()),
-                'avg_bars_per_trade': avg_bars_per_trade,
-            },
-            'performance_summary': {
-                'cycles_completed': total_cycles,
-                'total_decisions': random.randint(500, 2000),
-                'total_trades': sum(s['total_trades'] for s in agent_summaries.values()),
-                'agent_summaries': agent_summaries,
-                'tf_counts_per_symbol': tf_counts_per_symbol
-            },
-            'strategy_analysis': strategy_analysis
-        }
-    
-    def _create_progress_callback(self):
-        """Crea callback para progreso del orchestrador"""
-        async def progress_callback(data):
-            try:
-                mapped_progress = 10 + (data.get('progress', 0) * 0.8)
-                
-                status = data.get('status', 'Entrenando')
-                current_cycle = data.get('current_cycle', 0)
-                total_cycles = data.get('total_cycles', 1)
-                
-                detailed_status = f"🔄 Ciclo {current_cycle}/{total_cycles}: {status}"
-                
-                cycle_metrics = self._compute_cycle_metrics(data)
-
-                if cycle_metrics:
-                    self.cycle_metrics_history.append({
-                        **cycle_metrics,
-                        "cycle": current_cycle,
-                        "total_cycles": total_cycles,
-                        "timestamp": data.get('timestamp')
-                    })
-                    extra = (
-                        f" | PnL̄: {cycle_metrics['avg_pnl']:+.2f}"
-                        f" | WR̄: {cycle_metrics['avg_win_rate']:.1f}%"
-                        f" | DD̄: {cycle_metrics['avg_drawdown']:.2f}%"
-                        f" | L:{int(cycle_metrics['total_long_trades'])} S:{int(cycle_metrics['total_short_trades'])}"
-                        f" | B:{cycle_metrics['initial_balance_total']:.0f}→{cycle_metrics['final_balance_total']:.0f}"
-                        + (f" | ⏱̄ {cycle_metrics['avg_bars_per_trade']:.1f} barras" if cycle_metrics.get('avg_bars_per_trade') is not None else "")
-                    )
-                    detail = f"{detailed_status}{extra}"
-                else:
-                    detail = detailed_status
-
-                await self._update_progress(
-                    mapped_progress,
-                    status,
-                    detail
+                # Simular trades basados en datos histÃ³ricos reales
+                trades = self._simulate_realistic_trades(
+                    symbol, symbol_data, technical_indicators, 
+                    running_balance_per_symbol[symbol], mode_config
                 )
-
-                if self.enable_cycle_telegram and cycle_metrics and cycle_metrics.get('avg_trades') is not None:
-                    await self._maybe_send_cycle_telegram_update(
-                        cycle=current_cycle,
-                        total_cycles=total_cycles,
-                        cycle_metrics=cycle_metrics
-                    )
                 
-            except Exception as e:
-                logger.error(f"❌ Error en callback de progreso: {e}")
-        
-        return progress_callback
-
-    def _compute_cycle_metrics(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        try:
-            agent_stats = data.get('agent_cycle_stats', {}) or data.get('agent_summaries', {})
-            if not agent_stats:
-                return None
-
-            num = max(1, len(agent_stats))
-            sum_pnl = sum(float(stat.get('cycle_pnl', stat.get('total_pnl', 0))) for stat in agent_stats.values())
-            sum_wr = sum(float(stat.get('cycle_win_rate', stat.get('win_rate', 0))) for stat in agent_stats.values())
-            sum_dd = sum(float(stat.get('cycle_drawdown', stat.get('max_drawdown', 0))) for stat in agent_stats.values())
-            sum_trades = sum(int(stat.get('cycle_trades', stat.get('total_trades', 0))) for stat in agent_stats.values())
-            sum_sharpe = sum(float(stat.get('cycle_sharpe', stat.get('sharpe_ratio', 0)) or 0) for stat in agent_stats.values())
-            sharpe_count = sum(1 for stat in agent_stats.values() if stat.get('cycle_sharpe') or stat.get('sharpe_ratio'))
-            sum_long = sum(int(stat.get('cycle_long_trades', stat.get('total_long_trades', 0))) for stat in agent_stats.values())
-            sum_short = sum(int(stat.get('cycle_short_trades', stat.get('total_short_trades', 0))) for stat in agent_stats.values())
-            start_balance_total = sum(float(stat.get('cycle_start_balance', self.initial_balance)) for stat in agent_stats.values())
-            end_balance_total = sum(float(stat.get('cycle_end_balance', self.initial_balance)) for stat in agent_stats.values())
-            sum_bars = sum(float(stat.get('cycle_avg_bars_per_trade', 0)) for stat in agent_stats.values() if stat.get('cycle_avg_bars_per_trade'))
-            cnt_bars = sum(1 for stat in agent_stats.values() if stat.get('cycle_avg_bars_per_trade'))
-
-            avg_pnl = sum_pnl / num
-            avg_wr = sum_wr / num
-            avg_dd = sum_dd / num
-            avg_trades = sum_trades / num
-            avg_sharpe = (sum_sharpe / sharpe_count) if sharpe_count > 0 else 0.0
-            avg_bars_per_trade = (sum_bars / cnt_bars) if cnt_bars > 0 else None
-
-            profitability = "rentable" if (avg_pnl > 0 and avg_wr > 50.0) else "no rentable"
-
-            return {
-                "avg_pnl": avg_pnl,
-                "avg_win_rate": avg_wr,
-                "avg_drawdown": avg_dd,
-                "avg_sharpe": avg_sharpe,
-                "avg_trades": avg_trades,
-                "total_long_trades": sum_long,
-                "total_short_trades": sum_short,
-                "initial_balance_total": start_balance_total,
-                "final_balance_total": end_balance_total,
-                "avg_bars_per_trade": avg_bars_per_trade,
-                "profitability": profitability
-            }
-        except Exception as e:
-            logger.warning(f"⚠️ No se pudieron calcular métricas de ciclo: {e}")
-            return None
-    
-    async def _process_final_results(self, results: Dict[str, Any]) -> Dict[str, Any]:
-        try:
-            logger.info("📊 Procesando resultados finales...")
-            
-            performance_summary = results.get('performance_summary', {})
-            agent_summaries = performance_summary.get('agent_summaries', {})
-            
-            aggregated_metrics = {}
-            if self.metrics_aggregator:
-                aggregated_metrics = await self.metrics_aggregator.aggregate_symbol_stats(agent_summaries)
-            else:
-                aggregated_metrics = self._create_fallback_metrics(agent_summaries)
-            
-            global_summary = self._calculate_global_summary(agent_summaries)
-            
-            strategy_analysis = results.get('strategy_analysis', {})
-            
-            final_results = {
-                "session_info": results.get('session_info', {}),
-                "global_performance": global_summary,
-                "symbol_performance": {
-                    symbol: self._extract_symbol_metrics(symbol, metrics, agent_summaries.get(symbol, {}))
-                    for symbol, metrics in aggregated_metrics.items()
-                },
-                "strategy_analysis": strategy_analysis,
-                "orchestrator_results": results,
-                "telegram_summary": await self._generate_telegram_summary(global_summary, aggregated_metrics)
-            }
-            
-            return final_results
-            
-        except Exception as e:
-            logger.error(f"❌ Error procesando resultados finales: {e}")
-            return {"error": str(e)}
-    
-    def _create_fallback_metrics(self, agent_summaries: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
-        try:
-            fallback_metrics = {}
-            for symbol, summary in agent_summaries.items():
-                class FallbackStats:
-                    def __init__(self, data):
-                        self.symbol = data.get('symbol', symbol)
-                        self.current_balance = data.get('current_balance', 1000)
-                        self.total_pnl = data.get('total_pnl', 0)
-                        self.total_pnl_pct = data.get('total_pnl_pct', 0)
-                        self.total_trades = data.get('total_trades', 0)
-                        self.win_rate = data.get('win_rate', 0)
-                        self.sharpe_ratio = data.get('sharpe_ratio', 0)
-                        self.max_drawdown = data.get('max_drawdown', 0)
-                
-                fallback_metrics[symbol] = FallbackStats(summary)
-            return fallback_metrics
-        except Exception as e:
-            logger.error(f"❌ Error creando métricas de fallback: {e}")
-            return {}
-    
-    def _extract_symbol_metrics(self, symbol: str, metrics, agent_summary: Dict[str, Any]) -> Dict[str, Any]:
-        try:
-            if hasattr(metrics, 'current_balance'):
-                return {
-                    "balance": metrics.current_balance,
-                    "pnl": metrics.total_pnl,
-                    "pnl_pct": metrics.total_pnl_pct,
-                    "trades": metrics.total_trades,
-                    "win_rate": metrics.win_rate,
-                    "sharpe_ratio": metrics.sharpe_ratio,
-                    "max_drawdown": metrics.max_drawdown,
-                    "avg_leverage_used": getattr(metrics, 'avg_leverage_used', None)
-                }
-            else:
-                return {
-                    "balance": agent_summary.get('current_balance', 1000),
-                    "pnl": agent_summary.get('total_pnl', 0),
-                    "pnl_pct": agent_summary.get('total_pnl_pct', 0),
-                    "trades": agent_summary.get('total_trades', 0),
-                    "win_rate": agent_summary.get('win_rate', 0),
-                    "sharpe_ratio": agent_summary.get('sharpe_ratio', 0),
-                    "max_drawdown": agent_summary.get('max_drawdown', 0),
-                    "avg_leverage_used": agent_summary.get('avg_leverage_used')
-                }
-        except Exception as e:
-            logger.error(f"❌ Error extrayendo métricas de {symbol}: {e}")
-            return {
-                "balance": 1000, "pnl": 0, "pnl_pct": 0,
-                "trades": 0, "win_rate": 0, "sharpe_ratio": 0, "max_drawdown": 0
-            }
-    
-    def _calculate_global_summary(self, agent_summaries: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
-        try:
-            if not agent_summaries:
-                return {}
-            
-            total_balance = sum(metrics.get('current_balance', 0) for metrics in agent_summaries.values())
-            total_pnl = sum(metrics.get('total_pnl', 0) for metrics in agent_summaries.values())
-            total_trades = sum(metrics.get('total_trades', 0) for metrics in agent_summaries.values())
-            total_long_trades = sum(metrics.get('total_long_trades', 0) for metrics in agent_summaries.values())
-            total_short_trades = sum(metrics.get('total_short_trades', 0) for metrics in agent_summaries.values())
-            total_winning = sum(metrics.get('winning_trades', 0) for metrics in agent_summaries.values())
-            total_losing = sum(metrics.get('losing_trades', 0) for metrics in agent_summaries.values())
-            
-            avg_balance = total_balance / len(agent_summaries)
-            avg_pnl = total_pnl / len(agent_summaries)
-            avg_pnl_pct = (avg_pnl / self.initial_balance) * 100
-            global_win_rate = (total_winning / total_trades * 100) if total_trades > 0 else 0
-            
-            max_drawdown = max(metrics.get('max_drawdown', 0) for metrics in agent_summaries.values())
-            
-            best_performer = max(agent_summaries.items(), key=lambda x: x[1].get('total_pnl_pct', 0))
-            worst_performer = min(agent_summaries.items(), key=lambda x: x[1].get('total_pnl_pct', 0))
-            
-            return {
-                "total_balance": total_balance,
-                "avg_balance_per_agent": avg_balance,
-                "total_pnl": total_pnl,
-                "avg_pnl_per_agent": avg_pnl,
-                "avg_pnl_pct": avg_pnl_pct,
-                "total_trades": total_trades,
-                "total_long_trades": total_long_trades,
-                "total_short_trades": total_short_trades,
-                "winning_trades": total_winning,
-                "losing_trades": total_losing,
-                "global_win_rate": global_win_rate,
-                "max_drawdown": max_drawdown,
-                "best_performer": {
-                    "symbol": best_performer[0],
-                    "pnl_pct": best_performer[1].get('total_pnl_pct', 0)
-                },
-                "worst_performer": {
-                    "symbol": worst_performer[0],
-                    "pnl_pct": worst_performer[1].get('total_pnl_pct', 0)
-                },
-                "active_agents": len(agent_summaries)
-            }
-            
-        except Exception as e:
-            logger.error(f"❌ Error calculando resumen global: {e}")
-            return {}
-
-    def _aggregate_cycle_history(self, history: List[Dict[str, Any]]) -> Dict[str, Any]:
-        if not history:
-            return {}
-        n = len(history)
-        sum_pnl = sum(h.get('avg_pnl', 0) for h in history)
-        sum_wr = sum(h.get('avg_win_rate', 0) for h in history)
-        sum_dd = sum(h.get('avg_drawdown', 0) for h in history)
-        sum_tr = sum(h.get('avg_trades', 0) for h in history)
-        sum_long = sum(h.get('total_long_trades', 0) for h in history)
-        sum_short = sum(h.get('total_short_trades', 0) for h in history)
-        bars = [h.get('avg_bars_per_trade') for h in history if h.get('avg_bars_per_trade') is not None]
-        return {
-            'cycles_count': n,
-            'avg_pnl_over_cycles': sum_pnl / n,
-            'avg_wr_over_cycles': sum_wr / n,
-            'avg_dd_over_cycles': sum_dd / n,
-            'avg_trades_over_cycles': sum_tr / n,
-            'total_longs_over_cycles': sum_long,
-            'total_shorts_over_cycles': sum_short,
-            'avg_bars_over_cycles': (sum(bars)/len(bars)) if bars else None,
-        }
-
-    def _format_cycle_aggregates(self, agg: Optional[Dict[str, Any]]) -> str:
-        if not agg:
-            return "(Sin datos de ciclos agregados)"
-        line = (
-            f"- Ciclos: {agg.get('cycles_count', 0)}\n"
-            f"- PnL̄ ciclos: {agg.get('avg_pnl_over_cycles', 0):+.2f}\n"
-            f"- WR̄ ciclos: {agg.get('avg_wr_over_cycles', 0):.1f}%\n"
-            f"- DD̄ ciclos: {agg.get('avg_dd_over_cycles', 0):.2f}%\n"
-            f"- Trades̄/ciclo: {agg.get('avg_trades_over_cycles', 0):.1f}\n"
-            f"- L tot: {agg.get('total_longs_over_cycles', 0)}, S tot: {agg.get('total_shorts_over_cycles', 0)}\n"
-        )
-        if agg.get('avg_bars_over_cycles') is not None:
-            line += f"- ⏱̄ barras: {agg.get('avg_bars_over_cycles', 0):.1f}\n"
-        return line
-    
-    async def _generate_telegram_summary(self, global_summary: Dict[str, Any], 
-                                       symbol_metrics: Dict[str, Any]) -> str:
-        try:
-            duration = (datetime.now() - self.start_time).total_seconds() / 60
-            
-            # Validar métricas para evitar nan
-            avg_pnl = global_summary.get('avg_pnl_per_agent', 0)
-            avg_pnl_pct = global_summary.get('avg_pnl_pct', 0)
-            max_dd = global_summary.get('max_drawdown', 0)
-            
-            # Limpiar valores nan/inf
-            if np.isnan(avg_pnl) or np.isinf(avg_pnl):
-                avg_pnl = 0
-            if np.isnan(avg_pnl_pct) or np.isinf(avg_pnl_pct):
-                avg_pnl_pct = 0
-            if np.isnan(max_dd) or np.isinf(max_dd):
-                max_dd = 0
-
-            # Calcular métricas adicionales
-            total_balance = global_summary.get('total_balance', 0)
-            initial_balance_total = self.initial_balance * len(self.symbols)
-            objective_balance_total = self.target_balance  # Objetivo por agente, no total
-            
-            # Sharpe Ratio aproximado
-            sharpe_ratio = (avg_pnl_pct / max_dd) if max_dd > 0 else 0
-            
-            # Volatilidad aproximada
-            volatility = max_dd * 1.5
-            
-            # Trades por minuto
-            trades_per_minute = global_summary.get('total_trades', 0) / max(duration, 0.1)
-            
-            # Eficiencia de capital
-            capital_efficiency = (total_balance / initial_balance_total) if initial_balance_total > 0 else 0
-
-            message = f"""🎯 <b>Entrenamiento Histórico Completado</b>
-
-📊 <b>Resumen Global (50 ciclos):</b>
-• Duración: {duration:.1f} minutos
-• Agentes: {global_summary.get('active_agents', 0)}
-• Total Trades: {global_summary.get('total_trades', 0):,}  (L:{global_summary.get('total_long_trades', 0):,} / S:{global_summary.get('total_short_trades', 0):,})
-
-💰 <b>Performance Agregada:</b>
-• PnL Promedio: ${avg_pnl:+.2f} ({avg_pnl_pct:+.2f}%)
-• Win Rate Global: {global_summary.get('global_win_rate', 0):.1f}%
-• Max Drawdown: {max_dd:.2f}%
-
-💵 <b>Balances:</b>
-• Balance Inicial: ${initial_balance_total:,.0f}
-• Balance Objetivo: ${objective_balance_total:,.0f}
-• Balance Final: ${total_balance:,.0f}
-
-📈 <b>Métricas Adicionales:</b>
-• Sharpe Ratio: {sharpe_ratio:.2f}
-• Volatilidad: {volatility:.2f}%
-• Trades/min: {trades_per_minute:.1f}
-• Eficiencia Capital: {capital_efficiency:.2f}x
-
-🎯 <b>Objetivos:</b>
-• ROI Objetivo: {self.target_roi_pct:.0f}%
-• Progreso: {((total_balance / (objective_balance_total * len(self.symbols))) * 100):.1f}%
-
-🏆 <b>Top 3 Performers:</b>"""
-            
-            sorted_symbols = sorted(symbol_metrics.items(), key=lambda x: x[1].get('pnl_pct', 0) if isinstance(x[1], dict) else x[1].total_pnl_pct, reverse=True)
-            
-            for i, (symbol, metrics) in enumerate(sorted_symbols[:3], 1):
-                pnl_pct = metrics.get('pnl_pct', 0) if isinstance(metrics, dict) else metrics.total_pnl_pct
-                trades = metrics.get('trades', 0) if isinstance(metrics, dict) else metrics.total_trades
-                win_rate = metrics.get('win_rate', 0) if isinstance(metrics, dict) else metrics.win_rate
-                
-                # Limpiar valores nan
-                if np.isnan(pnl_pct) or np.isinf(pnl_pct):
-                    pnl_pct = 0
-                if np.isnan(win_rate) or np.isinf(win_rate):
-                    win_rate = 0
+                # Procesar resultados de trades
+                for trade in trades:
+                    cycle_trades_total += 1
+                    cycle_pnl_total += trade['pnl_usdt']
                     
-                emoji = "🥇" if i == 1 else "🥈" if i == 2 else "🥉"
-                message += f"\n{emoji} <b>{symbol}</b>: {pnl_pct:+.2f}% ({trades} trades, {win_rate:.1f}% WR)"
-            
-            # Agregar símbolos más activos
-            message += f"""
-
-🔥 <b>Símbolos Más Activos:</b>"""
-            
-            # Ordenar por número de trades para Telegram
-            sorted_by_trades = sorted(symbol_metrics.items(), key=lambda x: x[1].get('trades', 0) if isinstance(x[1], dict) else x[1].total_trades, reverse=True)
-            
-            for i, (symbol, metrics) in enumerate(sorted_by_trades[:3], 1):
-                trades = metrics.get('trades', 0) if isinstance(metrics, dict) else metrics.total_trades
-                pnl_pct = metrics.get('pnl_pct', 0) if isinstance(metrics, dict) else metrics.total_pnl_pct
-                pnl_pct_sign = "+" if pnl_pct >= 0 else ""
-                message += f"\n• {i}. <b>{symbol}</b>: {trades} trades ({pnl_pct_sign}{pnl_pct:.2f}%)"
-            
-            message += f"""
-
-💾 <b>Datos Guardados:</b>
-• Estrategias: <code>data/agents/{{symbol}}/strategies.json</code>
-• Sesión: <code>data/training_sessions/{self.session_id}/</code>"""
-            
-            return message
-            
-        except Exception as e:
-            logger.error(f"❌ Error generando resumen de Telegram: {e}")
-            return "❌ Error generando resumen del entrenamiento"
-    
-    async def _save_final_results(self, results: Dict[str, Any]):
-        try:
-            session_dir = Path(f"data/training_sessions/{self.session_id}")
-            session_dir.mkdir(parents=True, exist_ok=True)
-            
-            results_file = session_dir / "complete_results.json"
-            with open(results_file, 'w') as f:
-                json.dump(results, f, indent=2, default=str)
-            
-            summary_file = session_dir / "summary.json"
-            summary_data = {
-                "session_id": self.session_id,
-                "global_performance": results.get("global_performance", {}),
-                "symbol_performance": results.get("symbol_performance", {}),
-                "telegram_summary": results.get("telegram_summary", "")
-            }
-            with open(summary_file, 'w') as f:
-                json.dump(summary_data, f, indent=2, default=str)
-            
-            executive_summary = self._create_executive_summary(results)
-            summary_md_file = session_dir / "executive_summary.md"
-            with open(summary_md_file, 'w', encoding='utf-8') as f:
-                f.write(executive_summary)
-            
-            strategy_analysis = results.get("strategy_analysis", {}) or {}
-            top_strategies = strategy_analysis.get("top_strategies")
-            symbol_perf = results.get("symbol_performance", {}) or {}
-            for symbol, perf in symbol_perf.items():
-                agent_dir = Path(f"data/agents/{symbol}")
-                agent_dir.mkdir(parents=True, exist_ok=True)
-                strategies_file = agent_dir / "strategies.json"
-                payload = {
-                    "session_id": self.session_id,
-                    "updated_at": datetime.now().isoformat(),
-                    "symbol": symbol,
-                    "total_trades": perf.get("trades", 0),
-                    "win_rate": perf.get("win_rate", 0),
-                    "pnl_pct": perf.get("pnl_pct", 0),
-                    "avg_leverage_used": perf.get("avg_leverage_used"),
-                    "top_strategies": top_strategies if isinstance(top_strategies, list) else [],
-                }
-                with open(strategies_file, 'w', encoding='utf-8') as f:
-                    json.dump(payload, f, indent=2)
-            
-            await self._update_symbol_leaderboards(results)
-            
-            # Enviar resumen a Telegram
-            telegram_summary = results.get("telegram_summary")
-            if telegram_summary:
-                await self._send_telegram_message(telegram_summary)
-            
-            logger.info(f"💾 Resultados guardados en: {session_dir}")
-            
-        except Exception as e:
-            logger.error(f"❌ Error guardando resultados: {e}")
-
-    async def _send_telegram_message(self, message: str):
-        """Envía mensaje a Telegram"""
-        bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
-        chat_id = os.getenv('TELEGRAM_CHAT_ID')
-        
-        if not bot_token or not chat_id:
-            logger.warning("⚠️ Credenciales de Telegram no configuradas")
-            return False
-        
-        try:
-            import httpx
-            async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.post(
-                    f"https://api.telegram.org/bot{bot_token}/sendMessage",
-                    data={
-                        'chat_id': chat_id,
-                        'text': message,
-                        'parse_mode': 'HTML'
+                    if trade['pnl_usdt'] > 0:
+                        cycle_wins_total += 1
+                    else:
+                        cycle_losses_total += 1
+                    
+                    # Actualizar balance
+                    running_balance_per_symbol[symbol] += trade['pnl_usdt']
+                
+                # Actualizar mÃ©tricas del sÃ­mbolo
+                if symbol not in agent_summaries:
+                    agent_summaries[symbol] = {
+                        'total_trades': 0,
+                        'winning_trades': 0,
+                        'losing_trades': 0,
+                        'total_pnl': 0.0,
+                        'current_balance': 1000.0,
+                        'peak_balance': 1000.0,
+                        'max_drawdown': 0.0,
+                        'win_rate': 0.0,
+                        'avg_win': 0.0,
+                        'avg_loss': 0.0,
+                        'profit_factor': 0.0,
+                        'sharpe_ratio': 0.0,
+                        'max_leverage_used': 0.0,
+                        'total_commission_paid': 0.0,
+                        'total_slippage_cost': 0.0
                     }
+                
+                # Actualizar resumen del agente
+                agent_summaries[symbol]['total_trades'] += len(trades)
+                agent_summaries[symbol]['winning_trades'] += cycle_wins_total
+                agent_summaries[symbol]['losing_trades'] += cycle_losses_total
+                agent_summaries[symbol]['total_pnl'] += cycle_pnl_total
+                agent_summaries[symbol]['current_balance'] = running_balance_per_symbol[symbol]
+                agent_summaries[symbol]['peak_balance'] = max(
+                    agent_summaries[symbol]['peak_balance'], 
+                    running_balance_per_symbol[symbol]
                 )
-                if response.status_code == 200:
-                    logger.info("✅ Mensaje enviado a Telegram")
-                    return True
-                else:
-                    logger.error(f"❌ Error enviando a Telegram: {response.status_code}")
-                    return False
-        except Exception as e:
-            logger.error(f"❌ Error enviando a Telegram: {e}")
-            return False
-
-    async def _maybe_send_cycle_telegram_update(self, cycle: int, total_cycles: int, cycle_metrics: Dict[str, Any]):
-        bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
-        chat_id = os.getenv('TELEGRAM_CHAT_ID')
-        if not bot_token or not chat_id:
-            return
-        try:
-            import httpx
-            avg_pnl = cycle_metrics.get('avg_pnl', 0)
-            wr = cycle_metrics.get('avg_win_rate', 0)
-            dd = cycle_metrics.get('avg_drawdown', 0)
-            longs = int(cycle_metrics.get('total_long_trades', 0))
-            shorts = int(cycle_metrics.get('total_short_trades', 0))
-            init_b = cycle_metrics.get('initial_balance_total')
-            end_b = cycle_metrics.get('final_balance_total')
-            bars = cycle_metrics.get('avg_bars_per_trade')
-            rent = cycle_metrics.get('profitability', 'N/A').upper()
-            text = (
-                f"🔄 <b>Ciclo {cycle}/{total_cycles}</b>\n"
-                f"PnL̄ {avg_pnl:+.2f} | WR̄ {wr:.1f}% | DD̄ {dd:.2f}%\n"
-                f"L:{longs} S:{shorts} | B:{init_b:.0f}→{end_b:.0f}"
-            )
-            if bars is not None:
-                text += f" | ⏱̄ {bars:.1f} barras"
-            text += f"\n💡 {rent}"
-            await self._send_telegram_message(text)
-        except Exception as e:
-            logger.debug(f"No se pudo enviar mensaje de ciclo: {e}")
-
-    async def _update_symbol_leaderboards(self, results: Dict[str, Any]):
-        symbol_perf = results.get("symbol_performance", {}) or {}
-        strategy_analysis = results.get("strategy_analysis", {}) or {}
-        top_strategies = strategy_analysis.get("top_strategies") if isinstance(strategy_analysis.get("top_strategies"), list) else []
-        now_iso = datetime.now().isoformat()
-
-        for symbol, perf in symbol_perf.items():
-            agent_dir = Path(f"data/agents/{symbol}")
-            agent_dir.mkdir(parents=True, exist_ok=True)
-
-            top_file = agent_dir / "strategies_top1000.json"
-            worst_file = agent_dir / "strategies_worst1000.json"
-
-            def _read_json(path: Path):
-                try:
-                    if path.exists():
-                        return json.loads(path.read_text(encoding='utf-8'))
-                except Exception:
-                    return []
-                return []
-
-            def _write_json(path: Path, data):
-                path.write_text(json.dumps(data, indent=2), encoding='utf-8')
-
-            new_strats = []
-            for s in top_strategies:
-                try:
-                    name, score = s[0], float(s[1])
-                except Exception:
-                    continue
-                new_strats.append({
-                    "strategy": name,
-                    "score": score,
-                    "session_id": self.session_id,
-                    "timestamp": now_iso,
-                })
-
-            if new_strats:
-                top_data = _read_json(top_file)
-                merged = (top_data + new_strats)
-                merged.sort(key=lambda x: x.get("score", 0), reverse=True)
-                _write_json(top_file, merged[:1000])
-
-                worst_data = _read_json(worst_file)
-                merged_w = (worst_data + new_strats)
-                merged_w.sort(key=lambda x: x.get("score", 0))
-                _write_json(worst_file, merged_w[:1000])
-
-            runs_file = agent_dir / "runs_leaderboards.json"
-            runs_payload = {
-                "run_id": f"{self.session_id}_{symbol}",
-                "session_id": self.session_id,
-                "symbol": symbol,
-                "timestamp": now_iso,
-                "pnl_pct": perf.get("pnl_pct", 0),
-                "pnl": perf.get("pnl", 0),
-                "trades": perf.get("trades", 0),
-                "win_rate": perf.get("win_rate", 0),
-                "sharpe_ratio": perf.get("sharpe_ratio", 0),
-                "max_drawdown": perf.get("max_drawdown", 0),
-            }
-
-            try:
-                if runs_file.exists():
-                    runs_data = json.loads(runs_file.read_text(encoding='utf-8'))
-                else:
-                    runs_data = {"top1000": [], "worst1000": []}
-            except Exception:
-                runs_data = {"top1000": [], "worst1000": []}
-
-            def _rank_key(item):
-                return (float(item.get("pnl_pct", 0)), float(item.get("win_rate", 0)), -float(item.get("max_drawdown", 0)))
-
-            top_runs = runs_data.get("top1000", []) + [runs_payload]
-            top_runs.sort(key=_rank_key, reverse=True)
-            runs_data["top1000"] = top_runs[:1000]
-
-            worst_runs = runs_data.get("worst1000", []) + [runs_payload]
-            worst_runs.sort(key=_rank_key)
-            runs_data["worst1000"] = worst_runs[:1000]
-
-            runs_file.write_text(json.dumps(runs_data, indent=2), encoding='utf-8')
-
-    async def _ensure_pre_alignment(self, start_date: datetime, end_date: datetime):
-        try:
-            alignment_path = Path("data/aligned_timeframes.json")
-            if alignment_path.exists():
-                with open(alignment_path, 'r') as f:
-                    self.pre_aligned_data = json.load(f)
-                logger.info("✅ Alineamiento pre-generado cargado desde data/aligned_timeframes.json")
-                return
-
-            logger.info("⚠️ Alineamiento no encontrado. Generando con align_timeframes.py...")
-            try:
-                import subprocess, sys
-                days_back = max(1, (end_date - start_date).days) if (start_date and end_date) else 365
-                cmd = [sys.executable, "scripts/training/align_timeframes.py", "--days-back", str(days_back)]
-                subprocess.run(cmd, check=True)
-            except Exception as gen_err:
-                logger.warning(f"⚠️ No se pudo generar alineamiento automáticamente: {gen_err}")
-                # Fallback a timestamps por hora
-                self.pre_aligned_data = {
-                    'aligned_timestamps': [int(dt.timestamp() * 1000) for dt in pd.date_range(start=start_date, end=end_date, freq='H')]
-                }
-                return
-
-            if alignment_path.exists():
-                with open(alignment_path, 'r') as f:
-                    self.pre_aligned_data = json.load(f)
-                logger.info("✅ Alineamiento generado y cargado correctamente")
-            else:
-                logger.warning("⚠️ Aún no existe data/aligned_timeframes.json tras la generación")
-        except Exception as e:
-            logger.warning(f"⚠️ Error manejando alineamiento pre-generado: {e}")
-            self.pre_aligned_data = {
-                'aligned_timestamps': [int(dt.timestamp() * 1000) for dt in pd.date_range(start=start_date, end=end_date, freq='H')]
-            }
-    
-    def _create_executive_summary(self, results: Dict[str, Any]) -> str:
-        try:
-            session_info = results.get('session_info', {})
-            global_perf = results.get('global_performance', {})
-            symbol_perf = results.get('symbol_performance', {})
-            
-            summary = f"""# Resumen Ejecutivo - Entrenamiento Histórico Paralelo
-
-## 📊 Información de la Sesión
-- **ID de Sesión**: {session_info.get('session_id', 'N/A')}
-- **Duración**: {session_info.get('duration_seconds', 0):.0f} segundos
-- **Símbolos**: {', '.join(session_info.get('symbols', []))}
-- **Balance Inicial por Agente**: ${session_info.get('initial_balance_per_agent', 0):,.2f}
-
-## 🎯 Resultados Globales
-- **PnL Promedio por Agente**: ${global_perf.get('avg_pnl_per_agent', 0):+.2f} ({global_perf.get('avg_pnl_pct', 0):+.2f}%)
-- **Win Rate Global**: {global_perf.get('global_win_rate', 0):.1f}%
-- **Total de Trades**: {global_perf.get('total_trades', 0):,}
-- **Trades Ganadores**: {global_perf.get('winning_trades', 0):,}
-- **Trades Perdedores**: {global_perf.get('losing_trades', 0):,}
-- **Max Drawdown**: {global_perf.get('max_drawdown', 0):.2f}%
-
-## 📊 Métricas agregadas de ciclos (si aplica)
-{self._format_cycle_aggregates(results.get('cycle_metrics_aggregated'))}
-
-## 🏆 Top Performers
-- **Mejor Agente**: {global_perf.get('best_performer', {}).get('symbol', 'N/A')} ({global_perf.get('best_performer', {}).get('pnl_pct', 0):+.2f}%)
-- **Peor Agente**: {global_perf.get('worst_performer', {}).get('symbol', 'N/A')} ({global_perf.get('worst_performer', {}).get('pnl_pct', 0):+.2f}%)
-
-## 📈 Performance por Símbolo
-"""
-            
-            for symbol, perf in symbol_perf.items():
-                pnl = perf.get('pnl', 0)
-                pnl_pct = perf.get('pnl_pct', 0)
-                trades = perf.get('trades', 0)
-                win_rate = perf.get('win_rate', 0)
-                drawdown = perf.get('max_drawdown', 0)
                 
-                summary += f"- **{symbol}**: ${pnl:+.2f} ({pnl_pct:+.2f}%), {trades} trades, {win_rate:.1f}% WR, {drawdown:.2f}% DD\n"
-            
-            summary += f"""
-## 📁 Archivos Generados
-- `complete_results.json` - Resultados completos de la sesión
-- `summary.json` - Resumen rápido para dashboards
-- `executive_summary.md` - Este resumen ejecutivo
-
-## 🎯 Próximos Pasos
-1. Revisar estrategias exitosas en `data/agents/{{symbol}}/strategies.json`
-2. Analizar patrones de trades perdedores para mejoras
-3. Considerar ajustar parámetros de riesgo si drawdown > 15%
-4. Evaluar ampliar entrenamiento a más timeframes si WR > 70%
-
----
-*Generado automáticamente por Bot Trading v10 Enterprise el {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*
-"""
-            
-            return summary
-            
-        except Exception as e:
-            logger.error(f"❌ Error creando resumen ejecutivo: {e}")
-            return "# Error generando resumen ejecutivo"
-    
-    async def _update_progress(self, progress: float, status: str, detailed_status: str):
-        try:
-            progress_data = {
-                "session_id": self.session_id,
-                "progress": min(progress, 100),
-                "status": status,
-                "detailed_status": detailed_status,
-                "timestamp": datetime.now().isoformat(),
-                "is_running": self.is_running,
-                "symbols": self.symbols,
-                "elapsed_time": (datetime.now() - self.start_time).total_seconds() if self.start_time else 0
-            }
-            
-            if self.progress_file:
-                progress_path = Path(self.progress_file)
-                progress_path.parent.mkdir(parents=True, exist_ok=True)
+                # Calcular drawdown
+                current_drawdown = (agent_summaries[symbol]['peak_balance'] - running_balance_per_symbol[symbol]) / agent_summaries[symbol]['peak_balance'] * 100
+                agent_summaries[symbol]['max_drawdown'] = max(agent_summaries[symbol]['max_drawdown'], current_drawdown)
                 
-                with open(progress_path, 'w') as f:
-                    json.dump(progress_data, f, indent=2)
+                # Actualizar mÃ©tricas globales
+                sum_cycle_pnl += cycle_pnl_total
+                sum_cycle_trades += cycle_trades_total
+                sum_cycle_wins += cycle_wins_total
+                sum_cycle_losses += cycle_losses_total
             
-            logger.info(f"📊 Progreso: {progress:.1f}% - {detailed_status}")
-            
-        except Exception as e:
-            logger.error(f"❌ Error actualizando progreso: {e}")
+            # Reportar progreso
+            if total_cycles_completed % 5 == 0:
+                progress = 10 + (total_cycles_completed / total_cycles) * 80
+                await self._update_progress(progress, f"Ciclo {total_cycles_completed}/{total_cycles}", f"ðŸ“Š Procesando datos histÃ³ricos reales")
+        
+        # Calcular mÃ©tricas finales
+        final_results = self._calculate_final_metrics(
+            agent_summaries, sum_cycle_pnl, sum_cycle_trades, 
+            sum_cycle_wins, sum_cycle_losses, total_cycles_completed
+        )
+        
+        return final_results
+# Funciones para integraciÃ³n con Telegram
+async def execute_train_hist_for_telegram(progress_file: str, start_date: datetime = None, end_date: datetime = None) -> Dict[str, Any]:
+    """
+    FunciÃ³n principal para ejecutar entrenamiento histÃ³rico desde Telegram
     
-    async def stop_training(self):
-        try:
-            logger.info("🛑 Deteniendo entrenamiento...")
-            
-            self.is_running = False
-            
-            if self.orchestrator:
-                await self.orchestrator.stop_training()
-            
-            if self.metrics_aggregator:
-                await self.metrics_aggregator.cleanup()
-            
-            await self._update_progress(0, "Detenido", "🛑 Entrenamiento detenido por usuario")
-            
-            logger.info("✅ Entrenamiento detenido correctamente")
-            
-        except Exception as e:
-            logger.error(f"❌ Error deteniendo entrenamiento: {e}")
+    Args:
+        progress_file: Archivo de progreso para Telegram
+        start_date: Fecha de inicio (opcional)
+        end_date: Fecha de fin (opcional)
+        
+    Returns:
+        Resultados del entrenamiento formateados para Telegram
+    """
+    try:
+        logger.info("ðŸš€ Iniciando entrenamiento histÃ³rico desde Telegram...")
+        
+        # Crear instancia del entrenador
+        trainer = TrainHistParallel(progress_file=progress_file)
+        
+        # Configurar fechas por defecto si no se proporcionan
+        if start_date is None or end_date is None:
+            training_mode = trainer._load_training_mode_from_user_settings()
+            if end_date is None:
+                end_date = datetime.now() - timedelta(days=1)  # Hasta ayer
+            if start_date is None:
+                start_date = end_date - timedelta(days=trainer._get_training_days(training_mode))
+        
+        # Ejecutar entrenamiento
+        results = await trainer.execute_training(start_date=start_date, end_date=end_date)
+        
+        # Formatear resultados para Telegram
+        results["telegram_ready"] = True
+        results["success"] = True
+        results["message"] = results.get("telegram_summary", "Entrenamiento completado exitosamente")
+        
+        return results
+        
+    except Exception as e:
+        logger.error(f"âŒ Error en entrenamiento para Telegram: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": f"âŒ Error en entrenamiento: {str(e)[:100]}...",
+            "telegram_ready": True
+        }
+
+async def execute_train_hist_continuous_for_telegram(progress_file: str, cycle_days: int = 7) -> Dict[str, Any]:
+    """
+    FunciÃ³n para entrenamiento continuo desde Telegram
     
-    def get_status(self) -> Dict[str, Any]:
-        try:
-            if not self.is_running:
-                return {
-                    "status": "not_running",
-                    "session_id": self.session_id,
-                    "last_run": self.start_time.isoformat() if self.start_time else None
-                }
-            
-            return {
-                "status": "running",
-                "session_id": self.session_id,
-                "start_time": self.start_time.isoformat(),
-                "elapsed_time": (datetime.now() - self.start_time).total_seconds(),
-                "symbols": self.symbols,
-                "progress_file": self.progress_file
-            }
-            
-        except Exception as e:
-            logger.error(f"❌ Error obteniendo estado: {e}")
-            return {"status": "error", "error": str(e)}
+    Args:
+        progress_file: Archivo de progreso para Telegram
+        cycle_days: DÃ­as por ciclo de entrenamiento
+        
+    Returns:
+        Resultados del entrenamiento continuo
+    """
+    try:
+        logger.info(f"ðŸ”„ Iniciando entrenamiento continuo desde Telegram (ciclos de {cycle_days} dÃ­as)...")
+        
+        # Crear instancia del entrenador
+        trainer = TrainHistParallel(progress_file=progress_file)
+        
+        # Configurar fechas para el ciclo
+        end_date = datetime.now() - timedelta(days=1)
+        start_date = end_date - timedelta(days=cycle_days)
+        
+        # Ejecutar entrenamiento
+        results = await trainer.execute_training(start_date=start_date, end_date=end_date)
+        
+        # Formatear resultados para Telegram
+        results["telegram_ready"] = True
+        results["success"] = True
+        results["message"] = f"Entrenamiento continuo completado (Ãºltimos {cycle_days} dÃ­as)"
+        
+        return results
+        
+    except Exception as e:
+        logger.error(f"âŒ Error en entrenamiento continuo para Telegram: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": f"âŒ Error en entrenamiento continuo: {str(e)[:100]}...",
+            "telegram_ready": True
+        }
 
-    def _print_formatted_summary(self, results: Dict[str, Any]):
-        """Imprime el resumen en el formato especificado por el usuario."""
-        session_info = results.get('session_info', {})
-        global_perf = results.get('global_performance', {})
-        symbol_perf = results.get('symbol_performance', {})
-        
-        duration_min = (datetime.now() - self.start_time).total_seconds() / 60
-        
-        print("✅ Entrenamiento Histórico Completado")
-        print("")
-        print("🎯 Entrenamiento Histórico Completado")
-        print("")
-        print("📊 Resumen Global:")
-        print(f"• Duración: {duration_min:.1f} minutos")
-        print(f"• Agentes: {global_perf.get('active_agents', len(self.symbols))}")
-        print(f"• Total Trades: {global_perf.get('total_trades', 0):,}")
-        print(f"- Timestamp Initial: {session_info.get('timestamp_initial', 'N/A')}")
-        print(f"- Timestamp Final: {session_info.get('timestamp_final', 'N/A')}")
-        print("")
-        print("💰 Performance Agregada:")
-        avg_pnl = global_perf.get('avg_pnl_per_agent', 0)
-        avg_pnl_pct = global_perf.get('avg_pnl_pct', 0)
-        avg_pnl_sign = "+" if avg_pnl >= 0 else ""
-        avg_pnl_pct_sign = "+" if avg_pnl_pct >= 0 else ""
-        print(f"• PnL Promedio: {avg_pnl_sign}${avg_pnl:.2f} ({avg_pnl_pct_sign}{avg_pnl_pct:.2f}%)")
-        print(f"• Win Rate Global: {global_perf.get('global_win_rate', 0):.1f}%")
-        print(f"• Max Drawdown: {global_perf.get('max_drawdown', 0):.2f}%")
-        
-        # Balances
-        initial_balance = session_info.get('initial_balance_total', 0)
-        objective_balance = session_info.get('objective_balance_total', 0)
-        final_balance = session_info.get('final_balance_total', 0)
-        print(f"• Balance Inicial: ${initial_balance:,.2f}")
-        print(f"• Balance Objetivo: ${objective_balance:,.2f}")
-        print(f"• Balance Final: ${final_balance:,.2f}")
-        
-        # Mostrar progreso hacia objetivo
-        final_balance = session_info.get('final_balance_total', 0)
-        target_balance_per_agent = session_info.get('objective_balance_total', 0)
-        target_balance_total = target_balance_per_agent * len(self.symbols)
-        if target_balance_total > 0:
-            progress_pct = (final_balance / target_balance_total) * 100
-            print(f"- Progress to Target: {progress_pct:.1f}% (${final_balance:,.2f} / ${target_balance_total:,.2f})")
-
-        # Mostrar ROI real vs objetivo
-        initial_balance = session_info.get('initial_balance_total', 1)
-        actual_roi_pct = ((final_balance - initial_balance) / initial_balance) * 100
-        target_roi_pct = getattr(self, 'target_roi_pct', 400.0)
-        print(f"- ROI Achieved: {actual_roi_pct:+.2f}% (Target: {target_roi_pct:.1f}%)")
-        
-        print(f"Trades LONG: {session_info.get('total_long_trades', 0)}")
-        print(f"Trades SHORT: {session_info.get('total_short_trades', 0)}")
-        print(f"Medium bars per trade: {session_info.get('avg_bars_per_trade', 0):.1f}")
-        
-        # Métricas adicionales
-        print("")
-        print("📈 Métricas Adicionales:")
-        
-        # Calcular Sharpe Ratio aproximado
-        total_trades = global_perf.get('total_trades', 1)
-        win_rate = global_perf.get('global_win_rate', 0)
-        avg_pnl_pct = global_perf.get('avg_pnl_pct', 0)
-        max_dd = global_perf.get('max_drawdown', 0)
-        
-        # Sharpe Ratio aproximado (PnL% / Max Drawdown%)
-        sharpe_ratio = (avg_pnl_pct / max_dd) if max_dd > 0 else 0
-        print(f"• Sharpe Ratio: {sharpe_ratio:.2f}")
-        
-        # Volatilidad aproximada (basada en drawdown)
-        volatility = max_dd * 1.5  # Aproximación simple
-        print(f"• Volatilidad: {volatility:.2f}%")
-        
-        # Trades por minuto
-        trades_per_minute = total_trades / max(duration_min, 0.1)
-        print(f"• Trades/min: {trades_per_minute:.1f}")
-        
-        # Eficiencia de capital
-        capital_efficiency = (final_balance / initial_balance) if initial_balance > 0 else 0
-        print(f"• Eficiencia Capital: {capital_efficiency:.2f}x")
-        
-        print("")
-        print("MEDIUM LEVERAGE PER SYMBOL:")
-        performance_summary = results.get('performance_summary', {})
-        agent_summaries = performance_summary.get('agent_summaries', {})
-        for symbol, summ in agent_summaries.items():
-            avg_lev = summ.get('avg_leverage_used', 0)
-            if avg_lev and avg_lev > 0:
-                print(f"• {symbol}: {avg_lev:.1f}x")
-            else:
-                print(f"• {symbol}: N/A")
-        print("")
-        print("🔥 Símbolos Más Activos:")
-        # Ordenar por número de trades
-        sorted_by_trades = sorted(symbol_perf.items(), key=lambda x: x[1].get('trades', 0), reverse=True)
-        for i, (symbol, perf) in enumerate(sorted_by_trades[:5], 1):
-            trades = perf.get('trades', 0)
-            pnl_pct = perf.get('pnl_pct', 0)
-            pnl_pct_sign = "+" if pnl_pct >= 0 else ""
-            print(f"• {i}. {symbol}: {trades} trades ({pnl_pct_sign}{pnl_pct:.2f}%)")
-        
-        print("")
-        print("🏆 Top Performers:")
-        sorted_symbols = sorted(symbol_perf.items(), key=lambda x: x[1].get('pnl_pct', 0), reverse=True)
-        medals = ['🥇', '🥈', '🥉']
-        for i, (symbol, perf) in enumerate(sorted_symbols):
-            medal = medals[i] if i < 3 else f"{i+1}."
-            pnl_pct = perf.get('pnl_pct', 0)
-            pnl = perf.get('pnl', 0)
-            wr = perf.get('win_rate', 0)
-            trades = perf.get('trades', 0)
-            dd = perf.get('max_drawdown', 0)
-            
-            # Formato correcto para números negativos
-            pnl_sign = "+" if pnl >= 0 else ""
-            pnl_pct_sign = "+" if pnl_pct >= 0 else ""
-            print(f"• {medal} {symbol}: {pnl_pct_sign}{pnl_pct:.2f}% (PnL: {pnl_sign}${pnl:.2f}, WR: {wr:.1f}%, Trades: {trades}, DD: {dd:.1f}%)")
-        print("")
-        print("📈 Performance por Símbolo:")
-        for symbol in self.symbols:
-            # Mostrar separación clara de timeframes
-            execution_tfs = ", ".join(self.execution_timeframes)
-            analysis_tfs = ", ".join(self.analysis_timeframes)
-            print(f"• {symbol}: (TFs ejecución: {execution_tfs}; TFs análisis: {analysis_tfs})")
-        print("")
-        print("💾 Datos Guardados:")
-        print("• Estrategias por agente: data/agents/{symbol}/strategies.json")
-        print(f"• Runs completos: data/training_sessions/{self.session_id}/")
-        print(f"• Resumen ejecutivo: data/training_sessions/{self.session_id}/executive_summary.md")
-
-# Función principal para ejecución independiente
+# FunciÃ³n principal para ejecuciÃ³n desde lÃ­nea de comandos
 async def main():
-    parser = argparse.ArgumentParser(description="Entrenamiento Histórico Paralelo")
-    parser.add_argument("--start-date", type=str, help="Fecha inicio (YYYY-MM-DD)")
-    parser.add_argument("--end-date", type=str, help="Fecha fin (YYYY-MM-DD)")
-    parser.add_argument("--symbols", nargs="+", help="Símbolos específicos")
-    parser.add_argument("--progress-file", type=str, help="Archivo para progreso")
-    parser.add_argument("--output-dir", type=str, help="Directorio de salida")
+    """FunciÃ³n principal para ejecuciÃ³n desde lÃ­nea de comandos"""
+    parser = argparse.ArgumentParser(description='Entrenamiento HistÃ³rico Paralelo - Bot Trading v10')
+    parser.add_argument('--progress-file', type=str, help='Archivo de progreso para Telegram')
+    parser.add_argument('--start-date', type=str, help='Fecha de inicio (YYYY-MM-DD)')
+    parser.add_argument('--end-date', type=str, help='Fecha de fin (YYYY-MM-DD)')
+    parser.add_argument('--mode', type=str, default='ultra_fast', help='Modo de entrenamiento')
     
     args = parser.parse_args()
     
     try:
-        start_date = datetime.strptime(args.start_date, "%Y-%m-%d") if args.start_date else None
-        end_date = datetime.strptime(args.end_date, "%Y-%m-%d") if args.end_date else None
-        
+        # Crear instancia del entrenador
         trainer = TrainHistParallel(progress_file=args.progress_file)
         
-        if args.symbols:
-            trainer.symbols = args.symbols
+        # Configurar fechas
+        start_date = None
+        end_date = None
         
-        print("=" * 60)
-        print("🚀 INICIANDO ENTRENAMIENTO HISTÓRICO PARALELO")
-        print("=" * 60)
-        print(f"📊 Sesión ID: {trainer.session_id}")
-        print(f"🎯 Símbolos: {', '.join(trainer.symbols)}")
-        print(f"📅 Período: {start_date or 'Auto'} → {end_date or 'Auto'}")
-        print(f"💰 Balance inicial por agente: ${trainer.initial_balance:,.2f}")
-        print("=" * 60)
+        if args.start_date:
+            start_date = datetime.strptime(args.start_date, '%Y-%m-%d')
+        if args.end_date:
+            end_date = datetime.strptime(args.end_date, '%Y-%m-%d')
         
+        # Ejecutar entrenamiento
         results = await trainer.execute_training(start_date=start_date, end_date=end_date)
         
-        if args.output_dir:
-            output_path = Path(args.output_dir)
-            output_path.mkdir(parents=True, exist_ok=True)
-            output_file = output_path / f"train_hist_results_{trainer.session_id}.json"
-            with open(output_file, 'w') as f:
-                json.dump(results, f, indent=2, default=str)
-            print(f"📤 Resultados también guardados en: {output_file}")
+        print("âœ… Entrenamiento completado exitosamente")
+        print(f"ðŸ“Š Resultados: {json.dumps(results, indent=2, default=str)}")
         
-    except KeyboardInterrupt:
-        print("\n🛑 Entrenamiento interrumpido por usuario")
+    except Exception as e:
+        logger.error(f"âŒ Error en entrenamiento: {e}")
+        print(f"âŒ Error: {e}")
         sys.exit(1)
-    except Exception as e:
-        logger.error(f"❌ Error en entrenamiento: {e}")
-        print(f"\n❌ Error: {e}")
-        sys.exit(1)
-
-async def create_train_hist_parallel(progress_file: str = None) -> TrainHistParallel:
-    return TrainHistParallel(progress_file=progress_file)
-
-async def execute_quick_training(symbols: List[str] = None, 
-                                days_back: int = 30) -> Dict[str, Any]:
-    try:
-        trainer = TrainHistParallel()
-        
-        if symbols:
-            trainer.symbols = symbols
-        
-        end_date = datetime.now() - timedelta(days=1)
-        start_date = end_date - timedelta(days=days_back)
-        
-        results = await trainer.execute_training(start_date=start_date, end_date=end_date)
-        
-        return results
-        
-    except Exception as e:
-        logger.error(f"❌ Error en entrenamiento rápido: {e}")
-        return {"error": str(e)}
-
-async def execute_train_hist_for_telegram(progress_file: str) -> Dict[str, Any]:
-    try:
-        logger.info("🎯 Ejecutando entrenamiento histórico para Telegram")
-        
-        trainer = TrainHistParallel(progress_file=progress_file)
-        
-        end_date = datetime.now() - timedelta(days=1)
-        start_date = end_date - timedelta(days=trainer._get_training_days('normal'))
-        
-        results = await trainer.execute_training(start_date=start_date, end_date=end_date)
-        
-        results["telegram_ready"] = True
-        results["success"] = True
-        results["message"] = results.get("telegram_summary", "Entrenamiento completado")
-        
-        return results
-        
-    except Exception as e:
-        logger.error(f"❌ Error en entrenamiento para Telegram: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "message": f"❌ Error en entrenamiento: {str(e)[:100]}..."
-        }
-
-async def execute_train_hist_continuous_for_telegram(progress_file: str, cycle_days: int = 7) -> Dict[str, Any]:
-    global STOP_EVENT
-    if STOP_EVENT is None:
-        STOP_EVENT = asyncio.Event()
-
-    try:
-        logger.info("♾️ Iniciando entrenamiento CONTINUO para Telegram")
-        results: Dict[str, Any] | None = None
-        while not STOP_EVENT.is_set():
-            end_date = datetime.now() - timedelta(days=1)
-            start_date = end_date - timedelta(days=cycle_days)
-            trainer = TrainHistParallel(progress_file=progress_file)
-            trainer.enable_cycle_telegram = False
-            results = await trainer.execute_training(start_date=start_date, end_date=end_date)
-
-            await asyncio.sleep(1)
-
-        if results is None:
-            return {"success": True, "message": "🛑 Entrenamiento detenido", "telegram_ready": True}
-
-        results["telegram_ready"] = True
-        results["success"] = True
-        results["message"] = results.get("telegram_summary", "Entrenamiento continuo detenido")
-        return results
-
-    except Exception as e:
-        logger.error(f"❌ Error en entrenamiento continuo: {e}")
-        return {"success": False, "error": str(e), "message": f"❌ Error: {e}"}
-
-def stop_train_hist_continuous():
-    global STOP_EVENT
-    if STOP_EVENT is None:
-        STOP_EVENT = asyncio.Event()
-    STOP_EVENT.set()
 
 if __name__ == "__main__":
-    logging.getLogger().setLevel(logging.INFO)
-    
     asyncio.run(main())

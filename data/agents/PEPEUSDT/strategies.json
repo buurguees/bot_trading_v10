@@ -1,6 +1,6 @@
 {
-  "session_id": "train_hist_20250915_154552",
-  "updated_at": "2025-09-15T15:45:53.811852",
+  "session_id": "train_hist_20250915_195207",
+  "updated_at": "2025-09-15T19:52:34.380330",
   "symbol": "PEPEUSDT",
   "total_trades": 0,
   "win_rate": 0.0,
@@ -8,16 +8,8 @@
   "avg_leverage_used": null,
   "top_strategies": [
     [
-      "RSI_Divergence",
-      95
-    ],
-    [
-      "MA_Crossover",
-      12
-    ],
-    [
-      "Bollinger_Bounce",
-      98
+      "RSI_MA_Crossover",
+      90
     ]
   ]
 }

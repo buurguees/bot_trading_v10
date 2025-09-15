@@ -1,0 +1,174 @@
+{
+  "BTCUSDT": {
+    "train_hist_20250915_194234": {
+      "pnl_pct": -2.3835934522302997,
+      "win_rate": 0.0,
+      "trades": 134,
+      "timestamp": "2025-09-15T19:42:49.758835"
+    },
+    "train_hist_20250915_194637": {
+      "pnl_pct": -2.1724769984015513,
+      "win_rate": 0.0,
+      "trades": 122,
+      "timestamp": "2025-09-15T19:46:52.755594"
+    },
+    "train_hist_20250915_195137": {
+      "pnl_pct": -2.4891662504750096,
+      "win_rate": 0.0,
+      "trades": 140,
+      "timestamp": "2025-09-15T19:52:00.790804"
+    },
+    "train_hist_20250915_195207": {
+      "pnl_pct": -1.7664966990551978,
+      "win_rate": 0.0,
+      "trades": 99,
+      "timestamp": "2025-09-15T19:52:34.394855"
+    }
+  },
+  "ETHUSDT": {
+    "train_hist_20250915_194234": {
+      "pnl_pct": -2.278274994508589,
+      "win_rate": 0.0,
+      "trades": 128,
+      "timestamp": "2025-09-15T19:42:49.758852"
+    },
+    "train_hist_20250915_194637": {
+      "pnl_pct": -2.5597721699782103,
+      "win_rate": 0.0,
+      "trades": 144,
+      "timestamp": "2025-09-15T19:46:52.755602"
+    },
+    "train_hist_20250915_195137": {
+      "pnl_pct": -2.119941972653913,
+      "win_rate": 0.0,
+      "trades": 119,
+      "timestamp": "2025-09-15T19:52:00.790815"
+    },
+    "train_hist_20250915_195207": {
+      "pnl_pct": -2.2256527071022076,
+      "win_rate": 0.0,
+      "trades": 125,
+      "timestamp": "2025-09-15T19:52:34.394866"
+    }
+  },
+  "ADAUSDT": {
+    "train_hist_20250915_194234": {
+      "pnl_pct": 0.0,
+      "win_rate": 0.0,
+      "trades": 0,
+      "timestamp": "2025-09-15T19:42:49.758858"
+    },
+    "train_hist_20250915_194637": {
+      "pnl_pct": 0.0,
+      "win_rate": 0.0,
+      "trades": 0,
+      "timestamp": "2025-09-15T19:46:52.755606"
+    },
+    "train_hist_20250915_195137": {
+      "pnl_pct": -1.468601324467406,
+      "win_rate": 0.0,
+      "trades": 93,
+      "timestamp": "2025-09-15T19:52:00.790823"
+    },
+    "train_hist_20250915_195207": {
+      "pnl_pct": -0.914888716506739,
+      "win_rate": 0.0,
+      "trades": 68,
+      "timestamp": "2025-09-15T19:52:34.394873"
+    }
+  },
+  "DOGEUSDT": {
+    "train_hist_20250915_194234": {
+      "pnl_pct": 0.0,
+      "win_rate": 0.0,
+      "trades": 0,
+      "timestamp": "2025-09-15T19:42:49.758861"
+    },
+    "train_hist_20250915_194637": {
+      "pnl_pct": 0.0,
+      "win_rate": 0.0,
+      "trades": 0,
+      "timestamp": "2025-09-15T19:46:52.755609"
+    },
+    "train_hist_20250915_195137": {
+      "pnl_pct": -1.4499676756307185,
+      "win_rate": 0.0,
+      "trades": 90,
+      "timestamp": "2025-09-15T19:52:00.790829"
+    },
+    "train_hist_20250915_195207": {
+      "pnl_pct": -1.6006047598629132,
+      "win_rate": 0.0,
+      "trades": 97,
+      "timestamp": "2025-09-15T19:52:34.394879"
+    }
+  },
+  "SHIBUSDT": {
+    "train_hist_20250915_194234": {
+      "pnl_pct": 0.0,
+      "win_rate": 0.0,
+      "trades": 0,
+      "timestamp": "2025-09-15T19:42:49.758864"
+    },
+    "train_hist_20250915_194637": {
+      "pnl_pct": 0.0,
+      "win_rate": 0.0,
+      "trades": 0,
+      "timestamp": "2025-09-15T19:46:52.755612"
+    },
+    "train_hist_20250915_195137": {
+      "pnl_pct": 0.0,
+      "win_rate": 0.0,
+      "trades": 0,
+      "timestamp": "2025-09-15T19:52:00.790835"
+    },
+    "train_hist_20250915_195207": {
+      "pnl_pct": 0.0,
+      "win_rate": 0.0,
+      "trades": 0,
+      "timestamp": "2025-09-15T19:52:34.394885"
+    }
+  },
+  "SOLUSDT": {
+    "train_hist_20250915_195137": {
+      "pnl_pct": -1.3520990938923914,
+      "win_rate": 0.0,
+      "trades": 90,
+      "timestamp": "2025-09-15T19:52:00.790819"
+    },
+    "train_hist_20250915_195207": {
+      "pnl_pct": -1.465361436991547,
+      "win_rate": 0.0,
+      "trades": 89,
+      "timestamp": "2025-09-15T19:52:34.394869"
+    }
+  },
+  "XRPUSDT": {
+    "train_hist_20250915_195137": {
+      "pnl_pct": -1.8136111729847366,
+      "win_rate": 0.0,
+      "trades": 135,
+      "timestamp": "2025-09-15T19:52:00.790826"
+    },
+    "train_hist_20250915_195207": {
+      "pnl_pct": -1.2269533207212402,
+      "win_rate": 0.0,
+      "trades": 80,
+      "timestamp": "2025-09-15T19:52:34.394876"
+    }
+  },
+  "PEPEUSDT": {
+    "train_hist_20250915_195137": {
+      "pnl_pct": 0.0,
+      "win_rate": 0.0,
+      "trades": 0,
+      "timestamp": "2025-09-15T19:52:00.790832"
+    },
+    "train_hist_20250915_195207": {
+      "pnl_pct": 0.0,
+      "win_rate": 0.0,
+      "trades": 0,
+      "timestamp": "2025-09-15T19:52:34.394882"
+    }
+  }
+}

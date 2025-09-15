@@ -125,6 +125,8 @@ class CycleResult:
     """Resultado de un ciclo de entrenamiento"""
     cycle_id: int
     timestamp: datetime
+    start_timestamp: datetime
+    end_timestamp: datetime
     duration_seconds: float
     
     # Decisiones tomadas
@@ -151,18 +153,20 @@ class ParallelTrainingOrchestrator:
     """
     
     def __init__(self, symbols: List[str], timeframes: List[str], 
-                 initial_balance: float = 1000.0):
+                 initial_balance: float = 1000.0, capital_manager=None):
         """
         Inicializa el orchestrador
         
         Args:
             symbols: Lista de símbolos a entrenar
             timeframes: Lista de timeframes
-            initial_balance: Balance inicial por agente
+            initial_balance: Balance inicial total (si no hay capital_manager)
+            capital_manager: Gestor de capital centralizado (opcional)
         """
         self.symbols = symbols
         self.timeframes = timeframes
         self.initial_balance = initial_balance
+        self.capital_manager = capital_manager
         
         # Identificación de sesión
         self.session_id = f"parallel_train_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -200,7 +204,19 @@ class ParallelTrainingOrchestrator:
             logger.info("🤖 Inicializando agentes de trading...")
             
             for symbol in self.symbols:
-                agent = TradingAgent(symbol, self.initial_balance)
+                if self.capital_manager:
+                    # Usar gestor de capital centralizado
+                    agent = TradingAgent(
+                        symbol=symbol, 
+                        initial_balance=0.0,  # Se obtendrá del capital_manager
+                        capital_manager=self.capital_manager,
+                        is_shared_capital=True
+                    )
+                else:
+                    # Usar balance individual (comportamiento anterior)
+                    balance_per_symbol = self.initial_balance / len(self.symbols)
+                    agent = TradingAgent(symbol, balance_per_symbol)
+                
                 self.agents[symbol] = agent
                 
                 logger.info(f"✅ Agente {symbol} inicializado")
@@ -290,7 +306,9 @@ class ParallelTrainingOrchestrator:
                 await self._update_progress(
                     progress=(self.current_cycle / self.total_cycles) * 100,
                     status=f"Ciclo {self.current_cycle}/{self.total_cycles}",
-                    timestamp=sync_point.timestamp
+                    timestamp=sync_point.timestamp,
+                    cycle_start=sync_point.timestamp,
+                    cycle_end=datetime.now()
                 )
                 
                 # Ejecutar ciclo individual
@@ -363,6 +381,8 @@ class ParallelTrainingOrchestrator:
             cycle_result = CycleResult(
                 cycle_id=sync_point.cycle_id,
                 timestamp=sync_point.timestamp,
+                start_timestamp=cycle_start,
+                end_timestamp=datetime.now(),
                 duration_seconds=cycle_duration,
                 decisions_made=decisions_made,
                 trades_executed=trades_executed,
@@ -491,7 +511,8 @@ class ParallelTrainingOrchestrator:
             
             # Calcular métricas derivadas
             win_rate = (winning_trades / total_trades * 100) if total_trades > 0 else 0
-            total_pnl_pct = (total_pnl / (len(self.agents) * self.initial_balance)) * 100
+            # Usar el balance inicial total, no multiplicado por número de agentes
+            total_pnl_pct = (total_pnl / self.initial_balance) * 100
             current_drawdown = current_drawdown / len(self.agents) if len(self.agents) > 0 else 0
             
             # Encontrar mejores y peores performers
@@ -553,7 +574,8 @@ class ParallelTrainingOrchestrator:
                 sync_quality=0
             )
     
-    async def _update_progress(self, progress: float, status: str, timestamp: datetime):
+    async def _update_progress(self, progress: float, status: str, timestamp: datetime, 
+                              cycle_start: datetime = None, cycle_end: datetime = None):
         """Actualiza progreso y notifica callback"""
         try:
             if self.progress_callback:
@@ -564,6 +586,8 @@ class ParallelTrainingOrchestrator:
                     'current_cycle': self.current_cycle,
                     'total_cycles': self.total_cycles,
                     'timestamp': timestamp.isoformat(),
+                    'cycle_start_timestamp': cycle_start.isoformat() if cycle_start else None,
+                    'cycle_end_timestamp': cycle_end.isoformat() if cycle_end else None,
                     'symbols': self.symbols,
                     'elapsed_time': (datetime.now() - self.start_time).total_seconds() if self.start_time else 0
                 }
@@ -805,16 +829,18 @@ class ParallelTrainingOrchestrator:
 
 # Factory function para uso desde otros módulos
 async def create_parallel_training_orchestrator(symbols: List[str], timeframes: List[str], 
-                                               initial_balance: float = 1000.0) -> 'ParallelTrainingOrchestrator':
+                                               initial_balance: float = 1000.0, 
+                                               capital_manager=None) -> 'ParallelTrainingOrchestrator':
     """
     Crea instancia del orchestrador de entrenamiento paralelo
     
     Args:
         symbols: Lista de símbolos a entrenar
         timeframes: Lista de timeframes
-        initial_balance: Balance inicial por agente
+        initial_balance: Balance inicial total (si no hay capital_manager)
+        capital_manager: Gestor de capital centralizado (opcional)
         
     Returns:
         Instancia configurada del orchestrador
     """
-    return ParallelTrainingOrchestrator(symbols, timeframes, initial_balance)
+    return ParallelTrainingOrchestrator(symbols, timeframes, initial_balance, capital_manager)

@@ -60,6 +60,84 @@
     "timestamp": "2025-09-15T12:58:43.664595"
   },
   {
+    "strategy": "RSI_Divergence",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_161539",
+    "timestamp": "2025-09-15T16:15:40.317403"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_161726",
+    "timestamp": "2025-09-15T16:17:27.538465"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_161921",
+    "timestamp": "2025-09-15T16:19:22.472209"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_162512",
+    "timestamp": "2025-09-15T16:25:16.702084"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_162541",
+    "timestamp": "2025-09-15T16:25:45.685040"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_162719",
+    "timestamp": "2025-09-15T16:27:24.233274"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_164130",
+    "timestamp": "2025-09-15T16:41:34.519260"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_164305",
+    "timestamp": "2025-09-15T16:43:09.677141"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_164354",
+    "timestamp": "2025-09-15T16:43:58.720401"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_164412",
+    "timestamp": "2025-09-15T16:44:16.361675"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_173112",
+    "timestamp": "2025-09-15T17:31:16.352939"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_173245",
+    "timestamp": "2025-09-15T17:32:50.040467"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 10.0,
+    "session_id": "train_hist_20250915_181133",
+    "timestamp": "2025-09-15T18:11:37.624715"
+  },
+  {
     "strategy": "Bollinger_Bounce",
     "score": 11.0,
     "session_id": "train_hist_20250915_121345",
@@ -130,6 +208,78 @@
     "score": 11.0,
     "session_id": "train_hist_20250915_131531",
     "timestamp": "2025-09-15T13:15:37.344556"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_161539",
+    "timestamp": "2025-09-15T16:15:40.317403"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_161640",
+    "timestamp": "2025-09-15T16:16:41.467543"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_161653",
+    "timestamp": "2025-09-15T16:16:54.884082"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_181935",
+    "timestamp": "2025-09-15T18:19:43.135766"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_161943",
+    "timestamp": "2025-09-15T16:19:45.241305"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_173112",
+    "timestamp": "2025-09-15T17:31:16.352939"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_173312",
+    "timestamp": "2025-09-15T17:33:16.825451"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_173319",
+    "timestamp": "2025-09-15T17:33:23.642802"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_173352",
+    "timestamp": "2025-09-15T17:33:57.110442"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_181051",
+    "timestamp": "2025-09-15T18:10:55.852052"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_181146",
+    "timestamp": "2025-09-15T18:11:51.084859"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 11.0,
+    "session_id": "train_hist_20250915_182626",
+    "timestamp": "2025-09-15T18:26:31.017793"
   },
   {
     "strategy": "RSI_Divergence",
@@ -222,6 +372,72 @@
     "timestamp": "2025-09-15T15:45:53.813201"
   },
   {
+    "strategy": "Bollinger_Bounce",
+    "score": 12.0,
+    "session_id": "train_hist_20250915_161608",
+    "timestamp": "2025-09-15T16:16:09.568749"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 12.0,
+    "session_id": "train_hist_20250915_161822",
+    "timestamp": "2025-09-15T16:18:24.014527"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 12.0,
+    "session_id": "train_hist_20250915_162754",
+    "timestamp": "2025-09-15T16:27:58.525132"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 12.0,
+    "session_id": "train_hist_20250915_162805",
+    "timestamp": "2025-09-15T16:28:09.834909"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 12.0,
+    "session_id": "train_hist_20250915_163955",
+    "timestamp": "2025-09-15T16:39:59.566720"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 12.0,
+    "session_id": "train_hist_20250915_164117",
+    "timestamp": "2025-09-15T16:41:22.401369"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 12.0,
+    "session_id": "train_hist_20250915_164453",
+    "timestamp": "2025-09-15T16:44:58.037281"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 12.0,
+    "session_id": "train_hist_20250915_164659",
+    "timestamp": "2025-09-15T16:47:03.897205"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 12.0,
+    "session_id": "train_hist_20250915_173013",
+    "timestamp": "2025-09-15T17:30:17.836461"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 12.0,
+    "session_id": "train_hist_20250915_173138",
+    "timestamp": "2025-09-15T17:31:43.412483"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 12.0,
+    "session_id": "train_hist_20250915_182107",
+    "timestamp": "2025-09-15T18:21:12.087375"
+  },
+  {
     "strategy": "MA_Crossover",
     "score": 13.0,
     "session_id": "train_hist_20250915_123930",
@@ -301,6 +517,126 @@
   },
   {
     "strategy": "RSI_Divergence",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_161530",
+    "timestamp": "2025-09-15T16:15:31.979489"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_161640",
+    "timestamp": "2025-09-15T16:16:41.467543"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_161811",
+    "timestamp": "2025-09-15T16:18:13.060449"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_161900",
+    "timestamp": "2025-09-15T16:19:01.908861"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_161918",
+    "timestamp": "2025-09-15T16:19:19.617133"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_162018",
+    "timestamp": "2025-09-15T16:20:20.126673"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_162122",
+    "timestamp": "2025-09-15T16:21:23.937488"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_162552",
+    "timestamp": "2025-09-15T16:25:57.217093"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_162604",
+    "timestamp": "2025-09-15T16:26:08.706273"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_162759",
+    "timestamp": "2025-09-15T16:28:04.279666"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_183006",
+    "timestamp": "2025-09-15T18:30:10.789361"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_163822",
+    "timestamp": "2025-09-15T16:38:26.972878"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_163914",
+    "timestamp": "2025-09-15T16:39:18.983889"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_164006",
+    "timestamp": "2025-09-15T16:40:11.213903"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_164024",
+    "timestamp": "2025-09-15T16:40:28.893598"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_173131",
+    "timestamp": "2025-09-15T17:31:36.441916"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_173238",
+    "timestamp": "2025-09-15T17:32:42.788443"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_181023",
+    "timestamp": "2025-09-15T18:10:27.823950"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_181357",
+    "timestamp": "2025-09-15T18:14:02.012206"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 13.0,
+    "session_id": "train_hist_20250915_183721",
+    "timestamp": "2025-09-15T18:37:26.351617"
+  },
+  {
+    "strategy": "RSI_Divergence",
     "score": 14.0,
     "session_id": "train_hist_20250915_121338",
     "timestamp": "2025-09-15T12:13:43.844673"
@@ -360,6 +696,78 @@
     "timestamp": "2025-09-15T12:59:53.369585"
   },
   {
+    "strategy": "RSI_Divergence",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_161709",
+    "timestamp": "2025-09-15T16:17:11.083613"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_161728",
+    "timestamp": "2025-09-15T16:17:30.154718"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_161757",
+    "timestamp": "2025-09-15T16:17:58.705213"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_162038",
+    "timestamp": "2025-09-15T16:20:40.247451"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_162518",
+    "timestamp": "2025-09-15T16:25:22.476462"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_164241",
+    "timestamp": "2025-09-15T16:42:45.831645"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_172947",
+    "timestamp": "2025-09-15T17:29:51.447074"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_172947",
+    "timestamp": "2025-09-15T17:29:51.447074"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_173045",
+    "timestamp": "2025-09-15T17:30:49.722876"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_173259",
+    "timestamp": "2025-09-15T17:33:03.531139"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_181357",
+    "timestamp": "2025-09-15T18:14:02.012206"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 14.0,
+    "session_id": "train_hist_20250915_181437",
+    "timestamp": "2025-09-15T18:14:41.500943"
+  },
+  {
     "strategy": "Bollinger_Bounce",
     "score": 15.0,
     "session_id": "train_hist_20250915_122115",
@@ -412,6 +820,84 @@
     "score": 15.0,
     "session_id": "train_hist_20250915_130022",
     "timestamp": "2025-09-15T13:00:28.411791"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_161541",
+    "timestamp": "2025-09-15T16:15:43.038522"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_161632",
+    "timestamp": "2025-09-15T16:16:33.611461"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_161903",
+    "timestamp": "2025-09-15T16:19:04.888320"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_161955",
+    "timestamp": "2025-09-15T16:19:56.474695"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_161958",
+    "timestamp": "2025-09-15T16:19:59.334365"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_162003",
+    "timestamp": "2025-09-15T16:20:05.317046"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_162725",
+    "timestamp": "2025-09-15T16:27:29.960640"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_163822",
+    "timestamp": "2025-09-15T16:38:26.972878"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_164223",
+    "timestamp": "2025-09-15T16:42:27.472875"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_164400",
+    "timestamp": "2025-09-15T16:44:04.625519"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_173039",
+    "timestamp": "2025-09-15T17:30:43.406110"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_173118",
+    "timestamp": "2025-09-15T17:31:22.858904"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 15.0,
+    "session_id": "train_hist_20250915_173231",
+    "timestamp": "2025-09-15T17:32:36.009298"
   },
   {
     "strategy": "RSI_Divergence",
@@ -493,6 +979,96 @@
   },
   {
     "strategy": "MA_Crossover",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_161544",
+    "timestamp": "2025-09-15T16:15:45.710955"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_161701",
+    "timestamp": "2025-09-15T16:17:02.934010"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_161906",
+    "timestamp": "2025-09-15T16:19:07.823459"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_162148",
+    "timestamp": "2025-09-15T16:21:49.382104"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_162449",
+    "timestamp": "2025-09-15T16:24:53.466505"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_162523",
+    "timestamp": "2025-09-15T16:25:28.239958"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_162639",
+    "timestamp": "2025-09-15T16:26:43.800730"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_162754",
+    "timestamp": "2025-09-15T16:27:58.525132"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_164311",
+    "timestamp": "2025-09-15T16:43:15.812077"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_164540",
+    "timestamp": "2025-09-15T16:45:45.245940"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_173231",
+    "timestamp": "2025-09-15T17:32:36.009298"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_173245",
+    "timestamp": "2025-09-15T17:32:50.040467"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_180328",
+    "timestamp": "2025-09-15T18:03:33.357483"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_181220",
+    "timestamp": "2025-09-15T18:12:24.553785"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 16.0,
+    "session_id": "train_hist_20250915_182626",
+    "timestamp": "2025-09-15T18:26:31.017793"
+  },
+  {
+    "strategy": "MA_Crossover",
     "score": 17.0,
     "session_id": "train_hist_20250915_121452",
     "timestamp": "2025-09-15T12:14:58.081885"
@@ -528,6 +1104,66 @@
     "timestamp": "2025-09-15T12:56:45.354009"
   },
   {
+    "strategy": "MA_Crossover",
+    "score": 17.0,
+    "session_id": "train_hist_20250915_161624",
+    "timestamp": "2025-09-15T16:16:25.474889"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 17.0,
+    "session_id": "train_hist_20250915_161642",
+    "timestamp": "2025-09-15T16:16:44.169328"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 17.0,
+    "session_id": "train_hist_20250915_161709",
+    "timestamp": "2025-09-15T16:17:11.083613"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 17.0,
+    "session_id": "train_hist_20250915_161748",
+    "timestamp": "2025-09-15T16:17:50.067067"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 17.0,
+    "session_id": "train_hist_20250915_161958",
+    "timestamp": "2025-09-15T16:19:59.334365"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 17.0,
+    "session_id": "train_hist_20250915_181955",
+    "timestamp": "2025-09-15T18:20:03.690043"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 17.0,
+    "session_id": "train_hist_20250915_162027",
+    "timestamp": "2025-09-15T16:20:28.613727"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 17.0,
+    "session_id": "train_hist_20250915_162500",
+    "timestamp": "2025-09-15T16:25:05.024888"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 17.0,
+    "session_id": "train_hist_20250915_163926",
+    "timestamp": "2025-09-15T16:39:30.530791"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 17.0,
+    "session_id": "train_hist_20250915_164241",
+    "timestamp": "2025-09-15T16:42:45.831645"
+  },
+  {
     "strategy": "Bollinger_Bounce",
     "score": 18.0,
     "session_id": "train_hist_20250915_121833",
@@ -556,6 +1192,72 @@
     "score": 18.0,
     "session_id": "train_hist_20250915_125154",
     "timestamp": "2025-09-15T12:52:00.269872"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 18.0,
+    "session_id": "train_hist_20250915_161635",
+    "timestamp": "2025-09-15T16:16:36.187712"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 18.0,
+    "session_id": "train_hist_20250915_161721",
+    "timestamp": "2025-09-15T16:17:22.246051"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 18.0,
+    "session_id": "train_hist_20250915_161751",
+    "timestamp": "2025-09-15T16:17:52.968598"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 18.0,
+    "session_id": "train_hist_20250915_161825",
+    "timestamp": "2025-09-15T16:18:26.925622"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 18.0,
+    "session_id": "train_hist_20250915_162009",
+    "timestamp": "2025-09-15T16:20:11.422420"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 18.0,
+    "session_id": "train_hist_20250915_162737",
+    "timestamp": "2025-09-15T16:27:41.504434"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 18.0,
+    "session_id": "train_hist_20250915_162759",
+    "timestamp": "2025-09-15T16:28:04.279666"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 18.0,
+    "session_id": "train_hist_20250915_164042",
+    "timestamp": "2025-09-15T16:40:46.457509"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 18.0,
+    "session_id": "train_hist_20250915_164111",
+    "timestamp": "2025-09-15T16:41:16.168506"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 18.0,
+    "session_id": "train_hist_20250915_173013",
+    "timestamp": "2025-09-15T17:30:17.836461"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 18.0,
+    "session_id": "train_hist_20250915_173259",
+    "timestamp": "2025-09-15T17:33:03.531139"
   },
   {
     "strategy": "RSI_Divergence",
@@ -624,6 +1326,96 @@
     "timestamp": "2025-09-15T13:19:56.562956"
   },
   {
+    "strategy": "RSI_Divergence",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_161731",
+    "timestamp": "2025-09-15T16:17:32.814778"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_161757",
+    "timestamp": "2025-09-15T16:17:58.705213"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_162050",
+    "timestamp": "2025-09-15T16:20:51.541293"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_162105",
+    "timestamp": "2025-09-15T16:21:06.359610"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_162119",
+    "timestamp": "2025-09-15T16:21:21.008366"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_162627",
+    "timestamp": "2025-09-15T16:26:32.265928"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_163908",
+    "timestamp": "2025-09-15T16:39:13.179937"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_163949",
+    "timestamp": "2025-09-15T16:39:53.792186"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_164053",
+    "timestamp": "2025-09-15T16:40:58.455927"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_164305",
+    "timestamp": "2025-09-15T16:43:09.677141"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_164317",
+    "timestamp": "2025-09-15T16:43:22.121476"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_164511",
+    "timestamp": "2025-09-15T16:45:16.007480"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_173339",
+    "timestamp": "2025-09-15T17:33:43.993102"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_180308",
+    "timestamp": "2025-09-15T18:03:13.180827"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 19.0,
+    "session_id": "train_hist_20250915_181300",
+    "timestamp": "2025-09-15T18:13:05.038311"
+  },
+  {
     "strategy": "Bollinger_Bounce",
     "score": 20.0,
     "session_id": "train_hist_20250915_121519",
@@ -672,6 +1464,120 @@
     "timestamp": "2025-09-15T13:19:56.562956"
   },
   {
+    "strategy": "MA_Crossover",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_161611",
+    "timestamp": "2025-09-15T16:16:12.291365"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_161632",
+    "timestamp": "2025-09-15T16:16:33.611461"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_161709",
+    "timestamp": "2025-09-15T16:17:11.083613"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_161742",
+    "timestamp": "2025-09-15T16:17:44.172170"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_162038",
+    "timestamp": "2025-09-15T16:20:40.247451"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_162439",
+    "timestamp": "2025-09-15T16:24:43.872761"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_162529",
+    "timestamp": "2025-09-15T16:25:34.155024"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_162558",
+    "timestamp": "2025-09-15T16:26:02.940940"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_163920",
+    "timestamp": "2025-09-15T16:39:24.801341"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_164030",
+    "timestamp": "2025-09-15T16:40:34.769864"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_164130",
+    "timestamp": "2025-09-15T16:41:34.519260"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_164305",
+    "timestamp": "2025-09-15T16:43:09.677141"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_164711",
+    "timestamp": "2025-09-15T16:47:15.471249"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_173105",
+    "timestamp": "2025-09-15T17:31:09.564653"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_173125",
+    "timestamp": "2025-09-15T17:31:29.545963"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_173405",
+    "timestamp": "2025-09-15T17:34:10.401016"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_181044",
+    "timestamp": "2025-09-15T18:10:48.788356"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_181226",
+    "timestamp": "2025-09-15T18:12:31.038313"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 20.0,
+    "session_id": "train_hist_20250915_181357",
+    "timestamp": "2025-09-15T18:14:02.012206"
+  },
+  {
     "strategy": "RSI_Divergence",
     "score": 21.0,
     "session_id": "train_hist_20250915_123747",
@@ -712,6 +1618,54 @@
     "score": 21.0,
     "session_id": "train_hist_20250915_131524",
     "timestamp": "2025-09-15T13:15:30.358542"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 21.0,
+    "session_id": "train_hist_20250915_161645",
+    "timestamp": "2025-09-15T16:16:46.917174"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 21.0,
+    "session_id": "train_hist_20250915_161712",
+    "timestamp": "2025-09-15T16:17:13.954404"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 21.0,
+    "session_id": "train_hist_20250915_162047",
+    "timestamp": "2025-09-15T16:20:48.774340"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 21.0,
+    "session_id": "train_hist_20250915_162139",
+    "timestamp": "2025-09-15T16:21:41.151429"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 21.0,
+    "session_id": "train_hist_20250915_162725",
+    "timestamp": "2025-09-15T16:27:29.960640"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 21.0,
+    "session_id": "train_hist_20250915_164047",
+    "timestamp": "2025-09-15T16:40:52.350656"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 21.0,
+    "session_id": "train_hist_20250915_164617",
+    "timestamp": "2025-09-15T16:46:21.830644"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 21.0,
+    "session_id": "train_hist_20250915_173125",
+    "timestamp": "2025-09-15T17:31:29.545963"
   },
   {
     "strategy": "Bollinger_Bounce",
@@ -775,6 +1729,72 @@
   },
   {
     "strategy": "RSI_Divergence",
+    "score": 22.0,
+    "session_id": "train_hist_20250915_161547",
+    "timestamp": "2025-09-15T16:15:48.374383"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 22.0,
+    "session_id": "train_hist_20250915_161704",
+    "timestamp": "2025-09-15T16:17:05.629713"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 22.0,
+    "session_id": "train_hist_20250915_161800",
+    "timestamp": "2025-09-15T16:18:01.581509"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 22.0,
+    "session_id": "train_hist_20250915_162656",
+    "timestamp": "2025-09-15T16:27:01.028927"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 22.0,
+    "session_id": "train_hist_20250915_164311",
+    "timestamp": "2025-09-15T16:43:15.812077"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 22.0,
+    "session_id": "train_hist_20250915_164412",
+    "timestamp": "2025-09-15T16:44:16.361675"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 22.0,
+    "session_id": "train_hist_20250915_164429",
+    "timestamp": "2025-09-15T16:44:34.260787"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 22.0,
+    "session_id": "train_hist_20250915_172927",
+    "timestamp": "2025-09-15T17:29:31.964161"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 22.0,
+    "session_id": "train_hist_20250915_181023",
+    "timestamp": "2025-09-15T18:10:27.823950"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 22.0,
+    "session_id": "train_hist_20250915_181153",
+    "timestamp": "2025-09-15T18:11:57.914002"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 22.0,
+    "session_id": "train_hist_20250915_181503",
+    "timestamp": "2025-09-15T18:15:07.986649"
+  },
+  {
+    "strategy": "RSI_Divergence",
     "score": 23.0,
     "session_id": "train_hist_20250915_124256",
     "timestamp": "2025-09-15T12:43:01.980274"
@@ -834,6 +1854,66 @@
     "timestamp": "2025-09-15T12:57:40.876516"
   },
   {
+    "strategy": "RSI_Divergence",
+    "score": 23.0,
+    "session_id": "train_hist_20250915_161552",
+    "timestamp": "2025-09-15T16:15:53.713046"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 23.0,
+    "session_id": "train_hist_20250915_161616",
+    "timestamp": "2025-09-15T16:16:17.592066"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 23.0,
+    "session_id": "train_hist_20250915_161751",
+    "timestamp": "2025-09-15T16:17:52.968598"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 23.0,
+    "session_id": "train_hist_20250915_161800",
+    "timestamp": "2025-09-15T16:18:01.581509"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 23.0,
+    "session_id": "train_hist_20250915_162101",
+    "timestamp": "2025-09-15T16:21:03.484639"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 23.0,
+    "session_id": "train_hist_20250915_164111",
+    "timestamp": "2025-09-15T16:41:16.168506"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 23.0,
+    "session_id": "train_hist_20250915_164342",
+    "timestamp": "2025-09-15T16:43:46.558174"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 23.0,
+    "session_id": "train_hist_20250915_164611",
+    "timestamp": "2025-09-15T16:46:15.907910"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 23.0,
+    "session_id": "train_hist_20250915_164711",
+    "timestamp": "2025-09-15T16:47:15.471249"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 23.0,
+    "session_id": "train_hist_20250915_181030",
+    "timestamp": "2025-09-15T18:10:34.974879"
+  },
+  {
     "strategy": "MA_Crossover",
     "score": 24.0,
     "session_id": "train_hist_20250915_122853",
@@ -868,6 +1948,90 @@
     "score": 24.0,
     "session_id": "train_hist_20250915_145910",
     "timestamp": "2025-09-15T14:59:12.666128"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_161608",
+    "timestamp": "2025-09-15T16:16:09.568749"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_161635",
+    "timestamp": "2025-09-15T16:16:36.187712"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_161653",
+    "timestamp": "2025-09-15T16:16:54.884082"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_161736",
+    "timestamp": "2025-09-15T16:17:38.169716"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_162006",
+    "timestamp": "2025-09-15T16:20:08.229067"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_162523",
+    "timestamp": "2025-09-15T16:25:28.239958"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_163839",
+    "timestamp": "2025-09-15T16:38:44.155294"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_164540",
+    "timestamp": "2025-09-15T16:45:45.245940"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_172914",
+    "timestamp": "2025-09-15T17:29:18.487350"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_173125",
+    "timestamp": "2025-09-15T17:31:29.545963"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_180322",
+    "timestamp": "2025-09-15T18:03:26.576325"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_181037",
+    "timestamp": "2025-09-15T18:10:42.051366"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_181146",
+    "timestamp": "2025-09-15T18:11:51.084859"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 24.0,
+    "session_id": "train_hist_20250915_181226",
+    "timestamp": "2025-09-15T18:12:31.038313"
   },
   {
     "strategy": "MA_Crossover",
@@ -924,6 +2088,78 @@
     "timestamp": "2025-09-15T12:53:51.112678"
   },
   {
+    "strategy": "Bollinger_Bounce",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_161611",
+    "timestamp": "2025-09-15T16:16:12.291365"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_161739",
+    "timestamp": "2025-09-15T16:17:40.857426"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_161800",
+    "timestamp": "2025-09-15T16:18:01.581509"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_161946",
+    "timestamp": "2025-09-15T16:19:47.901849"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_162001",
+    "timestamp": "2025-09-15T16:20:02.428292"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_162139",
+    "timestamp": "2025-09-15T16:21:41.151429"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_162449",
+    "timestamp": "2025-09-15T16:24:53.466505"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_162500",
+    "timestamp": "2025-09-15T16:25:05.024888"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_162748",
+    "timestamp": "2025-09-15T16:27:53.039397"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_164417",
+    "timestamp": "2025-09-15T16:44:22.230279"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_173211",
+    "timestamp": "2025-09-15T17:32:16.165394"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 25.0,
+    "session_id": "train_hist_20250915_184208",
+    "timestamp": "2025-09-15T18:42:12.653174"
+  },
+  {
     "strategy": "MA_Crossover",
     "score": 26.0,
     "session_id": "train_hist_20250915_121625",
@@ -964,6 +2200,84 @@
     "score": 26.0,
     "session_id": "train_hist_20250915_145910",
     "timestamp": "2025-09-15T14:59:12.666128"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_161544",
+    "timestamp": "2025-09-15T16:15:45.710955"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_161600",
+    "timestamp": "2025-09-15T16:16:01.596875"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_161603",
+    "timestamp": "2025-09-15T16:16:04.261455"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_161621",
+    "timestamp": "2025-09-15T16:16:22.794277"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_161734",
+    "timestamp": "2025-09-15T16:17:35.465666"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_161831",
+    "timestamp": "2025-09-15T16:18:32.703385"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_162035",
+    "timestamp": "2025-09-15T16:20:37.372167"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_162056",
+    "timestamp": "2025-09-15T16:20:57.744606"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_162805",
+    "timestamp": "2025-09-15T16:28:09.834909"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_162805",
+    "timestamp": "2025-09-15T16:28:09.834909"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_163932",
+    "timestamp": "2025-09-15T16:39:36.303597"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_172940",
+    "timestamp": "2025-09-15T17:29:44.944379"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 26.0,
+    "session_id": "train_hist_20250915_182626",
+    "timestamp": "2025-09-15T18:26:31.017793"
   },
   {
     "strategy": "MA_Crossover",
@@ -1032,6 +2346,78 @@
     "timestamp": "2025-09-15T12:58:22.471458"
   },
   {
+    "strategy": "RSI_Divergence",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_161557",
+    "timestamp": "2025-09-15T16:15:58.928266"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_161918",
+    "timestamp": "2025-09-15T16:19:19.617133"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_161938",
+    "timestamp": "2025-09-15T16:19:39.726879"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_162035",
+    "timestamp": "2025-09-15T16:20:37.372167"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_162107",
+    "timestamp": "2025-09-15T16:21:09.134117"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_162702",
+    "timestamp": "2025-09-15T16:27:06.836683"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_164159",
+    "timestamp": "2025-09-15T16:42:03.977210"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_164535",
+    "timestamp": "2025-09-15T16:45:39.440709"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_173105",
+    "timestamp": "2025-09-15T17:31:09.564653"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_173138",
+    "timestamp": "2025-09-15T17:31:43.412483"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_181044",
+    "timestamp": "2025-09-15T18:10:48.788356"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 27.0,
+    "session_id": "train_hist_20250915_181133",
+    "timestamp": "2025-09-15T18:11:37.624715"
+  },
+  {
     "strategy": "MA_Crossover",
     "score": 28.0,
     "session_id": "train_hist_20250915_123706",
@@ -1093,6 +2479,72 @@
   },
   {
     "strategy": "Bollinger_Bounce",
+    "score": 28.0,
+    "session_id": "train_hist_20250915_161407",
+    "timestamp": "2025-09-15T16:14:08.933962"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 28.0,
+    "session_id": "train_hist_20250915_161642",
+    "timestamp": "2025-09-15T16:16:44.169328"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 28.0,
+    "session_id": "train_hist_20250915_161650",
+    "timestamp": "2025-09-15T16:16:52.160485"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 28.0,
+    "session_id": "train_hist_20250915_161822",
+    "timestamp": "2025-09-15T16:18:24.014527"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 28.0,
+    "session_id": "train_hist_20250915_162110",
+    "timestamp": "2025-09-15T16:21:12.212120"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 28.0,
+    "session_id": "train_hist_20250915_162134",
+    "timestamp": "2025-09-15T16:21:35.581792"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 28.0,
+    "session_id": "train_hist_20250915_162454",
+    "timestamp": "2025-09-15T16:24:59.235731"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 28.0,
+    "session_id": "train_hist_20250915_173346",
+    "timestamp": "2025-09-15T17:33:50.468292"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 28.0,
+    "session_id": "train_hist_20250915_180948",
+    "timestamp": "2025-09-15T18:09:53.304668"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 28.0,
+    "session_id": "train_hist_20250915_181009",
+    "timestamp": "2025-09-15T18:10:13.641301"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 28.0,
+    "session_id": "train_hist_20250915_191727",
+    "timestamp": "2025-09-15T19:19:51.850449"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
     "score": 29.0,
     "session_id": "train_hist_20250915_121625",
     "timestamp": "2025-09-15T12:17:04.798236"
@@ -1126,6 +2578,102 @@
     "score": 29.0,
     "session_id": "train_hist_20250915_131944",
     "timestamp": "2025-09-15T13:19:49.604069"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_181223",
+    "timestamp": "2025-09-15T18:12:24.611963"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_161848",
+    "timestamp": "2025-09-15T16:18:49.866645"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_161915",
+    "timestamp": "2025-09-15T16:19:16.705240"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_161946",
+    "timestamp": "2025-09-15T16:19:47.901849"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_162015",
+    "timestamp": "2025-09-15T16:20:17.149314"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_162035",
+    "timestamp": "2025-09-15T16:20:37.372167"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_162116",
+    "timestamp": "2025-09-15T16:21:18.130961"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_183006",
+    "timestamp": "2025-09-15T18:30:10.789361"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_163857",
+    "timestamp": "2025-09-15T16:39:01.579087"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_164053",
+    "timestamp": "2025-09-15T16:40:58.455927"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_164317",
+    "timestamp": "2025-09-15T16:43:22.121476"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_172934",
+    "timestamp": "2025-09-15T17:29:38.455240"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_172940",
+    "timestamp": "2025-09-15T17:29:44.944379"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_173259",
+    "timestamp": "2025-09-15T17:33:03.531139"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_173312",
+    "timestamp": "2025-09-15T17:33:16.825451"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 29.0,
+    "session_id": "train_hist_20250915_181450",
+    "timestamp": "2025-09-15T18:14:54.755232"
   },
   {
     "strategy": "Bollinger_Bounce",
@@ -1174,6 +2722,96 @@
     "score": 30.0,
     "session_id": "train_hist_20250915_125933",
     "timestamp": "2025-09-15T12:59:39.232989"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_161637",
+    "timestamp": "2025-09-15T16:16:38.876834"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_161650",
+    "timestamp": "2025-09-15T16:16:52.160485"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_162001",
+    "timestamp": "2025-09-15T16:20:02.428292"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_162529",
+    "timestamp": "2025-09-15T16:25:34.155024"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_163845",
+    "timestamp": "2025-09-15T16:38:49.970481"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_164030",
+    "timestamp": "2025-09-15T16:40:34.769864"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_164159",
+    "timestamp": "2025-09-15T16:42:03.977210"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_164211",
+    "timestamp": "2025-09-15T16:42:16.076070"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_164406",
+    "timestamp": "2025-09-15T16:44:10.463270"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_164605",
+    "timestamp": "2025-09-15T16:46:09.673168"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_164716",
+    "timestamp": "2025-09-15T16:47:21.286471"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_173158",
+    "timestamp": "2025-09-15T17:32:03.193986"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_180256",
+    "timestamp": "2025-09-15T18:03:00.651171"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_181030",
+    "timestamp": "2025-09-15T18:10:34.974879"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 30.0,
+    "session_id": "train_hist_20250915_182607",
+    "timestamp": "2025-09-15T18:26:11.479542"
   },
   {
     "strategy": "RSI_Divergence",
@@ -1290,6 +2928,96 @@
     "timestamp": "2025-09-15T14:51:46.483383"
   },
   {
+    "strategy": "Bollinger_Bounce",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_161715",
+    "timestamp": "2025-09-15T16:17:16.792752"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_161728",
+    "timestamp": "2025-09-15T16:17:30.154718"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_161837",
+    "timestamp": "2025-09-15T16:18:38.701538"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_161851",
+    "timestamp": "2025-09-15T16:18:52.624314"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_162119",
+    "timestamp": "2025-09-15T16:21:21.008366"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_162748",
+    "timestamp": "2025-09-15T16:27:53.039397"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_164423",
+    "timestamp": "2025-09-15T16:44:28.306717"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_164441",
+    "timestamp": "2025-09-15T16:44:46.192443"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_164611",
+    "timestamp": "2025-09-15T16:46:15.907910"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_173045",
+    "timestamp": "2025-09-15T17:30:49.722876"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_173346",
+    "timestamp": "2025-09-15T17:33:50.468292"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_180308",
+    "timestamp": "2025-09-15T18:03:13.180827"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_181112",
+    "timestamp": "2025-09-15T18:11:16.628740"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_181206",
+    "timestamp": "2025-09-15T18:12:11.312237"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 31.0,
+    "session_id": "train_hist_20250915_181206",
+    "timestamp": "2025-09-15T18:12:11.312237"
+  },
+  {
     "strategy": "RSI_Divergence",
     "score": 32.0,
     "session_id": "train_hist_20250915_123849",
@@ -1320,6 +3048,60 @@
     "timestamp": "2025-09-15T14:53:43.919528"
   },
   {
+    "strategy": "Bollinger_Bounce",
+    "score": 32.0,
+    "session_id": "train_hist_20250915_161828",
+    "timestamp": "2025-09-15T16:18:29.946950"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 32.0,
+    "session_id": "train_hist_20250915_162645",
+    "timestamp": "2025-09-15T16:26:49.552102"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 32.0,
+    "session_id": "train_hist_20250915_162650",
+    "timestamp": "2025-09-15T16:26:55.277114"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 32.0,
+    "session_id": "train_hist_20250915_164012",
+    "timestamp": "2025-09-15T16:40:17.162705"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 32.0,
+    "session_id": "train_hist_20250915_164259",
+    "timestamp": "2025-09-15T16:43:03.533114"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 32.0,
+    "session_id": "train_hist_20250915_172927",
+    "timestamp": "2025-09-15T17:29:31.964161"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 32.0,
+    "session_id": "train_hist_20250915_173158",
+    "timestamp": "2025-09-15T17:32:03.193986"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 32.0,
+    "session_id": "train_hist_20250915_184208",
+    "timestamp": "2025-09-15T18:42:12.653174"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 32.0,
+    "session_id": "train_hist_20250915_184208",
+    "timestamp": "2025-09-15T18:42:12.653174"
+  },
+  {
     "strategy": "RSI_Divergence",
     "score": 33.0,
     "session_id": "train_hist_20250915_121711",
@@ -1336,6 +3118,96 @@
     "score": 33.0,
     "session_id": "train_hist_20250915_124909",
     "timestamp": "2025-09-15T12:49:14.661163"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_161525",
+    "timestamp": "2025-09-15T16:15:26.541006"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_161600",
+    "timestamp": "2025-09-15T16:16:01.596875"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_161857",
+    "timestamp": "2025-09-15T16:18:59.105952"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_161941",
+    "timestamp": "2025-09-15T16:19:42.387124"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_162024",
+    "timestamp": "2025-09-15T16:20:25.927415"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_162047",
+    "timestamp": "2025-09-15T16:20:48.774340"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_162142",
+    "timestamp": "2025-09-15T16:21:43.826357"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_162506",
+    "timestamp": "2025-09-15T16:25:10.846858"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_162748",
+    "timestamp": "2025-09-15T16:27:53.039397"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_164105",
+    "timestamp": "2025-09-15T16:41:10.093027"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_164229",
+    "timestamp": "2025-09-15T16:42:33.378020"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_164311",
+    "timestamp": "2025-09-15T16:43:15.812077"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_164400",
+    "timestamp": "2025-09-15T16:44:04.625519"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_182221",
+    "timestamp": "2025-09-15T18:22:25.841942"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 33.0,
+    "session_id": "train_hist_20250915_182620",
+    "timestamp": "2025-09-15T18:26:24.532965"
   },
   {
     "strategy": "MA_Crossover",
@@ -1372,6 +3244,66 @@
     "score": 34.0,
     "session_id": "train_hist_20250915_125749",
     "timestamp": "2025-09-15T12:57:54.840558"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 34.0,
+    "session_id": "train_hist_20250915_161541",
+    "timestamp": "2025-09-15T16:15:43.038522"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 34.0,
+    "session_id": "train_hist_20250915_161938",
+    "timestamp": "2025-09-15T16:19:39.726879"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 34.0,
+    "session_id": "train_hist_20250915_183006",
+    "timestamp": "2025-09-15T18:30:10.789361"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 34.0,
+    "session_id": "train_hist_20250915_164036",
+    "timestamp": "2025-09-15T16:40:40.585757"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 34.0,
+    "session_id": "train_hist_20250915_164253",
+    "timestamp": "2025-09-15T16:42:57.658475"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 34.0,
+    "session_id": "train_hist_20250915_164348",
+    "timestamp": "2025-09-15T16:43:52.436148"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 34.0,
+    "session_id": "train_hist_20250915_172914",
+    "timestamp": "2025-09-15T17:29:18.487350"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 34.0,
+    "session_id": "train_hist_20250915_173224",
+    "timestamp": "2025-09-15T17:32:29.248635"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 34.0,
+    "session_id": "train_hist_20250915_180256",
+    "timestamp": "2025-09-15T18:03:00.651171"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 34.0,
+    "session_id": "train_hist_20250915_182633",
+    "timestamp": "2025-09-15T18:26:37.553189"
   },
   {
     "strategy": "Bollinger_Bounce",
@@ -1428,6 +3360,90 @@
     "timestamp": "2025-09-15T12:58:08.665896"
   },
   {
+    "strategy": "RSI_Divergence",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_161619",
+    "timestamp": "2025-09-15T16:16:20.211491"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_161637",
+    "timestamp": "2025-09-15T16:16:38.876834"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_161656",
+    "timestamp": "2025-09-15T16:16:57.510778"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_161854",
+    "timestamp": "2025-09-15T16:18:55.855421"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_161909",
+    "timestamp": "2025-09-15T16:19:10.807171"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_161943",
+    "timestamp": "2025-09-15T16:19:45.241305"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_162053",
+    "timestamp": "2025-09-15T16:20:54.836106"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_163937",
+    "timestamp": "2025-09-15T16:39:42.163642"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_164124",
+    "timestamp": "2025-09-15T16:41:28.461079"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_164400",
+    "timestamp": "2025-09-15T16:44:04.625519"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_180315",
+    "timestamp": "2025-09-15T18:03:19.869481"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_180948",
+    "timestamp": "2025-09-15T18:09:53.304668"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_181030",
+    "timestamp": "2025-09-15T18:10:34.974879"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 35.0,
+    "session_id": "train_hist_20250915_181058",
+    "timestamp": "2025-09-15T18:11:02.909112"
+  },
+  {
     "strategy": "Bollinger_Bounce",
     "score": 36.0,
     "session_id": "train_hist_20250915_121439",
@@ -1462,6 +3478,132 @@
     "score": 36.0,
     "session_id": "train_hist_20250915_130050",
     "timestamp": "2025-09-15T13:00:55.854866"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_161407",
+    "timestamp": "2025-09-15T16:14:08.933962"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_161621",
+    "timestamp": "2025-09-15T16:16:22.794277"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_161704",
+    "timestamp": "2025-09-15T16:17:05.629713"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_161803",
+    "timestamp": "2025-09-15T16:18:04.557943"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_161811",
+    "timestamp": "2025-09-15T16:18:13.060449"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_161814",
+    "timestamp": "2025-09-15T16:18:15.469894"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_161814",
+    "timestamp": "2025-09-15T16:18:15.469894"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_161842",
+    "timestamp": "2025-09-15T16:18:44.245668"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_162015",
+    "timestamp": "2025-09-15T16:20:17.149314"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_162015",
+    "timestamp": "2025-09-15T16:20:17.149314"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_162110",
+    "timestamp": "2025-09-15T16:21:12.212120"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_162604",
+    "timestamp": "2025-09-15T16:26:08.706273"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_164042",
+    "timestamp": "2025-09-15T16:40:46.457509"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_164211",
+    "timestamp": "2025-09-15T16:42:16.076070"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_164354",
+    "timestamp": "2025-09-15T16:43:58.720401"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_164535",
+    "timestamp": "2025-09-15T16:45:39.440709"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_173058",
+    "timestamp": "2025-09-15T17:31:02.857498"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_173218",
+    "timestamp": "2025-09-15T17:32:22.742679"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_180935",
+    "timestamp": "2025-09-15T18:09:39.564039"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_181051",
+    "timestamp": "2025-09-15T18:10:55.852052"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 36.0,
+    "session_id": "train_hist_20250915_184232",
+    "timestamp": "2025-09-15T18:42:36.679440"
   },
   {
     "strategy": "Bollinger_Bounce",
@@ -1560,6 +3702,48 @@
     "timestamp": "2025-09-15T13:00:28.411791"
   },
   {
+    "strategy": "MA_Crossover",
+    "score": 37.0,
+    "session_id": "train_hist_20250915_161848",
+    "timestamp": "2025-09-15T16:18:49.866645"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 37.0,
+    "session_id": "train_hist_20250915_161926",
+    "timestamp": "2025-09-15T16:19:27.941425"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 37.0,
+    "session_id": "train_hist_20250915_162056",
+    "timestamp": "2025-09-15T16:20:57.744606"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 37.0,
+    "session_id": "train_hist_20250915_162101",
+    "timestamp": "2025-09-15T16:21:03.484639"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 37.0,
+    "session_id": "train_hist_20250915_164001",
+    "timestamp": "2025-09-15T16:40:05.409594"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 37.0,
+    "session_id": "train_hist_20250915_164059",
+    "timestamp": "2025-09-15T16:41:04.270685"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 37.0,
+    "session_id": "train_hist_20250915_173312",
+    "timestamp": "2025-09-15T17:33:16.825451"
+  },
+  {
     "strategy": "Bollinger_Bounce",
     "score": 38.0,
     "session_id": "train_hist_20250915_123747",
@@ -1626,6 +3810,78 @@
     "timestamp": "2025-09-15T13:15:09.691217"
   },
   {
+    "strategy": "Bollinger_Bounce",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_161555",
+    "timestamp": "2025-09-15T16:15:56.346699"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_161721",
+    "timestamp": "2025-09-15T16:17:22.246051"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_162003",
+    "timestamp": "2025-09-15T16:20:05.317046"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_162523",
+    "timestamp": "2025-09-15T16:25:28.239958"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_162639",
+    "timestamp": "2025-09-15T16:26:43.800730"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_163851",
+    "timestamp": "2025-09-15T16:38:55.786749"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_163903",
+    "timestamp": "2025-09-15T16:39:07.352992"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_164259",
+    "timestamp": "2025-09-15T16:43:03.533114"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_164459",
+    "timestamp": "2025-09-15T16:45:04.047515"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_173131",
+    "timestamp": "2025-09-15T17:31:36.441916"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_181126",
+    "timestamp": "2025-09-15T18:11:30.655954"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 38.0,
+    "session_id": "train_hist_20250915_181213",
+    "timestamp": "2025-09-15T18:12:18.063198"
+  },
+  {
     "strategy": "MA_Crossover",
     "score": 39.0,
     "session_id": "train_hist_20250915_121351",
@@ -1684,6 +3940,96 @@
     "score": 39.0,
     "session_id": "train_hist_20250915_125852",
     "timestamp": "2025-09-15T12:58:57.573806"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_161536",
+    "timestamp": "2025-09-15T16:15:37.590194"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_161736",
+    "timestamp": "2025-09-15T16:17:38.169716"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_161803",
+    "timestamp": "2025-09-15T16:18:04.557943"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_161955",
+    "timestamp": "2025-09-15T16:19:56.474695"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_162125",
+    "timestamp": "2025-09-15T16:21:27.077168"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_162547",
+    "timestamp": "2025-09-15T16:25:51.460717"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_164047",
+    "timestamp": "2025-09-15T16:40:52.350656"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_164342",
+    "timestamp": "2025-09-15T16:43:46.558174"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_172934",
+    "timestamp": "2025-09-15T17:29:38.455240"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_173026",
+    "timestamp": "2025-09-15T17:30:30.795832"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_180335",
+    "timestamp": "2025-09-15T18:03:40.025562"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_180955",
+    "timestamp": "2025-09-15T18:10:00.016826"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_181002",
+    "timestamp": "2025-09-15T18:10:06.732212"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_181105",
+    "timestamp": "2025-09-15T18:11:09.711038"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 39.0,
+    "session_id": "train_hist_20250915_181206",
+    "timestamp": "2025-09-15T18:12:11.312237"
   },
   {
     "strategy": "Bollinger_Bounce",
@@ -1776,6 +4122,96 @@
     "timestamp": "2025-09-15T14:51:46.483383"
   },
   {
+    "strategy": "MA_Crossover",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_161541",
+    "timestamp": "2025-09-15T16:15:43.038522"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_161819",
+    "timestamp": "2025-09-15T16:18:21.163610"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_161822",
+    "timestamp": "2025-09-15T16:18:24.014527"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_161854",
+    "timestamp": "2025-09-15T16:18:55.855421"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_161949",
+    "timestamp": "2025-09-15T16:19:50.821471"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_162107",
+    "timestamp": "2025-09-15T16:21:09.134117"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_162142",
+    "timestamp": "2025-09-15T16:21:43.826357"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_162145",
+    "timestamp": "2025-09-15T16:21:46.676399"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_162714",
+    "timestamp": "2025-09-15T16:27:18.441462"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_164211",
+    "timestamp": "2025-09-15T16:42:16.076070"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_164453",
+    "timestamp": "2025-09-15T16:44:58.037281"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_164523",
+    "timestamp": "2025-09-15T16:45:27.697172"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_164635",
+    "timestamp": "2025-09-15T16:46:39.911962"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_181139",
+    "timestamp": "2025-09-15T18:11:44.319039"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 40.0,
+    "session_id": "train_hist_20250915_182613",
+    "timestamp": "2025-09-15T18:26:17.994236"
+  },
+  {
     "strategy": "Bollinger_Bounce",
     "score": 41.0,
     "session_id": "train_hist_20250915_125025",
@@ -1816,6 +4252,96 @@
     "score": 41.0,
     "session_id": "train_hist_20250915_130050",
     "timestamp": "2025-09-15T13:00:55.854866"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_161715",
+    "timestamp": "2025-09-15T16:17:16.792752"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_161819",
+    "timestamp": "2025-09-15T16:18:21.163610"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_161840",
+    "timestamp": "2025-09-15T16:18:41.428290"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_161848",
+    "timestamp": "2025-09-15T16:18:49.866645"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_161941",
+    "timestamp": "2025-09-15T16:19:42.387124"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_162552",
+    "timestamp": "2025-09-15T16:25:57.217093"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_164006",
+    "timestamp": "2025-09-15T16:40:11.213903"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_164117",
+    "timestamp": "2025-09-15T16:41:22.401369"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_164217",
+    "timestamp": "2025-09-15T16:42:22.010473"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_164629",
+    "timestamp": "2025-09-15T16:46:33.713633"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_173145",
+    "timestamp": "2025-09-15T17:31:49.930752"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_181009",
+    "timestamp": "2025-09-15T18:10:13.641301"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_181105",
+    "timestamp": "2025-09-15T18:11:09.711038"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_181705",
+    "timestamp": "2025-09-15T18:17:10.197471"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 41.0,
+    "session_id": "train_hist_20250915_182607",
+    "timestamp": "2025-09-15T18:26:11.479542"
   },
   {
     "strategy": "RSI_Divergence",
@@ -1878,6 +4404,66 @@
     "timestamp": "2025-09-15T13:00:00.311375"
   },
   {
+    "strategy": "MA_Crossover",
+    "score": 42.0,
+    "session_id": "train_hist_20250915_161552",
+    "timestamp": "2025-09-15T16:15:53.713046"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 42.0,
+    "session_id": "train_hist_20250915_161840",
+    "timestamp": "2025-09-15T16:18:41.428290"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 42.0,
+    "session_id": "train_hist_20250915_162033",
+    "timestamp": "2025-09-15T16:20:34.363612"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 42.0,
+    "session_id": "train_hist_20250915_162134",
+    "timestamp": "2025-09-15T16:21:35.581792"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 42.0,
+    "session_id": "train_hist_20250915_164136",
+    "timestamp": "2025-09-15T16:41:40.597955"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 42.0,
+    "session_id": "train_hist_20250915_164623",
+    "timestamp": "2025-09-15T16:46:27.811690"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 42.0,
+    "session_id": "train_hist_20250915_173019",
+    "timestamp": "2025-09-15T17:30:24.294981"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 42.0,
+    "session_id": "train_hist_20250915_173118",
+    "timestamp": "2025-09-15T17:31:22.858904"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 42.0,
+    "session_id": "train_hist_20250915_181450",
+    "timestamp": "2025-09-15T18:14:54.755232"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 42.0,
+    "session_id": "train_hist_20250915_181457",
+    "timestamp": "2025-09-15T18:15:01.377576"
+  },
+  {
     "strategy": "RSI_Divergence",
     "score": 43.0,
     "session_id": "train_hist_20250915_121954",
@@ -1936,6 +4522,72 @@
     "score": 43.0,
     "session_id": "train_hist_20250915_131457",
     "timestamp": "2025-09-15T13:15:02.644318"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 43.0,
+    "session_id": "train_hist_20250915_161718",
+    "timestamp": "2025-09-15T16:17:19.614490"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 43.0,
+    "session_id": "train_hist_20250915_161731",
+    "timestamp": "2025-09-15T16:17:32.814778"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 43.0,
+    "session_id": "train_hist_20250915_161739",
+    "timestamp": "2025-09-15T16:17:40.857426"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 43.0,
+    "session_id": "train_hist_20250915_162009",
+    "timestamp": "2025-09-15T16:20:11.422420"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 43.0,
+    "session_id": "train_hist_20250915_162702",
+    "timestamp": "2025-09-15T16:27:06.836683"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 43.0,
+    "session_id": "train_hist_20250915_163955",
+    "timestamp": "2025-09-15T16:39:59.566720"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 43.0,
+    "session_id": "train_hist_20250915_164105",
+    "timestamp": "2025-09-15T16:41:10.093027"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 43.0,
+    "session_id": "train_hist_20250915_173051",
+    "timestamp": "2025-09-15T17:30:56.287155"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 43.0,
+    "session_id": "train_hist_20250915_181058",
+    "timestamp": "2025-09-15T18:11:02.909112"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 43.0,
+    "session_id": "train_hist_20250915_181437",
+    "timestamp": "2025-09-15T18:14:41.500943"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 43.0,
+    "session_id": "train_hist_20250915_184718",
+    "timestamp": "2025-09-15T18:48:33.489620"
   },
   {
     "strategy": "RSI_Divergence",
@@ -1999,6 +4651,72 @@
   },
   {
     "strategy": "RSI_Divergence",
+    "score": 44.0,
+    "session_id": "train_hist_20250915_161514",
+    "timestamp": "2025-09-15T16:15:15.452964"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 44.0,
+    "session_id": "train_hist_20250915_161522",
+    "timestamp": "2025-09-15T16:15:23.693637"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 44.0,
+    "session_id": "train_hist_20250915_161603",
+    "timestamp": "2025-09-15T16:16:04.261455"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 44.0,
+    "session_id": "train_hist_20250915_161831",
+    "timestamp": "2025-09-15T16:18:32.703385"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 44.0,
+    "session_id": "train_hist_20250915_161946",
+    "timestamp": "2025-09-15T16:19:47.901849"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 44.0,
+    "session_id": "train_hist_20250915_164559",
+    "timestamp": "2025-09-15T16:46:03.834655"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 44.0,
+    "session_id": "train_hist_20250915_164605",
+    "timestamp": "2025-09-15T16:46:09.673168"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 44.0,
+    "session_id": "train_hist_20250915_164641",
+    "timestamp": "2025-09-15T16:46:45.764322"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 44.0,
+    "session_id": "train_hist_20250915_172934",
+    "timestamp": "2025-09-15T17:29:38.455240"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 44.0,
+    "session_id": "train_hist_20250915_180256",
+    "timestamp": "2025-09-15T18:03:00.651171"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 44.0,
+    "session_id": "train_hist_20250915_181051",
+    "timestamp": "2025-09-15T18:10:55.852052"
+  },
+  {
+    "strategy": "RSI_Divergence",
     "score": 45.0,
     "session_id": "train_hist_20250915_122356",
     "timestamp": "2025-09-15T12:24:35.604044"
@@ -2040,6 +4758,60 @@
     "timestamp": "2025-09-15T12:57:33.928818"
   },
   {
+    "strategy": "RSI_Divergence",
+    "score": 45.0,
+    "session_id": "train_hist_20250915_161811",
+    "timestamp": "2025-09-15T16:18:13.060449"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 45.0,
+    "session_id": "train_hist_20250915_161840",
+    "timestamp": "2025-09-15T16:18:41.428290"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 45.0,
+    "session_id": "train_hist_20250915_161906",
+    "timestamp": "2025-09-15T16:19:07.823459"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 45.0,
+    "session_id": "train_hist_20250915_162018",
+    "timestamp": "2025-09-15T16:20:20.126673"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 45.0,
+    "session_id": "train_hist_20250915_164024",
+    "timestamp": "2025-09-15T16:40:28.893598"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 45.0,
+    "session_id": "train_hist_20250915_164042",
+    "timestamp": "2025-09-15T16:40:46.457509"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 45.0,
+    "session_id": "train_hist_20250915_164217",
+    "timestamp": "2025-09-15T16:42:22.010473"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 45.0,
+    "session_id": "train_hist_20250915_164235",
+    "timestamp": "2025-09-15T16:42:39.474123"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 45.0,
+    "session_id": "train_hist_20250915_173252",
+    "timestamp": "2025-09-15T17:32:56.950355"
+  },
+  {
     "strategy": "MA_Crossover",
     "score": 46.0,
     "session_id": "train_hist_20250915_121331",
@@ -2074,6 +4846,144 @@
     "score": 46.0,
     "session_id": "train_hist_20250915_125714",
     "timestamp": "2025-09-15T12:57:20.062025"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_161533",
+    "timestamp": "2025-09-15T16:15:34.743967"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_161629",
+    "timestamp": "2025-09-15T16:16:30.908341"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_161704",
+    "timestamp": "2025-09-15T16:17:05.629713"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_161707",
+    "timestamp": "2025-09-15T16:17:08.237638"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_161742",
+    "timestamp": "2025-09-15T16:17:44.172170"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_161803",
+    "timestamp": "2025-09-15T16:18:04.557943"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_161828",
+    "timestamp": "2025-09-15T16:18:29.946950"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_162041",
+    "timestamp": "2025-09-15T16:20:43.131001"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_162050",
+    "timestamp": "2025-09-15T16:20:51.541293"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_162454",
+    "timestamp": "2025-09-15T16:24:59.235731"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_162512",
+    "timestamp": "2025-09-15T16:25:16.702084"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_162714",
+    "timestamp": "2025-09-15T16:27:18.441462"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_163949",
+    "timestamp": "2025-09-15T16:39:53.792186"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_164036",
+    "timestamp": "2025-09-15T16:40:40.585757"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_164336",
+    "timestamp": "2025-09-15T16:43:40.682774"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_164417",
+    "timestamp": "2025-09-15T16:44:22.230279"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_173131",
+    "timestamp": "2025-09-15T17:31:36.441916"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_173211",
+    "timestamp": "2025-09-15T17:32:16.165394"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_173224",
+    "timestamp": "2025-09-15T17:32:29.248635"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_173319",
+    "timestamp": "2025-09-15T17:33:23.642802"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_173339",
+    "timestamp": "2025-09-15T17:33:43.993102"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_181705",
+    "timestamp": "2025-09-15T18:17:10.197471"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 46.0,
+    "session_id": "train_hist_20250915_184718",
+    "timestamp": "2025-09-15T18:48:33.489620"
   },
   {
     "strategy": "Bollinger_Bounce",
@@ -2134,6 +5044,60 @@
     "score": 47.0,
     "session_id": "train_hist_20250915_131937",
     "timestamp": "2025-09-15T13:19:42.588966"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 47.0,
+    "session_id": "train_hist_20250915_161608",
+    "timestamp": "2025-09-15T16:16:09.568749"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 47.0,
+    "session_id": "train_hist_20250915_161715",
+    "timestamp": "2025-09-15T16:17:16.792752"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 47.0,
+    "session_id": "train_hist_20250915_161817",
+    "timestamp": "2025-09-15T16:18:18.441840"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 47.0,
+    "session_id": "train_hist_20250915_161912",
+    "timestamp": "2025-09-15T16:19:13.834516"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 47.0,
+    "session_id": "train_hist_20250915_162027",
+    "timestamp": "2025-09-15T16:20:28.613727"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 47.0,
+    "session_id": "train_hist_20250915_162731",
+    "timestamp": "2025-09-15T16:27:35.724912"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 47.0,
+    "session_id": "train_hist_20250915_164647",
+    "timestamp": "2025-09-15T16:46:51.758439"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 47.0,
+    "session_id": "train_hist_20250915_173013",
+    "timestamp": "2025-09-15T17:30:17.836461"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 47.0,
+    "session_id": "train_hist_20250915_173138",
+    "timestamp": "2025-09-15T17:31:43.412483"
   },
   {
     "strategy": "Bollinger_Bounce",
@@ -2202,6 +5166,90 @@
     "timestamp": "2025-09-15T13:19:14.164262"
   },
   {
+    "strategy": "Bollinger_Bounce",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_161525",
+    "timestamp": "2025-09-15T16:15:26.541006"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_161923",
+    "timestamp": "2025-09-15T16:19:25.205034"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_162033",
+    "timestamp": "2025-09-15T16:20:34.363612"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_162134",
+    "timestamp": "2025-09-15T16:21:35.581792"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_162610",
+    "timestamp": "2025-09-15T16:26:14.692299"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_162622",
+    "timestamp": "2025-09-15T16:26:26.411902"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_164159",
+    "timestamp": "2025-09-15T16:42:03.977210"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_164259",
+    "timestamp": "2025-09-15T16:43:03.533114"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_164517",
+    "timestamp": "2025-09-15T16:45:21.922876"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_173019",
+    "timestamp": "2025-09-15T17:30:24.294981"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_173058",
+    "timestamp": "2025-09-15T17:31:02.857498"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_181112",
+    "timestamp": "2025-09-15T18:11:16.628740"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_181213",
+    "timestamp": "2025-09-15T18:12:18.063198"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 48.0,
+    "session_id": "train_hist_20250915_181403",
+    "timestamp": "2025-09-15T18:14:08.307937"
+  },
+  {
     "strategy": "MA_Crossover",
     "score": 49.0,
     "session_id": "train_hist_20250915_121405",
@@ -2254,6 +5302,72 @@
     "score": 49.0,
     "session_id": "train_hist_20250915_125625",
     "timestamp": "2025-09-15T12:56:31.400637"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 49.0,
+    "session_id": "train_hist_20250915_161519",
+    "timestamp": "2025-09-15T16:15:20.931591"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 49.0,
+    "session_id": "train_hist_20250915_161806",
+    "timestamp": "2025-09-15T16:18:07.289211"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 49.0,
+    "session_id": "train_hist_20250915_161854",
+    "timestamp": "2025-09-15T16:18:55.855421"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 49.0,
+    "session_id": "train_hist_20250915_161857",
+    "timestamp": "2025-09-15T16:18:59.105952"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 49.0,
+    "session_id": "train_hist_20250915_181955",
+    "timestamp": "2025-09-15T18:20:03.690043"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 49.0,
+    "session_id": "train_hist_20250915_162439",
+    "timestamp": "2025-09-15T16:24:43.872761"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 49.0,
+    "session_id": "train_hist_20250915_164018",
+    "timestamp": "2025-09-15T16:40:22.989283"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 49.0,
+    "session_id": "train_hist_20250915_164505",
+    "timestamp": "2025-09-15T16:45:10.044308"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 49.0,
+    "session_id": "train_hist_20250915_173112",
+    "timestamp": "2025-09-15T17:31:16.352939"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 49.0,
+    "session_id": "train_hist_20250915_173305",
+    "timestamp": "2025-09-15T17:33:10.222792"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 49.0,
+    "session_id": "train_hist_20250915_181200",
+    "timestamp": "2025-09-15T18:12:04.583053"
   },
   {
     "strategy": "MA_Crossover",
@@ -2310,6 +5424,36 @@
     "timestamp": "2025-09-15T12:58:15.566649"
   },
   {
+    "strategy": "MA_Crossover",
+    "score": 50.0,
+    "session_id": "train_hist_20250915_161516",
+    "timestamp": "2025-09-15T16:15:18.187973"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 50.0,
+    "session_id": "train_hist_20250915_162622",
+    "timestamp": "2025-09-15T16:26:26.411902"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 50.0,
+    "session_id": "train_hist_20250915_162811",
+    "timestamp": "2025-09-15T16:28:15.642076"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 50.0,
+    "session_id": "train_hist_20250915_173359",
+    "timestamp": "2025-09-15T17:34:03.792476"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 50.0,
+    "session_id": "train_hist_20250915_181220",
+    "timestamp": "2025-09-15T18:12:24.553785"
+  },
+  {
     "strategy": "RSI_Divergence",
     "score": 51.0,
     "session_id": "train_hist_20250915_121358",
@@ -2362,6 +5506,102 @@
     "score": 51.0,
     "session_id": "train_hist_20250915_125455",
     "timestamp": "2025-09-15T12:55:01.353156"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_161552",
+    "timestamp": "2025-09-15T16:15:53.713046"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_161603",
+    "timestamp": "2025-09-15T16:16:04.261455"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_161613",
+    "timestamp": "2025-09-15T16:16:14.861609"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_161701",
+    "timestamp": "2025-09-15T16:17:02.934010"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_161806",
+    "timestamp": "2025-09-15T16:18:07.289211"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_161932",
+    "timestamp": "2025-09-15T16:19:34.115133"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_162024",
+    "timestamp": "2025-09-15T16:20:25.927415"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_162030",
+    "timestamp": "2025-09-15T16:20:31.477099"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_162131",
+    "timestamp": "2025-09-15T16:21:32.684046"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_162131",
+    "timestamp": "2025-09-15T16:21:32.684046"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_162616",
+    "timestamp": "2025-09-15T16:26:20.496378"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_164018",
+    "timestamp": "2025-09-15T16:40:22.989283"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_164247",
+    "timestamp": "2025-09-15T16:42:51.862196"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_173026",
+    "timestamp": "2025-09-15T17:30:30.795832"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_182545",
+    "timestamp": "2025-09-15T18:25:49.913351"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 51.0,
+    "session_id": "train_hist_20250915_182613",
+    "timestamp": "2025-09-15T18:26:17.994236"
   },
   {
     "strategy": "RSI_Divergence",
@@ -2413,6 +5653,72 @@
   },
   {
     "strategy": "MA_Crossover",
+    "score": 52.0,
+    "session_id": "train_hist_20250915_161533",
+    "timestamp": "2025-09-15T16:15:34.743967"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 52.0,
+    "session_id": "train_hist_20250915_161825",
+    "timestamp": "2025-09-15T16:18:26.925622"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 52.0,
+    "session_id": "train_hist_20250915_162142",
+    "timestamp": "2025-09-15T16:21:43.826357"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 52.0,
+    "session_id": "train_hist_20250915_162610",
+    "timestamp": "2025-09-15T16:26:14.692299"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 52.0,
+    "session_id": "train_hist_20250915_164435",
+    "timestamp": "2025-09-15T16:44:40.320737"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 52.0,
+    "session_id": "train_hist_20250915_164653",
+    "timestamp": "2025-09-15T16:46:58.010219"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 52.0,
+    "session_id": "train_hist_20250915_172953",
+    "timestamp": "2025-09-15T17:29:57.933495"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 52.0,
+    "session_id": "train_hist_20250915_173145",
+    "timestamp": "2025-09-15T17:31:49.930752"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 52.0,
+    "session_id": "train_hist_20250915_173158",
+    "timestamp": "2025-09-15T17:32:03.193986"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 52.0,
+    "session_id": "train_hist_20250915_173224",
+    "timestamp": "2025-09-15T17:32:29.248635"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 52.0,
+    "session_id": "train_hist_20250915_181037",
+    "timestamp": "2025-09-15T18:10:42.051366"
+  },
+  {
+    "strategy": "MA_Crossover",
     "score": 53.0,
     "session_id": "train_hist_20250915_121914",
     "timestamp": "2025-09-15T12:19:53.401658"
@@ -2461,6 +5767,42 @@
   },
   {
     "strategy": "Bollinger_Bounce",
+    "score": 53.0,
+    "session_id": "train_hist_20250915_161726",
+    "timestamp": "2025-09-15T16:17:27.538465"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 53.0,
+    "session_id": "train_hist_20250915_162547",
+    "timestamp": "2025-09-15T16:25:51.460717"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 53.0,
+    "session_id": "train_hist_20250915_163857",
+    "timestamp": "2025-09-15T16:39:01.579087"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 53.0,
+    "session_id": "train_hist_20250915_164105",
+    "timestamp": "2025-09-15T16:41:10.093027"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 53.0,
+    "session_id": "train_hist_20250915_164153",
+    "timestamp": "2025-09-15T16:41:58.119580"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 53.0,
+    "session_id": "train_hist_20250915_173026",
+    "timestamp": "2025-09-15T17:30:30.795832"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
     "score": 54.0,
     "session_id": "train_hist_20250915_124025",
     "timestamp": "2025-09-15T12:40:31.091376"
@@ -2488,6 +5830,66 @@
     "score": 54.0,
     "session_id": "train_hist_20250915_131937",
     "timestamp": "2025-09-15T13:19:42.588966"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 54.0,
+    "session_id": "train_hist_20250915_161549",
+    "timestamp": "2025-09-15T16:15:51.003177"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 54.0,
+    "session_id": "train_hist_20250915_161658",
+    "timestamp": "2025-09-15T16:17:00.284131"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 54.0,
+    "session_id": "train_hist_20250915_161817",
+    "timestamp": "2025-09-15T16:18:18.441840"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 54.0,
+    "session_id": "train_hist_20250915_161845",
+    "timestamp": "2025-09-15T16:18:46.944114"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 54.0,
+    "session_id": "train_hist_20250915_162145",
+    "timestamp": "2025-09-15T16:21:46.676399"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 54.0,
+    "session_id": "train_hist_20250915_162702",
+    "timestamp": "2025-09-15T16:27:06.836683"
+  },
+  {
+    "strategy": "MA_Crossover",
+    "score": 54.0,
+    "session_id": "train_hist_20250915_162743",
+    "timestamp": "2025-09-15T16:27:47.266249"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 54.0,
+    "session_id": "train_hist_20250915_163851",
+    "timestamp": "2025-09-15T16:38:55.786749"
+  },
+  {
+    "strategy": "RSI_Divergence",
+    "score": 54.0,
+    "session_id": "train_hist_20250915_164229",
+    "timestamp": "2025-09-15T16:42:33.378020"
+  },
+  {
+    "strategy": "Bollinger_Bounce",
+    "score": 54.0,
+    "session_id": "train_hist_20250915_181139",
+    "timestamp": "2025-09-15T18:11:44.319039"
   },
   {
     "strategy": "Bollinger_Bounce",
@@ -2556,2271 +5958,45 @@
     "timestamp": "2025-09-15T13:15:30.358542"
   },
   {
-    "strategy": "Bollinger_Bounce",
-    "score": 56.0,
-    "session_id": "train_hist_20250915_121418",
-    "timestamp": "2025-09-15T12:14:24.212408"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 56.0,
-    "session_id": "train_hist_20250915_122035",
-    "timestamp": "2025-09-15T12:21:13.911642"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 56.0,
-    "session_id": "train_hist_20250915_123606",
-    "timestamp": "2025-09-15T12:36:11.786217"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 56.0,
-    "session_id": "train_hist_20250915_123633",
-    "timestamp": "2025-09-15T12:36:38.837546"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 56.0,
-    "session_id": "train_hist_20250915_123727",
-    "timestamp": "2025-09-15T12:37:33.012128"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 56.0,
-    "session_id": "train_hist_20250915_124425",
-    "timestamp": "2025-09-15T12:44:31.516967"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 56.0,
-    "session_id": "train_hist_20250915_125120",
-    "timestamp": "2025-09-15T12:51:25.695126"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 56.0,
-    "session_id": "train_hist_20250915_131504",
-    "timestamp": "2025-09-15T13:15:09.691217"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_121411",
-    "timestamp": "2025-09-15T12:14:17.469422"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_121512",
-    "timestamp": "2025-09-15T12:15:18.303592"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_121519",
-    "timestamp": "2025-09-15T12:15:25.017695"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_122155",
-    "timestamp": "2025-09-15T12:22:34.655601"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_124555",
-    "timestamp": "2025-09-15T12:46:01.202015"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_124752",
-    "timestamp": "2025-09-15T12:47:58.303387"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_124806",
-    "timestamp": "2025-09-15T12:48:12.042834"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_125031",
-    "timestamp": "2025-09-15T12:50:37.520595"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_130057",
-    "timestamp": "2025-09-15T13:01:02.817822"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_131243",
-    "timestamp": "2025-09-15T13:13:23.697087"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_131450",
-    "timestamp": "2025-09-15T13:14:55.646524"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 57.0,
-    "session_id": "train_hist_20250915_131937",
-    "timestamp": "2025-09-15T13:19:42.588966"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_122155",
-    "timestamp": "2025-09-15T12:22:34.655601"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_122853",
-    "timestamp": "2025-09-15T12:29:32.324028"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_123646",
-    "timestamp": "2025-09-15T12:36:52.029653"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_123754",
-    "timestamp": "2025-09-15T12:38:00.337185"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_123849",
-    "timestamp": "2025-09-15T12:38:55.126846"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_124011",
-    "timestamp": "2025-09-15T12:40:17.381780"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_124433",
-    "timestamp": "2025-09-15T12:44:38.566691"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_124643",
-    "timestamp": "2025-09-15T12:46:49.294880"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_124657",
-    "timestamp": "2025-09-15T12:47:03.063929"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_124936",
-    "timestamp": "2025-09-15T12:49:42.277901"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_125011",
-    "timestamp": "2025-09-15T12:50:16.823016"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_125208",
-    "timestamp": "2025-09-15T12:52:14.102544"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_125537",
-    "timestamp": "2025-09-15T12:55:43.047533"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_125742",
-    "timestamp": "2025-09-15T12:57:47.900852"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_125756",
-    "timestamp": "2025-09-15T12:58:01.735280"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_131443",
-    "timestamp": "2025-09-15T13:14:48.638467"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 58.0,
-    "session_id": "train_hist_20250915_131517",
-    "timestamp": "2025-09-15T13:15:23.332395"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 59.0,
-    "session_id": "train_hist_20250915_121506",
-    "timestamp": "2025-09-15T12:15:11.586436"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 59.0,
-    "session_id": "train_hist_20250915_124303",
-    "timestamp": "2025-09-15T12:43:08.844766"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 59.0,
-    "session_id": "train_hist_20250915_124439",
-    "timestamp": "2025-09-15T12:44:45.456680"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 59.0,
-    "session_id": "train_hist_20250915_124909",
-    "timestamp": "2025-09-15T12:49:14.661163"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 59.0,
-    "session_id": "train_hist_20250915_125428",
-    "timestamp": "2025-09-15T12:54:33.666110"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 59.0,
-    "session_id": "train_hist_20250915_130008",
-    "timestamp": "2025-09-15T13:00:14.418881"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 60.0,
-    "session_id": "train_hist_20250915_121418",
-    "timestamp": "2025-09-15T12:14:24.212408"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 60.0,
-    "session_id": "train_hist_20250915_123808",
-    "timestamp": "2025-09-15T12:38:14.006702"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 60.0,
-    "session_id": "train_hist_20250915_123910",
-    "timestamp": "2025-09-15T12:39:15.665698"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 60.0,
-    "session_id": "train_hist_20250915_124004",
-    "timestamp": "2025-09-15T12:40:10.530764"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 60.0,
-    "session_id": "train_hist_20250915_124629",
-    "timestamp": "2025-09-15T12:46:35.399228"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 60.0,
-    "session_id": "train_hist_20250915_125317",
-    "timestamp": "2025-09-15T12:53:23.483263"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 60.0,
-    "session_id": "train_hist_20250915_130036",
-    "timestamp": "2025-09-15T13:00:42.242434"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 61.0,
-    "session_id": "train_hist_20250915_123910",
-    "timestamp": "2025-09-15T12:39:15.665698"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 61.0,
-    "session_id": "train_hist_20250915_124405",
-    "timestamp": "2025-09-15T12:44:10.844730"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 61.0,
-    "session_id": "train_hist_20250915_124528",
-    "timestamp": "2025-09-15T12:45:33.737499"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 61.0,
-    "session_id": "train_hist_20250915_124738",
-    "timestamp": "2025-09-15T12:47:44.544751"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 61.0,
-    "session_id": "train_hist_20250915_124820",
-    "timestamp": "2025-09-15T12:48:25.842723"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 61.0,
-    "session_id": "train_hist_20250915_125052",
-    "timestamp": "2025-09-15T12:50:58.293858"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 61.0,
-    "session_id": "train_hist_20250915_125127",
-    "timestamp": "2025-09-15T12:51:32.629010"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 61.0,
-    "session_id": "train_hist_20250915_125530",
-    "timestamp": "2025-09-15T12:55:36.131046"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 61.0,
-    "session_id": "train_hist_20250915_125653",
-    "timestamp": "2025-09-15T12:56:59.275402"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 61.0,
-    "session_id": "train_hist_20250915_131524",
-    "timestamp": "2025-09-15T13:15:30.358542"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 62.0,
-    "session_id": "train_hist_20250915_124113",
-    "timestamp": "2025-09-15T12:41:19.171907"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 62.0,
-    "session_id": "train_hist_20250915_124936",
-    "timestamp": "2025-09-15T12:49:42.277901"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 62.0,
-    "session_id": "train_hist_20250915_125345",
-    "timestamp": "2025-09-15T12:53:51.112678"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 62.0,
-    "session_id": "train_hist_20250915_131944",
-    "timestamp": "2025-09-15T13:19:49.604069"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 63.0,
-    "session_id": "train_hist_20250915_121751",
-    "timestamp": "2025-09-15T12:18:32.013219"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 63.0,
-    "session_id": "train_hist_20250915_124358",
-    "timestamp": "2025-09-15T12:44:03.977089"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 63.0,
-    "session_id": "train_hist_20250915_124657",
-    "timestamp": "2025-09-15T12:47:03.063929"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 63.0,
-    "session_id": "train_hist_20250915_125435",
-    "timestamp": "2025-09-15T12:54:40.600171"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 63.0,
-    "session_id": "train_hist_20250915_125632",
-    "timestamp": "2025-09-15T12:56:38.335173"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 63.0,
-    "session_id": "train_hist_20250915_131450",
-    "timestamp": "2025-09-15T13:14:55.646524"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 63.0,
-    "session_id": "train_hist_20250915_131908",
-    "timestamp": "2025-09-15T13:19:14.164262"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 63.0,
-    "session_id": "train_hist_20250915_145342",
-    "timestamp": "2025-09-15T14:53:43.919528"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 64.0,
-    "session_id": "train_hist_20250915_121345",
-    "timestamp": "2025-09-15T12:13:50.569970"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 64.0,
-    "session_id": "train_hist_20250915_124419",
-    "timestamp": "2025-09-15T12:44:24.578861"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 64.0,
-    "session_id": "train_hist_20250915_124425",
-    "timestamp": "2025-09-15T12:44:31.516967"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 64.0,
-    "session_id": "train_hist_20250915_124650",
-    "timestamp": "2025-09-15T12:46:56.187075"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 64.0,
-    "session_id": "train_hist_20250915_125516",
-    "timestamp": "2025-09-15T12:55:22.258011"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 65.0,
-    "session_id": "train_hist_20250915_123713",
-    "timestamp": "2025-09-15T12:37:19.325427"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 65.0,
-    "session_id": "train_hist_20250915_124201",
-    "timestamp": "2025-09-15T12:42:06.967587"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 65.0,
-    "session_id": "train_hist_20250915_125407",
-    "timestamp": "2025-09-15T12:54:12.561190"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 65.0,
-    "session_id": "train_hist_20250915_125435",
-    "timestamp": "2025-09-15T12:54:40.600171"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 65.0,
-    "session_id": "train_hist_20250915_125721",
-    "timestamp": "2025-09-15T12:57:26.999899"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 65.0,
-    "session_id": "train_hist_20250915_145858",
-    "timestamp": "2025-09-15T14:59:00.437589"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 66.0,
-    "session_id": "train_hist_20250915_121358",
-    "timestamp": "2025-09-15T12:14:03.999221"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 66.0,
-    "session_id": "train_hist_20250915_121833",
-    "timestamp": "2025-09-15T12:19:13.016249"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 66.0,
-    "session_id": "train_hist_20250915_123801",
-    "timestamp": "2025-09-15T12:38:07.173588"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 66.0,
-    "session_id": "train_hist_20250915_124018",
-    "timestamp": "2025-09-15T12:40:24.230400"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 66.0,
-    "session_id": "train_hist_20250915_124419",
-    "timestamp": "2025-09-15T12:44:24.578861"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 66.0,
-    "session_id": "train_hist_20250915_125304",
-    "timestamp": "2025-09-15T12:53:09.628290"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 66.0,
-    "session_id": "train_hist_20250915_125728",
-    "timestamp": "2025-09-15T12:57:33.928818"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 67.0,
-    "session_id": "train_hist_20250915_123720",
-    "timestamp": "2025-09-15T12:37:26.158575"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 67.0,
-    "session_id": "train_hist_20250915_124222",
-    "timestamp": "2025-09-15T12:42:27.588263"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 67.0,
-    "session_id": "train_hist_20250915_125551",
-    "timestamp": "2025-09-15T12:55:56.964308"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 68.0,
-    "session_id": "train_hist_20250915_121512",
-    "timestamp": "2025-09-15T12:15:18.303592"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 68.0,
-    "session_id": "train_hist_20250915_122115",
-    "timestamp": "2025-09-15T12:21:54.143288"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 68.0,
-    "session_id": "train_hist_20250915_123856",
-    "timestamp": "2025-09-15T12:39:01.981696"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 68.0,
-    "session_id": "train_hist_20250915_124025",
-    "timestamp": "2025-09-15T12:40:31.091376"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 68.0,
-    "session_id": "train_hist_20250915_124602",
-    "timestamp": "2025-09-15T12:46:08.108572"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 68.0,
-    "session_id": "train_hist_20250915_125735",
-    "timestamp": "2025-09-15T12:57:40.876516"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 68.0,
-    "session_id": "train_hist_20250915_145342",
-    "timestamp": "2025-09-15T14:53:43.919528"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 69.0,
-    "session_id": "train_hist_20250915_122316",
-    "timestamp": "2025-09-15T12:23:55.098891"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 69.0,
-    "session_id": "train_hist_20250915_122436",
-    "timestamp": "2025-09-15T12:25:16.461867"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 69.0,
-    "session_id": "train_hist_20250915_124738",
-    "timestamp": "2025-09-15T12:47:44.544751"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 69.0,
-    "session_id": "train_hist_20250915_124752",
-    "timestamp": "2025-09-15T12:47:58.303387"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 69.0,
-    "session_id": "train_hist_20250915_125407",
-    "timestamp": "2025-09-15T12:54:12.561190"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 69.0,
-    "session_id": "train_hist_20250915_125516",
-    "timestamp": "2025-09-15T12:55:22.258011"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 69.0,
-    "session_id": "train_hist_20250915_125816",
-    "timestamp": "2025-09-15T12:58:22.471458"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 70.0,
-    "session_id": "train_hist_20250915_121358",
-    "timestamp": "2025-09-15T12:14:03.999221"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 70.0,
-    "session_id": "train_hist_20250915_121425",
-    "timestamp": "2025-09-15T12:14:31.046222"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 70.0,
-    "session_id": "train_hist_20250915_124310",
-    "timestamp": "2025-09-15T12:43:15.694765"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 70.0,
-    "session_id": "train_hist_20250915_124643",
-    "timestamp": "2025-09-15T12:46:49.294880"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 70.0,
-    "session_id": "train_hist_20250915_124704",
-    "timestamp": "2025-09-15T12:47:09.985668"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 70.0,
-    "session_id": "train_hist_20250915_124855",
-    "timestamp": "2025-09-15T12:49:00.784537"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 70.0,
-    "session_id": "train_hist_20250915_124950",
-    "timestamp": "2025-09-15T12:49:56.110447"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 70.0,
-    "session_id": "train_hist_20250915_125133",
-    "timestamp": "2025-09-15T12:51:39.530200"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 70.0,
-    "session_id": "train_hist_20250915_125742",
-    "timestamp": "2025-09-15T12:57:47.900852"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 70.0,
-    "session_id": "train_hist_20250915_130036",
-    "timestamp": "2025-09-15T13:00:42.242434"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 71.0,
-    "session_id": "train_hist_20250915_121345",
-    "timestamp": "2025-09-15T12:13:50.569970"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 71.0,
-    "session_id": "train_hist_20250915_124228",
-    "timestamp": "2025-09-15T12:42:34.442333"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 71.0,
-    "session_id": "train_hist_20250915_124310",
-    "timestamp": "2025-09-15T12:43:15.694765"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 71.0,
-    "session_id": "train_hist_20250915_124957",
-    "timestamp": "2025-09-15T12:50:03.034649"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 71.0,
-    "session_id": "train_hist_20250915_125059",
-    "timestamp": "2025-09-15T12:51:05.211039"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 71.0,
-    "session_id": "train_hist_20250915_125250",
-    "timestamp": "2025-09-15T12:52:55.731680"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 71.0,
-    "session_id": "train_hist_20250915_125257",
-    "timestamp": "2025-09-15T12:53:02.642371"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 71.0,
-    "session_id": "train_hist_20250915_125714",
-    "timestamp": "2025-09-15T12:57:20.062025"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 71.0,
-    "session_id": "train_hist_20250915_125742",
-    "timestamp": "2025-09-15T12:57:47.900852"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 71.0,
-    "session_id": "train_hist_20250915_125933",
-    "timestamp": "2025-09-15T12:59:39.232989"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 72.0,
-    "session_id": "train_hist_20250915_121338",
-    "timestamp": "2025-09-15T12:13:43.844673"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 72.0,
-    "session_id": "train_hist_20250915_121439",
-    "timestamp": "2025-09-15T12:14:44.561557"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 72.0,
-    "session_id": "train_hist_20250915_121711",
-    "timestamp": "2025-09-15T12:17:50.655869"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 72.0,
-    "session_id": "train_hist_20250915_124235",
-    "timestamp": "2025-09-15T12:42:41.309585"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 72.0,
-    "session_id": "train_hist_20250915_124957",
-    "timestamp": "2025-09-15T12:50:03.034649"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 72.0,
-    "session_id": "train_hist_20250915_125845",
-    "timestamp": "2025-09-15T12:58:50.646005"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 72.0,
-    "session_id": "train_hist_20250915_125912",
-    "timestamp": "2025-09-15T12:59:18.406011"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 73.0,
-    "session_id": "train_hist_20250915_121751",
-    "timestamp": "2025-09-15T12:18:32.013219"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 73.0,
-    "session_id": "train_hist_20250915_123856",
-    "timestamp": "2025-09-15T12:39:01.981696"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 73.0,
-    "session_id": "train_hist_20250915_124242",
-    "timestamp": "2025-09-15T12:42:48.187021"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 73.0,
-    "session_id": "train_hist_20250915_124405",
-    "timestamp": "2025-09-15T12:44:10.844730"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 73.0,
-    "session_id": "train_hist_20250915_124425",
-    "timestamp": "2025-09-15T12:44:31.516967"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 73.0,
-    "session_id": "train_hist_20250915_124622",
-    "timestamp": "2025-09-15T12:46:28.468420"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 73.0,
-    "session_id": "train_hist_20250915_124636",
-    "timestamp": "2025-09-15T12:46:42.426210"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 73.0,
-    "session_id": "train_hist_20250915_125905",
-    "timestamp": "2025-09-15T12:59:11.490660"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 74.0,
-    "session_id": "train_hist_20250915_121452",
-    "timestamp": "2025-09-15T12:14:58.081885"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 74.0,
-    "session_id": "train_hist_20250915_123903",
-    "timestamp": "2025-09-15T12:39:08.830592"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 74.0,
-    "session_id": "train_hist_20250915_123944",
-    "timestamp": "2025-09-15T12:39:49.972434"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 74.0,
-    "session_id": "train_hist_20250915_124011",
-    "timestamp": "2025-09-15T12:40:17.381780"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 74.0,
-    "session_id": "train_hist_20250915_124650",
-    "timestamp": "2025-09-15T12:46:56.187075"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 74.0,
-    "session_id": "train_hist_20250915_124929",
-    "timestamp": "2025-09-15T12:49:35.392965"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 74.0,
-    "session_id": "train_hist_20250915_125120",
-    "timestamp": "2025-09-15T12:51:25.695126"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 74.0,
-    "session_id": "train_hist_20250915_125838",
-    "timestamp": "2025-09-15T12:58:43.664595"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 74.0,
-    "session_id": "train_hist_20250915_125940",
-    "timestamp": "2025-09-15T12:59:46.416486"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 75.0,
-    "session_id": "train_hist_20250915_123653",
-    "timestamp": "2025-09-15T12:36:58.885714"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 75.0,
-    "session_id": "train_hist_20250915_124059",
-    "timestamp": "2025-09-15T12:41:05.427949"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 75.0,
-    "session_id": "train_hist_20250915_124242",
-    "timestamp": "2025-09-15T12:42:48.187021"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 75.0,
-    "session_id": "train_hist_20250915_124446",
-    "timestamp": "2025-09-15T12:44:52.339548"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 75.0,
-    "session_id": "train_hist_20250915_124813",
-    "timestamp": "2025-09-15T12:48:18.951869"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 75.0,
-    "session_id": "train_hist_20250915_125133",
-    "timestamp": "2025-09-15T12:51:39.530200"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 75.0,
-    "session_id": "train_hist_20250915_131457",
-    "timestamp": "2025-09-15T13:15:02.644318"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 75.0,
-    "session_id": "train_hist_20250915_131531",
-    "timestamp": "2025-09-15T13:15:37.344556"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_123951",
-    "timestamp": "2025-09-15T12:39:56.821858"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_124147",
-    "timestamp": "2025-09-15T12:41:53.250178"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_124303",
-    "timestamp": "2025-09-15T12:43:08.844766"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_124745",
-    "timestamp": "2025-09-15T12:47:51.424266"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_124950",
-    "timestamp": "2025-09-15T12:49:56.110447"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_125018",
-    "timestamp": "2025-09-15T12:50:23.732770"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_125229",
-    "timestamp": "2025-09-15T12:52:34.884985"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_125331",
-    "timestamp": "2025-09-15T12:53:37.283230"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_125331",
-    "timestamp": "2025-09-15T12:53:37.283230"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_125523",
-    "timestamp": "2025-09-15T12:55:29.170270"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_125611",
-    "timestamp": "2025-09-15T12:56:17.273902"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 76.0,
-    "session_id": "train_hist_20250915_130001",
-    "timestamp": "2025-09-15T13:00:07.255080"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 77.0,
-    "session_id": "train_hist_20250915_123606",
-    "timestamp": "2025-09-15T12:36:11.786217"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 77.0,
-    "session_id": "train_hist_20250915_123916",
-    "timestamp": "2025-09-15T12:39:22.512044"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 77.0,
-    "session_id": "train_hist_20250915_124405",
-    "timestamp": "2025-09-15T12:44:10.844730"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 77.0,
-    "session_id": "train_hist_20250915_124507",
-    "timestamp": "2025-09-15T12:45:13.108965"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 77.0,
-    "session_id": "train_hist_20250915_124855",
-    "timestamp": "2025-09-15T12:49:00.784537"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 77.0,
-    "session_id": "train_hist_20250915_125317",
-    "timestamp": "2025-09-15T12:53:23.483263"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_121452",
-    "timestamp": "2025-09-15T12:14:58.081885"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_121526",
-    "timestamp": "2025-09-15T12:15:31.757498"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_123653",
-    "timestamp": "2025-09-15T12:36:58.885714"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_124039",
-    "timestamp": "2025-09-15T12:40:44.802612"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_124337",
-    "timestamp": "2025-09-15T12:43:43.324552"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_124535",
-    "timestamp": "2025-09-15T12:45:40.585796"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_125140",
-    "timestamp": "2025-09-15T12:51:46.422164"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_125455",
-    "timestamp": "2025-09-15T12:55:01.353156"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_125838",
-    "timestamp": "2025-09-15T12:58:43.664595"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_125852",
-    "timestamp": "2025-09-15T12:58:57.573806"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_130015",
-    "timestamp": "2025-09-15T13:00:21.374078"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_131243",
-    "timestamp": "2025-09-15T13:13:23.697087"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_131443",
-    "timestamp": "2025-09-15T13:14:48.638467"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_131457",
-    "timestamp": "2025-09-15T13:15:02.644318"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 78.0,
-    "session_id": "train_hist_20250915_145910",
-    "timestamp": "2025-09-15T14:59:12.666128"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 79.0,
-    "session_id": "train_hist_20250915_121914",
-    "timestamp": "2025-09-15T12:19:53.401658"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 79.0,
-    "session_id": "train_hist_20250915_123727",
-    "timestamp": "2025-09-15T12:37:33.012128"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 79.0,
-    "session_id": "train_hist_20250915_123822",
-    "timestamp": "2025-09-15T12:38:27.687429"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 79.0,
-    "session_id": "train_hist_20250915_124317",
-    "timestamp": "2025-09-15T12:43:22.557743"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 79.0,
-    "session_id": "train_hist_20250915_124636",
-    "timestamp": "2025-09-15T12:46:42.426210"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 79.0,
-    "session_id": "train_hist_20250915_131510",
-    "timestamp": "2025-09-15T13:15:16.362711"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 79.0,
-    "session_id": "train_hist_20250915_145858",
-    "timestamp": "2025-09-15T14:59:00.437589"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 80.0,
-    "session_id": "train_hist_20250915_121512",
-    "timestamp": "2025-09-15T12:15:18.303592"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 80.0,
-    "session_id": "train_hist_20250915_121625",
-    "timestamp": "2025-09-15T12:17:04.798236"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 80.0,
-    "session_id": "train_hist_20250915_124616",
-    "timestamp": "2025-09-15T12:46:21.776612"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 80.0,
-    "session_id": "train_hist_20250915_124738",
-    "timestamp": "2025-09-15T12:47:44.544751"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 80.0,
-    "session_id": "train_hist_20250915_124827",
-    "timestamp": "2025-09-15T12:48:32.805361"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 80.0,
-    "session_id": "train_hist_20250915_124929",
-    "timestamp": "2025-09-15T12:49:35.392965"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 80.0,
-    "session_id": "train_hist_20250915_125604",
-    "timestamp": "2025-09-15T12:56:10.475805"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 80.0,
-    "session_id": "train_hist_20250915_125611",
-    "timestamp": "2025-09-15T12:56:17.273902"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 80.0,
-    "session_id": "train_hist_20250915_125749",
-    "timestamp": "2025-09-15T12:57:54.840558"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 80.0,
-    "session_id": "train_hist_20250915_131510",
-    "timestamp": "2025-09-15T13:15:16.362711"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 81.0,
-    "session_id": "train_hist_20250915_124140",
-    "timestamp": "2025-09-15T12:41:46.365666"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 81.0,
-    "session_id": "train_hist_20250915_124256",
-    "timestamp": "2025-09-15T12:43:01.980274"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 81.0,
-    "session_id": "train_hist_20250915_124704",
-    "timestamp": "2025-09-15T12:47:09.985668"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 81.0,
-    "session_id": "train_hist_20250915_124732",
-    "timestamp": "2025-09-15T12:47:37.578369"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 81.0,
-    "session_id": "train_hist_20250915_124936",
-    "timestamp": "2025-09-15T12:49:42.277901"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 81.0,
-    "session_id": "train_hist_20250915_125311",
-    "timestamp": "2025-09-15T12:53:16.557142"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 81.0,
-    "session_id": "train_hist_20250915_125359",
-    "timestamp": "2025-09-15T12:54:04.923781"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 81.0,
-    "session_id": "train_hist_20250915_131450",
-    "timestamp": "2025-09-15T13:14:55.646524"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 82.0,
-    "session_id": "train_hist_20250915_123815",
-    "timestamp": "2025-09-15T12:38:20.843277"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 82.0,
-    "session_id": "train_hist_20250915_123835",
-    "timestamp": "2025-09-15T12:38:41.457635"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 82.0,
-    "session_id": "train_hist_20250915_123842",
-    "timestamp": "2025-09-15T12:38:48.292579"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 82.0,
-    "session_id": "train_hist_20250915_125059",
-    "timestamp": "2025-09-15T12:51:05.211039"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 82.0,
-    "session_id": "train_hist_20250915_125544",
-    "timestamp": "2025-09-15T12:55:50.026139"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 82.0,
-    "session_id": "train_hist_20250915_131944",
-    "timestamp": "2025-09-15T13:19:49.604069"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_121432",
-    "timestamp": "2025-09-15T12:14:37.854863"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_122853",
-    "timestamp": "2025-09-15T12:29:32.324028"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_123741",
-    "timestamp": "2025-09-15T12:37:46.677306"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_123815",
-    "timestamp": "2025-09-15T12:38:20.843277"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_123822",
-    "timestamp": "2025-09-15T12:38:27.687429"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_123930",
-    "timestamp": "2025-09-15T12:39:36.271248"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_124052",
-    "timestamp": "2025-09-15T12:40:58.512264"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_124106",
-    "timestamp": "2025-09-15T12:41:12.321342"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_124215",
-    "timestamp": "2025-09-15T12:42:20.733680"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_124412",
-    "timestamp": "2025-09-15T12:44:17.718459"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_124500",
-    "timestamp": "2025-09-15T12:45:06.211784"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_124929",
-    "timestamp": "2025-09-15T12:49:35.392965"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_125004",
-    "timestamp": "2025-09-15T12:50:09.920541"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_125551",
-    "timestamp": "2025-09-15T12:55:56.964308"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 83.0,
-    "session_id": "train_hist_20250915_125756",
-    "timestamp": "2025-09-15T12:58:01.735280"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_123633",
-    "timestamp": "2025-09-15T12:36:38.837546"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_123734",
-    "timestamp": "2025-09-15T12:37:39.830967"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_124059",
-    "timestamp": "2025-09-15T12:41:05.427949"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_124208",
-    "timestamp": "2025-09-15T12:42:13.851702"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_124419",
-    "timestamp": "2025-09-15T12:44:24.578861"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_124453",
-    "timestamp": "2025-09-15T12:44:59.344418"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_124541",
-    "timestamp": "2025-09-15T12:45:47.449037"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_124827",
-    "timestamp": "2025-09-15T12:48:32.805361"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_124943",
-    "timestamp": "2025-09-15T12:49:49.173727"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_125106",
-    "timestamp": "2025-09-15T12:51:11.863500"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_125106",
-    "timestamp": "2025-09-15T12:51:11.863500"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_125352",
-    "timestamp": "2025-09-15T12:53:58.012103"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 84.0,
-    "session_id": "train_hist_20250915_125639",
-    "timestamp": "2025-09-15T12:56:45.354009"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 85.0,
-    "session_id": "train_hist_20250915_123829",
-    "timestamp": "2025-09-15T12:38:34.625876"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 85.0,
-    "session_id": "train_hist_20250915_123856",
-    "timestamp": "2025-09-15T12:39:01.981696"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 85.0,
-    "session_id": "train_hist_20250915_124133",
-    "timestamp": "2025-09-15T12:41:39.487032"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 85.0,
-    "session_id": "train_hist_20250915_124323",
-    "timestamp": "2025-09-15T12:43:29.460311"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 85.0,
-    "session_id": "train_hist_20250915_125324",
-    "timestamp": "2025-09-15T12:53:30.392841"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 85.0,
-    "session_id": "train_hist_20250915_125537",
-    "timestamp": "2025-09-15T12:55:43.047533"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 85.0,
-    "session_id": "train_hist_20250915_125803",
-    "timestamp": "2025-09-15T12:58:08.665896"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 85.0,
-    "session_id": "train_hist_20250915_125810",
-    "timestamp": "2025-09-15T12:58:15.566649"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 85.0,
-    "session_id": "train_hist_20250915_125823",
-    "timestamp": "2025-09-15T12:58:29.368870"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 85.0,
-    "session_id": "train_hist_20250915_125858",
-    "timestamp": "2025-09-15T12:59:04.534797"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 85.0,
-    "session_id": "train_hist_20250915_125905",
-    "timestamp": "2025-09-15T12:59:11.490660"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 86.0,
-    "session_id": "train_hist_20250915_123619",
-    "timestamp": "2025-09-15T12:36:25.204157"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 86.0,
-    "session_id": "train_hist_20250915_123754",
-    "timestamp": "2025-09-15T12:38:00.337185"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 86.0,
-    "session_id": "train_hist_20250915_124433",
-    "timestamp": "2025-09-15T12:44:38.566691"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 86.0,
-    "session_id": "train_hist_20250915_124732",
-    "timestamp": "2025-09-15T12:47:37.578369"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 86.0,
-    "session_id": "train_hist_20250915_124902",
-    "timestamp": "2025-09-15T12:49:07.682334"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 86.0,
-    "session_id": "train_hist_20250915_125823",
-    "timestamp": "2025-09-15T12:58:29.368870"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 86.0,
-    "session_id": "train_hist_20250915_130008",
-    "timestamp": "2025-09-15T13:00:14.418881"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 86.0,
-    "session_id": "train_hist_20250915_131908",
-    "timestamp": "2025-09-15T13:19:14.164262"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 87.0,
-    "session_id": "train_hist_20250915_124133",
-    "timestamp": "2025-09-15T12:41:39.487032"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 87.0,
-    "session_id": "train_hist_20250915_124453",
-    "timestamp": "2025-09-15T12:44:59.344418"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 87.0,
-    "session_id": "train_hist_20250915_124902",
-    "timestamp": "2025-09-15T12:49:07.682334"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 87.0,
-    "session_id": "train_hist_20250915_125147",
-    "timestamp": "2025-09-15T12:51:53.362054"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 87.0,
-    "session_id": "train_hist_20250915_125428",
-    "timestamp": "2025-09-15T12:54:33.666110"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 87.0,
-    "session_id": "train_hist_20250915_125714",
-    "timestamp": "2025-09-15T12:57:20.062025"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 87.0,
-    "session_id": "train_hist_20250915_125933",
-    "timestamp": "2025-09-15T12:59:39.232989"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 87.0,
-    "session_id": "train_hist_20250915_125954",
-    "timestamp": "2025-09-15T13:00:00.311375"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 88.0,
-    "session_id": "train_hist_20250915_121405",
-    "timestamp": "2025-09-15T12:14:10.718479"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 88.0,
-    "session_id": "train_hist_20250915_123653",
-    "timestamp": "2025-09-15T12:36:58.885714"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 88.0,
-    "session_id": "train_hist_20250915_123937",
-    "timestamp": "2025-09-15T12:39:43.099936"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 88.0,
-    "session_id": "train_hist_20250915_124046",
-    "timestamp": "2025-09-15T12:40:51.663080"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 88.0,
-    "session_id": "train_hist_20250915_124521",
-    "timestamp": "2025-09-15T12:45:26.876469"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 88.0,
-    "session_id": "train_hist_20250915_124943",
-    "timestamp": "2025-09-15T12:49:49.173727"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 88.0,
-    "session_id": "train_hist_20250915_125052",
-    "timestamp": "2025-09-15T12:50:58.293858"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 88.0,
-    "session_id": "train_hist_20250915_125414",
-    "timestamp": "2025-09-15T12:54:19.811122"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 88.0,
-    "session_id": "train_hist_20250915_125926",
-    "timestamp": "2025-09-15T12:59:32.323176"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 89.0,
-    "session_id": "train_hist_20250915_121445",
-    "timestamp": "2025-09-15T12:14:51.272704"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 89.0,
-    "session_id": "train_hist_20250915_124059",
-    "timestamp": "2025-09-15T12:41:05.427949"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 89.0,
-    "session_id": "train_hist_20250915_124813",
-    "timestamp": "2025-09-15T12:48:18.951869"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 89.0,
-    "session_id": "train_hist_20250915_124841",
-    "timestamp": "2025-09-15T12:48:46.879549"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 89.0,
-    "session_id": "train_hist_20250915_125127",
-    "timestamp": "2025-09-15T12:51:32.629010"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 89.0,
-    "session_id": "train_hist_20250915_125646",
-    "timestamp": "2025-09-15T12:56:52.282747"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 90.0,
-    "session_id": "train_hist_20250915_123747",
-    "timestamp": "2025-09-15T12:37:53.505436"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 90.0,
-    "session_id": "train_hist_20250915_124242",
-    "timestamp": "2025-09-15T12:42:48.187021"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 90.0,
-    "session_id": "train_hist_20250915_125025",
-    "timestamp": "2025-09-15T12:50:30.643027"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 91.0,
-    "session_id": "train_hist_20250915_121351",
-    "timestamp": "2025-09-15T12:13:57.278603"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 91.0,
-    "session_id": "train_hist_20250915_124249",
-    "timestamp": "2025-09-15T12:42:55.058785"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 91.0,
-    "session_id": "train_hist_20250915_124514",
-    "timestamp": "2025-09-15T12:45:19.999387"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 91.0,
-    "session_id": "train_hist_20250915_124902",
-    "timestamp": "2025-09-15T12:49:07.682334"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 91.0,
-    "session_id": "train_hist_20250915_124916",
-    "timestamp": "2025-09-15T12:49:21.568272"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 92.0,
-    "session_id": "train_hist_20250915_123612",
-    "timestamp": "2025-09-15T12:36:18.378686"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 92.0,
-    "session_id": "train_hist_20250915_123842",
-    "timestamp": "2025-09-15T12:38:48.292579"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 92.0,
-    "session_id": "train_hist_20250915_125421",
-    "timestamp": "2025-09-15T12:54:26.713956"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 92.0,
-    "session_id": "train_hist_20250915_125858",
-    "timestamp": "2025-09-15T12:59:04.534797"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 93.0,
-    "session_id": "train_hist_20250915_121351",
-    "timestamp": "2025-09-15T12:13:57.278603"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 93.0,
-    "session_id": "train_hist_20250915_122316",
-    "timestamp": "2025-09-15T12:23:55.098891"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 93.0,
-    "session_id": "train_hist_20250915_123639",
-    "timestamp": "2025-09-15T12:36:45.430242"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 93.0,
-    "session_id": "train_hist_20250915_123741",
-    "timestamp": "2025-09-15T12:37:46.677306"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 93.0,
-    "session_id": "train_hist_20250915_124500",
-    "timestamp": "2025-09-15T12:45:06.211784"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 93.0,
-    "session_id": "train_hist_20250915_124711",
-    "timestamp": "2025-09-15T12:47:16.861460"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 93.0,
-    "session_id": "train_hist_20250915_125127",
-    "timestamp": "2025-09-15T12:51:32.629010"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 94.0,
-    "session_id": "train_hist_20250915_124317",
-    "timestamp": "2025-09-15T12:43:22.557743"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 94.0,
-    "session_id": "train_hist_20250915_125653",
-    "timestamp": "2025-09-15T12:56:59.275402"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 94.0,
-    "session_id": "train_hist_20250915_125810",
-    "timestamp": "2025-09-15T12:58:15.566649"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 95.0,
-    "session_id": "train_hist_20250915_122316",
-    "timestamp": "2025-09-15T12:23:55.098891"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 95.0,
-    "session_id": "train_hist_20250915_123923",
-    "timestamp": "2025-09-15T12:39:29.417967"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 95.0,
-    "session_id": "train_hist_20250915_124330",
-    "timestamp": "2025-09-15T12:43:36.423652"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 95.0,
-    "session_id": "train_hist_20250915_124609",
-    "timestamp": "2025-09-15T12:46:15.008955"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 95.0,
-    "session_id": "train_hist_20250915_124922",
-    "timestamp": "2025-09-15T12:49:28.440727"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 95.0,
-    "session_id": "train_hist_20250915_124950",
-    "timestamp": "2025-09-15T12:49:56.110447"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 95.0,
-    "session_id": "train_hist_20250915_125038",
-    "timestamp": "2025-09-15T12:50:44.428754"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 95.0,
-    "session_id": "train_hist_20250915_125236",
-    "timestamp": "2025-09-15T12:52:41.925756"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 95.0,
-    "session_id": "train_hist_20250915_154552",
-    "timestamp": "2025-09-15T15:45:53.813201"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 96.0,
-    "session_id": "train_hist_20250915_121751",
-    "timestamp": "2025-09-15T12:18:32.013219"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 96.0,
-    "session_id": "train_hist_20250915_123626",
-    "timestamp": "2025-09-15T12:36:32.019823"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 96.0,
-    "session_id": "train_hist_20250915_124235",
-    "timestamp": "2025-09-15T12:42:41.309585"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 96.0,
-    "session_id": "train_hist_20250915_124351",
-    "timestamp": "2025-09-15T12:43:57.056697"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 96.0,
-    "session_id": "train_hist_20250915_124752",
-    "timestamp": "2025-09-15T12:47:58.303387"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 96.0,
-    "session_id": "train_hist_20250915_125201",
-    "timestamp": "2025-09-15T12:52:07.175440"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 96.0,
-    "session_id": "train_hist_20250915_125516",
-    "timestamp": "2025-09-15T12:55:22.258011"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 96.0,
-    "session_id": "train_hist_20250915_145144",
-    "timestamp": "2025-09-15T14:51:46.483383"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 97.0,
-    "session_id": "train_hist_20250915_124228",
-    "timestamp": "2025-09-15T12:42:34.442333"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 97.0,
-    "session_id": "train_hist_20250915_124433",
-    "timestamp": "2025-09-15T12:44:38.566691"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 97.0,
-    "session_id": "train_hist_20250915_125113",
-    "timestamp": "2025-09-15T12:51:18.759896"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 97.0,
-    "session_id": "train_hist_20250915_125154",
-    "timestamp": "2025-09-15T12:52:00.269872"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 97.0,
-    "session_id": "train_hist_20250915_125338",
-    "timestamp": "2025-09-15T12:53:44.201035"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 97.0,
-    "session_id": "train_hist_20250915_125830",
-    "timestamp": "2025-09-15T12:58:36.554949"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 97.0,
-    "session_id": "train_hist_20250915_130057",
-    "timestamp": "2025-09-15T13:01:02.817822"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_121331",
-    "timestamp": "2025-09-15T12:13:37.208051"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_123720",
-    "timestamp": "2025-09-15T12:37:26.158575"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_123815",
-    "timestamp": "2025-09-15T12:38:20.843277"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_123951",
-    "timestamp": "2025-09-15T12:39:56.821858"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_124018",
-    "timestamp": "2025-09-15T12:40:24.230400"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_124759",
-    "timestamp": "2025-09-15T12:48:05.167713"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_125324",
-    "timestamp": "2025-09-15T12:53:30.392841"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_125324",
-    "timestamp": "2025-09-15T12:53:30.392841"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_125823",
-    "timestamp": "2025-09-15T12:58:29.368870"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_125912",
-    "timestamp": "2025-09-15T12:59:18.406011"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_131504",
-    "timestamp": "2025-09-15T13:15:09.691217"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 98.0,
-    "session_id": "train_hist_20250915_154552",
-    "timestamp": "2025-09-15T15:45:53.813201"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_121405",
-    "timestamp": "2025-09-15T12:14:10.718479"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_121439",
-    "timestamp": "2025-09-15T12:14:44.561557"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_121459",
-    "timestamp": "2025-09-15T12:15:04.816532"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_124018",
-    "timestamp": "2025-09-15T12:40:24.230400"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_124052",
-    "timestamp": "2025-09-15T12:40:58.512264"
-  },
-  {
     "strategy": "RSI_Divergence",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_124215",
-    "timestamp": "2025-09-15T12:42:20.733680"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_124344",
-    "timestamp": "2025-09-15T12:43:50.185164"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_124535",
-    "timestamp": "2025-09-15T12:45:40.585796"
+    "score": 55.0,
+    "session_id": "train_hist_20250915_161600",
+    "timestamp": "2025-09-15T16:16:01.596875"
   },
   {
     "strategy": "RSI_Divergence",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_124909",
-    "timestamp": "2025-09-15T12:49:14.661163"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_124922",
-    "timestamp": "2025-09-15T12:49:28.440727"
+    "score": 55.0,
+    "session_id": "train_hist_20250915_161605",
+    "timestamp": "2025-09-15T16:16:06.873027"
   },
   {
     "strategy": "MA_Crossover",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_125208",
-    "timestamp": "2025-09-15T12:52:14.102544"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_125215",
-    "timestamp": "2025-09-15T12:52:21.031896"
+    "score": 55.0,
+    "session_id": "train_hist_20250915_161912",
+    "timestamp": "2025-09-15T16:19:13.834516"
   },
   {
-    "strategy": "RSI_Divergence",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_125558",
-    "timestamp": "2025-09-15T12:56:03.624690"
-  },
-  {
-    "strategy": "Bollinger_Bounce",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_130001",
-    "timestamp": "2025-09-15T13:00:07.255080"
-  },
-  {
     "strategy": "MA_Crossover",
-    "score": 99.0,
-    "session_id": "train_hist_20250915_145858",
-    "timestamp": "2025-09-15T14:59:00.437589"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_121833",
-    "timestamp": "2025-09-15T12:19:13.016249"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_122436",
-    "timestamp": "2025-09-15T12:25:16.461867"
+    "score": 55.0,
+    "session_id": "train_hist_20250915_162731",
+    "timestamp": "2025-09-15T16:27:35.724912"
   },
   {
     "strategy": "Bollinger_Bounce",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_123944",
-    "timestamp": "2025-09-15T12:39:49.972434"
+    "score": 55.0,
+    "session_id": "train_hist_20250915_163914",
+    "timestamp": "2025-09-15T16:39:18.983889"
   },
   {
-    "strategy": "MA_Crossover",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_124834",
-    "timestamp": "2025-09-15T12:48:39.982041"
-  },
-  {
     "strategy": "RSI_Divergence",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_124848",
-    "timestamp": "2025-09-15T12:48:53.783128"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_125147",
-    "timestamp": "2025-09-15T12:51:53.362054"
+    "score": 55.0,
+    "session_id": "train_hist_20250915_163943",
+    "timestamp": "2025-09-15T16:39:47.905236"
   },
   {
     "strategy": "Bollinger_Bounce",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_125428",
-    "timestamp": "2025-09-15T12:54:33.666110"
-  },
-  {
-    "strategy": "MA_Crossover",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_125435",
-    "timestamp": "2025-09-15T12:54:40.600171"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_125530",
-    "timestamp": "2025-09-15T12:55:36.131046"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_125604",
-    "timestamp": "2025-09-15T12:56:10.475805"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_125845",
-    "timestamp": "2025-09-15T12:58:50.646005"
-  },
-  {
-    "strategy": "RSI_Divergence",
-    "score": 100.0,
-    "session_id": "train_hist_20250915_125919",
-    "timestamp": "2025-09-15T12:59:25.322703"
+    "score": 55.0,
+    "session_id": "train_hist_20250915_164130",
+    "timestamp": "2025-09-15T16:41:34.519260"
   }
 ]

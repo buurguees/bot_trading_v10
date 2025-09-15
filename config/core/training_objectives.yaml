@@ -4,6 +4,80 @@
 # Objetivos REALISTAS y SOSTENIBLES para trading profesional
 # Enfocados en gestión de riesgo y crecimiento consistente
 
+# ⚙️ CONFIGURACIÓN DE MODOS DE ENTRENAMIENTO HISTÓRICO
+historical_training_modes:
+  ultra_fast:
+    name: "Ultra Rápido"
+    description: "Entrenamiento rápido para pruebas y desarrollo"
+    days: 30
+    cycles: 50
+    chunk_size_days: 7
+    chunk_overlap_days: 1
+    max_memory_mb: 2048
+    progress_report_interval: 10
+    use_case: "Desarrollo, pruebas rápidas, validación de estrategias"
+    
+  fast:
+    name: "Rápido"
+    description: "Entrenamiento acelerado con datos recientes"
+    days: 90
+    cycles: 100
+    chunk_size_days: 14
+    chunk_overlap_days: 2
+    max_memory_mb: 4096
+    progress_report_interval: 5
+    use_case: "Análisis de tendencias recientes, optimización rápida"
+    
+  normal:
+    name: "Normal"
+    description: "Entrenamiento estándar con datos históricos completos"
+    days: 180
+    cycles: 200
+    chunk_size_days: 30
+    chunk_overlap_days: 3
+    max_memory_mb: 8192
+    progress_report_interval: 2
+    use_case: "Entrenamiento estándar, análisis de mercado completo"
+    
+  complete:
+    name: "Completo"
+    description: "Entrenamiento exhaustivo con máximo de datos históricos"
+    days: 365
+    cycles: 500
+    chunk_size_days: 60
+    chunk_overlap_days: 5
+    max_memory_mb: 16384
+    progress_report_interval: 1
+    use_case: "Análisis exhaustivo, entrenamiento de producción"
+    
+  realistic:
+    name: "Realista"
+    description: "Entrenamiento 100% realista con datos históricos cronológicos"
+    days: 365
+    cycles: 500
+    chunk_size_days: 60
+    chunk_overlap_days: 5
+    max_memory_mb: 16384
+    progress_report_interval: 1
+    use_case: "Entrenamiento realista, simulación de trading real"
+    realistic_mode: true
+    max_daily_roi: 2.0  # Máximo 2% ROI diario
+    max_annual_roi: 50.0  # Máximo 50% ROI anual
+    commission_rate: 0.001  # 0.1% comisión por trade
+    spread_rate: 0.0005  # 0.05% spread
+    slippage_rate: 0.0002  # 0.02% slippage
+    max_leverage: 5.0  # Máximo 5x leverage
+    realistic_volatility: true
+
+# 🔧 CONFIGURACIÓN POR DEFECTO DE ENTRENAMIENTO
+default_training_config:
+  mode: "realistic"
+  incremental_training: true
+  enable_cycle_telegram: true
+  enable_cycle_metrics: true
+  save_strategies: true
+  save_session_data: true
+
 # 💰 OBJETIVOS FINANCIEROS REALISTAS
 financial_targets:
   balance:
